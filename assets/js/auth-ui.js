@@ -29,7 +29,7 @@ window.CAPSAuthUI = (function () {
 
     var demoHint = db.mode === 'local'
       ? '<p class="auth-demo">지금은 <strong>데모 모드</strong>입니다 (Firebase 미연결). ' +
-        '관리자 화면을 둘러보시려면 <code>admin@caps.or.kr</code> / <code>caps1234</code> 로 로그인하세요.</p>'
+        '둘러보기용 관리자 계정: <code>admin@caps.or.kr</code> / <code>caps1234</code></p>'
       : '';
 
     var el = document.createElement('div');
@@ -59,6 +59,8 @@ window.CAPSAuthUI = (function () {
             '<button type="submit" class="btn btn-primary btn-block btn-lg">로그인</button>' +
             '<button type="button" class="btn btn-outline btn-block auth-google" id="googleBtn">Google 계정으로 계속하기</button>' +
             '<button type="button" class="link-btn auth-reset" id="resetBtn">비밀번호를 잊으셨나요?</button>' +
+            '<p class="auth-staff-link">CAPS 센터 직원이신가요? ' +
+              '<a href="' + base() + 'staff.html">직원 로그인 &rarr;</a></p>' +
           '</form>' +
 
           /* 회원가입 */
@@ -74,8 +76,6 @@ window.CAPSAuthUI = (function () {
             '<div class="field"><label for="suPw">비밀번호 <em class="req">필수</em></label>' +
               '<div class="pw-row"><input type="password" id="suPw" autocomplete="new-password" required minlength="6" placeholder="6자 이상">' +
               '<button type="button" class="pw-toggle" data-pw="suPw">표시</button></div></div>' +
-            '<label class="check-line"><input type="checkbox" id="suStaff">' +
-              '<span>CAPS 센터 직원입니다 <small>(최고관리자 승인 후 관리자 화면을 이용할 수 있습니다)</small></span></label>' +
             '<label class="check-line"><input type="checkbox" id="suAgree" required>' +
               '<span>개인정보 수집 · 이용에 동의합니다. <em class="req">필수</em></span></label>' +
             '<p class="auth-err" id="signupErr" hidden></p>' +
@@ -188,14 +188,8 @@ window.CAPSAuthUI = (function () {
           name: modal.querySelector('#suName').value,
           phone: db.formatPhone(modal.querySelector('#suPhone').value),
           church: modal.querySelector('#suChurch').value,
-          staffRequest: modal.querySelector('#suStaff').checked,
         })
-        .then(function (user) {
-          if (user && user.role === 'staff' && !user.approved) {
-            window.alert('가입이 완료되었습니다.\n\n직원 계정은 최고관리자 승인 후 관리자 화면을 이용할 수 있습니다.');
-          }
-          succeed();
-        })
+        .then(function () { succeed(); })
         .catch(function (ex) {
           err.textContent = ex.message;
           err.hidden = false;

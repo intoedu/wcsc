@@ -5,6 +5,17 @@
    공개 페이지와 관리자 화면이 함께 사용합니다.
    ========================================================= */
 
+/* ---------- 로그인 게이트 ---------- */
+.gate { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+.gate-card {
+  width: min(100%, 460px); padding: 42px 36px; background: #fff;
+  border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center;
+}
+.gate-card .logo-mark { width: 54px; height: 54px; margin-bottom: 18px; }
+.gate-card h1 { font-size: 24px; letter-spacing: -.035em; }
+.gate-card p { margin-top: 12px; font-size: 15px; color: var(--muted); line-height: 1.8; }
+.gate-actions { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; }
+
 /* ---------- 인증 모달 ---------- */
 .auth-modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .auth-modal[hidden] { display: none; }
@@ -102,4 +113,135 @@
 
 @media (max-width: 680px) {
   .auth-body { padding: 22px 20px 26px; }
+}
+
+/* =========================================================
+   직원 전용 포털 (staff.html)
+   공개 홈페이지와 분리된 로그인 · 회원가입 화면입니다.
+   ========================================================= */
+
+body.staff { background: var(--brand-900); }
+
+.sp { display: grid; grid-template-columns: 1.05fr 1fr; min-height: 100vh; }
+
+/* 왼쪽 브랜드 패널 */
+.sp-aside {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 44px 52px; color: #fff; overflow: hidden;
+  background:
+    radial-gradient(760px 420px at 88% -10%, rgba(198,151,73,.26), transparent 60%),
+    linear-gradient(155deg, #0B1E38 0%, #0E2340 48%, #143355 100%);
+}
+.sp-aside::after {
+  content: ""; position: absolute; inset: 0; opacity: .5; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(620px 420px at 25% 45%, #000, transparent 78%);
+}
+.sp-aside > * { position: relative; }
+
+.sp-brand { display: inline-flex; align-items: center; gap: 12px; }
+.sp-brand .logo-mark { width: 44px; height: 44px; }
+.sp-brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+.sp-brand-text strong { font-size: 17px; color: #fff; letter-spacing: -.03em; }
+.sp-brand-text small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #7D91AD; }
+
+.sp-copy { max-width: 30em; }
+.sp-badge {
+  display: inline-block; padding: 5px 13px; border-radius: 999px; margin-bottom: 20px;
+  background: rgba(198,151,73,.18); border: 1px solid rgba(198,151,73,.34);
+  color: var(--gold-400); font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
+}
+.sp-copy h1 { font-size: clamp(26px, 3vw, 36px); color: #fff; letter-spacing: -.035em; line-height: 1.32; }
+.sp-copy p { margin-top: 18px; font-size: 16px; line-height: 1.85; color: #B6C6DA; }
+.sp-list { margin-top: 26px; display: grid; gap: 11px; }
+.sp-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.8px; color: #C6D3E4; }
+.sp-list svg { flex: none; margin-top: 4px; color: var(--gold-400); width: 17px; height: 17px; }
+
+.sp-foot { font-size: 13px; color: #6D82A0; }
+.sp-foot a { color: #A9BAD0; text-decoration: underline; text-underline-offset: 3px; }
+.sp-foot a:hover { color: #fff; }
+
+/* 오른쪽 폼 패널 */
+.sp-main {
+  display: flex; align-items: center; justify-content: center;
+  padding: 44px 32px; background: var(--bg-soft);
+}
+.sp-card {
+  width: min(100%, 460px); background: #fff; border: 1px solid var(--line);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.sp-card-body { padding: 30px 32px 34px; }
+.sp-card-body > h2 { font-size: 22px; letter-spacing: -.03em; }
+.sp-card-body > .sp-lead { margin-top: 10px; font-size: 14.5px; color: var(--muted); line-height: 1.75; }
+
+.sp-tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--bg-soft); }
+.sp-tab {
+  flex: 1; padding: 18px 12px; border: none; background: none; cursor: pointer;
+  font-family: inherit; font-size: 15.5px; font-weight: 700; color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+.sp-tab.is-on { background: #fff; color: var(--brand-800); border-bottom-color: var(--brand-700); }
+
+.sp-form .field { margin-top: 15px; }
+.sp-form .field:first-child { margin-top: 0; }
+.sp-form .btn { margin-top: 22px; }
+.sp-form .btn + .btn { margin-top: 10px; }
+
+.sp-notice {
+  padding: 14px 17px; border-radius: 10px; font-size: 14px; line-height: 1.75;
+  background: var(--brand-50); border: 1px solid var(--brand-100); color: var(--brand-700);
+  margin-bottom: 20px;
+}
+.sp-notice strong { color: var(--brand-800); }
+
+.sp-state { text-align: center; padding: 8px 0 4px; }
+.sp-state-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 62px; height: 62px; border-radius: 50%; margin-bottom: 18px;
+}
+.sp-state-ico.is-wait { background: var(--gold-100); color: var(--gold-600); }
+.sp-state-ico.is-ok { background: #E6F4EC; color: var(--ok); }
+.sp-state-ico.is-no { background: #FDECEA; color: #B3261E; }
+.sp-state h2 { font-size: 22px; letter-spacing: -.03em; }
+.sp-state p { margin-top: 12px; font-size: 15px; color: var(--muted); line-height: 1.8; }
+.sp-state .sp-who {
+  display: inline-block; margin-top: 16px; padding: 10px 16px; border-radius: 10px;
+  background: var(--bg-soft); border: 1px solid var(--line); font-size: 14px; color: var(--ink-2);
+}
+.sp-state .sp-who strong { color: var(--brand-800); }
+.sp-actions { margin-top: 26px; display: grid; gap: 10px; }
+
+.sp-switch {
+  margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line-2);
+  text-align: center; font-size: 14px; color: var(--muted);
+}
+.sp-switch a, .sp-switch button {
+  color: var(--brand-600); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;
+  background: none; border: none; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0;
+}
+
+@media (max-width: 900px) {
+  .sp { grid-template-columns: 1fr; min-height: 0; }
+  .sp-aside { padding: 28px 24px 34px; }
+  .sp-aside .sp-list, .sp-aside .sp-foot { display: none; }
+  .sp-copy h1 { font-size: 24px; }
+  .sp-copy p { font-size: 15px; margin-top: 12px; }
+  .sp-main { padding: 28px 18px 48px; }
+}
+
+@media (max-width: 480px) {
+  .sp-card-body { padding: 24px 20px 28px; }
+}
+
+/* 로그인 창 하단 직원 포털 안내 */
+.auth-staff-link {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-2);
+  text-align: center; font-size: 13.5px; color: var(--muted);
+}
+.auth-staff-link a {
+  color: var(--brand-600); font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
 }

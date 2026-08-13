@@ -836,3 +836,7 @@ table { border-collapse: collapse; width: 100%; }
   .page-hero, .hero, .svc-hero { background: none !important; color: #000; }
   .page-hero h1, .hero h1, .svc-hero h1 { color: #000; }
 }
+
+/* 푸터의 직원 전용 링크 — 교회 방문자에게는 눈에 덜 띄도록 */
+.footer-staff { color: #6D82A0; font-size: 13.5px; }
+.footer-staff::before { content: "🔒 "; font-size: 11px; }

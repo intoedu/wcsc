@@ -140,6 +140,7 @@ function footer(base) {
         <li><a href="${base}faq.html">자주 묻는 질문</a></li>
         <li><a href="${base}contact.html">문의하기</a></li>
         <li><a href="${base}status.html">신청 조회</a></li>
+        <li><a href="${base}staff.html" class="footer-staff">직원 로그인</a></li>
       </ul>
     </div>
     <div class="footer-col">

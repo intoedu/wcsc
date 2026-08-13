@@ -240,14 +240,14 @@ window.CAPSAdmin = (function () {
         '</div>';
     } else if (kind === 'anon') {
       body =
-        '<h1>관리자 로그인</h1>' +
-        '<p>CAPS 교회지원센터 관리자 화면입니다.<br>승인된 직원 계정으로 로그인해 주세요.</p>' +
+        '<h1>로그인이 필요합니다</h1>' +
+        '<p>CAPS 교회지원센터 업무 시스템입니다.<br>직원 로그인 페이지에서 로그인해 주세요.</p>' +
         (db.mode === 'local'
           ? '<p class="auth-demo" style="margin-top:20px;text-align:left">데모 모드입니다. ' +
             '<code>admin@caps.or.kr</code> / <code>caps1234</code> 로 로그인해 보세요.</p>'
           : '') +
         '<div class="gate-actions">' +
-          '<button type="button" class="btn btn-primary btn-lg" id="gateLogin">로그인 / 회원가입</button>' +
+          '<a class="btn btn-primary btn-lg" href="staff.html">직원 로그인으로 이동</a>' +
           '<a class="btn btn-outline" href="index.html">홈페이지로 돌아가기</a>' +
         '</div>';
     } else if (kind === 'pending') {
@@ -256,7 +256,7 @@ window.CAPSAdmin = (function () {
         '<p><strong>' + h(user.name || user.email) + '</strong> 님의 직원 계정은<br>' +
         '최고관리자 승인 후 이용할 수 있습니다.<br>승인되면 이 화면에서 바로 들어오실 수 있습니다.</p>' +
         '<div class="gate-actions">' +
-          '<button type="button" class="btn btn-outline" id="gateReload">다시 확인</button>' +
+          '<button type="button" class="btn btn-primary" id="gateReload">승인 확인</button>' +
           '<button type="button" class="btn btn-outline" id="gateOut">로그아웃</button>' +
           '<a class="btn btn-primary" href="index.html">홈페이지로 돌아가기</a>' +
         '</div>';
@@ -273,8 +273,6 @@ window.CAPSAdmin = (function () {
 
     gate.innerHTML = '<div class="gate-card">' + el('gateLogo').innerHTML + body + '</div>';
 
-    var login = el('gateLogin');
-    if (login) login.addEventListener('click', function () { window.CAPSAuthUI.open({ tab: 'login' }); });
     var reload = el('gateReload');
     if (reload) reload.addEventListener('click', function () { window.location.reload(); });
     var out = el('gateOut');
