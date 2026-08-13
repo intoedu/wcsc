@@ -279,6 +279,13 @@ body.staff { background: var(--brand-900); }
   margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.65; text-align: center;
 }
 
+/* 회원가입 창 맨 위에 놓인 구글 버튼 */
+.auth-form .auth-google.is-first,
+.sp-form .auth-google.is-first { margin-top: 0; }
+.auth-form .auth-google.is-first + .auth-google-note,
+.sp-form .auth-google.is-first + .auth-google-note { margin-bottom: 2px; }
+.auth-or span { font-weight: 600; white-space: nowrap; }
+
 /* 비밀번호 일치 여부 표시 */
 .field-hint.is-match { color: var(--ok); font-weight: 600; }
 .field-hint.is-mismatch { color: #B3261E; font-weight: 600; }

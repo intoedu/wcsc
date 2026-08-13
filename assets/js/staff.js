@@ -266,7 +266,8 @@
     googleAuth('spLoginErr', false);
   });
   document.getElementById('spGoogleSignup').addEventListener('click', function () {
-    googleAuth('spSignupErr', true);
+    document.getElementById('spSignupErr').hidden = true;
+    googleAuth('spSignupGoogleErr', true);
   });
 
   /* 비밀번호 재설정 */
@@ -292,6 +293,7 @@
     e.preventDefault();
     var err = document.getElementById('spSignupErr');
     err.hidden = true;
+    document.getElementById('spSignupGoogleErr').hidden = true;
 
     var problem = validateSignup(true);
     if (problem) { showProblem('spSignupErr', problem); return; }

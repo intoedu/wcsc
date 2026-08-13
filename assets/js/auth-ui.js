@@ -77,6 +77,14 @@ window.CAPSAuthUI = (function () {
 
           /* 회원가입 */
           '<form class="auth-form" id="signupForm" data-pane="signup" hidden novalidate>' +
+            /* 구글 가입을 가장 위에 둡니다 — 가장 빠른 방법이기 때문입니다. */
+            '<button type="button" class="btn btn-outline btn-block btn-lg auth-google is-first" id="googleSignupBtn">' +
+              googleMark() + 'Google 계정으로 가입하기</button>' +
+            '<p class="auth-google-note">비밀번호를 따로 만들지 않아도 됩니다. ' +
+              '교회명 · 직분 · 연락처는 다음 화면에서 입력합니다.</p>' +
+            '<p class="auth-err" id="signupGoogleErr" hidden></p>' +
+            '<p class="auth-or"><span>또는 이메일로 가입</span></p>' +
+
             '<div class="field"><label for="suName">성함 <em class="req">필수</em></label>' +
               '<input type="text" id="suName" autocomplete="name" required></div>' +
             '<div class="field"><label for="suBirth">생년월일 <span class="opt">선택</span></label>' +
@@ -102,11 +110,6 @@ window.CAPSAuthUI = (function () {
               '<span>개인정보 수집 · 이용에 동의합니다. <em class="req">필수</em></span></label>' +
             '<p class="auth-err" id="signupErr" hidden></p>' +
             '<button type="submit" class="btn btn-primary btn-block btn-lg">가입하고 계속하기</button>' +
-            '<p class="auth-or"><span>또는</span></p>' +
-            '<button type="button" class="btn btn-outline btn-block auth-google" id="googleSignupBtn">' +
-              googleMark() + 'Google 계정으로 가입하기</button>' +
-            '<p class="auth-google-note">구글 계정으로 가입하면 비밀번호를 따로 만들지 않아도 됩니다. ' +
-              '위 칸을 비워두고 눌러도 되며, 교회명 · 직분 · 연락처는 다음 화면에서 입력합니다.</p>' +
           '</form>' +
         '</div>' +
       '</div>';
@@ -226,8 +229,9 @@ window.CAPSAuthUI = (function () {
        위 칸을 미리 채우지 않아도 됩니다. 비어 있으면 구글 인증 뒤에
        [추가 정보 입력] 화면에서 교회 · 직분 · 연락처를 받습니다. */
     modal.querySelector('#googleSignupBtn').addEventListener('click', function () {
-      var err = modal.querySelector('#signupErr');
+      var err = modal.querySelector('#signupGoogleErr');
       err.hidden = true;
+      modal.querySelector('#signupErr').hidden = true;
 
       db.auth.signInGoogle(signupData())
         .then(function () { succeed(); })
@@ -263,6 +267,7 @@ window.CAPSAuthUI = (function () {
       e.preventDefault();
       var err = modal.querySelector('#signupErr');
       err.hidden = true;
+      modal.querySelector('#signupGoogleErr').hidden = true;
 
       var problem = validateSignup(true);
       if (problem) {
