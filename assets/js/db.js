@@ -157,7 +157,7 @@ window.CAPSDB = (function () {
         {
           id: 'demo-owner', email: 'admin@caps.or.kr', password: 'caps1234',
           name: '관리자', phone: '02-0000-0000', role: 'owner', approved: true,
-          church: 'CAPS 교회지원센터', contactRole: '행정 간사', birthDate: '',
+          church: '우리교회지원센터', contactRole: '행정 간사', birthDate: '',
           perms: {}, createdAt: nowIso(),
         },
       ]);

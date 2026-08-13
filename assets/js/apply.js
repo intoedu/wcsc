@@ -287,7 +287,7 @@
     form.hidden = true;
     done.hidden = false;
     done.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    document.title = '신청 완료 (' + record.code + ') | CAPS 교회지원센터';
+    document.title = '신청 완료 (' + record.code + ') | 우리교회지원센터';
 
     var copy = document.getElementById('copyCode');
     copy.addEventListener('click', function () {

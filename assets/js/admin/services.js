@@ -21,7 +21,7 @@
     {
       key: 'externalApply', label: '외부 접수 주소',
       hint: '이 항목의 신청을 다른 사이트에서 받을 때 주소를 넣으세요. ' +
-        '비워두면 CAPS 신청서로 접수합니다. (예: 홈페이지·디자인은 @IM 접수 페이지)',
+        '비워두면 우리교회지원센터 신청서로 접수합니다. (예: 홈페이지·디자인은 @IM 접수 페이지)',
     },
     {
       key: 'externalApplyLabel', label: '외부 접수 사이트 이름',
@@ -106,7 +106,7 @@
         (data.externalApply
           ? '<div class="guide-box" style="margin-bottom:16px"><strong>외부 접수 항목입니다.</strong><br>' +
             '신청 버튼이 <code>' + h(data.externalApply) + '</code> 로 연결되며, ' +
-            'CAPS 신청서에서는 체크박스가 아닌 링크로 표시됩니다.</div>'
+            '우리교회지원센터 신청서에서는 체크박스가 아닌 링크로 표시됩니다.</div>'
           : '') +
         (edited
           ? '<div class="guide-box" style="margin-bottom:20px"><strong>수정된 항목입니다.</strong> ' +

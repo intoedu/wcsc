@@ -1,7 +1,7 @@
 {
   "name": "caps-home-page",
   "version": "1.0.0",
-  "description": "CAPS 교회지원센터 (Church Assist Platform Service) 홈페이지",
+  "description": "우리교회지원센터 홈페이지",
   "private": true,
   "scripts": {
     "build": "node build.js",

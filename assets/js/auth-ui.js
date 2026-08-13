@@ -71,7 +71,7 @@ window.CAPSAuthUI = (function () {
             '<button type="button" class="btn btn-outline btn-block auth-google" id="googleBtn">' +
               googleMark() + 'Google 계정으로 로그인</button>' +
             '<button type="button" class="link-btn auth-reset" id="resetBtn">비밀번호를 잊으셨나요?</button>' +
-            '<p class="auth-staff-link">CAPS 센터 직원이신가요? ' +
+            '<p class="auth-staff-link">우리교회지원센터 직원이신가요? ' +
               '<a href="' + base() + 'staff.html">직원 로그인 &rarr;</a></p>' +
           '</form>' +
 

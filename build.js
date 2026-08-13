@@ -33,8 +33,8 @@ function buildIndex() {
   <div class="hero-bg" aria-hidden="true"></div>
   <div class="wrap hero-in">
     <div class="hero-copy">
-      <p class="hero-eyebrow">Church Assist Platform Service</p>
-      <h1>교회는 사역에 집중하고,<br><span class="hl">나머지는 CAPS</span>가 맡습니다</h1>
+      <p class="hero-eyebrow">Woori Church Support Center</p>
+      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">우리교회지원센터</span>가 맡습니다</h1>
       <p class="hero-lead">
         홈페이지와 주보 제작부터 교역자 청빙, 음향, 부동산, 앱, 행정까지.
         한국 교회에 필요한 8개 지원 항목을 한 창구에서 상담하고 진행합니다.
@@ -91,7 +91,7 @@ function buildIndex() {
 
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('CAPS가 일하는 방식', '업체가 아니라, 교회를 아는 담당자와 일합니다')}
+    ${sectionHead('우리교회지원센터가 일하는 방식', '업체가 아니라, 교회를 아는 담당자와 일합니다')}
     <div class="why-grid">
       ${site.principles
         .map(
@@ -138,7 +138,7 @@ ${ctaBand('')}
   write(
     'index.html',
     layout({
-      title: 'CAPS 교회지원센터 | 한국 교회를 위한 통합 지원',
+      title: '우리교회지원센터 | 한국 교회를 위한 통합 지원',
       description: site.description,
       base: '',
       active: 'index.html',
@@ -155,7 +155,7 @@ function buildAbout() {
 ${pageHero({
   eyebrow: '센터 소개',
   title: '한국 교회 곁에서<br>실무를 맡는 기관',
-  lead: 'CAPS(Church Assist Platform Service) 교회지원센터는 교회가 사역 외의 일로 소모하는 시간과 비용을 줄이기 위해 만들어졌습니다.',
+  lead: '우리교회지원센터는 교회가 사역 외의 일로 소모하는 시간과 비용을 줄이기 위해 만들어졌습니다.',
 })}
 
 <section class="section">
@@ -168,12 +168,12 @@ ${pageHero({
     </p>
     <p>
       이 일들은 모두 사역이 아니지만, 하지 않으면 사역이 막힙니다. 그리고 대부분의 교회에는 이 일을 전담할 사람이 없습니다.
-      CAPS는 그 자리를 대신 맡기 위해 만들어진 기관입니다.
+      우리교회지원센터는 그 자리를 대신 맡기 위해 만들어진 기관입니다.
     </p>
 
     <h2>어떻게 일하나</h2>
     <p>
-      CAPS는 항목별로 다른 담당자에게 넘기지 않습니다. 교회 한 곳에 담당자 한 명이 배정되어, 여러 항목을 진행하더라도
+      우리교회지원센터는 항목별로 다른 담당자에게 넘기지 않습니다. 교회 한 곳에 담당자 한 명이 배정되어, 여러 항목을 진행하더라도
       같은 사람과 이야기하게 됩니다. 교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 사람과 일한다는 뜻입니다.
     </p>
     <p>
@@ -218,8 +218,8 @@ ${ctaBand('', {
   write(
     'about.html',
     layout({
-      title: '센터 소개 | CAPS 교회지원센터',
-      description: 'CAPS 교회지원센터가 만들어진 이유와 일하는 방식, 그리고 지키는 원칙을 소개합니다.',
+      title: '센터 소개 | 우리교회지원센터',
+      description: '우리교회지원센터가 만들어진 이유와 일하는 방식, 그리고 지키는 원칙을 소개합니다.',
       base: '',
       active: 'about.html',
       body,
@@ -303,8 +303,8 @@ ${ctaBand('')}
   write(
     'process.html',
     layout({
-      title: '이용 절차 | CAPS 교회지원센터',
-      description: '신청 접수, 담당자 배정, 제안·견적, 진행, 사후 지원까지 CAPS 교회지원센터의 5단계 이용 절차를 안내합니다.',
+      title: '이용 절차 | 우리교회지원센터',
+      description: '신청 접수, 담당자 배정, 제안·견적, 진행, 사후 지원까지 우리교회지원센터의 5단계 이용 절차를 안내합니다.',
       base: '',
       active: 'process.html',
       body,
@@ -356,8 +356,8 @@ ${ctaBand('', {
   write(
     'faq.html',
     layout({
-      title: '자주 묻는 질문 | CAPS 교회지원센터',
-      description: 'CAPS 교회지원센터 이용과 8개 지원 항목에 대해 자주 묻는 질문을 모았습니다.',
+      title: '자주 묻는 질문 | 우리교회지원센터',
+      description: '우리교회지원센터 이용과 8개 지원 항목에 대해 자주 묻는 질문을 모았습니다.',
       base: '',
       active: 'faq.html',
       body,
@@ -415,9 +415,9 @@ ${ctaBand('../')}
   write(
     'services/index.html',
     layout({
-      title: '지원 항목 | CAPS 교회지원센터',
+      title: '지원 항목 | 우리교회지원센터',
       description:
-        '홈페이지 제작, 디자인, 교역자 구인, 음향 세팅, 부동산, AKC, 스마트처치 앱, 인투오피스 등 CAPS 교회지원센터의 8개 지원 항목을 안내합니다.',
+        '홈페이지 제작, 디자인, 교역자 구인, 음향 세팅, 부동산, AKC, 스마트처치 앱, 인투오피스 등 우리교회지원센터의 8개 지원 항목을 안내합니다.',
       base: '../',
       active: 'services/index.html',
       body,
@@ -565,7 +565,7 @@ ${ctaBand('../', {
   write(
     `services/${s.slug}.html`,
     layout({
-      title: `${s.name} | CAPS 교회지원센터`,
+      title: `${s.name} | 우리교회지원센터`,
       description: s.summary,
       base: '../',
       active: `services/${s.slug}.html`,
@@ -745,7 +745,7 @@ ${pageHero({
         <p class="err" id="err-consent" hidden>개인정보 수집·이용에 동의해 주세요.</p>
         <label class="check-line">
           <input type="checkbox" name="marketing">
-          <span>CAPS 소식과 교회 실무 자료를 받아보겠습니다. <span class="opt">선택</span></span>
+          <span>우리교회지원센터 소식과 교회 실무 자료를 받아보겠습니다. <span class="opt">선택</span></span>
         </label>
       </fieldset>
 
@@ -781,8 +781,8 @@ ${pageHero({
   write(
     'apply.html',
     layout({
-      title: '지원 신청 | CAPS 교회지원센터',
-      description: 'CAPS 교회지원센터 지원 신청서. 필요한 항목을 선택해 신청하시면 담당자가 1~2일 내 연락드립니다.',
+      title: '지원 신청 | 우리교회지원센터',
+      description: '우리교회지원센터 지원 신청서. 필요한 항목을 선택해 신청하시면 담당자가 1~2일 내 연락드립니다.',
       base: '',
       active: 'apply.html',
       body,
@@ -835,8 +835,8 @@ ${pageHero({
   write(
     'status.html',
     layout({
-      title: '신청 조회 | CAPS 교회지원센터',
-      description: '접수번호로 CAPS 교회지원센터 지원 신청 내역을 조회합니다.',
+      title: '신청 조회 | 우리교회지원센터',
+      description: '접수번호로 우리교회지원센터 지원 신청 내역을 조회합니다.',
       base: '',
       active: 'status.html',
       body,
@@ -900,8 +900,8 @@ ${ctaBand('')}
   write(
     'contact.html',
     layout({
-      title: '문의 | CAPS 교회지원센터',
-      description: 'CAPS 교회지원센터 전화·이메일 문의 및 방문 안내.',
+      title: '문의 | 우리교회지원센터',
+      description: '우리교회지원센터 전화·이메일 문의 및 방문 안내.',
       base: '',
       active: 'contact.html',
       body,

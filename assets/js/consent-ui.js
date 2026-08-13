@@ -40,7 +40,7 @@ window.CAPSConsentUI = (function () {
     }
     bar.innerHTML =
       '<div class="wrap">' +
-        '<span><strong>CAPS 교회지원센터</strong>가 교회 정보 수정 승인을 요청했습니다' +
+        '<span><strong>우리교회지원센터</strong>가 교회 정보 수정 승인을 요청했습니다' +
           (count > 1 ? ' (' + count + '건)' : '') + '.</span>' +
         '<button type="button" class="btn btn-primary btn-sm" id="consentOpen">내용 확인하기</button>' +
       '</div>';
@@ -96,7 +96,7 @@ window.CAPSConsentUI = (function () {
         '<p class="cs-line"><span>교회</span><strong>' + esc(current.customerName || '-') + '</strong></p>' +
         '<p class="cs-line"><span>수정할 항목</span><strong>' + esc(db.fieldLabels(v.fields)) + '</strong></p>' +
         '<p class="cs-line"><span>요청한 사람</span><strong>' +
-          esc(current.requestedByName || 'CAPS 교회지원센터') + '</strong></p>' +
+          esc(current.requestedByName || '우리교회지원센터') + '</strong></p>' +
         '<p class="cs-line"><span>요청 일시</span><strong>' +
           esc(db.formatDate(current.requestedAt)) + '</strong></p>' +
       '</div>' +

@@ -91,8 +91,8 @@ function header(base, active) {
     <a class="brand" href="${base}index.html">
       ${logoMark()}
       <span class="brand-text">
-        <strong>CAPS 교회지원센터</strong>
-        <small>Church Assist Platform Service</small>
+        <strong>우리교회지원센터</strong>
+        <small>Woori Church Support Center</small>
       </span>
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
@@ -121,8 +121,8 @@ function footer(base) {
       <a class="brand brand-light" href="${base}index.html">
         ${logoMark()}
         <span class="brand-text">
-          <strong>CAPS 교회지원센터</strong>
-          <small>Church Assist Platform Service</small>
+          <strong>우리교회지원센터</strong>
+          <small>Woori Church Support Center</small>
         </span>
       </a>
       <p class="footer-desc">${esc(site.description)}</p>
@@ -154,7 +154,7 @@ function footer(base) {
     </div>
   </div>
   <div class="wrap footer-bottom">
-    <p>© <span id="year">2026</span> CAPS 교회지원센터. All rights reserved.</p>
+    <p>© <span id="year">2026</span> 우리교회지원센터. All rights reserved.</p>
     <p class="footer-note">한국 교회를 위한 통합 지원 기관</p>
   </div>
 </footer>`;
@@ -177,7 +177,7 @@ function layout(o) {
   <meta property="og:type" content="website">
   <meta property="og:title" content="${esc(o.title)}">
   <meta property="og:description" content="${esc(o.description)}">
-  <meta property="og:site_name" content="CAPS 교회지원센터">
+  <meta property="og:site_name" content="우리교회지원센터">
   <meta name="theme-color" content="#1D4ED8">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231D4ED8'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F59E0B' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>

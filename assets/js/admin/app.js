@@ -248,7 +248,7 @@ window.CAPSAdmin = (function () {
     } else if (kind === 'anon') {
       body =
         '<h1>로그인이 필요합니다</h1>' +
-        '<p>CAPS 교회지원센터 업무 시스템입니다.<br>직원 로그인 페이지에서 로그인해 주세요.</p>' +
+        '<p>우리교회지원센터 업무 시스템입니다.<br>직원 로그인 페이지에서 로그인해 주세요.</p>' +
         (db.mode === 'local'
           ? '<p class="auth-demo" style="margin-top:20px;text-align:left">데모 모드입니다. ' +
             '<code>admin@caps.or.kr</code> / <code>caps1234</code> 로 로그인해 보세요.</p>'
