@@ -98,6 +98,7 @@ window.CAPSAdmin = (function () {
   /* ---------------- 사이드바 ---------------- */
 
   var ICONS = {
+    rules: '<path d="M12 3 4 6.5v5.8c0 4.3 3.4 7.9 8 8.7 4.6-.8 8-4.4 8-8.7V6.5L12 3Z"/><path d="M12 8.6v3.2M12 15h.01"/>',
     mytasks: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
     alltasks: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16M8 13h4M8 16.5h6"/>',
     workload: '<path d="M3 20h18"/><path d="M6 20v-6M11 20V8M16 20v-9M21 20V5"/>',
@@ -121,7 +122,7 @@ window.CAPSAdmin = (function () {
     { title: '작업', keys: ['mytasks', 'alltasks', 'workload'] },
     { title: '의뢰 관리', keys: ['requests', 'customers', 'subscriptions'] },
     { title: '정산', keys: ['settlement'] },
-    { title: '센터 관리', keys: ['services', 'members', 'settings'] },
+    { title: '센터 관리', keys: ['services', 'members', 'settings', 'rules'] },
   ];
 
   function renderSidebar() {

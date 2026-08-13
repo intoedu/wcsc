@@ -98,6 +98,7 @@ npm start     # http://localhost:8123
 | **지원 항목** | **공개 페이지에 나가는 내용을 직접 수정** (아래 참고) | `지원 항목 수정` |
 | **관리자 목록** | 직원 승인·거절, 직분 변경, 권한 체크박스, 고객 계정 조회, CSV | `직원 승인·권한 관리` |
 | **센터 설정** | 대표 연락처·운영시간·주소, 전체 공지 배너, 전체 데이터 백업(JSON) | `센터 설정` |
+| **보안 규칙** | Firestore 규칙 전체를 한 번에 복사 · 파일 내려받기 · 콘솔 바로 열기 | `센터 설정` |
 
 ### 4-1. 지원 항목 수정 → 홈페이지 즉시 반영
 
@@ -170,9 +171,41 @@ npm start     # http://localhost:8123
 1. [Firebase 콘솔](https://console.firebase.google.com) 에서 프로젝트 생성
 2. **Authentication** → 시작하기 → `이메일/비밀번호` 사용 설정 (원하면 `Google` 도 함께)
 3. **Firestore Database** → 데이터베이스 만들기 (위치: `asia-northeast3` 서울 권장)
-4. **Firestore → 규칙** 탭에 이 저장소의 **`firestore.rules`** 내용을 붙여넣고 게시
+4. **Firestore → 규칙** 탭에 규칙 전체를 붙여넣고 게시 (아래 *규칙 게시하기* 참고)
 5. **프로젝트 설정 → 내 앱 → 웹(`</>`)** 추가 후, 표시되는 `firebaseConfig` 값을 `firebase-config.js` 에 붙여넣기
 6. **Authentication → 설정 → 승인된 도메인** 에 배포 주소(예: `intoedu.github.io`) 추가
+
+### 규칙 게시하기 (전체 덮어쓰기)
+
+보안 규칙은 **부분 수정이 아니라 전체를 덮어쓰는** 방식입니다. 세 가지 방법 중 편한 것을 쓰세요.
+
+#### 방법 1 — 관리자 화면에서 복사 (권장)
+
+관리자 화면 → **센터 관리 → 보안 규칙** (`admin.html#rules`)
+
+1. **[규칙 전체 복사]** 클릭
+2. **[Firebase 규칙 화면 열기]** 로 콘솔 열기
+3. 편집창에서 `Ctrl+A` → `Delete` → `Ctrl+V`
+4. **[게시]**
+
+이 화면에는 배포된 저장소의 `firestore.rules` 가 그대로 표시되므로 **항상 최신본**입니다.
+`규칙 판` 번호가 콘솔에 게시한 것과 다르면 다시 붙여넣으면 됩니다.
+[파일로 내려받기] 로 `firestore.rules` 파일을 받을 수도 있습니다.
+
+#### 방법 2 — 명령 한 줄 (Firebase CLI)
+
+```bash
+npm run rules:login   # 처음 한 번만 (구글 로그인)
+npm run rules         # firestore.rules 를 caps-4e079 에 게시
+```
+
+`firebase.json` 과 `.firebaserc` 가 저장소에 있어 프로젝트를 따로 지정하지 않아도 됩니다.
+
+#### 방법 3 — GitHub에서 직접 복사
+
+```
+raw.githubusercontent.com/intoedu/Caps-Home-Page/claude/church-support-platform-b296qn/firestore.rules
+```
 
 ### 첫 최고관리자 만들기
 
@@ -234,7 +267,9 @@ status.html              신청 조회 / 내 신청 내역
 staff.html               직원 전용 로그인 · 계정 신청
 admin.html               관리자 시스템 (승인된 직원만)
 
-firestore.rules          Firestore 보안 규칙  ← 콘솔에 붙여넣기
+firestore.rules          Firestore 보안 규칙  ← 원본 (관리자 [보안 규칙] 화면에 그대로 표시됩니다)
+firebase.json            firebase CLI 설정 (npm run rules 로 게시)
+.firebaserc              대상 프로젝트 (caps-4e079)
 build.js                 정적 페이지 생성기
 src/data/site.js         모든 콘텐츠 원본  ← 여기만 고치면 됩니다
 src/templates.js         공통 레이아웃
@@ -252,6 +287,7 @@ assets/js/status.js           신청 조회
 assets/js/staff.js            직원 포털
 assets/js/app.js              공통 UI (메뉴, 스크롤)
 assets/js/data.js             build.js 가 생성 — 직접 수정하지 마세요
+assets/js/rules-text.js       build.js 가 firestore.rules 에서 생성 — 직접 수정하지 마세요
 assets/js/admin/*.js          관리자 화면별 코드 (tasks.js = 내 작업·전체 작업·업무량)
 ```
 
@@ -281,7 +317,7 @@ npm run build
 - [ ] **승인된 도메인** — Authentication → 설정에 배포 주소 추가
 - [ ] **첫 최고관리자** — Firestore에서 `role: "owner"`, `approved: true` 로 지정
 - [ ] **Google 로그인** — 쓰실 경우 Authentication → 로그인 방법에서 Google 사용 설정
-- [ ] **보안 규칙 재게시** — 작업 관리 기능 추가로 `firestore.rules` 가 변경되었습니다. 콘솔에 **다시 붙여넣고 게시**해야 합니다
+- [ ] **보안 규칙 게시** — 관리자 화면 **[보안 규칙]** 에서 전체 복사 → 콘솔에 붙여넣고 게시 (또는 `npm run rules`)
 - [ ] **연락처** — `src/data/site.js` 의 `site.contact` (전화 `02-0000-0000`, 이메일, 주소가 모두 임시값). 또는 관리자 화면 → 센터 설정에서 입력
 - [ ] **AKC** — 정식 명칭과 실제 프로그램 구성 확인 필요 (`services[5]`, 코드에 `needsReview: true` 표시)
 - [ ] **인투오피스** — 실제 서비스 범위와 요금 체계 확인 필요 (`services[7]`, `needsReview: true`)
@@ -320,3 +356,4 @@ Chromium(Playwright)으로 다음을 실제 실행해 확인했습니다.
 - CAPS 신청서에서 두 항목이 체크박스가 아닌 링크로 표시되고 선택 항목은 6개
 - 내 작업에서 마감일 저장 → D-2 / D+3 배지 계산, 직원별 업무량 집계
 - 로그인·회원가입 양쪽 탭의 구글 버튼 노출
+- [보안 규칙] 화면의 규칙 전체 노출과 클립보드 복사 결과가 원본과 일치

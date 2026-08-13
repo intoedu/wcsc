@@ -910,6 +910,23 @@ ${ctaBand('')}
 }
 
 /* =========================================================
+   보안 규칙을 관리자 화면에서 복사할 수 있도록 내보냅니다.
+   firestore.rules 가 원본이고, 이 파일은 그 사본입니다.
+   ========================================================= */
+function buildRulesScript() {
+  const file = path.join(ROOT, 'firestore.rules');
+  const text = fs.readFileSync(file, 'utf8');
+  const version = (text.match(/CAPS_RULES_VERSION:\s*([\w.-]+)/) || [])[1] || '(미표기)';
+
+  const js = `/* build.js 가 firestore.rules 에서 생성한 파일입니다. 직접 수정하지 마세요.
+   규칙을 바꿀 때는 firestore.rules 를 고치고 \`npm run build\` 를 실행하세요. */
+window.CAPS_FIRESTORE_RULES = ${JSON.stringify(text)};
+window.CAPS_FIRESTORE_RULES_VERSION = ${JSON.stringify(version)};
+`;
+  write('assets/js/rules-text.js', js);
+}
+
+/* =========================================================
    브라우저용 데이터 파일
    ========================================================= */
 function buildDataScript() {
@@ -949,6 +966,7 @@ function main() {
   buildStatus();
   buildContact();
   buildDataScript();
+  buildRulesScript();
   console.log(`생성 완료 (${out.length}개)`);
   out.forEach((f) => console.log('  ' + f));
 }

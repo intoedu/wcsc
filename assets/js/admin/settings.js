@@ -78,10 +78,13 @@
           (db.mode === 'local'
             ? '<div class="guide-box" style="margin-top:18px"><strong>실제 운영으로 전환하려면</strong><ul>' +
               '<li><code>assets/js/firebase-config.js</code> 에 Firebase 설정값을 넣으세요.</li>' +
-              '<li>Firestore 보안 규칙은 저장소의 <code>firestore.rules</code> 내용을 붙여넣으세요.</li>' +
+              '<li>보안 규칙은 <button type="button" class="link-btn" data-view="rules">[보안 규칙]</button> ' +
+                '화면에서 전체를 복사해 콘솔에 붙여넣으세요.</li>' +
               '<li>전환 전에 위의 [전체 데이터 내려받기] 로 데모 데이터를 보관하실 수 있습니다.</li>' +
               '</ul></div>'
-            : '') +
+            : '<div class="guide-box" style="margin-top:18px"><strong>권한 오류가 나면</strong><br>' +
+              '<button type="button" class="link-btn" data-view="rules">[보안 규칙]</button> 화면에서 ' +
+              '규칙 전체를 다시 복사해 콘솔에 붙여넣고 게시해 주세요. 규칙은 부분 수정이 아니라 전체를 덮어쓰는 방식입니다.</div>') +
         '</div>';
 
       root.querySelector('#setSave').addEventListener('click', function () {

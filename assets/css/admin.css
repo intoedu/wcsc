@@ -371,3 +371,36 @@ body.admin .float-cta { display: none !important; }
 
 .adm-note { margin-top: 16px; font-size: 13.5px; color: var(--muted); line-height: 1.7; }
 .adm-note .link-btn { font-size: 13.5px; }
+
+/* ---------- 보안 규칙 화면 ---------- */
+.rules-steps { counter-reset: rs; margin-top: 4px; }
+.rules-steps li {
+  position: relative; padding: 8px 0 8px 34px; font-size: 15px; line-height: 1.75; color: var(--ink-2);
+}
+.rules-steps li::before {
+  counter-increment: rs; content: counter(rs);
+  position: absolute; left: 0; top: 10px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--brand-700); color: #fff;
+  font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.rules-steps code, .rules-when code {
+  padding: 1px 6px; border-radius: 5px; background: var(--brand-50);
+  border: 1px solid var(--brand-100); font-size: 13px; font-family: ui-monospace, monospace;
+}
+
+.rules-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+
+.rules-text {
+  width: 100%; height: 380px; resize: vertical;
+  padding: 16px 18px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg-soft); color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px; line-height: 1.7; white-space: pre; overflow-wrap: normal; overflow-x: auto;
+}
+.rules-text:focus { outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
+
+.rules-when li {
+  position: relative; padding: 6px 0 6px 16px; font-size: 15px; color: var(--ink-2); line-height: 1.7;
+}
+.rules-when li::before { content: "·"; position: absolute; left: 4px; color: var(--brand-500); font-weight: 700; }
