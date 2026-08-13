@@ -350,6 +350,18 @@ window.CAPSDB = (function () {
     var fb = {};
     var authListeners = [];
     var profile = null;
+    var loadError = null;
+
+    var LOAD_MSG =
+      'Firebase 연결에 실패했습니다. 인터넷 연결을 확인해 주세요. ' +
+      '(광고 차단 프로그램이나 사내 방화벽이 googleapis.com · gstatic.com 을 막고 있을 수도 있습니다.)';
+
+    /** SDK 로드 실패 시 모든 데이터 호출을 같은 메시지로 막습니다. */
+    function guard() {
+      return ready.then(function () {
+        if (loadError) throw new Error(LOAD_MSG);
+      });
+    }
 
     var ready = Promise.all([
       import(base + 'firebase-app.js'),
@@ -375,6 +387,12 @@ window.CAPSDB = (function () {
             if (first) { first = false; resolve(); }
           });
         });
+      });
+    }).catch(function (err) {
+      // SDK 로드 또는 초기화 실패 — 화면이 멈추지 않도록 여기서 흡수합니다.
+      loadError = err;
+      authListeners.forEach(function (cb) {
+        try { cb(null); } catch (e) { /* 무시 */ }
       });
     });
 
@@ -419,6 +437,7 @@ window.CAPSDB = (function () {
     return {
       mode: 'firebase',
       ready: ready,
+      loadError: function () { return loadError && LOAD_MSG; },
 
       auth: {
         current: function () { return profile; },
@@ -430,7 +449,7 @@ window.CAPSDB = (function () {
           };
         },
         signUp: function (data) {
-          return ready.then(function () {
+          return guard().then(function () {
             window.sessionStorage.setItem('caps.signup.intent', JSON.stringify({
               name: data.name, phone: data.phone, church: data.church, staffRequest: !!data.staffRequest,
             }));
@@ -447,30 +466,30 @@ window.CAPSDB = (function () {
           });
         },
         signIn: function (data) {
-          return ready.then(function () {
+          return guard().then(function () {
             return fb.authMod
               .signInWithEmailAndPassword(fb.auth, String(data.email).trim(), data.password)
               .catch(function (err) { throw new Error(authMessage(err)); });
           });
         },
         signInGoogle: function () {
-          return ready.then(function () {
+          return guard().then(function () {
             var provider = new fb.authMod.GoogleAuthProvider();
             return fb.authMod.signInWithPopup(fb.auth, provider)
               .catch(function (err) { throw new Error(authMessage(err)); });
           });
         },
         signOut: function () {
-          return ready.then(function () { return fb.authMod.signOut(fb.auth); });
+          return guard().then(function () { return fb.authMod.signOut(fb.auth); });
         },
         resetPassword: function (email) {
-          return ready.then(function () {
+          return guard().then(function () {
             return fb.authMod.sendPasswordResetEmail(fb.auth, String(email).trim())
               .catch(function (err) { throw new Error(authMessage(err)); });
           });
         },
         updateProfile: function (patch) {
-          return ready.then(function () {
+          return guard().then(function () {
             if (!profile) throw new Error('로그인이 필요합니다.');
             return fb.fsMod.updateDoc(fb.fsMod.doc(fb.fs, 'users', profile.id), patch).then(function () {
               profile = Object.assign({}, profile, patch);
@@ -481,21 +500,21 @@ window.CAPSDB = (function () {
       },
 
       list: function (name, opts) {
-        return ready.then(function () {
+        return guard().then(function () {
           return fb.fsMod.getDocs(col(name)).then(function (snap) {
             return applyQuery(snapRows(snap), opts);
           });
         });
       },
       get: function (name, id) {
-        return ready.then(function () {
+        return guard().then(function () {
           return fb.fsMod.getDoc(fb.fsMod.doc(fb.fs, name, id)).then(function (d) {
             return d.exists() ? Object.assign({ id: d.id }, d.data()) : null;
           });
         });
       },
       add: function (name, data) {
-        return ready.then(function () {
+        return guard().then(function () {
           var row = Object.assign({ createdAt: nowIso() }, data);
           return fb.fsMod.addDoc(col(name), row).then(function (ref) {
             return Object.assign({ id: ref.id }, row);
@@ -503,19 +522,19 @@ window.CAPSDB = (function () {
         });
       },
       set: function (name, id, data) {
-        return ready.then(function () {
+        return guard().then(function () {
           return fb.fsMod.setDoc(fb.fsMod.doc(fb.fs, name, id), data).then(function () {
             return Object.assign({ id: id }, data);
           });
         });
       },
       update: function (name, id, patch) {
-        return ready.then(function () {
+        return guard().then(function () {
           return fb.fsMod.updateDoc(fb.fsMod.doc(fb.fs, name, id), patch);
         });
       },
       remove: function (name, id) {
-        return ready.then(function () {
+        return guard().then(function () {
           return fb.fsMod.deleteDoc(fb.fsMod.doc(fb.fs, name, id));
         });
       },
@@ -524,6 +543,7 @@ window.CAPSDB = (function () {
         var dead = false;
         ready.then(function () {
           if (dead) return;
+          if (loadError) { cb([]); return; }
           stop = fb.fsMod.onSnapshot(col(name), function (snap) { cb(snapRows(snap)); }, function () { cb([]); });
         });
         return function () {
@@ -543,10 +563,25 @@ window.CAPSDB = (function () {
         'auth/user-not-found': '가입되지 않은 이메일입니다.',
         'auth/too-many-requests': '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.',
         'auth/popup-closed-by-user': '로그인 창이 닫혔습니다.',
-        'auth/unauthorized-domain': '이 주소는 Firebase 승인된 도메인에 등록되지 않았습니다.',
+        'auth/unauthorized-domain':
+          '이 주소가 Firebase [Authentication → 설정 → 승인된 도메인] 에 등록되지 않았습니다.',
         'auth/network-request-failed': '네트워크 연결을 확인해 주세요.',
+        'auth/api-key-not-valid': 'Firebase 설정값(apiKey)이 올바르지 않습니다. firebase-config.js 를 확인해 주세요.',
+        'auth/invalid-api-key': 'Firebase 설정값(apiKey)이 올바르지 않습니다. firebase-config.js 를 확인해 주세요.',
+        'auth/operation-not-allowed':
+          'Firebase [Authentication] 에서 [이메일/비밀번호] 로그인이 사용 설정되지 않았습니다.',
+        'auth/configuration-not-found':
+          'Firebase [Authentication] 이 아직 설정되지 않았습니다. 콘솔에서 [시작하기] 를 눌러주세요.',
       };
-      return map[err && err.code] || (err && err.message) || '처리 중 문제가 발생했습니다.';
+      var code = (err && err.code) || '';
+      if (map[code]) return map[code];
+      // Firebase 가 코드에 설명을 덧붙이는 경우가 있어 부분 일치도 확인합니다.
+      var keys = Object.keys(map);
+      for (var i = 0; i < keys.length; i++) {
+        if (code.indexOf(keys[i]) === 0) return map[keys[i]];
+      }
+      if (code.indexOf('api-key') > -1) return map['auth/api-key-not-valid'];
+      return (err && err.message) || '처리 중 문제가 발생했습니다.';
     }
   }
 
@@ -559,6 +594,8 @@ window.CAPSDB = (function () {
   var api = {
     mode: adapter.mode,
     ready: adapter.ready || Promise.resolve(),
+    /** Firebase SDK 로드에 실패한 경우 안내 문구, 정상이면 null */
+    loadError: adapter.loadError || function () { return null; },
     ROLES: ROLES,
     PERMS: PERMS,
     REQUEST_STATUS: REQUEST_STATUS,

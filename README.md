@@ -10,19 +10,25 @@
 
 ---
 
-## 1. 바로 확인해 보기
+## 1. 현재 연결 상태
+
+**Firebase 프로젝트 `caps-4e079` 에 연결되어 있습니다.** (`assets/js/firebase-config.js`)
 
 ```bash
 npm start     # http://localhost:8123
 ```
 
-`admin.html` 로 들어가서 아래 데모 계정으로 로그인하면 관리자 화면 전체를 볼 수 있습니다.
+실제 데이터가 Firestore에 저장되므로, 로컬에서 테스트한 내용도 운영 데이터에 그대로 들어갑니다.
+테스트로 만든 신청·고객은 관리자 화면에서 삭제하세요.
+
+### 데모 모드로 되돌리려면
+
+`firebase-config.js` 의 `apiKey` 를 빈 문자열(`''`)로 두면 브라우저 저장소를 쓰는 데모 모드로 돌아갑니다.
+이 모드에서는 예시 데이터와 함께 아래 계정으로 로그인해 화면을 둘러볼 수 있습니다.
 
 | 구분 | 계정 | 비밀번호 |
 |------|------|----------|
-| 최고관리자 | `admin@caps.or.kr` | `caps1234` |
-
-> 데모 모드에서는 데이터가 **그 브라우저에만** 저장됩니다. 예시 고객·구독·신청 데이터가 미리 들어 있습니다.
+| 최고관리자 (데모 전용) | `admin@caps.or.kr` | `caps1234` |
 
 ---
 
@@ -202,8 +208,10 @@ npm run build
 
 콘텐츠에 자리표시자가 남아 있습니다. **공개 전에 반드시 교체하세요.**
 
-- [ ] **Firebase 설정** — `assets/js/firebase-config.js` (비어 있으면 데모 모드로만 동작합니다)
-- [ ] **Firestore 보안 규칙** — `firestore.rules` 를 콘솔에 게시
+- [x] **Firebase 설정** — `caps-4e079` 프로젝트 연결 완료
+- [ ] **Authentication** — 콘솔에서 `이메일/비밀번호` 사용 설정
+- [ ] **Firestore 보안 규칙** — `firestore.rules` 를 콘솔 [규칙] 탭에 붙여넣고 게시
+- [ ] **승인된 도메인** — Authentication → 설정에 배포 주소 추가
 - [ ] **첫 최고관리자** — Firestore에서 `role: "owner"`, `approved: true` 로 지정
 - [ ] **연락처** — `src/data/site.js` 의 `site.contact` (전화 `02-0000-0000`, 이메일, 주소가 모두 임시값). 또는 관리자 화면 → 센터 설정에서 입력
 - [ ] **AKC** — 정식 명칭과 실제 프로그램 구성 확인 필요 (`services[5]`, 코드에 `needsReview: true` 표시)

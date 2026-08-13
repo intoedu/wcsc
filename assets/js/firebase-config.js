@@ -33,12 +33,14 @@
 */
 
 window.FIREBASE_CONFIG = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  apiKey: 'AIzaSyCe6VkSMUC_etFLnsGn96oTOPLQJ4Yfo58',
+  authDomain: 'caps-4e079.firebaseapp.com',
+  projectId: 'caps-4e079',
+  storageBucket: 'caps-4e079.firebasestorage.app',
+  messagingSenderId: '111846219367',
+  appId: '1:111846219367:web:1d1a0dea68c54ec032fec2',
+  // measurementId 는 Google 애널리틱스용입니다. 이 사이트에서는 사용하지 않습니다.
+  measurementId: 'G-61JXH58N7R',
 };
 
 /* 센터 운영 관련 기본값 */

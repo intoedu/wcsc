@@ -229,7 +229,16 @@ window.CAPSAdmin = (function () {
     gate.hidden = false;
 
     var body;
-    if (kind === 'anon') {
+    var loadError = db.loadError();
+    if (loadError) {
+      body =
+        '<h1>연결할 수 없습니다</h1>' +
+        '<p>' + h(loadError) + '</p>' +
+        '<div class="gate-actions">' +
+          '<button type="button" class="btn btn-primary" id="gateReload">다시 시도</button>' +
+          '<a class="btn btn-outline" href="index.html">홈페이지로 돌아가기</a>' +
+        '</div>';
+    } else if (kind === 'anon') {
       body =
         '<h1>관리자 로그인</h1>' +
         '<p>CAPS 교회지원센터 관리자 화면입니다.<br>승인된 직원 계정으로 로그인해 주세요.</p>' +
