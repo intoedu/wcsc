@@ -100,15 +100,31 @@
             </p>
             <div class="field">
               <label for="spName">성함 <em class="req">필수</em></label>
-              <input type="text" id="spName" autocomplete="name" required placeholder="예: 박요엘">
+              <input type="text" id="spName" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="spBirth">생년월일 <span class="opt">선택</span></label>
+              <input type="date" id="spBirth" autocomplete="bday">
+            </div>
+            <div class="field">
+              <label for="spChurch">교회명 <em class="req">필수</em></label>
+              <input type="text" id="spChurch" autocomplete="organization" required>
+            </div>
+            <div class="field">
+              <label for="spRole">직분 <em class="req">필수</em></label>
+              <select id="spRole" required>
+                <option value="">선택해 주세요</option>
+                <option>담임목사</option><option>부목사</option><option>전도사</option><option>장로</option><option>권사</option><option>집사</option><option>행정 간사</option><option>성도</option><option>기타</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="spPhone">연락처 <em class="req">필수</em></label>
+              <input type="tel" id="spPhone" autocomplete="tel" required placeholder="01000000000">
+              <p class="field-hint">숫자 11자리까지 입력됩니다. 하이픈은 자동으로 들어갑니다.</p>
             </div>
             <div class="field">
               <label for="spSuEmail">이메일 <em class="req">필수</em></label>
               <input type="email" id="spSuEmail" autocomplete="email" required placeholder="name@caps.or.kr">
-            </div>
-            <div class="field">
-              <label for="spPhone">연락처 <span class="opt">선택</span></label>
-              <input type="tel" id="spPhone" autocomplete="tel" placeholder="010-0000-0000">
             </div>
             <div class="field">
               <label for="spSuPw">비밀번호 <em class="req">필수</em></label>
@@ -116,6 +132,14 @@
                 <input type="password" id="spSuPw" autocomplete="new-password" required minlength="6" placeholder="6자 이상">
                 <button type="button" class="pw-toggle" data-pw="spSuPw">표시</button>
               </div>
+            </div>
+            <div class="field">
+              <label for="spSuPw2">비밀번호 확인 <em class="req">필수</em></label>
+              <div class="pw-row">
+                <input type="password" id="spSuPw2" autocomplete="new-password" required minlength="6">
+                <button type="button" class="pw-toggle" data-pw="spSuPw2">표시</button>
+              </div>
+              <p class="field-hint" id="spPwMatch"></p>
             </div>
             <label class="check-line">
               <input type="checkbox" id="spAgree" required>
@@ -127,7 +151,7 @@
             <button type="button" class="btn btn-outline btn-block auth-google" id="spGoogleSignup"><svg class="g-mark" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A8.99 8.99 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.34Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A8.99 8.99 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58Z"/></svg>Google 계정으로 신청하기</button>
             <p class="auth-google-note">
               구글 계정으로 신청하면 비밀번호를 따로 만들지 않아도 됩니다.
-              위의 성함 · 연락처를 먼저 입력하시면 함께 등록됩니다.
+              교회명 · 직분 · 연락처는 위에 먼저 입력해 주세요.
             </p>
           </form>
         </div>

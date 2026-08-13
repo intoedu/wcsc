@@ -1,6 +1,6 @@
 rules_version = '2';
 
-/* CAPS_RULES_VERSION: 2026-08-13-a  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
+/* CAPS_RULES_VERSION: 2026-08-13-b  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
 
 /* =========================================================
    CAPS 교회지원센터 — Firestore 보안 규칙
@@ -78,7 +78,8 @@ service cloud.firestore {
       // 직분 · 승인 · 권한 변경은 직원 관리 권한자만.
       allow update: if can('members');
 
-      allow delete: if isOwner();
+      // 계정 정보 삭제 (로그인 계정 자체는 콘솔에서 지워야 합니다)
+      allow delete: if can('members');
     }
 
     /* ---------- requests : 지원 신청 ---------- */

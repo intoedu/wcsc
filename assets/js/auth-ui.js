@@ -59,7 +59,7 @@ window.CAPSAuthUI = (function () {
           '<p class="auth-note" id="authReason" hidden></p>' +
 
           /* 로그인 */
-          '<form class="auth-form" id="loginForm" data-pane="login">' +
+          '<form class="auth-form" id="loginForm" data-pane="login" novalidate>' +
             '<div class="field"><label for="loginEmail">이메일</label>' +
               '<input type="email" id="loginEmail" autocomplete="email" required placeholder="church@example.com"></div>' +
             '<div class="field"><label for="loginPw">비밀번호</label>' +
@@ -76,18 +76,28 @@ window.CAPSAuthUI = (function () {
           '</form>' +
 
           /* 회원가입 */
-          '<form class="auth-form" id="signupForm" data-pane="signup" hidden>' +
+          '<form class="auth-form" id="signupForm" data-pane="signup" hidden novalidate>' +
             '<div class="field"><label for="suName">성함 <em class="req">필수</em></label>' +
-              '<input type="text" id="suName" autocomplete="name" required placeholder="예: 김은혜"></div>' +
-            '<div class="field"><label for="suChurch">교회명 <span class="opt">선택</span></label>' +
-              '<input type="text" id="suChurch" autocomplete="organization" placeholder="예: 은혜로교회"></div>' +
-            '<div class="field"><label for="suPhone">연락처 <span class="opt">선택</span></label>' +
-              '<input type="tel" id="suPhone" autocomplete="tel" placeholder="010-0000-0000"></div>' +
+              '<input type="text" id="suName" autocomplete="name" required></div>' +
+            '<div class="field"><label for="suBirth">생년월일 <span class="opt">선택</span></label>' +
+              '<input type="date" id="suBirth" autocomplete="bday"></div>' +
+            '<div class="field"><label for="suChurch">교회명 <em class="req">필수</em></label>' +
+              '<input type="text" id="suChurch" autocomplete="organization" required></div>' +
+            '<div class="field"><label for="suRole">직분 <em class="req">필수</em></label>' +
+              '<select id="suRole" required><option value="">선택해 주세요</option>' +
+              '<option>담임목사</option><option>부목사</option><option>전도사</option><option>장로</option><option>권사</option><option>집사</option><option>행정 간사</option><option>성도</option><option>기타</option></select></div>' +
+            '<div class="field"><label for="suPhone">연락처 <em class="req">필수</em></label>' +
+              '<input type="tel" id="suPhone" autocomplete="tel" required placeholder="01000000000">' +
+              '<p class="field-hint">숫자 11자리까지 입력됩니다. 하이픈은 자동으로 들어갑니다.</p></div>' +
             '<div class="field"><label for="suEmail">이메일 <em class="req">필수</em></label>' +
               '<input type="email" id="suEmail" autocomplete="email" required placeholder="church@example.com"></div>' +
             '<div class="field"><label for="suPw">비밀번호 <em class="req">필수</em></label>' +
               '<div class="pw-row"><input type="password" id="suPw" autocomplete="new-password" required minlength="6" placeholder="6자 이상">' +
               '<button type="button" class="pw-toggle" data-pw="suPw">표시</button></div></div>' +
+            '<div class="field"><label for="suPw2">비밀번호 확인 <em class="req">필수</em></label>' +
+              '<div class="pw-row"><input type="password" id="suPw2" autocomplete="new-password" required minlength="6">' +
+              '<button type="button" class="pw-toggle" data-pw="suPw2">표시</button></div>' +
+              '<p class="field-hint" id="suPwMatch"></p></div>' +
             '<label class="check-line"><input type="checkbox" id="suAgree" required>' +
               '<span>개인정보 수집 · 이용에 동의합니다. <em class="req">필수</em></span></label>' +
             '<p class="auth-err" id="signupErr" hidden></p>' +
@@ -95,7 +105,8 @@ window.CAPSAuthUI = (function () {
             '<p class="auth-or"><span>또는</span></p>' +
             '<button type="button" class="btn btn-outline btn-block auth-google" id="googleSignupBtn">' +
               googleMark() + 'Google 계정으로 가입하기</button>' +
-            '<p class="auth-google-note">구글 계정으로 가입하면 비밀번호를 따로 만들지 않아도 됩니다.</p>' +
+            '<p class="auth-google-note">구글 계정으로 가입하면 비밀번호를 따로 만들지 않아도 됩니다. ' +
+              '교회명 · 직분 · 연락처는 위에 먼저 입력해 주세요.</p>' +
           '</form>' +
         '</div>' +
       '</div>';
@@ -106,7 +117,55 @@ window.CAPSAuthUI = (function () {
     return el;
   }
 
+  /** 회원가입 필수값 검증. 문제가 있으면 [메시지, 대상칸id] 를 돌려줍니다. */
+  function validateSignup(needPassword) {
+    var v = function (id) { return (modal.querySelector('#' + id).value || '').trim(); };
+
+    if (!v('suName')) return ['성함을 입력해 주세요.', 'suName'];
+    if (!v('suChurch')) return ['교회명을 입력해 주세요.', 'suChurch'];
+    if (!v('suRole')) return ['직분을 선택해 주세요.', 'suRole'];
+    if (!v('suPhone')) return ['연락처를 입력해 주세요.', 'suPhone'];
+    if (!db.isValidPhone(v('suPhone'))) return ['연락처를 정확히 입력해 주세요.', 'suPhone'];
+    if (!modal.querySelector('#suAgree').checked) return ['개인정보 수집 · 이용에 동의해 주세요.', 'suAgree'];
+
+    if (needPassword) {
+      if (!v('suEmail')) return ['이메일을 입력해 주세요.', 'suEmail'];
+      if (v('suPw').length < 6) return ['비밀번호는 6자 이상으로 입력해 주세요.', 'suPw'];
+      if (v('suPw') !== v('suPw2')) return ['비밀번호가 서로 다릅니다. 다시 확인해 주세요.', 'suPw2'];
+    }
+    return null;
+  }
+
+  function signupData() {
+    var v = function (id) { return (modal.querySelector('#' + id).value || '').trim(); };
+    return {
+      email: v('suEmail'),
+      password: v('suPw'),
+      name: v('suName'),
+      birthDate: v('suBirth'),
+      church: v('suChurch'),
+      contactRole: v('suRole'),
+      phone: db.formatPhone(v('suPhone')),
+    };
+  }
+
   function wire() {
+    /* 연락처는 숫자 11자리까지만 입력됩니다. */
+    db.bindPhoneInput(modal.querySelector('#suPhone'));
+
+    /* 비밀번호 확인 실시간 표시 */
+    var pw = modal.querySelector('#suPw');
+    var pw2 = modal.querySelector('#suPw2');
+    var pwMatch = modal.querySelector('#suPwMatch');
+    var checkMatch = function () {
+      if (!pw2.value) { pwMatch.textContent = ''; pwMatch.className = 'field-hint'; return; }
+      var same = pw.value === pw2.value;
+      pwMatch.textContent = same ? '비밀번호가 일치합니다.' : '비밀번호가 서로 다릅니다.';
+      pwMatch.className = 'field-hint ' + (same ? 'is-match' : 'is-mismatch');
+    };
+    pw.addEventListener('input', checkMatch);
+    pw2.addEventListener('input', checkMatch);
+
     var tabs = modal.querySelectorAll('.auth-tab');
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () { switchTab(tab.dataset.tab); });
@@ -142,7 +201,7 @@ window.CAPSAuthUI = (function () {
         })
         .then(function () { succeed(); })
         .catch(function (ex) {
-          err.textContent = ex.message;
+          err.innerHTML = ex.message;
           err.hidden = false;
         })
         .then(function () {
@@ -158,7 +217,7 @@ window.CAPSAuthUI = (function () {
       db.auth.signInGoogle()
         .then(function () { succeed(); })
         .catch(function (ex) {
-          err.textContent = ex.message;
+          err.innerHTML = ex.message;
           err.hidden = false;
         });
     });
@@ -167,14 +226,21 @@ window.CAPSAuthUI = (function () {
     modal.querySelector('#googleSignupBtn').addEventListener('click', function () {
       var err = modal.querySelector('#signupErr');
       err.hidden = true;
-      db.auth.signInGoogle({
-        name: modal.querySelector('#suName').value,
-        phone: db.formatPhone(modal.querySelector('#suPhone').value),
-        church: modal.querySelector('#suChurch').value,
-      })
+
+      // 구글로 가입해도 교회 · 직분 · 연락처는 받습니다.
+      var problem = validateSignup(false);
+      if (problem) {
+        err.textContent = problem[0];
+        err.hidden = false;
+        var target = modal.querySelector('#' + problem[1]);
+        if (target) target.focus();
+        return;
+      }
+
+      db.auth.signInGoogle(signupData())
         .then(function () { succeed(); })
         .catch(function (ex) {
-          err.textContent = ex.message;
+          err.innerHTML = ex.message;
           err.hidden = false;
         });
     });
@@ -195,7 +261,7 @@ window.CAPSAuthUI = (function () {
           window.alert(email + ' 로 비밀번호 재설정 메일을 보냈습니다.');
         })
         .catch(function (ex) {
-          err.textContent = ex.message;
+          err.innerHTML = ex.message;
           err.hidden = false;
         });
     });
@@ -205,25 +271,22 @@ window.CAPSAuthUI = (function () {
       e.preventDefault();
       var err = modal.querySelector('#signupErr');
       err.hidden = true;
-      if (!modal.querySelector('#suAgree').checked) {
-        err.textContent = '개인정보 수집 · 이용에 동의해 주세요.';
+
+      var problem = validateSignup(true);
+      if (problem) {
+        err.textContent = problem[0];
         err.hidden = false;
+        var target = modal.querySelector('#' + problem[1]);
+        if (target) target.focus();
         return;
       }
       var btn = e.target.querySelector('button[type="submit"]');
       btn.disabled = true;
       btn.textContent = '가입 중…';
-      db.auth
-        .signUp({
-          email: modal.querySelector('#suEmail').value,
-          password: modal.querySelector('#suPw').value,
-          name: modal.querySelector('#suName').value,
-          phone: db.formatPhone(modal.querySelector('#suPhone').value),
-          church: modal.querySelector('#suChurch').value,
-        })
+      db.auth.signUp(signupData())
         .then(function () { succeed(); })
         .catch(function (ex) {
-          err.textContent = ex.message;
+          err.innerHTML = ex.message;
           err.hidden = false;
         })
         .then(function () {

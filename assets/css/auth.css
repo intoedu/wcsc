@@ -259,3 +259,8 @@ body.staff { background: var(--brand-900); }
 .auth-google-note {
   margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.65; text-align: center;
 }
+
+/* 비밀번호 일치 여부 표시 */
+.field-hint.is-match { color: var(--ok); font-weight: 600; }
+.field-hint.is-mismatch { color: #B3261E; font-weight: 600; }
+.auth-err a { color: #8C1D18; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }

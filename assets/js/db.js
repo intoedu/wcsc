@@ -260,6 +260,8 @@ window.CAPSDB = (function () {
             id: uid('user'), email: email, password: data.password,
             name: (data.name || '').trim(), phone: (data.phone || '').trim(),
             church: (data.church || '').trim(),
+            contactRole: (data.contactRole || '').trim(),
+            birthDate: (data.birthDate || '').trim(),
             role: isStaff ? 'staff' : 'client',
             approved: !isStaff, // 고객은 즉시 이용, 직원은 승인 대기
             perms: {}, createdAt: nowIso(),
@@ -415,6 +417,8 @@ window.CAPSDB = (function () {
           name: intent.name || user.displayName || '',
           phone: intent.phone || '',
           church: intent.church || '',
+          contactRole: intent.contactRole || '',
+          birthDate: intent.birthDate || '',
           role: isStaff ? 'staff' : 'client',
           approved: !isStaff,
           perms: {},
@@ -451,7 +455,9 @@ window.CAPSDB = (function () {
         signUp: function (data) {
           return guard().then(function () {
             window.sessionStorage.setItem('caps.signup.intent', JSON.stringify({
-              name: data.name, phone: data.phone, church: data.church, staffRequest: !!data.staffRequest,
+              name: data.name, phone: data.phone, church: data.church,
+              contactRole: data.contactRole, birthDate: data.birthDate,
+              staffRequest: !!data.staffRequest,
             }));
             return fb.authMod
               .createUserWithEmailAndPassword(fb.auth, String(data.email).trim(), data.password)
@@ -482,7 +488,8 @@ window.CAPSDB = (function () {
             if (intent) {
               window.sessionStorage.setItem('caps.signup.intent', JSON.stringify({
                 name: intent.name || '', phone: intent.phone || '',
-                church: intent.church || '', staffRequest: !!intent.staffRequest,
+                church: intent.church || '', contactRole: intent.contactRole || '',
+                birthDate: intent.birthDate || '', staffRequest: !!intent.staffRequest,
               }));
             }
             var provider = new fb.authMod.GoogleAuthProvider();
@@ -583,9 +590,23 @@ window.CAPSDB = (function () {
       },
     };
 
+    /** 콘솔에서 바로 켤 수 있도록 링크를 붙입니다. */
+    function providerHint(what) {
+      var pid = (window.FIREBASE_CONFIG || {}).projectId;
+      var url = pid
+        ? 'https://console.firebase.google.com/project/' + pid + '/authentication/providers'
+        : 'https://console.firebase.google.com';
+      return 'Firebase 콘솔에서 ' + what + ' 로그인을 켜야 합니다. ' +
+        '<a href="' + url + '" target="_blank" rel="noopener">Authentication → 로그인 방법 열기 ↗</a>';
+    }
+
     function authMessage(err, kind) {
-      if (kind === 'google' && err && err.code === 'auth/operation-not-allowed') {
-        return 'Firebase [Authentication → 로그인 방법] 에서 Google 로그인이 사용 설정되지 않았습니다.';
+      var code = (err && err.code) || '';
+      if (code === 'auth/operation-not-allowed') {
+        return providerHint(kind === 'google' ? '[Google]' : '[이메일/비밀번호]');
+      }
+      if (code === 'auth/configuration-not-found') {
+        return providerHint('[이메일/비밀번호]');
       }
       var map = {
         'auth/invalid-email': '이메일 형식을 확인해 주세요.',
@@ -601,12 +622,8 @@ window.CAPSDB = (function () {
         'auth/network-request-failed': '네트워크 연결을 확인해 주세요.',
         'auth/api-key-not-valid': 'Firebase 설정값(apiKey)이 올바르지 않습니다. firebase-config.js 를 확인해 주세요.',
         'auth/invalid-api-key': 'Firebase 설정값(apiKey)이 올바르지 않습니다. firebase-config.js 를 확인해 주세요.',
-        'auth/operation-not-allowed':
-          'Firebase [Authentication] 에서 [이메일/비밀번호] 로그인이 사용 설정되지 않았습니다.',
-        'auth/configuration-not-found':
-          'Firebase [Authentication] 이 아직 설정되지 않았습니다. 콘솔에서 [시작하기] 를 눌러주세요.',
+
       };
-      var code = (err && err.code) || '';
       if (map[code]) return map[code];
       // Firebase 가 코드에 설명을 덧붙이는 경우가 있어 부분 일치도 확인합니다.
       var keys = Object.keys(map);
@@ -752,6 +769,35 @@ window.CAPSDB = (function () {
     /** 작업이 끝난 상태인지 (지연 계산에서 제외) */
     isClosed: function (status) {
       return status === 'done' || status === 'canceled';
+    },
+
+    /**
+     * 전화번호 입력칸을 숫자 11자리로 제한하고 하이픈을 자동으로 넣습니다.
+     * (하이픈은 표시용이고, 실제로 입력받는 숫자는 최대 11자리입니다.)
+     */
+    bindPhoneInput: function (input) {
+      if (!input) return;
+      input.setAttribute('inputmode', 'numeric');
+      input.setAttribute('maxlength', '13'); // 010-0000-0000
+      input.addEventListener('input', function () {
+        var d = input.value.replace(/\D/g, '').slice(0, 11);
+        if (d.length < 4) { input.value = d; return; }
+        if (d.startsWith('02')) {
+          input.value = d.length <= 5 ? d.replace(/(\d{2})(\d+)/, '$1-$2')
+            : d.length <= 9 ? d.replace(/(\d{2})(\d{3})(\d+)/, '$1-$2-$3')
+            : d.replace(/(\d{2})(\d{4})(\d{1,4})/, '$1-$2-$3');
+        } else {
+          input.value = d.length <= 7 ? d.replace(/(\d{3})(\d+)/, '$1-$2')
+            : d.length <= 10 ? d.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3')
+            : d.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+        }
+      });
+    },
+
+    /** 숫자만 세어 유효한 길이인지 확인 (휴대폰 11자리 · 서울 지역번호 9~10자리) */
+    isValidPhone: function (value) {
+      var d = String(value || '').replace(/\D/g, '');
+      return d.length >= 9 && d.length <= 11;
     },
 
     /** 전화번호에 하이픈을 넣습니다. 형식을 알 수 없으면 원본을 그대로 돌려줍니다. */
