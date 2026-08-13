@@ -442,9 +442,9 @@ function buildServicePage(s, i) {
     <div class="svc-hero-in">
       <div class="svc-hero-copy">
         <p class="eyebrow"><span class="svc-hero-no">${s.no}</span> 지원 항목</p>
-        <h1>${esc(s.name)}</h1>
-        <p class="svc-hero-tag">${esc(s.tagline)}</p>
-        <p class="lead">${esc(s.summary)}</p>
+        <h1 data-live="svc.${s.id}.name">${esc(s.name)}</h1>
+        <p class="svc-hero-tag" data-live="svc.${s.id}.tagline">${esc(s.tagline)}</p>
+        <p class="lead" data-live="svc.${s.id}.summary">${esc(s.summary)}</p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="../apply.html?service=${s.id}">이 항목 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
           <a class="btn btn-outline btn-lg" href="${site.contact.phoneHref}">전화 상담</a>
@@ -453,7 +453,7 @@ function buildServicePage(s, i) {
       <div class="svc-hero-side">
         <span class="svc-hero-ico">${icon(s.icon)}</span>
         <dl class="svc-meta">
-          <div><dt>소요 기간</dt><dd>${esc(s.duration)}</dd></div>
+          <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           <div><dt>지원 지역</dt><dd>전국</dd></div>
         </dl>
@@ -481,7 +481,7 @@ function buildServicePage(s, i) {
 <section class="section section-alt">
   <div class="wrap">
     ${sectionHead('지원 내용', '이런 것들을 해 드립니다')}
-    <div class="feat-grid">
+    <div class="feat-grid" data-live-list="svc.${s.id}.features">
       ${s.features
         .map(
           (f) => `<article class="feat-card">
@@ -516,16 +516,16 @@ function buildServicePage(s, i) {
     <div class="split">
       <div class="split-col">
         <h2 class="split-title">제공 내역</h2>
-        <ul class="check-list">
+        <ul class="check-list" data-live-list="svc.${s.id}.deliverables">
           ${s.deliverables.map((d) => `<li>${icon('check', 'ico ico-sm')}<span>${esc(d)}</span></li>`).join('\n          ')}
         </ul>
       </div>
       <div class="split-col">
         <h2 class="split-title">비용 안내</h2>
         <div class="price-card">
-          <p>${esc(s.priceNote)}</p>
+          <p data-live="svc.${s.id}.priceNote">${esc(s.priceNote)}</p>
           <dl class="price-meta">
-            <div><dt>소요 기간</dt><dd>${esc(s.duration)}</dd></div>
+            <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           </dl>
           <a class="btn btn-primary btn-block" href="../apply.html?service=${s.id}">견적 요청하기</a>
@@ -538,7 +538,7 @@ function buildServicePage(s, i) {
 <section class="section">
   <div class="wrap narrow">
     ${sectionHead('자주 묻는 질문', `${s.name} 관련 질문`)}
-    ${faqList(s.faqs, `svc-${s.id}`)}
+    ${faqList(s.faqs, `svc-${s.id}`, `data-live-list="svc.${s.id}.faqs"`)}
   </div>
 </section>
 
@@ -567,6 +567,7 @@ ${ctaBand('../', {
       description: s.summary,
       base: '../',
       active: `services/${s.slug}.html`,
+      serviceId: s.id,
       body,
     })
   );
@@ -764,7 +765,7 @@ ${pageHero({
       base: '',
       active: 'apply.html',
       body,
-      scripts: ['store.js', 'apply.js'],
+      scripts: ['apply.js'],
     })
   );
 }
@@ -818,72 +819,7 @@ ${pageHero({
       base: '',
       active: 'status.html',
       body,
-      scripts: ['store.js', 'status.js'],
-    })
-  );
-}
-
-/* =========================================================
-   관리자 (접수 현황)
-   ========================================================= */
-function buildAdmin() {
-  const body = `
-${pageHero({
-  eyebrow: '관리자',
-  title: '접수 현황',
-  lead: '이 기기에 저장된 신청 내역입니다. 실제 운영 시에는 서버 연동으로 대체됩니다.',
-})}
-
-<section class="section">
-  <div class="wrap">
-    <div class="admin-bar">
-      <div class="admin-stats" id="adminStats"></div>
-      <div class="admin-actions">
-        <input type="search" id="adminSearch" placeholder="교회명 · 담당자 · 접수번호 검색" aria-label="검색">
-        <select id="adminFilter" aria-label="항목 필터">
-          <option value="">전체 항목</option>
-          ${services.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('\n          ')}
-        </select>
-        <button type="button" class="btn btn-outline btn-sm" id="exportCsv">CSV 내려받기</button>
-      </div>
-    </div>
-    <div class="table-scroll">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th scope="col">접수번호</th><th scope="col">접수일</th><th scope="col">교회명</th>
-            <th scope="col">담당자</th><th scope="col">연락처</th><th scope="col">신청 항목</th>
-            <th scope="col">상태</th><th scope="col"></th>
-          </tr>
-        </thead>
-        <tbody id="adminRows"></tbody>
-      </table>
-    </div>
-    <p class="admin-empty" id="adminEmpty" hidden>저장된 신청 내역이 없습니다. <a href="apply.html">신청서 페이지</a>에서 테스트 신청을 남겨보세요.</p>
-  </div>
-</section>
-
-<div class="modal" id="detailModal" hidden>
-  <div class="modal-backdrop" data-close></div>
-  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-head">
-      <h2 id="modalTitle">신청 상세</h2>
-      <button type="button" class="modal-close" data-close aria-label="닫기">×</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-`;
-
-  write(
-    'admin.html',
-    layout({
-      title: '접수 현황 | CAPS 교회지원센터',
-      description: 'CAPS 교회지원센터 신청 접수 현황 (데모).',
-      base: '',
-      active: 'admin.html',
-      body,
-      scripts: ['store.js', 'admin.js'],
+      scripts: ['status.js'],
     })
   );
 }
@@ -956,12 +892,20 @@ ${ctaBand('')}
    브라우저용 데이터 파일
    ========================================================= */
 function buildDataScript() {
+  // 관리자 화면의 항목 편집기와 신청서가 함께 사용합니다.
   const payload = services.map((s) => ({
     id: s.id,
     slug: s.slug,
     no: s.no,
+    icon: s.icon,
     name: s.name,
     tagline: s.tagline,
+    summary: s.summary,
+    duration: s.duration,
+    priceNote: s.priceNote,
+    features: s.features,
+    deliverables: s.deliverables,
+    faqs: s.faqs,
     extraFields: s.extraFields || [],
   }));
   const js = `/* build.js 가 생성한 파일입니다. 직접 수정하지 마세요. */
@@ -980,7 +924,6 @@ function main() {
   services.forEach(buildServicePage);
   buildApply();
   buildStatus();
-  buildAdmin();
   buildContact();
   buildDataScript();
   console.log(`생성 완료 (${out.length}개)`);

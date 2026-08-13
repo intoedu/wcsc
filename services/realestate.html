@@ -14,16 +14,17 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/auth.css">
 </head>
-<body>
+<body data-service="realestate">
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 <header class="site-header" id="siteHeader">
   <div class="topbar">
     <div class="wrap topbar-in">
-      <span class="topbar-item"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> 평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span>
+      <span class="topbar-item"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></span>
       <span class="topbar-links">
-        <a href="tel:0200000000"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> 02-0000-0000</a>
-        <a href="mailto:help@caps.or.kr"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> help@caps.or.kr</a>
+        <a href="tel:0200000000"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <span data-live="site.phone">02-0000-0000</span></a>
+        <a href="mailto:help@caps.or.kr"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <span data-live="site.email">help@caps.or.kr</span></a>
       </span>
     </div>
   </div>
@@ -41,6 +42,7 @@
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
       <a class="nav-link" href="../about.html">센터 소개</a><a class="nav-link is-active" href="../services/index.html">지원 항목</a><a class="nav-link" href="../process.html">이용 절차</a><a class="nav-link" href="../faq.html">자주 묻는 질문</a><a class="nav-link" href="../contact.html">문의</a>
+      <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="../apply.html">지원 신청</a>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
@@ -87,9 +89,9 @@
     <div class="svc-hero-in">
       <div class="svc-hero-copy">
         <p class="eyebrow"><span class="svc-hero-no">05</span> 지원 항목</p>
-        <h1>부동산</h1>
-        <p class="svc-hero-tag">예배 공간을 구하고, 옮기고, 정리하는 일</p>
-        <p class="lead">교회 건물 매입과 임대, 이전, 처분을 지원합니다. 일반 상가와 달리 교회는 용도와 소음, 주차, 명의 문제가 함께 걸리는 만큼 사전에 확인해야 할 것이 많습니다.</p>
+        <h1 data-live="svc.realestate.name">부동산</h1>
+        <p class="svc-hero-tag" data-live="svc.realestate.tagline">예배 공간을 구하고, 옮기고, 정리하는 일</p>
+        <p class="lead" data-live="svc.realestate.summary">교회 건물 매입과 임대, 이전, 처분을 지원합니다. 일반 상가와 달리 교회는 용도와 소음, 주차, 명의 문제가 함께 걸리는 만큼 사전에 확인해야 할 것이 많습니다.</p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="../apply.html?service=realestate">이 항목 신청하기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
           <a class="btn btn-outline btn-lg" href="tel:0200000000">전화 상담</a>
@@ -98,7 +100,7 @@
       <div class="svc-hero-side">
         <span class="svc-hero-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5.6c0-.9.6-1.6 1.5-1.6h5c.9 0 1.5.7 1.5 1.6V21M13 21V10.4h4.5c.9 0 1.5.7 1.5 1.6V21"/><path d="M8 8h2M8 12h2M8 16h2M16 14h1"/></svg></span>
         <dl class="svc-meta">
-          <div><dt>소요 기간</dt><dd>조건과 지역에 따라 상이 (통상 2~6개월)</dd></div>
+          <div><dt>소요 기간</dt><dd data-live="svc.realestate.duration">조건과 지역에 따라 상이 (통상 2~6개월)</dd></div>
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           <div><dt>지원 지역</dt><dd>전국</dd></div>
         </dl>
@@ -138,7 +140,7 @@
     <h2>이런 것들을 해 드립니다</h2>
     
   </div>
-    <div class="feat-grid">
+    <div class="feat-grid" data-live-list="svc.realestate.features">
       <article class="feat-card">
         <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
         <h3>조건 정리 · 매물 검토</h3>
@@ -210,7 +212,7 @@
     <div class="split">
       <div class="split-col">
         <h2 class="split-title">제공 내역</h2>
-        <ul class="check-list">
+        <ul class="check-list" data-live-list="svc.realestate.deliverables">
           <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>조건에 맞는 후보 매물 목록 및 비교 자료</span></li>
           <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>용도 · 법규 검토 결과 정리</span></li>
           <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>주차 · 소음 등 현장 점검 의견</span></li>
@@ -220,9 +222,9 @@
       <div class="split-col">
         <h2 class="split-title">비용 안내</h2>
         <div class="price-card">
-          <p>중개 보수는 법정 요율을 따릅니다. 검토와 자문만 필요한 경우도 상담 가능하니 필요한 범위를 알려주세요.</p>
+          <p data-live="svc.realestate.priceNote">중개 보수는 법정 요율을 따릅니다. 검토와 자문만 필요한 경우도 상담 가능하니 필요한 범위를 알려주세요.</p>
           <dl class="price-meta">
-            <div><dt>소요 기간</dt><dd>조건과 지역에 따라 상이 (통상 2~6개월)</dd></div>
+            <div><dt>소요 기간</dt><dd data-live="svc.realestate.duration">조건과 지역에 따라 상이 (통상 2~6개월)</dd></div>
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           </dl>
           <a class="btn btn-primary btn-block" href="../apply.html?service=realestate">견적 요청하기</a>
@@ -239,7 +241,7 @@
     <h2>부동산 관련 질문</h2>
     
   </div>
-    <div class="faq">
+    <div class="faq" data-live-list="svc.realestate.faqs">
     <details class="faq-item" open>
       <summary id="svc-realestate-0"><span>상가 건물에 교회가 들어갈 수 있나요?</span><i aria-hidden="true"></i></summary>
       <div class="faq-body"><p>건물의 용도와 면적, 층수, 관할 지자체 기준에 따라 다릅니다. 가능한 경우에도 용도 변경 절차와 비용이 발생할 수 있어, 계약 전에 반드시 확인해야 합니다. 이 확인을 계약 이전 단계에서 대신 해 드립니다.</p></div>
@@ -316,10 +318,10 @@
     <div class="footer-col">
       <h3>문의</h3>
       <ul class="footer-contact">
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:0200000000">02-0000-0000</a></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:help@caps.or.kr">help@caps.or.kr</a></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span>평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/></svg> <span>서울특별시 ○○구 ○○로 00, 0층</span></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:0200000000" data-live="site.phone">02-0000-0000</a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:help@caps.or.kr" data-live="site.email">help@caps.or.kr</a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/></svg> <span data-live="site.address">서울특별시 ○○구 ○○로 00, 0층</span></li>
       </ul>
     </div>
   </div>
@@ -329,7 +331,11 @@
   </div>
 </footer>
   <a class="float-cta" href="../apply.html">지원 신청</a>
+  <script src="../assets/js/firebase-config.js" defer></script>
   <script src="../assets/js/data.js" defer></script>
+  <script src="../assets/js/db.js" defer></script>
+  <script src="../assets/js/auth-ui.js" defer></script>
+  <script src="../assets/js/live-content.js" defer></script>
   <script src="../assets/js/app.js" defer></script>
   
 </body>

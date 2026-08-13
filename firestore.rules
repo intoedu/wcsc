@@ -1,0 +1,126 @@
+rules_version = '2';
+
+/* =========================================================
+   CAPS 교회지원센터 — Firestore 보안 규칙
+
+   Firebase 콘솔 → Firestore Database → [규칙] 탭에
+   이 파일 내용을 그대로 붙여넣고 [게시] 를 누르세요.
+
+   기본 원칙
+   · 홈페이지 내용(지원 항목, 센터 설정)은 로그인 없이 누구나 읽을 수 있습니다.
+   · 신청서는 로그인한 사용자가 자기 것만 만들고 읽을 수 있습니다.
+   · 고객·구독·청구·계정 정보는 승인된 직원만 볼 수 있습니다.
+   · 직분(role)과 승인(approved)은 최고관리자만 바꿀 수 있습니다.
+     (사용자가 스스로 관리자로 승격하는 것을 막습니다.)
+   ========================================================= */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ---------- 도우미 ---------- */
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function me() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function meExists() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isOwner() {
+      return meExists() && me().role == 'owner' && me().approved == true;
+    }
+
+    // 승인된 직원 (최고관리자 · 관리자 · 직원)
+    function isStaff() {
+      return meExists() && me().approved == true && me().role in ['owner', 'admin', 'staff'];
+    }
+
+    // 특정 권한 보유 여부 (최고관리자는 항상 통과)
+    function can(perm) {
+      return isOwner() || (isStaff() && me().perms[perm] == true);
+    }
+
+    /* ---------- users : 계정 ---------- */
+    match /users/{userId} {
+      // 본인 문서, 또는 직원 관리 권한자만 읽을 수 있습니다.
+      allow read: if signedIn() && (request.auth.uid == userId || can('members'));
+
+      // 가입 시 본인 문서를 만듭니다. 스스로 관리자가 될 수는 없습니다.
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role in ['client', 'staff']
+        && (request.resource.data.role == 'client'
+              ? request.resource.data.approved == true
+              : request.resource.data.approved == false)
+        && request.resource.data.perms.size() == 0;
+
+      // 본인은 이름·연락처 등만 수정할 수 있습니다 (role·approved·perms 는 잠금).
+      allow update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.approved == resource.data.approved
+        && request.resource.data.perms == resource.data.perms;
+
+      // 직분 · 승인 · 권한 변경은 최고관리자 또는 직원 관리 권한자만.
+      allow update: if can('members');
+
+      allow delete: if isOwner();
+    }
+
+    /* ---------- requests : 지원 신청 ---------- */
+    match /requests/{docId} {
+      // 신청자 본인 또는 신청 관리 권한자
+      allow read: if signedIn()
+        && (resource.data.userId == request.auth.uid || can('requests'));
+
+      // 로그인한 사용자가 자기 이름으로 신청서를 만듭니다.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'received';
+
+      // 상태 · 담당자 · 메모 변경은 담당 직원만.
+      allow update, delete: if can('requests');
+    }
+
+    /* ---------- customers : 고객 교회 ---------- */
+    match /customers/{docId} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || can('customers') || can('requests'));
+      // 신청서 제출 시 고객 문서가 자동으로 만들어집니다.
+      allow create: if signedIn();
+      allow update, delete: if can('customers');
+    }
+
+    /* ---------- subscriptions : 구독 ---------- */
+    match /subscriptions/{docId} {
+      allow read: if can('customers') || can('settlement');
+      allow write: if can('customers');
+    }
+
+    /* ---------- invoices : 청구 · 정산 ---------- */
+    match /invoices/{docId} {
+      allow read, write: if can('settlement');
+    }
+
+    /* ---------- serviceContent : 지원 항목 공개 내용 ---------- */
+    match /serviceContent/{docId} {
+      // 홈페이지가 로그인 없이 읽습니다.
+      allow read: if true;
+      allow write: if can('services');
+    }
+
+    /* ---------- settings : 센터 설정 ---------- */
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if can('settings');
+    }
+
+    /* 위에서 다루지 않은 경로는 모두 차단 */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

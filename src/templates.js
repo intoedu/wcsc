@@ -80,10 +80,10 @@ function header(base, active) {
 <header class="site-header" id="siteHeader">
   <div class="topbar">
     <div class="wrap topbar-in">
-      <span class="topbar-item">${icon('clock', 'ico ico-xs')} ${esc(site.contact.hours)}</span>
+      <span class="topbar-item">${icon('clock', 'ico ico-xs')} <span data-live="site.hours">${esc(site.contact.hours)}</span></span>
       <span class="topbar-links">
-        <a href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-xs')} ${esc(site.contact.phone)}</a>
-        <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-xs')} ${esc(site.contact.email)}</a>
+        <a href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-xs')} <span data-live="site.phone">${esc(site.contact.phone)}</span></a>
+        <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-xs')} <span data-live="site.email">${esc(site.contact.email)}</span></a>
       </span>
     </div>
   </div>
@@ -97,6 +97,7 @@ function header(base, active) {
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
       ${links}
+      <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="${base}apply.html">지원 신청</a>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
@@ -144,10 +145,10 @@ function footer(base) {
     <div class="footer-col">
       <h3>문의</h3>
       <ul class="footer-contact">
-        <li>${icon('phoneCall', 'ico ico-sm')} <a href="${site.contact.phoneHref}">${esc(site.contact.phone)}</a></li>
-        <li>${icon('mail', 'ico ico-sm')} <a href="mailto:${esc(site.contact.email)}">${esc(site.contact.email)}</a></li>
-        <li>${icon('clock', 'ico ico-sm')} <span>${esc(site.contact.hours)}</span></li>
-        <li>${icon('pin', 'ico ico-sm')} <span>${esc(site.contact.address)}</span></li>
+        <li>${icon('phoneCall', 'ico ico-sm')} <a href="${site.contact.phoneHref}" data-live="site.phone">${esc(site.contact.phone)}</a></li>
+        <li>${icon('mail', 'ico ico-sm')} <a href="mailto:${esc(site.contact.email)}" data-live="site.email">${esc(site.contact.email)}</a></li>
+        <li>${icon('clock', 'ico ico-sm')} <span data-live="site.hours">${esc(site.contact.hours)}</span></li>
+        <li>${icon('pin', 'ico ico-sm')} <span data-live="site.address">${esc(site.contact.address)}</span></li>
       </ul>
     </div>
   </div>
@@ -181,15 +182,20 @@ function layout(o) {
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="${base}assets/css/style.css">
+  <link rel="stylesheet" href="${base}assets/css/auth.css">
 </head>
-<body${o.bodyClass ? ` class="${o.bodyClass}"` : ''}>
+<body${o.bodyClass ? ` class="${o.bodyClass}"` : ''}${o.serviceId ? ` data-service="${o.serviceId}"` : ''}>
   ${header(base, o.active)}
   <main id="main">
 ${o.body}
   </main>
   ${footer(base)}
   <a class="float-cta" href="${base}apply.html">지원 신청</a>
+  <script src="${base}assets/js/firebase-config.js" defer></script>
   <script src="${base}assets/js/data.js" defer></script>
+  <script src="${base}assets/js/db.js" defer></script>
+  <script src="${base}assets/js/auth-ui.js" defer></script>
+  <script src="${base}assets/js/live-content.js" defer></script>
   <script src="${base}assets/js/app.js" defer></script>
   ${scripts}
 </body>
@@ -218,8 +224,8 @@ function sectionHead(eyebrow, title, lead, align) {
   </div>`;
 }
 
-function faqList(items, idPrefix) {
-  return `<div class="faq">
+function faqList(items, idPrefix, attrs) {
+  return `<div class="faq"${attrs ? ' ' + attrs : ''}>
     ${items
       .map(
         (f, i) => `<details class="faq-item"${i === 0 ? ' open' : ''}>
@@ -235,9 +241,9 @@ function serviceCard(s, base) {
   return `<a class="svc-card" href="${base}services/${s.slug}.html">
     <span class="svc-no">${s.no}</span>
     <span class="svc-ico">${icon(s.icon)}</span>
-    <h3>${esc(s.name)}</h3>
-    <p class="svc-tag">${esc(s.tagline)}</p>
-    <p class="svc-sum">${esc(s.summary)}</p>
+    <h3 data-live="svc.${s.id}.name">${esc(s.name)}</h3>
+    <p class="svc-tag" data-live="svc.${s.id}.tagline">${esc(s.tagline)}</p>
+    <p class="svc-sum" data-live="svc.${s.id}.summary">${esc(s.summary)}</p>
     <span class="svc-more">자세히 보기 ${icon('arrow', 'ico ico-sm')}</span>
   </a>`;
 }

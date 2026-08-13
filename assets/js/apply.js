@@ -221,6 +221,14 @@
       return;
     }
 
+    // 신청 내역을 계정에 남기기 위해 제출 시점에 로그인을 요청합니다.
+    window.CAPSAuthUI
+      .require('신청 내역을 확인하고 진행 상황을 안내드리기 위해 로그인이 필요합니다. 처음이시면 회원가입을 해주세요.')
+      .then(function () { send(); })
+      .catch(function () { /* 로그인 창을 닫은 경우 — 입력 내용은 그대로 남습니다 */ });
+  });
+
+  function send() {
     submitBtn.disabled = true;
     submitBtn.textContent = '제출 중…';
 
@@ -248,16 +256,17 @@
       extra: extra,
     };
 
-    window.CAPS.save(payload)
+    window.CAPSDB.submitRequest(payload)
       .then(function (record) { showDone(record); })
-      .catch(function () {
+      .catch(function (err) {
         submitBtn.disabled = false;
         submitBtn.textContent = '신청서 제출하기';
-        formError.textContent =
-          '접수 처리 중 문제가 발생했습니다. 잠시 후 다시 시도하시거나 전화로 문의해 주세요.';
+        formError.textContent = (err && err.message)
+          ? '접수 처리 중 문제가 발생했습니다: ' + err.message
+          : '접수 처리 중 문제가 발생했습니다. 잠시 후 다시 시도하시거나 전화로 문의해 주세요.';
         formError.hidden = false;
       });
-  });
+  }
 
   /* ---------- 완료 화면 ---------- */
   function showDone(record) {
@@ -265,11 +274,11 @@
     document.getElementById('doneCode').textContent = record.code;
 
     var rows = [
-      ['신청 항목', window.CAPS.serviceNames(record.services).join(', ')],
+      ['신청 항목', record.services.map(window.CAPSDB.serviceName).join(', ')],
       ['교회명', record.church_name],
       ['담당자', record.contact_name + (record.contact_role ? ' ' + record.contact_role : '')],
       ['연락처', record.phone],
-      ['접수 일시', window.CAPS.formatDate(record.createdAt)],
+      ['접수 일시', window.CAPSDB.formatDate(record.createdAt)],
     ];
     document.getElementById('doneSummary').innerHTML = rows
       .map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>'; })
@@ -295,6 +304,17 @@
         });
     });
   }
+
+  /* 로그인 상태라면 담당자 정보를 미리 채웁니다. */
+  window.CAPSDB.auth.onChange(function (user) {
+    if (!user) return;
+    var pairs = [['contact_name', user.name], ['email', user.email], ['phone', user.phone], ['church_name', user.church]];
+    pairs.forEach(function (pair) {
+      var input = form.elements[pair[0]];
+      if (input && !input.value && pair[1]) input.value = pair[1];
+    });
+    updateProgress();
+  });
 
   buildExtraFields();
   updateProgress();

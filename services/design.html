@@ -14,16 +14,17 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/auth.css">
 </head>
-<body>
+<body data-service="design">
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 <header class="site-header" id="siteHeader">
   <div class="topbar">
     <div class="wrap topbar-in">
-      <span class="topbar-item"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> 평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span>
+      <span class="topbar-item"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></span>
       <span class="topbar-links">
-        <a href="tel:0200000000"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> 02-0000-0000</a>
-        <a href="mailto:help@caps.or.kr"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> help@caps.or.kr</a>
+        <a href="tel:0200000000"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <span data-live="site.phone">02-0000-0000</span></a>
+        <a href="mailto:help@caps.or.kr"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <span data-live="site.email">help@caps.or.kr</span></a>
       </span>
     </div>
   </div>
@@ -41,6 +42,7 @@
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
       <a class="nav-link" href="../about.html">센터 소개</a><a class="nav-link is-active" href="../services/index.html">지원 항목</a><a class="nav-link" href="../process.html">이용 절차</a><a class="nav-link" href="../faq.html">자주 묻는 질문</a><a class="nav-link" href="../contact.html">문의</a>
+      <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="../apply.html">지원 신청</a>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
@@ -87,9 +89,9 @@
     <div class="svc-hero-in">
       <div class="svc-hero-copy">
         <p class="eyebrow"><span class="svc-hero-no">02</span> 지원 항목</p>
-        <h1>디자인 제작</h1>
-        <p class="svc-hero-tag">배너 · 포스터 · 현수막 · 주보를 한 곳에서</p>
-        <p class="lead">절기 현수막부터 매주 나가는 주보까지, 교회에서 반복적으로 필요한 인쇄·디자인물을 제작합니다. 시안 작업부터 인쇄와 배송까지 함께 처리합니다.</p>
+        <h1 data-live="svc.design.name">디자인 제작</h1>
+        <p class="svc-hero-tag" data-live="svc.design.tagline">배너 · 포스터 · 현수막 · 주보를 한 곳에서</p>
+        <p class="lead" data-live="svc.design.summary">절기 현수막부터 매주 나가는 주보까지, 교회에서 반복적으로 필요한 인쇄·디자인물을 제작합니다. 시안 작업부터 인쇄와 배송까지 함께 처리합니다.</p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="../apply.html?service=design">이 항목 신청하기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
           <a class="btn btn-outline btn-lg" href="tel:0200000000">전화 상담</a>
@@ -98,7 +100,7 @@
       <div class="svc-hero-side">
         <span class="svc-hero-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.6-1.9-.2-1 .5-1.9 1.6-1.9h1.6A4.2 4.2 0 0 0 21 13C21 7.5 16.9 3 12 3Z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="11" cy="7.6" r="1.1"/><circle cx="15.6" cy="9.2" r="1.1"/></svg></span>
         <dl class="svc-meta">
-          <div><dt>소요 기간</dt><dd>단건 3~7일 / 주보 정기 제작은 주 단위 일정 협의</dd></div>
+          <div><dt>소요 기간</dt><dd data-live="svc.design.duration">단건 3~7일 / 주보 정기 제작은 주 단위 일정 협의</dd></div>
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           <div><dt>지원 지역</dt><dd>전국</dd></div>
         </dl>
@@ -138,7 +140,7 @@
     <h2>이런 것들을 해 드립니다</h2>
     
   </div>
-    <div class="feat-grid">
+    <div class="feat-grid" data-live-list="svc.design.features">
       <article class="feat-card">
         <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
         <h3>주보 정기 제작</h3>
@@ -206,7 +208,7 @@
     <div class="split">
       <div class="split-col">
         <h2 class="split-title">제공 내역</h2>
-        <ul class="check-list">
+        <ul class="check-list" data-live-list="svc.design.deliverables">
           <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>인쇄용 원본 파일 (PDF · 고해상도)</span></li>
           <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>온라인 공유용 이미지 (카카오톡 · SNS 규격)</span></li>
           <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>교회에서 직접 수정할 수 있는 템플릿 파일</span></li>
@@ -216,9 +218,9 @@
       <div class="split-col">
         <h2 class="split-title">비용 안내</h2>
         <div class="price-card">
-          <p>건별 제작과 월 정기 계약 중 선택할 수 있습니다. 주보처럼 매주 반복되는 항목은 정기 계약이 유리합니다. 수량과 규격을 알려주시면 견적을 드립니다.</p>
+          <p data-live="svc.design.priceNote">건별 제작과 월 정기 계약 중 선택할 수 있습니다. 주보처럼 매주 반복되는 항목은 정기 계약이 유리합니다. 수량과 규격을 알려주시면 견적을 드립니다.</p>
           <dl class="price-meta">
-            <div><dt>소요 기간</dt><dd>단건 3~7일 / 주보 정기 제작은 주 단위 일정 협의</dd></div>
+            <div><dt>소요 기간</dt><dd data-live="svc.design.duration">단건 3~7일 / 주보 정기 제작은 주 단위 일정 협의</dd></div>
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           </dl>
           <a class="btn btn-primary btn-block" href="../apply.html?service=design">견적 요청하기</a>
@@ -235,7 +237,7 @@
     <h2>디자인 제작 관련 질문</h2>
     
   </div>
-    <div class="faq">
+    <div class="faq" data-live-list="svc.design.faqs">
     <details class="faq-item" open>
       <summary id="svc-design-0"><span>급하게 이번 주까지 필요한데 가능한가요?</span><i aria-hidden="true"></i></summary>
       <div class="faq-body"><p>항목과 현재 작업량에 따라 다릅니다. 신청서에 사용 일자를 적어주시면 가능 여부를 먼저 확인해 회신드립니다. 현수막은 인쇄와 배송에 최소 2~3일이 필요합니다.</p></div>
@@ -312,10 +314,10 @@
     <div class="footer-col">
       <h3>문의</h3>
       <ul class="footer-contact">
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:0200000000">02-0000-0000</a></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:help@caps.or.kr">help@caps.or.kr</a></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span>평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/></svg> <span>서울특별시 ○○구 ○○로 00, 0층</span></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:0200000000" data-live="site.phone">02-0000-0000</a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:help@caps.or.kr" data-live="site.email">help@caps.or.kr</a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/></svg> <span data-live="site.address">서울특별시 ○○구 ○○로 00, 0층</span></li>
       </ul>
     </div>
   </div>
@@ -325,7 +327,11 @@
   </div>
 </footer>
   <a class="float-cta" href="../apply.html">지원 신청</a>
+  <script src="../assets/js/firebase-config.js" defer></script>
   <script src="../assets/js/data.js" defer></script>
+  <script src="../assets/js/db.js" defer></script>
+  <script src="../assets/js/auth-ui.js" defer></script>
+  <script src="../assets/js/live-content.js" defer></script>
   <script src="../assets/js/app.js" defer></script>
   
 </body>

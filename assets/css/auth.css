@@ -1,0 +1,105 @@
+@charset "utf-8";
+
+/* =========================================================
+   로그인 / 회원가입 모달 · 헤더 로그인 상태 · 알림 토스트
+   공개 페이지와 관리자 화면이 함께 사용합니다.
+   ========================================================= */
+
+/* ---------- 인증 모달 ---------- */
+.auth-modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.auth-modal[hidden] { display: none; }
+.auth-backdrop { position: absolute; inset: 0; background: rgba(8,26,48,.55); backdrop-filter: blur(2px); }
+.auth-panel {
+  position: relative; width: min(100%, 440px); max-height: 92vh; overflow-y: auto;
+  background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+}
+.auth-tabs { position: sticky; top: 0; display: flex; background: var(--bg-soft); border-bottom: 1px solid var(--line); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.auth-tab {
+  flex: 1; padding: 18px 12px; border: none; background: none; cursor: pointer;
+  font-size: 15.5px; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent;
+}
+.auth-tab.is-on { background: #fff; color: var(--brand-800); border-bottom-color: var(--brand-700); }
+.auth-close {
+  position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
+  border: none; background: none; font-size: 24px; line-height: 1; color: var(--muted); cursor: pointer; border-radius: 8px;
+}
+.auth-close:hover { background: var(--line-2); color: var(--ink); }
+.auth-body { padding: 26px 28px 30px; }
+.auth-form .field { margin-top: 14px; }
+.auth-form .field:first-child { margin-top: 0; }
+.auth-form .btn { margin-top: 20px; }
+.auth-form .auth-google { margin-top: 10px; }
+.auth-err {
+  margin-top: 16px; padding: 12px 15px; background: #FDECEA; border: 1px solid #F5C6C0;
+  border-radius: 9px; color: #8C1D18; font-size: 14px; font-weight: 600;
+}
+.auth-note {
+  margin-bottom: 18px; padding: 13px 16px; background: var(--brand-50);
+  border: 1px solid var(--brand-100); border-radius: 10px; font-size: 14px; color: var(--brand-700); line-height: 1.7;
+}
+.auth-demo {
+  margin-bottom: 18px; padding: 13px 16px; background: var(--gold-100);
+  border: 1px solid #E8D6B0; border-radius: 10px; font-size: 13.5px; color: #6E5117; line-height: 1.8;
+}
+.auth-demo code { background: #fff; padding: 1px 6px; border-radius: 5px; font-family: ui-monospace, monospace; font-size: 12.5px; }
+.auth-reset { display: block; margin: 16px auto 0; }
+.pw-row { display: flex; gap: 8px; }
+.pw-row input { flex: 1; }
+.pw-toggle {
+  padding: 0 14px; border: 1.5px solid var(--line); background: #fff; border-radius: 10px;
+  font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap;
+}
+.pw-toggle:hover { border-color: var(--brand-500); color: var(--brand-600); }
+.check-line small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+
+/* ---------- 헤더 로그인 상태 (공개 페이지) ---------- */
+#authSlot { display: flex; align-items: center; }
+#authSlot .auth-open { border: none; background: none; cursor: pointer; font-family: inherit; }
+.user-box { position: relative; }
+.user-btn {
+  display: flex; align-items: center; gap: 9px; padding: 6px 12px 6px 6px;
+  border: 1.5px solid var(--line); background: #fff; border-radius: 999px; cursor: pointer;
+  font-size: 14.5px; font-weight: 600; color: var(--ink-2); max-width: 190px;
+}
+.user-btn:hover { border-color: var(--brand-500); }
+.user-avatar {
+  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+  border-radius: 50%; background: var(--brand-700); color: #fff; font-size: 13px; font-weight: 800; flex: none;
+}
+.user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-menu {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 120; width: 240px;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-md); padding: 8px; overflow: hidden;
+}
+.user-menu-head { padding: 12px 12px 14px; border-bottom: 1px solid var(--line-2); margin-bottom: 6px; }
+.user-menu-head strong { display: block; font-size: 15px; color: var(--brand-900); }
+.user-menu-head small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; word-break: break-all; }
+.user-menu-head em {
+  display: inline-block; margin-top: 8px; padding: 2px 9px; border-radius: 6px; font-style: normal;
+  background: var(--brand-50); color: var(--brand-700); font-size: 11.5px; font-weight: 700;
+}
+.user-menu-note { display: block; margin-top: 6px; font-size: 12px; color: var(--warn); font-weight: 600; }
+.user-menu-item {
+  display: block; width: 100%; padding: 11px 12px; border: none; background: none;
+  border-radius: 9px; text-align: left; font-size: 14.5px; font-weight: 600; color: var(--ink-2);
+  cursor: pointer; font-family: inherit;
+}
+.user-menu-item:hover { background: var(--brand-50); color: var(--brand-700); }
+.user-menu-item.is-danger:hover { background: #FDECEA; color: #B3261E; }
+
+/* ---------- 알림 토스트 ---------- */
+.toast-wrap { position: fixed; right: 20px; bottom: 20px; z-index: 300; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  padding: 14px 20px; border-radius: 11px; background: var(--brand-800); color: #fff;
+  font-size: 14.5px; font-weight: 600; box-shadow: var(--shadow-lg);
+  animation: toast-in .22s cubic-bezier(.2,.7,.3,1);
+}
+.toast.is-ok { background: #12603C; }
+.toast.is-err { background: #8C1D18; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+
+@media (max-width: 680px) {
+  .auth-body { padding: 22px 20px 26px; }
+}

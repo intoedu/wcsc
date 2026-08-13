@@ -1,0 +1,337 @@
+/* =========================================================
+   관리자 화면 셸 — 인증 게이트, 사이드바, 해시 라우터
+   각 화면은 assets/js/admin/*.js 에서 CAPSAdmin.register() 로 등록합니다.
+   ========================================================= */
+
+window.CAPSAdmin = (function () {
+  'use strict';
+
+  var db = window.CAPSDB;
+  var views = {};
+  var order = [];
+  var state = {
+    requests: [], customers: [], subscriptions: [], users: [],
+    invoices: [], serviceContent: [], settings: [],
+  };
+  var stops = [];
+  var currentKey = null;
+
+  /* ---------------- 유틸 ---------------- */
+
+  function h(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function el(id) { return document.getElementById(id); }
+
+  function toast(message, kind) {
+    var wrap = el('toastWrap');
+    var t = document.createElement('div');
+    t.className = 'toast' + (kind ? ' is-' + kind : '');
+    t.textContent = message;
+    wrap.appendChild(t);
+    window.setTimeout(function () {
+      t.style.opacity = '0';
+      t.style.transition = 'opacity .25s';
+      window.setTimeout(function () { t.remove(); }, 260);
+    }, 2600);
+  }
+
+  function money(n) { return db.money(n); }
+
+  /** 표 없음 상태 */
+  function emptyRow(cols, title, desc) {
+    return '<tr><td colspan="' + cols + '"><div class="adm-empty"><strong>' + h(title) + '</strong>' +
+      (desc ? '<p>' + h(desc) + '</p>' : '') + '</div></td></tr>';
+  }
+
+  /** CSV 내려받기 (엑셀 한글 대응 BOM 포함) */
+  function downloadCsv(filename, headers, rows) {
+    var cell = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+    var body = [headers.map(cell).join(',')]
+      .concat(rows.map(function (r) { return r.map(cell).join(','); }))
+      .join('\r\n');
+    var blob = new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  /* ---------------- 서랍(drawer) ---------------- */
+
+  var drawerLastFocus = null;
+
+  function openDrawer(opts) {
+    var d = el('drawer');
+    el('drawerTitle').textContent = opts.title || '';
+    el('drawerSub').textContent = opts.sub || '';
+    el('drawerBody').innerHTML = opts.body || '';
+    drawerLastFocus = document.activeElement;
+    d.hidden = false;
+    document.body.style.overflow = 'hidden';
+    el('drawerClose').focus();
+    if (opts.onMount) opts.onMount(el('drawerBody'));
+  }
+
+  function closeDrawer() {
+    var d = el('drawer');
+    if (d.hidden) return;
+    d.hidden = true;
+    document.body.style.overflow = '';
+    if (drawerLastFocus && drawerLastFocus.focus) drawerLastFocus.focus();
+  }
+
+  /* ---------------- 화면 등록 ---------------- */
+
+  function register(key, view) {
+    views[key] = view;
+    order.push(key);
+  }
+
+  /* ---------------- 사이드바 ---------------- */
+
+  var ICONS = {
+    dashboard: '<path d="M3 12h6V3H3v9Zm0 9h6v-6H3v6Zm9 0h9v-9h-9v9Zm0-18v6h9V3h-9Z"/>',
+    requests: '<path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/>',
+    customers: '<path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5"/>',
+    subscriptions: '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/><path d="M12 8v4l3 2"/>',
+    settlement: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 14.5h4"/>',
+    services: '<path d="M12 3 4 7v5.5c0 4.2 3.3 7.7 8 8.5 4.7-.8 8-4.3 8-8.5V7l-8-4Z"/><path d="m9 12 2 2 4-4"/>',
+    members: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20v-1a4.5 4.5 0 0 1 4.5-4.5h5A4.5 4.5 0 0 1 19 19v1"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+  };
+
+  function icon(name) {
+    return '<svg class="adm-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || ICONS.dashboard) + '</svg>';
+  }
+
+  var GROUPS = [
+    { title: '', keys: ['dashboard'] },
+    { title: '의뢰 관리', keys: ['requests', 'customers', 'subscriptions'] },
+    { title: '정산', keys: ['settlement'] },
+    { title: '센터 관리', keys: ['services', 'members', 'settings'] },
+  ];
+
+  function renderSidebar() {
+    var me = db.auth.current();
+    var nav = el('admNav');
+
+    nav.innerHTML = GROUPS.map(function (g) {
+      var links = g.keys
+        .filter(function (k) { return views[k] && (!views[k].perm || db.can(views[k].perm)); })
+        .map(function (k) {
+          var v = views[k];
+          var count = v.badge ? v.badge(state) : null;
+          var badge = count == null ? '' :
+            '<span class="adm-count' + (count ? '' : ' is-zero') + '">' + count + '</span>';
+          return '<button type="button" class="adm-link' + (currentKey === k ? ' is-on' : '') + '" data-view="' + k + '">' +
+            icon(v.icon || k) + '<span class="adm-link-text">' + h(v.nav || v.title) + '</span>' + badge + '</button>';
+        })
+        .join('');
+      if (!links) return '';
+      return (g.title ? '<div class="adm-group"><p class="adm-group-title">' + h(g.title) + '</p>' : '<div class="adm-group">') +
+        links + '</div>';
+    }).join('');
+
+    el('admMe').innerHTML =
+      '<strong>' + h(me.name || me.email) + '</strong>' +
+      '<small>' + h(me.email) + '</small>' +
+      '<span class="adm-role">' + h(db.roleLabel(me.role)) + '</span>';
+
+    el('admMode').hidden = db.mode !== 'local';
+  }
+
+  /* ---------------- 라우팅 ---------------- */
+
+  function firstAllowed() {
+    for (var i = 0; i < order.length; i++) {
+      var k = order[i];
+      if (!views[k].perm || db.can(views[k].perm)) return k;
+    }
+    return null;
+  }
+
+  function go(key, replace) {
+    if (!views[key] || (views[key].perm && !db.can(views[key].perm))) {
+      key = firstAllowed();
+      if (!key) return;
+    }
+    if (window.location.hash.slice(1) !== key) {
+      if (replace) window.location.replace('#' + key);
+      else window.location.hash = key;
+      return; // hashchange 가 다시 호출합니다
+    }
+    render(key);
+  }
+
+  function render(key) {
+    currentKey = key;
+    var v = views[key];
+    closeDrawer();
+    el('admTitle').textContent = v.title;
+    el('admDesc').textContent = v.desc || '';
+    el('admActions').innerHTML = '';
+    el('admMobileTitle').textContent = v.title;
+    var body = el('admBody');
+    body.innerHTML = '';
+    renderSidebar();
+    try {
+      v.render(body, state, { actions: el('admActions') });
+    } catch (err) {
+      body.innerHTML = '<div class="adm-card"><h2>화면을 표시할 수 없습니다</h2>' +
+        '<p class="adm-card-lead">' + h(err.message) + '</p></div>';
+    }
+    el('admSide').classList.remove('is-open');
+    window.scrollTo(0, 0);
+  }
+
+  function rerender() {
+    if (currentKey) render(currentKey);
+  }
+
+  /* ---------------- 데이터 구독 ---------------- */
+
+  function watchAll(done) {
+    var names = ['requests', 'customers', 'subscriptions', 'users', 'invoices', 'serviceContent', 'settings'];
+    var seen = 0;
+    var finished = false;
+
+    names.forEach(function (name) {
+      var stop = db.watch(name, function (rows) {
+        state[name] = rows;
+        seen++;
+        if (!finished && seen >= names.length) {
+          finished = true;
+          done();
+        } else if (finished) {
+          // 다른 화면이 열려 있어도 사이드바 숫자는 항상 갱신
+          renderSidebar();
+          if (currentKey && views[currentKey].live !== false) render(currentKey);
+        }
+      });
+      stops.push(stop);
+    });
+  }
+
+  /* ---------------- 인증 게이트 ---------------- */
+
+  function showGate(kind, user) {
+    el('admShell').hidden = true;
+    var gate = el('admGate');
+    gate.hidden = false;
+
+    var body;
+    if (kind === 'anon') {
+      body =
+        '<h1>관리자 로그인</h1>' +
+        '<p>CAPS 교회지원센터 관리자 화면입니다.<br>승인된 직원 계정으로 로그인해 주세요.</p>' +
+        (db.mode === 'local'
+          ? '<p class="auth-demo" style="margin-top:20px;text-align:left">데모 모드입니다. ' +
+            '<code>admin@caps.or.kr</code> / <code>caps1234</code> 로 로그인해 보세요.</p>'
+          : '') +
+        '<div class="gate-actions">' +
+          '<button type="button" class="btn btn-primary btn-lg" id="gateLogin">로그인 / 회원가입</button>' +
+          '<a class="btn btn-outline" href="index.html">홈페이지로 돌아가기</a>' +
+        '</div>';
+    } else if (kind === 'pending') {
+      body =
+        '<h1>승인 대기 중입니다</h1>' +
+        '<p><strong>' + h(user.name || user.email) + '</strong> 님의 직원 계정은<br>' +
+        '최고관리자 승인 후 이용할 수 있습니다.<br>승인되면 이 화면에서 바로 들어오실 수 있습니다.</p>' +
+        '<div class="gate-actions">' +
+          '<button type="button" class="btn btn-outline" id="gateReload">다시 확인</button>' +
+          '<button type="button" class="btn btn-outline" id="gateOut">로그아웃</button>' +
+          '<a class="btn btn-primary" href="index.html">홈페이지로 돌아가기</a>' +
+        '</div>';
+    } else {
+      body =
+        '<h1>접근 권한이 없습니다</h1>' +
+        '<p>이 계정(<strong>' + h(user.email) + '</strong>)은 고객 계정입니다.<br>' +
+        '관리자 화면은 센터 직원만 이용할 수 있습니다.</p>' +
+        '<div class="gate-actions">' +
+          '<a class="btn btn-primary" href="status.html">내 신청 내역 보기</a>' +
+          '<button type="button" class="btn btn-outline" id="gateOut">로그아웃</button>' +
+        '</div>';
+    }
+
+    gate.innerHTML = '<div class="gate-card">' + el('gateLogo').innerHTML + body + '</div>';
+
+    var login = el('gateLogin');
+    if (login) login.addEventListener('click', function () { window.CAPSAuthUI.open({ tab: 'login' }); });
+    var reload = el('gateReload');
+    if (reload) reload.addEventListener('click', function () { window.location.reload(); });
+    var out = el('gateOut');
+    if (out) {
+      out.addEventListener('click', function () {
+        db.auth.signOut().then(function () { window.location.reload(); });
+      });
+    }
+  }
+
+  function boot() {
+    db.auth.onChange(function (user) {
+      stops.forEach(function (s) { s(); });
+      stops = [];
+
+      if (!user) return showGate('anon', null);
+      if (user.role === 'client') return showGate('client', user);
+      if (!user.approved) return showGate('pending', user);
+
+      el('admGate').hidden = true;
+      el('admShell').hidden = false;
+      el('admBody').innerHTML = '<div class="adm-card"><p class="adm-card-lead">불러오는 중…</p></div>';
+
+      watchAll(function () {
+        var key = window.location.hash.slice(1) || firstAllowed();
+        go(key, true);
+      });
+    });
+
+    window.addEventListener('hashchange', function () {
+      var key = window.location.hash.slice(1);
+      if (!key) return;
+      if (el('admShell').hidden) return;
+      go(key);
+    });
+
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('[data-view]');
+      if (link) { go(link.dataset.view); return; }
+      if (e.target.closest('#drawerClose') || e.target.closest('.drawer-backdrop')) closeDrawer();
+      if (e.target.closest('#admBurger')) el('admSide').classList.toggle('is-open');
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    el('admSignOut').addEventListener('click', function () {
+      db.auth.signOut().then(function () { window.location.reload(); });
+    });
+  }
+
+  return {
+    register: register,
+    boot: boot,
+    go: go,
+    rerender: rerender,
+    renderSidebar: renderSidebar,
+    openDrawer: openDrawer,
+    closeDrawer: closeDrawer,
+    toast: toast,
+    downloadCsv: downloadCsv,
+    emptyRow: emptyRow,
+    money: money,
+    h: h,
+    db: db,
+    state: state,
+  };
+})();
