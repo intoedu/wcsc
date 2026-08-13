@@ -420,3 +420,32 @@ body.admin .float-cta { display: none !important; }
 .row-menu-item:hover { background: var(--brand-50); color: var(--brand-700); }
 .row-menu-item.is-danger { color: #B3261E; }
 .row-menu-item.is-danger:hover { background: #FDECEA; }
+
+/* ---------- 고객 정보 수정 승인 ---------- */
+.consent-note {
+  display: flex; flex-direction: column; gap: 7px; align-items: flex-start;
+  margin-bottom: 22px; padding: 16px 18px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: var(--bg-soft); font-size: 14px; line-height: 1.7;
+}
+.consent-note strong { font-size: 15px; color: var(--ink); }
+.consent-note span { color: var(--muted); }
+.consent-note span.is-bad { color: #B3261E; font-weight: 600; }
+.consent-note .btn { margin-top: 4px; }
+.consent-note.is-lock { background: #FFF8E8; border-color: #E8D6B0; }
+.consent-note.is-lock strong { color: #6E5117; }
+.consent-note.is-wait { background: var(--brand-50); border-color: var(--brand-100); }
+.consent-note.is-wait strong { color: var(--brand-800); }
+.consent-note.is-ok { background: #E9F6EF; border-color: #B7E0C9; }
+.consent-note.is-ok strong { color: #14663C; }
+.consent-note.is-open { background: var(--bg-soft); color: var(--muted); }
+
+.lock-tag {
+  display: inline-block; margin-left: 4px; padding: 2px 7px; border-radius: 5px;
+  background: #FFF1CF; color: #6E5117; font-size: 11.5px; font-weight: 700;
+}
+.field.is-locked input, .field.is-locked select, .field.is-locked textarea {
+  background: var(--bg-soft); color: var(--muted); cursor: not-allowed;
+}
+
+.chk-grid { display: grid; gap: 6px 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 560px) { .chk-grid { grid-template-columns: 1fr; } }

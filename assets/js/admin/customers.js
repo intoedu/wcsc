@@ -24,18 +24,132 @@
 
   function field(label, name, value, opts) {
     var o = opts || {};
-    return '<div class="field"><label for="c_' + name + '">' + h(label) +
-      (o.required ? ' <em class="req">필수</em>' : '') + '</label>' +
+    var lock = o.locked ? ' disabled' : '';
+    return '<div class="field' + (o.locked ? ' is-locked' : '') + '"><label for="c_' + name + '">' + h(label) +
+      (o.required ? ' <em class="req">필수</em>' : '') +
+      (o.locked ? ' <span class="lock-tag">승인 필요</span>' : '') + '</label>' +
       (o.type === 'textarea'
-        ? '<textarea id="c_' + name + '" name="' + name + '" rows="3">' + h(value || '') + '</textarea>'
+        ? '<textarea id="c_' + name + '" name="' + name + '" rows="3"' + lock + '>' + h(value || '') + '</textarea>'
         : o.type === 'select'
-          ? '<select id="c_' + name + '" name="' + name + '"><option value="">선택</option>' +
+          ? '<select id="c_' + name + '" name="' + name + '"' + lock + '><option value="">선택</option>' +
             o.options.map(function (op) {
               return '<option' + (op === value ? ' selected' : '') + '>' + h(op) + '</option>';
             }).join('') + '</select>'
           : '<input type="' + (o.type || 'text') + '" id="c_' + name + '" name="' + name + '" value="' + h(value || '') + '"' +
-            (o.placeholder ? ' placeholder="' + h(o.placeholder) + '"' : '') + '>') +
+            (o.placeholder ? ' placeholder="' + h(o.placeholder) + '"' : '') + lock + '>') +
       '</div>';
+  }
+
+  function consentOf(state, customerId) {
+    return state.editConsents.filter(function (x) { return x.id === customerId; })[0] || null;
+  }
+
+  /** 교회 정보 잠금 상태 안내 + 버튼 */
+  function consentPanel(c, state, isNew) {
+    if (isNew) {
+      return '<p class="consent-note is-open">처음 등록할 때는 교회가 알려준 내용을 그대로 입력하시면 됩니다. ' +
+        '등록 후에 이 정보를 고치려면 해당 교회의 승인이 필요합니다.</p>';
+    }
+
+    var doc = consentOf(state, c.id);
+    var v = db.consentView(doc);
+    var account = db.accountOf(c, state.requests);
+    var who = account
+      ? (state.users.filter(function (u) { return u.id === account; })[0] || null)
+      : null;
+
+    if (v.live) {
+      return '<div class="consent-note is-ok">' +
+        '<strong>' + h(c.name) + ' 교회가 수정을 승인했습니다.</strong>' +
+        '<span>승인 요청 항목: ' + h(db.fieldLabels(v.fields)) + '</span>' +
+        '<span>기한: ' + h(db.formatDate(v.expiresAt)) + ' 까지 · 저장하면 다시 잠깁니다</span>' +
+        '<button type="button" class="btn btn-outline btn-sm" id="cConsentCancel">승인 반납(다시 잠금)</button>' +
+        '</div>';
+    }
+
+    if (v.status === 'pending') {
+      return '<div class="consent-note is-wait">' +
+        '<strong>승인을 기다리고 있습니다.</strong>' +
+        '<span>' + h(who ? (who.name || who.email) : '교회 계정') + ' 님에게 요청을 보냈습니다 (' +
+          h(db.formatDate(doc.requestedAt)) + ')</span>' +
+        '<span>요청 항목: ' + h(db.fieldLabels(v.fields)) + '</span>' +
+        '<button type="button" class="btn btn-outline btn-sm" id="cConsentCancel">요청 취소</button>' +
+        '</div>';
+    }
+
+    var last = '';
+    if (v.status === 'rejected') {
+      last = '<span class="is-bad">지난 요청은 거절되었습니다.' +
+        (doc.rejectNote ? ' 사유: ' + h(doc.rejectNote) : '') + '</span>';
+    } else if (v.status === 'used') {
+      last = '<span>지난 승인으로 ' + h(db.formatDate(doc.usedAt)) + ' 에 수정을 마쳤습니다.</span>';
+    } else if (v.status === 'expired') {
+      last = '<span>지난 승인은 기한이 지났습니다.</span>';
+    }
+
+    return '<div class="consent-note is-lock">' +
+      '<strong>교회 정보는 잠겨 있습니다.</strong>' +
+      '<span>교회명 · 담당자 · 연락처 등은 해당 교회가 승인해야 수정할 수 있습니다. ' +
+        '내부 메모는 언제든 수정됩니다.</span>' +
+      last +
+      (account
+        ? '<button type="button" class="btn btn-primary btn-sm" id="cConsentAsk">정보 수정 요청 보내기</button>'
+        : '<span class="is-bad">이 교회에 연결된 계정이 없어 요청을 보낼 수 없습니다. ' +
+          '[지원 신청] 화면에서 신청 건을 이 고객으로 연결하면 계정이 이어집니다.</span>') +
+      '</div>';
+  }
+
+  /** 요청 보내기 창 */
+  function askConsent(c, state) {
+    var account = db.accountOf(c, state.requests);
+    var keys = Object.keys(db.CHURCH_FIELDS);
+
+    A.openDrawer({
+      title: '정보 수정 요청',
+      sub: h(c.name) + ' 교회 계정에 승인을 요청합니다.',
+      body:
+        '<div class="drawer-section">' +
+          '<h3>어떤 항목을 고칠까요?</h3>' +
+          '<p class="field-hint" style="margin-bottom:10px">고객에게 그대로 보여집니다. ' +
+            '하나도 고르지 않으면 "교회 정보 전체"로 요청합니다.</p>' +
+          '<div class="chk-grid" id="ecFields">' +
+            keys.map(function (k) {
+              return '<label class="check-line"><input type="checkbox" value="' + h(k) + '">' +
+                '<span>' + h(db.CHURCH_FIELDS[k]) + '</span></label>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="drawer-section">' +
+          '<h3>사유 (고객에게 보입니다)</h3>' +
+          '<div class="field"><textarea id="ecReason" rows="3" ' +
+            'placeholder="예: 주보 발송 주소가 반송되어 소재지와 연락처를 확인하고 싶습니다."></textarea></div>' +
+        '</div>' +
+        '<p class="field-hint">승인하면 ' + db.CONSENT_DAYS + '일 동안 수정할 수 있고, ' +
+          '저장을 마치면 자동으로 다시 잠깁니다.</p>' +
+        '<div style="display:flex;gap:10px;margin-top:14px">' +
+          '<button type="button" class="btn btn-primary" id="ecSend">요청 보내기</button>' +
+          '<button type="button" class="btn btn-outline" id="ecBack">뒤로</button>' +
+        '</div>',
+
+      onMount: function (body) {
+        body.querySelector('#ecBack').addEventListener('click', function () {
+          openCustomer(c.id, A.state);
+        });
+        body.querySelector('#ecSend').addEventListener('click', function () {
+          var fields = Array.prototype.slice
+            .call(body.querySelectorAll('#ecFields input:checked'))
+            .map(function (i) { return i.value; });
+          db.requestChurchEdit(c, {
+            userId: account,
+            fields: fields,
+            reason: body.querySelector('#ecReason').value,
+          }).then(function () {
+            A.toast('수정 요청을 보냈습니다. 고객이 승인하면 알려드립니다.', 'ok');
+            A.closeDrawer();
+          }).catch(function (err) { A.toast(err.message || '요청에 실패했습니다.', 'err'); });
+        });
+      },
+    });
   }
 
   /* ---------------- 상세 / 등록 서랍 ---------------- */
@@ -49,27 +163,36 @@
     var subs = isNew ? [] : subsOf(state, c.id);
     var reqs = isNew ? [] : reqsOf(state, c.id);
 
+    /* 교회가 알려준 정보는 그 교회가 승인한 동안에만 수정할 수 있습니다.
+       (보안 규칙에도 같은 조건이 걸려 있습니다) */
+    var consent = isNew ? null : consentOf(state, c.id);
+    var unlocked = isNew || db.consentLive(consent);
+    var lk = { locked: !unlocked };
+
     A.openDrawer({
       title: isNew ? '고객 교회 등록' : c.name,
       sub: isNew ? '직접 등록한 교회도 구독과 정산에 함께 반영됩니다.'
         : (c.location || '') + (c.createdAt ? ' · 등록 ' + db.formatDate(c.createdAt, false) : ''),
       body:
+        consentPanel(c, state, isNew) +
         '<form id="custForm">' +
           '<div class="drawer-section"><h3>교회 정보</h3>' +
-            field('교회명', 'name', c.name, { required: true, placeholder: '예: 은혜로교회' }) +
-            field('교단', 'denomination', c.denomination, { placeholder: '예: 예장합동' }) +
-            field('소재지', 'location', c.location, { placeholder: '예: 경기 성남시 분당구' }) +
+            field('교회명', 'name', c.name, { required: true, placeholder: '예: 은혜로교회', locked: lk.locked }) +
+            field('교단', 'denomination', c.denomination, { placeholder: '예: 예장합동', locked: lk.locked }) +
+            field('소재지', 'location', c.location, { placeholder: '예: 경기 성남시 분당구', locked: lk.locked }) +
             field('출석 교인 수', 'size', c.size, {
-              type: 'select', options: ['50명 미만', '50~150명', '150~500명', '500~1,000명', '1,000명 이상'],
+              type: 'select', locked: lk.locked,
+              options: ['50명 미만', '50~150명', '150~500명', '500~1,000명', '1,000명 이상'],
             }) +
           '</div>' +
           '<div class="drawer-section"><h3>담당자</h3>' +
-            field('담당자 성함', 'contactName', c.contactName) +
+            field('담당자 성함', 'contactName', c.contactName, { locked: lk.locked }) +
             field('직분', 'contactRole', c.contactRole, {
-              type: 'select', options: ['담임목사', '부목사', '전도사', '장로', '집사', '행정 간사', '기타'],
+              type: 'select', locked: lk.locked,
+              options: ['담임목사', '부목사', '전도사', '장로', '집사', '행정 간사', '기타'],
             }) +
-            field('연락처', 'phone', c.phone, { type: 'tel', placeholder: '010-0000-0000' }) +
-            field('이메일', 'email', c.email, { type: 'email' }) +
+            field('연락처', 'phone', c.phone, { type: 'tel', placeholder: '010-0000-0000', locked: lk.locked }) +
+            field('이메일', 'email', c.email, { type: 'email', locked: lk.locked }) +
           '</div>' +
           '<div class="drawer-section"><h3>메모</h3>' +
             field('내부 메모', 'memo', c.memo, { type: 'textarea' }) +
@@ -112,20 +235,40 @@
         '</div>',
 
       onMount: function (body) {
+        var ask = body.querySelector('#cConsentAsk');
+        if (ask) ask.addEventListener('click', function () { askConsent(c, A.state); });
+
+        var undo = body.querySelector('#cConsentCancel');
+        if (undo) {
+          undo.addEventListener('click', function () {
+            db.cancelChurchEdit(c.id).then(function () {
+              A.toast('요청을 취소했습니다.');
+              A.closeDrawer();
+            }).catch(function (err) { A.toast(err.message || '취소에 실패했습니다.', 'err'); });
+          });
+        }
+
         body.querySelector('#cSave').addEventListener('click', function () {
           var form = body.querySelector('#custForm');
           var data = {};
           Array.prototype.slice.call(form.querySelectorAll('[name]')).forEach(function (input) {
+            // 잠긴 칸은 보내지 않습니다 (서버 규칙에서도 거부됩니다).
+            if (input.disabled) return;
             data[input.name] = input.value.trim();
           });
-          if (!data.name) {
+          if (isNew && !data.name) {
             A.toast('교회명을 입력해 주세요.', 'err');
             form.querySelector('#c_name').focus();
             return;
           }
           var done = isNew ? db.add('customers', data) : db.update('customers', c.id, data);
           done.then(function () {
-            A.toast(isNew ? '고객을 등록했습니다.' : '저장했습니다.', 'ok');
+            // 승인받아 수정한 경우에는 저장과 함께 다시 잠급니다.
+            if (!isNew && unlocked && consent) return db.finishChurchEdit(c.id);
+            return null;
+          }).then(function () {
+            A.toast(isNew ? '고객을 등록했습니다.'
+              : (unlocked && consent ? '저장했습니다. 교회 정보는 다시 잠겼습니다.' : '저장했습니다.'), 'ok');
             A.closeDrawer();
           }).catch(function (err) { A.toast(err.message || '저장에 실패했습니다.', 'err'); });
         });
@@ -213,8 +356,11 @@
         (rows.length
           ? rows.map(function (c) {
               var subs = subsOf(state, c.id);
+              var cv = db.consentView(consentOf(state, c.id));
+              var mark = cv.status === 'pending' ? ' <span class="st st-hold">수정 승인 대기</span>'
+                : cv.live ? ' <span class="st st-done">수정 가능</span>' : '';
               return '<tr data-id="' + h(c.id) + '" style="cursor:pointer">' +
-                '<td class="strong">' + h(c.name) +
+                '<td class="strong">' + h(c.name) + mark +
                   '<span class="sub">' + h(c.location || '') + (c.denomination ? ' · ' + h(c.denomination) : '') + '</span></td>' +
                 '<td>' + h(c.contactName || '-') +
                   (c.contactRole ? '<span class="sub">' + h(c.contactRole) + '</span>' : '') + '</td>' +

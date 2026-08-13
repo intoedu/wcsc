@@ -290,3 +290,46 @@ body.staff { background: var(--brand-900); }
 .field-hint.is-match { color: var(--ok); font-weight: 600; }
 .field-hint.is-mismatch { color: #B3261E; font-weight: 600; }
 .auth-err a { color: #8C1D18; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- 정보 수정 승인 (고객 쪽) ---------- */
+.consent-strip { background: var(--brand-800); color: #fff; }
+.consent-strip .wrap {
+  display: flex; align-items: center; justify-content: center; gap: 14px 18px;
+  flex-wrap: wrap; padding: 11px 20px; font-size: 14px; line-height: 1.6; text-align: center;
+}
+.consent-strip strong { color: #fff; }
+.consent-strip .btn { padding: 7px 14px; font-size: 13.5px; }
+
+.consent-modal { z-index: 240; }
+.cs-head {
+  position: relative; padding: 24px 28px 20px; background: var(--brand-800); color: #fff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.cs-head h2 { font-size: 20px; letter-spacing: -.02em; }
+.cs-head p { margin-top: 8px; font-size: 13.5px; line-height: 1.8; color: rgba(255,255,255,.85); }
+.cs-head .auth-close { color: rgba(255,255,255,.8); }
+.cs-head .auth-close:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+.cs-count { margin-bottom: 12px; font-size: 13px; font-weight: 700; color: var(--brand-600); }
+.cs-card {
+  padding: 4px 16px; background: var(--bg-soft);
+  border: 1px solid var(--line); border-radius: 10px;
+}
+.cs-line {
+  display: flex; gap: 12px; justify-content: space-between; align-items: baseline;
+  padding: 11px 0; font-size: 14px; border-bottom: 1px solid var(--line);
+}
+.cs-line:last-child { border-bottom: none; }
+.cs-line span { flex: none; color: var(--muted); }
+.cs-line strong { text-align: right; }
+.cs-reason {
+  margin-top: 14px; padding: 13px 16px; background: var(--gold-100);
+  border: 1px solid #E8D6B0; border-radius: 10px; font-size: 14px; line-height: 1.75; color: #6E5117;
+}
+.cs-reason strong { display: block; margin-bottom: 4px; }
+.cs-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.cs-actions .btn { margin-top: 0; }
+.cs-reject { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.cs-reject .btn { margin-top: 12px; }
+.cs-foot { margin-top: 16px; font-size: 13px; color: var(--muted); text-align: center; line-height: 1.7; }
+.cs-done { padding: 8px 0 18px; font-size: 15px; line-height: 1.8; color: var(--ink-2); text-align: center; }

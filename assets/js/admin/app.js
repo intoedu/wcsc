@@ -11,7 +11,7 @@ window.CAPSAdmin = (function () {
   var order = [];
   var state = {
     requests: [], customers: [], subscriptions: [], users: [],
-    invoices: [], serviceContent: [], settings: [],
+    invoices: [], serviceContent: [], settings: [], editConsents: [],
   };
   var stops = [];
   var currentKey = null;
@@ -105,6 +105,7 @@ window.CAPSAdmin = (function () {
     dashboard: '<path d="M3 12h6V3H3v9Zm0 9h6v-6H3v6Zm9 0h9v-9h-9v9Zm0-18v6h9V3h-9Z"/>',
     requests: '<path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/>',
     customers: '<path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5"/>',
+    consents: '<rect x="4.5" y="3" width="15" height="18" rx="2"/><path d="M8.5 8.5h7M8.5 12h7"/><path d="m9 16.5 1.7 1.7 3.6-3.8"/>',
     subscriptions: '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/><path d="M12 8v4l3 2"/>',
     settlement: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 14.5h4"/>',
     services: '<path d="M12 3 4 7v5.5c0 4.2 3.3 7.7 8 8.5 4.7-.8 8-4.3 8-8.5V7l-8-4Z"/><path d="m9 12 2 2 4-4"/>',
@@ -120,7 +121,7 @@ window.CAPSAdmin = (function () {
   var GROUPS = [
     { title: '', keys: ['dashboard'] },
     { title: '작업', keys: ['mytasks', 'alltasks', 'workload'] },
-    { title: '의뢰 관리', keys: ['requests', 'customers', 'subscriptions'] },
+    { title: '의뢰 관리', keys: ['requests', 'customers', 'consents', 'subscriptions'] },
     { title: '정산', keys: ['settlement'] },
     { title: '센터 관리', keys: ['services', 'members', 'settings', 'rules'] },
   ];
@@ -205,7 +206,8 @@ window.CAPSAdmin = (function () {
   /* ---------------- 데이터 구독 ---------------- */
 
   function watchAll(done) {
-    var names = ['requests', 'customers', 'subscriptions', 'users', 'invoices', 'serviceContent', 'settings'];
+    var names = ['requests', 'customers', 'subscriptions', 'users', 'invoices',
+      'serviceContent', 'settings', 'editConsents'];
     var seen = 0;
     var finished = false;
 

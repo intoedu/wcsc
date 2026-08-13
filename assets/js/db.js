@@ -30,7 +30,33 @@ window.CAPSDB = (function () {
     settings: '센터 설정',
   };
 
-  var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices', 'serviceContent', 'settings'];
+  var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
+    'serviceContent', 'settings', 'editConsents'];
+
+  /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
+     (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
+  var CHURCH_FIELDS = {
+    name: '교회명',
+    denomination: '교단',
+    location: '소재지',
+    size: '출석 교인 수',
+    contactName: '담당자 성함',
+    contactRole: '담당자 직분',
+    phone: '연락처',
+    email: '이메일',
+  };
+
+  var CONSENT_STATUS = {
+    pending: '승인 대기',
+    approved: '수정 가능',
+    rejected: '거절',
+    used: '수정 완료',
+    canceled: '요청 취소',
+    expired: '기한 지남',
+  };
+
+  /** 승인 후 수정할 수 있는 기간 (일) */
+  var CONSENT_DAYS = 7;
 
   var REQUEST_STATUS = {
     received: '접수',
@@ -656,6 +682,9 @@ window.CAPSDB = (function () {
     REQUEST_STATUS: REQUEST_STATUS,
     SUB_STATUS: SUB_STATUS,
     COLLECTIONS: COLLECTIONS,
+    CHURCH_FIELDS: CHURCH_FIELDS,
+    CONSENT_STATUS: CONSENT_STATUS,
+    CONSENT_DAYS: CONSENT_DAYS,
 
     auth: adapter.auth,
     list: adapter.list,
@@ -687,6 +716,127 @@ window.CAPSDB = (function () {
       return !String(u.church || '').trim()
         || !String(u.contactRole || '').trim()
         || !String(u.phone || '').trim();
+    },
+
+    /* =====================================================
+       고객 정보 수정 동의 (editConsents)
+
+       흐름
+         1. 직원이 고객에게 [정보 수정 요청] 을 보냅니다  → pending
+         2. 교회 계정이 홈페이지에서 승인 또는 거절합니다  → approved / rejected
+         3. 승인된 동안(기본 7일) 직원이 교회 정보를 수정합니다
+         4. 저장을 마치면 다시 잠깁니다                    → used
+
+       보안 규칙이 customers 의 교회 정보 항목을 이 승인과 묶어 두었으므로,
+       화면에서 잠금을 우회해도 서버에서 거부됩니다.
+       ===================================================== */
+
+    /** 승인이 살아 있는지 (승인 상태이고 기한이 남았는지) */
+    consentLive: function (doc) {
+      if (!doc || doc.status !== 'approved') return false;
+      if (!doc.expiresAt) return true;
+      return new Date(doc.expiresAt).getTime() > Date.now();
+    },
+
+    /** 화면 표시용 상태 정보 */
+    consentView: function (doc) {
+      if (!doc) return { status: 'none', label: '요청 없음', cls: 'none', live: false };
+      var live = api.consentLive(doc);
+      var status = doc.status;
+      if (status === 'approved' && !live) status = 'expired';
+      return {
+        status: status,
+        label: CONSENT_STATUS[status] || status,
+        cls: status,
+        live: live,
+        fields: doc.fields || [],
+        reason: doc.reason || '',
+        expiresAt: doc.expiresAt || '',
+      };
+    },
+
+    /** 항목 키 목록을 사람이 읽는 문구로 */
+    fieldLabels: function (keys) {
+      var list = (keys || []).map(function (k) { return CHURCH_FIELDS[k] || k; });
+      return list.length ? list.join(' · ') : '교회 정보 전체';
+    },
+
+    /**
+     * 고객 교회 계정을 찾습니다.
+     * customers.userId 를 먼저 보고, 없으면 연결된 신청서에서 찾습니다.
+     */
+    accountOf: function (customer, requests) {
+      if (!customer) return '';
+      if (customer.userId) return customer.userId;
+      var linked = (requests || []).filter(function (r) {
+        return r.customerId === customer.id && r.userId;
+      });
+      return linked.length ? linked[0].userId : '';
+    },
+
+    /** 직원 → 고객에게 정보 수정 요청 보내기 */
+    requestChurchEdit: function (customer, opts) {
+      var o = opts || {};
+      var me = adapter.auth.current();
+      var userId = String(o.userId || '').trim();
+      if (!userId) {
+        return Promise.reject(new Error(
+          '이 교회에 연결된 계정이 없습니다. 먼저 신청 건을 고객으로 연결하거나, 교회 계정을 확인해 주세요.'));
+      }
+      return adapter.set('editConsents', customer.id, {
+        customerId: customer.id,
+        customerName: customer.name || '',
+        userId: userId,
+        fields: o.fields || [],
+        reason: String(o.reason || '').trim(),
+        status: 'pending',
+        requestedBy: me ? me.id : '',
+        requestedByName: me ? (me.name || me.email) : '',
+        requestedAt: nowIso(),
+        respondedAt: '',
+        rejectNote: '',
+        expiresAt: '',
+        createdAt: nowIso(),
+      });
+    },
+
+    /** 직원 → 요청 취소 */
+    cancelChurchEdit: function (customerId) {
+      return adapter.update('editConsents', customerId, {
+        status: 'canceled', respondedAt: nowIso(),
+      });
+    },
+
+    /** 직원 → 수정을 마쳐 다시 잠금 */
+    finishChurchEdit: function (customerId) {
+      return adapter.update('editConsents', customerId, {
+        status: 'used', usedAt: nowIso(),
+      });
+    },
+
+    /** 기한이 지난 승인을 정리 */
+    expireChurchEdit: function (customerId) {
+      return adapter.update('editConsents', customerId, { status: 'expired' });
+    },
+
+    /** 고객 → 승인 또는 거절 */
+    respondChurchEdit: function (customerId, approve, note) {
+      var patch = {
+        status: approve ? 'approved' : 'rejected',
+        respondedAt: nowIso(),
+        rejectNote: approve ? '' : String(note || '').trim(),
+        expiresAt: approve
+          ? new Date(Date.now() + CONSENT_DAYS * 864e5).toISOString()
+          : '',
+      };
+      return adapter.update('editConsents', customerId, patch);
+    },
+
+    /** 고객 → 나에게 온 요청 목록 (보안 규칙이 조회 범위를 확인합니다) */
+    myEditConsents: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('editConsents', { where: { userId: me.id } });
     },
 
     /** 관리자 화면에 들어올 수 있는 계정인지 */
