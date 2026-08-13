@@ -338,3 +338,36 @@ body.admin .float-cta { display: none !important; }
   .dl-flat > div { flex-direction: column; gap: 3px; }
   .dl-flat dt { width: auto; }
 }
+
+/* ---------- 디데이 배지 ---------- */
+.dd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 56px; padding: 4px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 800; letter-spacing: .02em; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.dd-late  { background: #FDECEA; color: #B3261E; }
+.dd-today { background: #FFF0E1; color: #A8480B; }
+.dd-soon  { background: var(--gold-100); color: var(--gold-600); }
+.dd-ok    { background: var(--brand-50); color: var(--brand-600); }
+.dd-done  { background: #E6F4EC; color: var(--ok); }
+.dd-none  { background: var(--line-2); color: var(--muted); font-weight: 600; }
+
+.due-input {
+  padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 8px;
+  font-size: 13.5px; background: #fff; width: 100%; max-width: 150px;
+}
+.due-input:focus { outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(36,92,144,.13); }
+
+/* 주의가 필요한 통계 카드 */
+.adm-stat.is-alert { border-color: #F5C6C0; background: #FFF8F7; }
+.adm-stat.is-alert strong { color: #B3261E; }
+.adm-stat.is-alert small { color: #B3261E; }
+
+/* ---------- 업무량 막대 ---------- */
+.wl-bar { height: 12px; border-radius: 999px; background: var(--line-2); overflow: hidden; max-width: 420px; }
+.wl-fill { height: 100%; border-radius: 999px; background: var(--brand-500); transition: width .3s; }
+.wl-fill.is-late { background: #C6453B; }
+
+.adm-note { margin-top: 16px; font-size: 13.5px; color: var(--muted); line-height: 1.7; }
+.adm-note .link-btn { font-size: 13.5px; }

@@ -18,6 +18,15 @@
     { key: 'summary', label: '요약 설명', type: 'textarea', hint: '카드와 상세 페이지 상단에 나옵니다. 2~3문장이 적당합니다.' },
     { key: 'duration', label: '소요 기간', hint: '예: 약 4~8주 (자료 준비 상황에 따라 조정)' },
     { key: 'priceNote', label: '비용 안내', type: 'textarea', hint: '금액을 적지 않으실 경우 산정 방식만 안내하세요.' },
+    {
+      key: 'externalApply', label: '외부 접수 주소',
+      hint: '이 항목의 신청을 다른 사이트에서 받을 때 주소를 넣으세요. ' +
+        '비워두면 CAPS 신청서로 접수합니다. (예: 홈페이지·디자인은 @IM 접수 페이지)',
+    },
+    {
+      key: 'externalApplyLabel', label: '외부 접수 사이트 이름',
+      hint: '버튼에 "○○에서 신청하기" 로 표시됩니다. 예: @IM',
+    },
   ];
 
   function defaults(id) {
@@ -37,6 +46,11 @@
     var over = overrideOf(state, id) || {};
     var out = {};
     TEXT_FIELDS.forEach(function (f) {
+      // 외부 접수 주소는 '빈 값으로 저장' 자체가 의미(내부 접수 전환)를 가집니다.
+      if (f.key === 'externalApply' || f.key === 'externalApplyLabel') {
+        out[f.key] = over[f.key] != null ? over[f.key] : (base[f.key] || '');
+        return;
+      }
       out[f.key] = over[f.key] != null && over[f.key] !== '' ? over[f.key] : (base[f.key] || '');
     });
     out.features = over.features || (base.features || []);
@@ -89,6 +103,11 @@
       title: base.name + ' 수정',
       sub: '지원 항목 ' + base.no + ' · 저장하면 공개 페이지에 바로 반영됩니다.',
       body:
+        (data.externalApply
+          ? '<div class="guide-box" style="margin-bottom:16px"><strong>외부 접수 항목입니다.</strong><br>' +
+            '신청 버튼이 <code>' + h(data.externalApply) + '</code> 로 연결되며, ' +
+            'CAPS 신청서에서는 체크박스가 아닌 링크로 표시됩니다.</div>'
+          : '') +
         (edited
           ? '<div class="guide-box" style="margin-bottom:20px"><strong>수정된 항목입니다.</strong> ' +
             '기본 내용으로 되돌리려면 아래 [기본값으로 되돌리기] 를 누르세요.</div>'
@@ -265,6 +284,9 @@
               (isEdited(state, s.id) ? ' <span class="svc-row-edited">수정됨</span>' : '') +
               '<small>' + h(cur.tagline) + '</small>' +
             '</div>' +
+            (cur.externalApply
+              ? '<span class="chip is-gold">' + h(cur.externalApplyLabel || '외부') + ' 접수</span>'
+              : '') +
             '<span class="st ' + (off ? 'st-hold' : 'st-active') + '">' + (off ? '숨김' : '공개') + '</span>' +
             '<button type="button" class="btn btn-outline btn-sm" data-edit="' + h(s.id) + '">수정</button>' +
             '</div>';

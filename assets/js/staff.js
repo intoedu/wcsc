@@ -178,14 +178,29 @@
     });
   });
 
-  /* 구글 로그인 */
-  document.getElementById('spGoogle').addEventListener('click', function () {
-    var err = document.getElementById('spLoginErr');
+  /* 구글 로그인 · 가입
+     이 페이지에서 처음 쓰는 구글 계정은 '직원 신청'(승인 대기)으로 만들어집니다.
+     이미 있는 계정은 기존 직분이 그대로 유지됩니다. */
+  function googleAuth(errId, fromSignup) {
+    var err = document.getElementById(errId);
     err.hidden = true;
-    db.auth.signInGoogle().catch(function (ex) {
+    if (fromSignup) justSignedUp = true;
+    db.auth.signInGoogle({
+      staffRequest: true,
+      name: document.getElementById('spName').value,
+      phone: db.formatPhone(document.getElementById('spPhone').value),
+    }).catch(function (ex) {
+      justSignedUp = false;
       err.textContent = ex.message;
       err.hidden = false;
     });
+  }
+
+  document.getElementById('spGoogle').addEventListener('click', function () {
+    googleAuth('spLoginErr', false);
+  });
+  document.getElementById('spGoogleSignup').addEventListener('click', function () {
+    googleAuth('spSignupErr', true);
   });
 
   /* 비밀번호 재설정 */

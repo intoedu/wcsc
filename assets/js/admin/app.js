@@ -98,6 +98,9 @@ window.CAPSAdmin = (function () {
   /* ---------------- 사이드바 ---------------- */
 
   var ICONS = {
+    mytasks: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+    alltasks: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16M8 13h4M8 16.5h6"/>',
+    workload: '<path d="M3 20h18"/><path d="M6 20v-6M11 20V8M16 20v-9M21 20V5"/>',
     dashboard: '<path d="M3 12h6V3H3v9Zm0 9h6v-6H3v6Zm9 0h9v-9h-9v9Zm0-18v6h9V3h-9Z"/>',
     requests: '<path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/>',
     customers: '<path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5"/>',
@@ -115,6 +118,7 @@ window.CAPSAdmin = (function () {
 
   var GROUPS = [
     { title: '', keys: ['dashboard'] },
+    { title: '작업', keys: ['mytasks', 'alltasks', 'workload'] },
     { title: '의뢰 관리', keys: ['requests', 'customers', 'subscriptions'] },
     { title: '정산', keys: ['settlement'] },
     { title: '센터 관리', keys: ['services', 'members', 'settings'] },

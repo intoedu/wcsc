@@ -17,6 +17,16 @@ window.CAPSAuthUI = (function () {
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  /** 구글 로고 (공식 4색) */
+  function googleMark() {
+    return '<svg class="g-mark" viewBox="0 0 18 18" aria-hidden="true">' +
+      '<path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/>' +
+      '<path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A8.99 8.99 0 0 0 9 18Z"/>' +
+      '<path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.34Z"/>' +
+      '<path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A8.99 8.99 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58Z"/>' +
+      '</svg>';
+  }
+
   function base() {
     // services/ 하위 페이지에서도 링크가 맞도록 경로 접두사를 계산합니다.
     return /\/services\//.test(window.location.pathname) ? '../' : '';
@@ -57,7 +67,9 @@ window.CAPSAuthUI = (function () {
               '<button type="button" class="pw-toggle" data-pw="loginPw">표시</button></div></div>' +
             '<p class="auth-err" id="loginErr" hidden></p>' +
             '<button type="submit" class="btn btn-primary btn-block btn-lg">로그인</button>' +
-            '<button type="button" class="btn btn-outline btn-block auth-google" id="googleBtn">Google 계정으로 계속하기</button>' +
+            '<p class="auth-or"><span>또는</span></p>' +
+            '<button type="button" class="btn btn-outline btn-block auth-google" id="googleBtn">' +
+              googleMark() + 'Google 계정으로 로그인</button>' +
             '<button type="button" class="link-btn auth-reset" id="resetBtn">비밀번호를 잊으셨나요?</button>' +
             '<p class="auth-staff-link">CAPS 센터 직원이신가요? ' +
               '<a href="' + base() + 'staff.html">직원 로그인 &rarr;</a></p>' +
@@ -80,6 +92,10 @@ window.CAPSAuthUI = (function () {
               '<span>개인정보 수집 · 이용에 동의합니다. <em class="req">필수</em></span></label>' +
             '<p class="auth-err" id="signupErr" hidden></p>' +
             '<button type="submit" class="btn btn-primary btn-block btn-lg">가입하고 계속하기</button>' +
+            '<p class="auth-or"><span>또는</span></p>' +
+            '<button type="button" class="btn btn-outline btn-block auth-google" id="googleSignupBtn">' +
+              googleMark() + 'Google 계정으로 가입하기</button>' +
+            '<p class="auth-google-note">구글 계정으로 가입하면 비밀번호를 따로 만들지 않아도 됩니다.</p>' +
           '</form>' +
         '</div>' +
       '</div>';
@@ -140,6 +156,22 @@ window.CAPSAuthUI = (function () {
       var err = modal.querySelector('#loginErr');
       err.hidden = true;
       db.auth.signInGoogle()
+        .then(function () { succeed(); })
+        .catch(function (ex) {
+          err.textContent = ex.message;
+          err.hidden = false;
+        });
+    });
+
+    /* 구글 계정으로 가입 (처음이면 자동 가입, 이미 있으면 로그인) */
+    modal.querySelector('#googleSignupBtn').addEventListener('click', function () {
+      var err = modal.querySelector('#signupErr');
+      err.hidden = true;
+      db.auth.signInGoogle({
+        name: modal.querySelector('#suName').value,
+        phone: db.formatPhone(modal.querySelector('#suPhone').value),
+        church: modal.querySelector('#suChurch').value,
+      })
         .then(function () { succeed(); })
         .catch(function (ex) {
           err.textContent = ex.message;

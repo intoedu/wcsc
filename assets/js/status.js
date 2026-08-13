@@ -104,8 +104,8 @@
       return;
     }
 
-    db.list('requests').then(function (rows) {
-      var mine = rows.filter(function (r) { return r.userId && r.userId === user.id; });
+    // 본인 신청만 조회합니다 (보안 규칙이 조회 범위를 확인합니다).
+    db.list('requests', { where: { userId: user.id } }).then(function (mine) {
       recentTitle.textContent = mine.length ? '내 신청 내역 (' + mine.length + '건)' : '내 신청 내역';
 
       if (!mine.length) {

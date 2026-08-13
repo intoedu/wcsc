@@ -129,8 +129,8 @@ body.staff { background: var(--brand-900); }
   position: relative; display: flex; flex-direction: column; justify-content: space-between;
   padding: 44px 52px; color: #fff; overflow: hidden;
   background:
-    radial-gradient(760px 420px at 88% -10%, rgba(198,151,73,.26), transparent 60%),
-    linear-gradient(155deg, #0B1E38 0%, #0E2340 48%, #143355 100%);
+    radial-gradient(760px 420px at 88% -10%, rgba(245,158,11,.20), transparent 60%),
+    linear-gradient(155deg, #12274A 0%, #1A3E7C 55%, #1D4ED8 100%);
 }
 .sp-aside::after {
   content: ""; position: absolute; inset: 0; opacity: .5; pointer-events: none;
@@ -146,19 +146,19 @@ body.staff { background: var(--brand-900); }
 .sp-brand .logo-mark { width: 44px; height: 44px; }
 .sp-brand-text { display: flex; flex-direction: column; line-height: 1.25; }
 .sp-brand-text strong { font-size: 17px; color: #fff; letter-spacing: -.03em; }
-.sp-brand-text small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #7D91AD; }
+.sp-brand-text small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #9DB4D8; }
 
 .sp-copy { max-width: 30em; }
 .sp-badge {
   display: inline-block; padding: 5px 13px; border-radius: 999px; margin-bottom: 20px;
-  background: rgba(198,151,73,.18); border: 1px solid rgba(198,151,73,.34);
-  color: var(--gold-400); font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
+  background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28);
+  color: #FFF; font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
 }
 .sp-copy h1 { font-size: clamp(26px, 3vw, 36px); color: #fff; letter-spacing: -.035em; line-height: 1.32; }
 .sp-copy p { margin-top: 18px; font-size: 16px; line-height: 1.85; color: #B6C6DA; }
 .sp-list { margin-top: 26px; display: grid; gap: 11px; }
 .sp-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.8px; color: #C6D3E4; }
-.sp-list svg { flex: none; margin-top: 4px; color: var(--gold-400); width: 17px; height: 17px; }
+.sp-list svg { flex: none; margin-top: 4px; color: #93C5FD; width: 17px; height: 17px; }
 
 .sp-foot { font-size: 13px; color: #6D82A0; }
 .sp-foot a { color: #A9BAD0; text-decoration: underline; text-underline-offset: 3px; }
@@ -244,4 +244,18 @@ body.staff { background: var(--brand-900); }
 .auth-staff-link a {
   color: var(--brand-600); font-weight: 700;
   text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+
+/* ---------- 구글 로그인 · 가입 ---------- */
+.g-mark { width: 18px; height: 18px; flex: none; }
+.auth-google { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.auth-or {
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0 0; font-size: 13px; color: var(--muted);
+}
+.auth-or::before, .auth-or::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+.auth-google-note {
+  margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.65; text-align: center;
 }

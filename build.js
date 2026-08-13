@@ -11,7 +11,8 @@ const fs = require('fs');
 const path = require('path');
 const T = require('./src/templates');
 
-const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand, site, services } = T;
+const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
+  applyLink, externalNote, site, services } = T;
 
 const ROOT = __dirname;
 const out = [];
@@ -446,9 +447,10 @@ function buildServicePage(s, i) {
         <p class="svc-hero-tag" data-live="svc.${s.id}.tagline">${esc(s.tagline)}</p>
         <p class="lead" data-live="svc.${s.id}.summary">${esc(s.summary)}</p>
         <div class="hero-actions">
-          <a class="btn btn-primary btn-lg" href="../apply.html?service=${s.id}">이 항목 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+          ${applyLink(s, '../')}
           <a class="btn btn-outline btn-lg" href="${site.contact.phoneHref}">전화 상담</a>
         </div>
+        ${externalNote(s)}
       </div>
       <div class="svc-hero-side">
         <span class="svc-hero-ico">${icon(s.icon)}</span>
@@ -528,7 +530,7 @@ function buildServicePage(s, i) {
             <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           </dl>
-          <a class="btn btn-primary btn-block" href="../apply.html?service=${s.id}">견적 요청하기</a>
+          ${applyLink(s, '../', { cls: 'btn-primary btn-block', label: '견적 요청하기', arrow: false })}
         </div>
       </div>
     </div>
@@ -577,18 +579,32 @@ ${ctaBand('../', {
    신청서
    ========================================================= */
 function buildApply() {
+  // 외부에서 접수하는 항목(@IM 등)은 체크박스가 아니라 링크로 내보냅니다.
   const serviceChecks = services
-    .map(
-      (s) => `<label class="pick" data-service="${s.id}">
+    .map((s) => {
+      if (s.externalApply) {
+        const who = s.externalApplyLabel || '외부 사이트';
+        return `<a class="pick pick-external" data-service="${s.id}" data-apply="${s.id}"
+          href="${s.externalApply}" target="_blank" rel="noopener">
+          <span class="pick-in">
+            <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
+            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(who)} 접수 페이지에서 신청합니다</small></span>
+            <span class="pick-out">${esc(who)} ${icon('arrow', 'ico ico-xs')}</span>
+          </span>
+        </a>`;
+      }
+      return `<label class="pick" data-service="${s.id}">
           <input type="checkbox" name="services" value="${s.id}">
           <span class="pick-in">
             <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
             <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(s.tagline)}</small></span>
             <span class="pick-mark">${icon('check', 'ico ico-xs')}</span>
           </span>
-        </label>`
-    )
+        </label>`;
+    })
     .join('\n        ');
+
+  const externalIds = services.filter((s) => s.externalApply).map((s) => s.id);
 
   const body = `
 ${pageHero({
@@ -609,6 +625,11 @@ ${pageHero({
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
         <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 담당자 한 명이 묶어서 진행합니다.</p>
+        ${externalIds.length
+          ? `<p class="fs-help fs-help-external">${externalIds
+              .map((id) => esc(services.find((v) => v.id === id).name))
+              .join(' · ')} 은 별도 접수 페이지에서 신청받습니다. 아래에서 해당 항목을 누르면 새 창으로 열립니다.</p>`
+          : ''}
         <div class="pick-grid">
         ${serviceChecks}
         </div>
@@ -903,6 +924,8 @@ function buildDataScript() {
     summary: s.summary,
     duration: s.duration,
     priceNote: s.priceNote,
+    externalApply: s.externalApply || '',
+    externalApplyLabel: s.externalApplyLabel || '',
     features: s.features,
     deliverables: s.deliverables,
     faqs: s.faqs,

@@ -178,8 +178,8 @@ function layout(o) {
   <meta property="og:title" content="${esc(o.title)}">
   <meta property="og:description" content="${esc(o.description)}">
   <meta property="og:site_name" content="CAPS 교회지원센터">
-  <meta name="theme-color" content="#0E2340">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%230E2340'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23C69749' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#1D4ED8">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231D4ED8'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F59E0B' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="${base}assets/css/style.css">
@@ -238,6 +238,35 @@ function faqList(items, idPrefix, attrs) {
   </div>`;
 }
 
+/**
+ * 항목 신청 버튼.
+ * externalApply 가 있으면 외부 접수 사이트로, 없으면 내부 신청서로 연결합니다.
+ * data-apply 표시는 live-content.js 가 관리자 수정본을 반영할 때 사용합니다.
+ */
+function applyLink(s, base, o) {
+  const opt = o || {};
+  const cls = 'btn ' + (opt.cls || 'btn-primary btn-lg');
+  const arrow = opt.arrow === false ? '' : ' ' + icon('arrow', 'ico ico-sm');
+
+  if (s.externalApply) {
+    const who = s.externalApplyLabel || '외부 사이트';
+    return `<a class="${cls}" href="${s.externalApply}" target="_blank" rel="noopener"
+      data-apply="${s.id}">${esc(who)}에서 신청하기${arrow}</a>`;
+  }
+  return `<a class="${cls}" href="${base}apply.html?service=${s.id}"
+      data-apply="${s.id}">${esc(opt.label || '이 항목 신청하기')}${arrow}</a>`;
+}
+
+/** 외부 접수 항목임을 알리는 안내 문구 */
+function externalNote(s) {
+  if (!s.externalApply) return '';
+  const who = s.externalApplyLabel || '외부 사이트';
+  return `<p class="apply-external-note" data-apply-note="${s.id}">
+    이 항목의 신청은 <strong>${esc(who)}</strong> 접수 페이지에서 진행됩니다.
+    버튼을 누르면 새 창으로 열립니다.
+  </p>`;
+}
+
 function serviceCard(s, base) {
   return `<a class="svc-card" href="${base}services/${s.slug}.html">
     <span class="svc-no">${s.no}</span>
@@ -268,6 +297,8 @@ function ctaBand(base, opts) {
 module.exports = {
   esc,
   icon,
+  applyLink,
+  externalNote,
   logoMark,
   layout,
   pageHero,

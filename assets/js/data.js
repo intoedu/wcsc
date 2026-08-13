@@ -10,6 +10,8 @@ window.CAPS_SERVICES = [
     "summary": "교회 소개, 예배 시간, 설교 영상, 주보, 오시는 길까지. 성도와 새가족 모두에게 필요한 정보를 담은 홈페이지를 제작하고 운영까지 지원합니다.",
     "duration": "약 4~8주 (자료 준비 상황에 따라 조정)",
     "priceNote": "페이지 수, 게시판 종류, 영상·헌금 기능 포함 여부에 따라 달라집니다. 상담 후 항목별 내역이 적힌 견적서를 드립니다.",
+    "externalApply": "https://koreayjk.github.io/aim/request.html",
+    "externalApplyLabel": "@IM",
     "features": [
       {
         "title": "반응형 디자인",
@@ -87,6 +89,8 @@ window.CAPS_SERVICES = [
     "summary": "절기 현수막부터 매주 나가는 주보까지, 교회에서 반복적으로 필요한 인쇄·디자인물을 제작합니다. 시안 작업부터 인쇄와 배송까지 함께 처리합니다.",
     "duration": "단건 3~7일 / 주보 정기 제작은 주 단위 일정 협의",
     "priceNote": "건별 제작과 월 정기 계약 중 선택할 수 있습니다. 주보처럼 매주 반복되는 항목은 정기 계약이 유리합니다. 수량과 규격을 알려주시면 견적을 드립니다.",
+    "externalApply": "https://koreayjk.github.io/aim/request.html",
+    "externalApplyLabel": "@IM",
     "features": [
       {
         "title": "주보 정기 제작",
@@ -157,6 +161,8 @@ window.CAPS_SERVICES = [
     "summary": "교회가 필요한 사역자를 찾고, 사역자가 맞는 교회를 만나도록 중간에서 돕습니다. 공고 작성부터 지원자 정리, 면접 일정 조율까지 지원합니다.",
     "duration": "공고 게시 후 통상 4~8주 (사역 분야와 지역에 따라 차이)",
     "priceNote": "공고 배포까지의 기본 지원과, 지원자 정리·면접 조율을 포함한 전 과정 지원 중 선택할 수 있습니다. 상담 시 안내드립니다.",
+    "externalApply": "",
+    "externalApplyLabel": "",
     "features": [
       {
         "title": "청빙 공고 작성",
@@ -240,6 +246,8 @@ window.CAPS_SERVICES = [
     "summary": "예배당 음향 진단부터 장비 선정, 설치, 운영자 교육까지 지원합니다. 온라인 송출을 위한 음향 구성도 함께 잡아 드립니다.",
     "duration": "진단 1일 / 설치 1~3일 (규모에 따라 조정)",
     "priceNote": "기존 장비를 활용한 세팅 조정만으로 해결되는 경우도 많습니다. 우선 진단을 받아보시고 필요한 범위를 확인하시길 권합니다.",
+    "externalApply": "",
+    "externalApplyLabel": "",
     "features": [
       {
         "title": "현장 음향 진단",
@@ -317,6 +325,8 @@ window.CAPS_SERVICES = [
     "summary": "교회 건물 매입과 임대, 이전, 처분을 지원합니다. 일반 상가와 달리 교회는 용도와 소음, 주차, 명의 문제가 함께 걸리는 만큼 사전에 확인해야 할 것이 많습니다.",
     "duration": "조건과 지역에 따라 상이 (통상 2~6개월)",
     "priceNote": "중개 보수는 법정 요율을 따릅니다. 검토와 자문만 필요한 경우도 상담 가능하니 필요한 범위를 알려주세요.",
+    "externalApply": "",
+    "externalApplyLabel": "",
     "features": [
       {
         "title": "조건 정리 · 매물 검토",
@@ -394,6 +404,8 @@ window.CAPS_SERVICES = [
     "summary": "개교회가 혼자 감당하기 어려운 일을 함께 풀기 위한 협력 프로그램입니다. 교회 간 자원 연결, 공동 사역, 교육과 세미나를 지원합니다.",
     "duration": "연 단위 참여 (상시 신청 가능)",
     "priceNote": "참여 형태에 따라 다릅니다. 상담 시 안내드립니다.",
+    "externalApply": "",
+    "externalApplyLabel": "",
     "features": [
       {
         "title": "교회 간 연결",
@@ -459,6 +471,8 @@ window.CAPS_SERVICES = [
     "summary": "주보, 예배 영상, 공지, 출석, 심방 기록까지 하나의 앱으로 정리합니다. 성도용 앱과 교역자용 관리 화면을 함께 제공합니다.",
     "duration": "초기 설정 후 약 2~4주 내 사용 시작",
     "priceNote": "교인 수 구간에 따른 월 이용료 방식입니다. 초기 설정과 데이터 이전 비용이 별도로 발생할 수 있습니다.",
+    "externalApply": "",
+    "externalApplyLabel": "",
     "features": [
       {
         "title": "주보 · 공지 알림",
@@ -536,6 +550,8 @@ window.CAPS_SERVICES = [
     "summary": "회계 정리, 문서 작성, 각종 신고와 서류 처리처럼 손이 많이 가지만 사역은 아닌 일을 대행합니다. 행정 간사를 따로 두기 어려운 교회를 위한 항목입니다.",
     "duration": "월 단위 계약 (최소 3개월 권장)",
     "priceNote": "대행 범위와 교회 규모에 따라 월 이용료가 달라집니다. 필요한 항목만 골라 시작하실 수 있습니다.",
+    "externalApply": "",
+    "externalApplyLabel": "",
     "features": [
       {
         "title": "회계 정리",

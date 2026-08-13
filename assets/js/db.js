@@ -279,7 +279,7 @@ window.CAPSDB = (function () {
           return Promise.resolve(publicUser(found[0]));
         },
         signInGoogle: function () {
-          return Promise.reject(new Error('구글 로그인은 Firebase 연결 후 사용할 수 있습니다.'));
+          return Promise.reject(new Error('구글 로그인·가입은 Firebase 연결 후 사용할 수 있습니다. 데모 모드에서는 이메일로 가입해 주세요.'));
         },
         signOut: function () { setSession(null); return Promise.resolve(); },
         resetPassword: function () {
@@ -472,11 +472,25 @@ window.CAPSDB = (function () {
               .catch(function (err) { throw new Error(authMessage(err)); });
           });
         },
-        signInGoogle: function () {
+        /**
+         * 구글 계정으로 로그인 또는 가입.
+         * 처음 사용하는 계정이면 자동으로 가입 처리되며, intent 로 넘긴 값이
+         * users 문서 생성에 사용됩니다 (직원 포털은 staffRequest: true).
+         */
+        signInGoogle: function (intent) {
           return guard().then(function () {
+            if (intent) {
+              window.sessionStorage.setItem('caps.signup.intent', JSON.stringify({
+                name: intent.name || '', phone: intent.phone || '',
+                church: intent.church || '', staffRequest: !!intent.staffRequest,
+              }));
+            }
             var provider = new fb.authMod.GoogleAuthProvider();
             return fb.authMod.signInWithPopup(fb.auth, provider)
-              .catch(function (err) { throw new Error(authMessage(err)); });
+              .catch(function (err) {
+                window.sessionStorage.removeItem('caps.signup.intent');
+                throw new Error(authMessage(err, 'google'));
+              });
           });
         },
         signOut: function () {
@@ -501,8 +515,24 @@ window.CAPSDB = (function () {
 
       list: function (name, opts) {
         return guard().then(function () {
-          return fb.fsMod.getDocs(col(name)).then(function (snap) {
-            return applyQuery(snapRows(snap), opts);
+          var o = opts || {};
+          var fs = fb.fsMod;
+          var ref = col(name);
+
+          // where 조건은 서버로 넘깁니다. 보안 규칙이 조회 범위를 확인할 수 있어야
+          // 하기 때문입니다 (전체 목록 조회는 권한이 없으면 거부됩니다).
+          if (o.where) {
+            var clauses = Object.keys(o.where).map(function (key) {
+              return fs.where(key, '==', o.where[key]);
+            });
+            if (clauses.length) ref = fs.query.apply(null, [ref].concat(clauses));
+          }
+
+          return fs.getDocs(ref).then(function (snap) {
+            // 정렬·개수 제한은 색인을 추가하지 않아도 되도록 여기서 처리합니다.
+            var rest = Object.assign({}, o);
+            delete rest.where;
+            return applyQuery(snapRows(snap), rest);
           });
         });
       },
@@ -553,7 +583,10 @@ window.CAPSDB = (function () {
       },
     };
 
-    function authMessage(err) {
+    function authMessage(err, kind) {
+      if (kind === 'google' && err && err.code === 'auth/operation-not-allowed') {
+        return 'Firebase [Authentication → 로그인 방법] 에서 Google 로그인이 사용 설정되지 않았습니다.';
+      }
       var map = {
         'auth/invalid-email': '이메일 형식을 확인해 주세요.',
         'auth/email-already-in-use': '이미 가입된 이메일입니다.',
@@ -633,7 +666,12 @@ window.CAPSDB = (function () {
       return (ROLES[role] || {}).label || role || '-';
     },
 
-    /** 신청서 제출 — 접수번호를 발급하고 고객 정보를 함께 정리합니다. */
+    /**
+     * 신청서 제출.
+     * requests 문서 하나만 만듭니다. 고객(customers) 연결은 관리자 화면에서 처리합니다.
+     * — 고객 목록을 읽으려면 다른 교회 정보까지 볼 수 있어야 하므로,
+     *   신청자 권한으로는 조회하지 않습니다.
+     */
     submitRequest: function (data) {
       var me = adapter.auth.current();
       var record = Object.assign({}, data, {
@@ -641,45 +679,25 @@ window.CAPSDB = (function () {
         createdAt: nowIso(),
         status: 'received',
         assignee: '',
+        dueDate: '',
         memo: '',
         tasks: [],
         userId: me ? me.id : '',
       });
-      return adapter.add('requests', record).then(function (saved) {
-        // 같은 교회 이름의 고객이 없으면 고객으로 등록해 둡니다.
-        return adapter.list('customers').then(function (customers) {
-          var match = customers.filter(function (c) {
-            return c.name.trim() === String(record.church_name).trim();
-          });
-          if (match.length) {
-            return adapter.update('requests', saved.id, { customerId: match[0].id }).then(function () { return saved; });
-          }
-          return adapter
-            .add('customers', {
-              name: record.church_name,
-              denomination: record.denomination || '',
-              contactName: record.contact_name || '',
-              contactRole: record.contact_role || '',
-              phone: record.phone || '',
-              email: record.email || '',
-              location: record.location || '',
-              size: record.size || '',
-              memo: '',
-              userId: me ? me.id : '',
-            })
-            .then(function (cust) {
-              return adapter.update('requests', saved.id, { customerId: cust.id });
-            })
-            .then(function () { return saved; });
-        });
-      });
+      return adapter.add('requests', record);
     },
 
-    /** 접수번호로 조회 */
+    /** 접수번호로 조회. 고객은 본인 신청만, 직원은 전체를 조회합니다. */
     findByCode: function (code) {
       var needle = String(code || '').trim().toUpperCase();
       if (!needle) return Promise.resolve(null);
-      return adapter.list('requests').then(function (rows) {
+
+      var me = adapter.auth.current();
+      var isStaffUser = !!(me && me.approved &&
+        ['owner', 'admin', 'staff'].indexOf(me.role) > -1);
+      var opts = isStaffUser ? {} : { where: { userId: me ? me.id : '__none__' } };
+
+      return adapter.list('requests', opts).then(function (rows) {
         var hit = rows.filter(function (r) {
           return String(r.code || '').toUpperCase() === needle;
         });
@@ -706,6 +724,34 @@ window.CAPSDB = (function () {
 
     money: function (n) {
       return (Number(n) || 0).toLocaleString('ko-KR');
+    },
+
+    /**
+     * 마감일까지 남은 일수(디데이)를 계산합니다.
+     * @param {string} dateStr 'YYYY-MM-DD'
+     * @returns {{days:number, label:string, cls:string, late:boolean}|null}
+     */
+    dday: function (dateStr) {
+      if (!dateStr) return null;
+      var parts = String(dateStr).split('-');
+      if (parts.length !== 3) return null;
+
+      var due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      if (isNaN(due.getTime())) return null;
+
+      var now = new Date();
+      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var days = Math.round((due - today) / 864e5);
+
+      if (days < 0) return { days: days, label: 'D+' + -days, cls: 'dd-late', late: true };
+      if (days === 0) return { days: 0, label: 'D-DAY', cls: 'dd-today', late: false };
+      if (days <= 3) return { days: days, label: 'D-' + days, cls: 'dd-soon', late: false };
+      return { days: days, label: 'D-' + days, cls: 'dd-ok', late: false };
+    },
+
+    /** 작업이 끝난 상태인지 (지연 계산에서 제외) */
+    isClosed: function (status) {
+      return status === 'done' || status === 'canceled';
     },
 
     /** 전화번호에 하이픈을 넣습니다. 형식을 알 수 없으면 원본을 그대로 돌려줍니다. */

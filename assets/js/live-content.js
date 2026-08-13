@@ -68,8 +68,44 @@
         });
       }
 
+      /* 외부 접수 주소 변경 */
+      if (over.externalApply != null) applyExternal(id, over);
+
       /* 숨김 처리 */
       if (over.published === false) hideService(id);
+    });
+  }
+
+  /** 관리자가 바꾼 외부 접수 주소를 신청 버튼에 반영합니다. */
+  function applyExternal(id, over) {
+    var url = String(over.externalApply || '').trim();
+    var who = String(over.externalApplyLabel || '').trim() || '외부 사이트';
+
+    document.querySelectorAll('[data-apply="' + id + '"]').forEach(function (a) {
+      if (url) {
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        // 버튼 문구의 앞부분(사이트 이름)만 바꿉니다.
+        if (/에서 신청하기/.test(a.textContent)) {
+          var arrow = a.querySelector('svg');
+          a.textContent = who + '에서 신청하기';
+          if (arrow) a.appendChild(arrow);
+        }
+      } else {
+        // 주소를 비우면 내부 신청서로 되돌립니다.
+        var prefix = /\/services\//.test(window.location.pathname) ? '../' : '';
+        a.href = prefix + 'apply.html?service=' + id;
+        a.removeAttribute('target');
+        a.removeAttribute('rel');
+      }
+    });
+
+    document.querySelectorAll('[data-apply-note="' + id + '"]').forEach(function (note) {
+      if (!url) { note.hidden = true; return; }
+      note.hidden = false;
+      note.innerHTML = '이 항목의 신청은 <strong>' + esc(who) +
+        '</strong> 접수 페이지에서 진행됩니다. 버튼을 누르면 새 창으로 열립니다.';
     });
   }
 

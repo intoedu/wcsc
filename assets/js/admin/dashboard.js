@@ -18,6 +18,13 @@
     icon: 'dashboard',
 
     render: function (root, state) {
+      var me = db.auth.current();
+      // 정산·고객 권한이 없는 직원에게는 금액 정보를 표시하지 않습니다.
+      var canSeeMoney = db.can('settlement') || db.can('customers');
+      var myOpen = state.requests.filter(function (r) {
+        return r.assignee === me.id && ['done', 'canceled'].indexOf(r.status) === -1;
+      }).length;
+
       var reqs = state.requests;
       var newReqs = reqs.filter(function (r) { return r.status === 'received'; });
       var running = reqs.filter(function (r) {
@@ -58,8 +65,11 @@
             (newReqs.length ? '<small>확인이 필요합니다</small>' : '') + '</div>' +
           '<div class="adm-stat"><strong>' + running.length + '</strong><span>진행 중인 건</span></div>' +
           '<div class="adm-stat"><strong>' + state.customers.length + '</strong><span>등록 고객 교회</span></div>' +
-          '<div class="adm-stat is-accent"><strong>' + A.money(mrr) + '</strong><span>월 구독 합계 (원)</span>' +
-            '<small>이용중 ' + activeSubs.length + '건</small></div>' +
+          (canSeeMoney
+            ? '<div class="adm-stat is-accent"><strong>' + A.money(mrr) + '</strong><span>월 구독 합계 (원)</span>' +
+              '<small>이용중 ' + activeSubs.length + '건</small></div>'
+            : '<div class="adm-stat"><strong>' + myOpen + '</strong><span>내 진행 작업</span>' +
+              '<small><button type="button" class="link-btn" data-view="mytasks">내 작업 보기</button></small></div>') +
         '</div>' +
 
         (pendingStaff.length
@@ -67,7 +77,7 @@
             '<button type="button" class="link-btn" data-view="members">관리자 목록에서 승인하기</button></div>'
           : '') +
 
-        (unpaid.length
+        (unpaid.length && canSeeMoney
           ? '<div class="guide-box"><strong>이번 달 미수금 ' + A.money(unpaidSum) + '원</strong> (' + unpaid.length + '건) · ' +
             '<button type="button" class="link-btn" data-view="settlement">정산 화면에서 확인</button></div>'
           : '') +

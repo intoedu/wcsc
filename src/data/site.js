@@ -144,6 +144,9 @@ const services = [
     duration: '약 4~8주 (자료 준비 상황에 따라 조정)',
     priceNote:
       '페이지 수, 게시판 종류, 영상·헌금 기능 포함 여부에 따라 달라집니다. 상담 후 항목별 내역이 적힌 견적서를 드립니다.',
+    // 이 항목의 신청은 @IM 사이트에서 접수합니다 (관리자 화면에서 주소 수정 가능).
+    externalApply: 'https://koreayjk.github.io/aim/request.html',
+    externalApplyLabel: '@IM',
     faqs: [
       {
         q: '기존 홈페이지 자료를 옮길 수 있나요?',
@@ -216,6 +219,8 @@ const services = [
     duration: '단건 3~7일 / 주보 정기 제작은 주 단위 일정 협의',
     priceNote:
       '건별 제작과 월 정기 계약 중 선택할 수 있습니다. 주보처럼 매주 반복되는 항목은 정기 계약이 유리합니다. 수량과 규격을 알려주시면 견적을 드립니다.',
+    externalApply: 'https://koreayjk.github.io/aim/request.html',
+    externalApplyLabel: '@IM',
     faqs: [
       {
         q: '급하게 이번 주까지 필요한데 가능한가요?',

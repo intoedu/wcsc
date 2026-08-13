@@ -20,6 +20,13 @@
     return hit.length ? (hit[0].name || hit[0].email) : '(삭제된 계정)';
   }
 
+  function ddayCell(r) {
+    if (db.isClosed(r.status)) return '<span class="dd dd-done">완료</span>';
+    var d = db.dday(r.dueDate);
+    if (!d) return '<span class="dd dd-none">미설정</span>';
+    return '<span class="dd ' + d.cls + '">' + d.label + '</span>';
+  }
+
   function match(r, state) {
     if (filter.status && r.status !== filter.status) return false;
     if (filter.service && (r.services || []).indexOf(filter.service) === -1) return false;
@@ -64,6 +71,15 @@
       sub: r.code + ' · 접수 ' + db.formatDate(r.createdAt),
       body:
         '<div class="drawer-section"><h3>상태</h3><div class="seg" id="dStatus">' + statusBtns + '</div></div>' +
+
+        '<div class="drawer-section"><h3>마감일 (디데이)</h3>' +
+          '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
+            '<input type="date" id="dDue" value="' + h(r.dueDate || '') + '" ' +
+            'style="padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14.5px">' +
+            ddayCell(r) +
+          '</div>' +
+          '<p class="field-hint">담당자는 [내 작업] 화면에서도 직접 바꿀 수 있습니다.</p>' +
+        '</div>' +
 
         '<div class="drawer-section"><h3>담당자</h3>' +
           '<select class="inline-select" id="dAssignee" style="max-width:none;width:100%;padding:12px 14px;font-size:14.5px">' +
@@ -163,6 +179,7 @@
         body.querySelector('#dSave').addEventListener('click', function () {
           db.update('requests', r.id, {
             status: pendingStatus,
+            dueDate: body.querySelector('#dDue').value,
             assignee: body.querySelector('#dAssignee').value,
             memo: body.querySelector('#dMemo').value,
             tasks: pendingTasks,
@@ -225,6 +242,49 @@
     }).join('');
   }
 
+  /**
+   * 고객으로 연결되지 않은 신청을 정리합니다.
+   * 같은 교회명이 이미 있으면 연결만, 없으면 고객을 새로 만듭니다.
+   * (신청자 권한으로는 고객 목록을 볼 수 없어 관리자 화면에서 처리합니다.)
+   */
+  function linkAll(list, state) {
+    var byName = {};
+    state.customers.forEach(function (c) {
+      byName[String(c.name || '').trim()] = c.id;
+    });
+
+    var count = 0;
+    // 같은 교회가 여러 건 들어와도 고객이 중복 생성되지 않도록 순차 처리합니다.
+    return list.reduce(function (chain, r) {
+      return chain.then(function () {
+        var name = String(r.church_name || '').trim();
+        if (!name) return null;
+
+        var existing = byName[name];
+        if (existing) {
+          count++;
+          return db.update('requests', r.id, { customerId: existing });
+        }
+        return db.add('customers', {
+          name: name,
+          denomination: r.denomination || '',
+          contactName: r.contact_name || '',
+          contactRole: r.contact_role || '',
+          phone: r.phone || '',
+          email: r.email || '',
+          location: r.location || '',
+          size: r.size || '',
+          memo: '',
+          userId: r.userId || '',
+        }).then(function (cust) {
+          byName[name] = cust.id;
+          count++;
+          return db.update('requests', r.id, { customerId: cust.id });
+        });
+      });
+    }, Promise.resolve()).then(function () { return count; });
+  }
+
   /* ---------------- 목록 화면 ---------------- */
 
   A.register('requests', {
@@ -250,7 +310,15 @@
 
       ctx.actions.innerHTML = '<button type="button" class="btn btn-outline btn-sm" id="reqCsv">CSV 내려받기</button>';
 
+      var unlinked = all.filter(function (r) { return !r.customerId; });
+
       root.innerHTML =
+        (unlinked.length && db.can('customers') && db.can('requests')
+          ? '<div class="guide-box"><strong>고객으로 연결되지 않은 신청이 ' + unlinked.length + '건 있습니다.</strong><br>' +
+            '연결하면 고객 관리·구독·정산에서 같은 교회로 묶여 보입니다. ' +
+            '<button type="button" class="btn btn-outline btn-sm" id="linkCustomers" ' +
+            'style="margin-top:10px">고객으로 연결하기</button></div>'
+          : '') +
         '<div class="adm-stats">' +
           '<div class="adm-stat"><strong>' + all.length + '</strong><span>전체</span></div>' +
           '<div class="adm-stat"><strong>' + counts.received + '</strong><span>접수 (미확인)</span></div>' +
@@ -283,7 +351,8 @@
 
         '<div class="adm-tablewrap"><table class="adm-t"><thead><tr>' +
           '<th style="width:150px">접수번호</th><th>교회명 · 담당자</th><th>신청 항목</th>' +
-          '<th style="width:130px">담당자</th><th>진행</th><th style="width:120px">상태</th><th style="width:100px">접수일</th>' +
+          '<th style="width:130px">담당자</th><th style="width:90px">디데이</th>' +
+          '<th>진행</th><th style="width:120px">상태</th><th style="width:100px">접수일</th>' +
         '</tr></thead><tbody id="reqRows">' +
         (rows.length
           ? rows.map(function (r) {
@@ -298,12 +367,13 @@
                 }).join('') + '</div></td>' +
                 '<td class="nowrap">' + (r.assignee ? h(staffName(state, r.assignee)) :
                   '<span style="color:var(--muted)">미배정</span>') + '</td>' +
+                '<td>' + ddayCell(r) + '</td>' +
                 '<td class="nowrap">' + (total ? done + ' / ' + total : '<span style="color:var(--muted)">-</span>') +
                   (r.memo ? '<span class="sub">' + h(r.memo.slice(0, 22)) + (r.memo.length > 22 ? '…' : '') + '</span>' : '') + '</td>' +
                 '<td><span class="st st-' + h(r.status) + '">' + h(db.REQUEST_STATUS[r.status] || r.status) + '</span></td>' +
                 '<td class="nowrap">' + h(db.formatDate(r.createdAt, false)) + '</td></tr>';
             }).join('')
-          : A.emptyRow(7, all.length ? '조건에 맞는 신청이 없습니다' : '아직 신청이 없습니다',
+          : A.emptyRow(8, all.length ? '조건에 맞는 신청이 없습니다' : '아직 신청이 없습니다',
               all.length ? '검색어나 필터를 바꿔보세요.' : '홈페이지에서 신청이 들어오면 여기에 표시됩니다.')) +
         '</tbody></table></div>';
 
@@ -325,6 +395,21 @@
       root.querySelector('#fstatus').addEventListener('change', function (e) { filter.status = e.target.value; apply(); });
       root.querySelector('#fservice').addEventListener('change', function (e) { filter.service = e.target.value; apply(); });
       root.querySelector('#fassignee').addEventListener('change', function (e) { filter.assignee = e.target.value; apply(); });
+
+      var linkBtn = root.querySelector('#linkCustomers');
+      if (linkBtn) {
+        linkBtn.addEventListener('click', function () {
+          linkBtn.disabled = true;
+          linkBtn.textContent = '연결 중…';
+          linkAll(unlinked, state).then(function (n) {
+            A.toast(n ? n + '건을 고객으로 연결했습니다.' : '연결할 신청이 없습니다.', n ? 'ok' : 'err');
+          }).catch(function (err) {
+            A.toast(err.message || '연결에 실패했습니다.', 'err');
+            linkBtn.disabled = false;
+            linkBtn.textContent = '고객으로 연결하기';
+          });
+        });
+      }
 
       root.querySelector('#reqRows').addEventListener('click', function (e) {
         var tr = e.target.closest('tr[data-id]');
