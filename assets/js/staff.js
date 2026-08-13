@@ -90,6 +90,13 @@
       return;
     }
 
+    /* 교회 · 직분 · 연락처가 비어 있으면 먼저 받습니다 (구글 가입 · 예전 계정).
+       저장하면 로그인 상태가 갱신되어 이 함수가 다시 불립니다. */
+    if (window.CAPSProfile && db.needsProfile(user)) {
+      window.CAPSProfile.ensure(user);
+      return;
+    }
+
     var who =
       '<span class="sp-who"><strong>' + esc(user.name || user.email) + '</strong><br>' +
       esc(user.email) + '</span>';
@@ -243,12 +250,9 @@
     var err = document.getElementById(errId);
     err.hidden = true;
 
-    // 신청 탭에서 누른 경우에는 교회 · 직분 · 연락처를 먼저 받습니다.
-    if (fromSignup) {
-      var problem = validateSignup(false);
-      if (problem) { showProblem(errId, problem); return; }
-      justSignedUp = true;
-    }
+    // 신청 탭의 칸은 비워두어도 됩니다.
+    // 비어 있으면 구글 인증 뒤 [추가 정보 입력] 화면에서 받습니다.
+    if (fromSignup) justSignedUp = true;
 
     db.auth.signInGoogle(fromSignup ? signupData() : { staffRequest: true })
       .catch(function (ex) {

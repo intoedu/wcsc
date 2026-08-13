@@ -106,7 +106,7 @@ window.CAPSAuthUI = (function () {
             '<button type="button" class="btn btn-outline btn-block auth-google" id="googleSignupBtn">' +
               googleMark() + 'Google 계정으로 가입하기</button>' +
             '<p class="auth-google-note">구글 계정으로 가입하면 비밀번호를 따로 만들지 않아도 됩니다. ' +
-              '교회명 · 직분 · 연락처는 위에 먼저 입력해 주세요.</p>' +
+              '위 칸을 비워두고 눌러도 되며, 교회명 · 직분 · 연락처는 다음 화면에서 입력합니다.</p>' +
           '</form>' +
         '</div>' +
       '</div>';
@@ -222,20 +222,12 @@ window.CAPSAuthUI = (function () {
         });
     });
 
-    /* 구글 계정으로 가입 (처음이면 자동 가입, 이미 있으면 로그인) */
+    /* 구글 계정으로 가입 (처음이면 자동 가입, 이미 있으면 로그인)
+       위 칸을 미리 채우지 않아도 됩니다. 비어 있으면 구글 인증 뒤에
+       [추가 정보 입력] 화면에서 교회 · 직분 · 연락처를 받습니다. */
     modal.querySelector('#googleSignupBtn').addEventListener('click', function () {
       var err = modal.querySelector('#signupErr');
       err.hidden = true;
-
-      // 구글로 가입해도 교회 · 직분 · 연락처는 받습니다.
-      var problem = validateSignup(false);
-      if (problem) {
-        err.textContent = problem[0];
-        err.hidden = false;
-        var target = modal.querySelector('#' + problem[1]);
-        if (target) target.focus();
-        return;
-      }
 
       db.auth.signInGoogle(signupData())
         .then(function () { succeed(); })
@@ -335,21 +327,41 @@ window.CAPSAuthUI = (function () {
     }
   }
 
+  /**
+   * 교회명 · 직분 · 연락처가 비어 있으면 [추가 정보 입력] 화면을 거칩니다.
+   * 저장을 마치면 원래 하려던 동작으로 이어집니다.
+   */
+  function profileGate(user) {
+    if (!user) return Promise.reject(new Error('cancelled'));
+    if (!window.CAPSProfile) return Promise.resolve(user);
+    return window.CAPSProfile.ensure(user).then(function (u) {
+      if (!u) throw new Error('cancelled');
+      return u;
+    });
+  }
+
   function succeed() {
     var user = db.auth.current();
     modal.hidden = true;
-    document.body.style.overflow = '';
-    if (pendingResolve) {
-      var resolve = pendingResolve.resolve;
-      pendingResolve = null;
-      resolve(user);
+    // 추가 정보 화면이 이어서 열리는 경우에는 스크롤 잠금을 그대로 둡니다.
+    if (!(window.CAPSProfile && window.CAPSProfile.isOpen())) {
+      document.body.style.overflow = '';
     }
+
+    var waiting = pendingResolve;
+    pendingResolve = null;
+    var gate = profileGate(user);
+    if (!waiting) {
+      gate.catch(function () { /* 무시 */ });
+      return;
+    }
+    gate.then(waiting.resolve, waiting.reject);
   }
 
   /** 로그인이 필요한 동작에서 사용. 이미 로그인 상태면 바로 통과합니다. */
   function require(reason) {
     var user = db.auth.current();
-    if (user) return Promise.resolve(user);
+    if (user) return profileGate(user);
     return new Promise(function (resolve, reject) {
       pendingResolve = { resolve: resolve, reject: reject };
       open({ reason: reason || '이어서 진행하려면 로그인이 필요합니다.' });
@@ -410,7 +422,12 @@ window.CAPSAuthUI = (function () {
     });
   }
 
-  db.auth.onChange(renderHeader);
+  /* 로그인할 때마다 필수 정보를 확인합니다.
+     구글로 가입한 계정과 예전에 만들어진 계정도 이 지점에서 걸립니다. */
+  db.auth.onChange(function (user) {
+    renderHeader(user);
+    if (user && window.CAPSProfile) window.CAPSProfile.ensure(user);
+  });
 
   return { open: open, close: close, require: require };
 })();

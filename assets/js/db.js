@@ -131,6 +131,7 @@ window.CAPSDB = (function () {
         {
           id: 'demo-owner', email: 'admin@caps.or.kr', password: 'caps1234',
           name: '관리자', phone: '02-0000-0000', role: 'owner', approved: true,
+          church: 'CAPS 교회지원센터', contactRole: '행정 간사', birthDate: '',
           perms: {}, createdAt: nowIso(),
         },
       ]);
@@ -514,6 +515,10 @@ window.CAPSDB = (function () {
             if (!profile) throw new Error('로그인이 필요합니다.');
             return fb.fsMod.updateDoc(fb.fsMod.doc(fb.fs, 'users', profile.id), patch).then(function () {
               profile = Object.assign({}, profile, patch);
+              // 헤더·게이트 등 로그인 상태를 보는 화면도 함께 갱신합니다.
+              authListeners.forEach(function (cb) {
+                try { cb(profile); } catch (e) { /* 무시 */ }
+              });
               return profile;
             });
           });
@@ -670,6 +675,18 @@ window.CAPSDB = (function () {
       if (u.role === 'owner') return true;
       if (u.role === 'client') return false;
       return !!(u.perms && u.perms[perm]);
+    },
+
+    /**
+     * 필수 프로필(교회명 · 직분 · 연락처)이 비어 있는지.
+     * 구글로 가입한 계정과 예전에 만들어진 계정을 걸러내기 위한 것입니다.
+     */
+    needsProfile: function (user) {
+      var u = user || adapter.auth.current();
+      if (!u) return false;
+      return !String(u.church || '').trim()
+        || !String(u.contactRole || '').trim()
+        || !String(u.phone || '').trim();
     },
 
     /** 관리자 화면에 들어올 수 있는 계정인지 */

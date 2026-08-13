@@ -297,6 +297,15 @@ window.CAPSAdmin = (function () {
       if (user.role === 'client') return showGate('client', user);
       if (!user.approved) return showGate('pending', user);
 
+      /* 교회 · 직분 · 연락처가 비어 있으면 먼저 받습니다.
+         저장하면 로그인 상태가 갱신되어 이 함수가 다시 불립니다. */
+      if (window.CAPSProfile && db.needsProfile(user)) {
+        el('admShell').hidden = true;
+        el('admGate').hidden = true;
+        window.CAPSProfile.ensure(user);
+        return;
+      }
+
       el('admGate').hidden = true;
       el('admShell').hidden = false;
       el('admBody').innerHTML = '<div class="adm-card"><p class="adm-card-lead">불러오는 중…</p></div>';
