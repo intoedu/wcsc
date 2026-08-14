@@ -15,7 +15,6 @@ window.CAPSProfile = (function () {
   var db = window.CAPSDB;
   var modal = null;
   var waiting = null;   // { promise, resolve }
-  var ROLES = ['담임목사', '부목사', '전도사', '장로', '권사', '집사', '행정 간사', '성도', '기타'];
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -51,9 +50,9 @@ window.CAPSProfile = (function () {
             '<div class="field"><label for="pfChurch">교회명 <em class="req">필수</em></label>' +
               '<input type="text" id="pfChurch" autocomplete="organization" required></div>' +
             '<div class="field"><label for="pfRole">직분 <em class="req">필수</em></label>' +
-              '<select id="pfRole" required><option value="">선택해 주세요</option>' +
-              ROLES.map(function (r) { return '<option>' + r + '</option>'; }).join('') +
-              '</select></div>' +
+              '<select id="pfRole" required>' + db.roleOptionsHtml() + '</select></div>' +
+            '<div class="field" id="pfRoleOtherBox" hidden><label for="pfRoleOther">직분 직접 입력 <em class="req">필수</em></label>' +
+              '<input type="text" id="pfRoleOther"></div>' +
             '<div class="field"><label for="pfPhone">연락처 <em class="req">필수</em></label>' +
               '<input type="tel" id="pfPhone" autocomplete="tel" required placeholder="01000000000">' +
               '<p class="field-hint">숫자 11자리까지 입력됩니다. 하이픈은 자동으로 들어갑니다.</p></div>' +
@@ -74,6 +73,9 @@ window.CAPSProfile = (function () {
   function wire() {
     db.bindPhoneInput(modal.querySelector('#pfPhone'));
 
+    /* 직분에서 '기타'를 고르면 직접 입력칸이 나타납니다. */
+    db.bindRoleSelect(modal.querySelector('#pfRole'), modal.querySelector('#pfRoleOther'));
+
     modal.querySelector('#pfSignOut').addEventListener('click', function () {
       db.auth.signOut().then(function () {
         window.location.href = base() + 'index.html';
@@ -87,9 +89,11 @@ window.CAPSProfile = (function () {
 
       var v = function (id) { return (modal.querySelector('#' + id).value || '').trim(); };
       var problem = null;
+      var role = db.roleValue(modal.querySelector('#pfRole'), modal.querySelector('#pfRoleOther'));
       if (!v('pfName')) problem = ['성함을 입력해 주세요.', 'pfName'];
       else if (!v('pfChurch')) problem = ['교회명을 입력해 주세요.', 'pfChurch'];
       else if (!v('pfRole')) problem = ['직분을 선택해 주세요.', 'pfRole'];
+      else if (!role) problem = ['직분을 직접 입력해 주세요.', 'pfRoleOther'];
       else if (!v('pfPhone')) problem = ['연락처를 입력해 주세요.', 'pfPhone'];
       else if (!db.isValidPhone(v('pfPhone'))) problem = ['연락처를 정확히 입력해 주세요.', 'pfPhone'];
 
@@ -109,7 +113,7 @@ window.CAPSProfile = (function () {
         name: v('pfName'),
         birthDate: v('pfBirth'),
         church: v('pfChurch'),
-        contactRole: v('pfRole'),
+        contactRole: role,
         phone: db.formatPhone(v('pfPhone')),
       }).then(function () {
         settle(db.auth.current());
@@ -128,7 +132,7 @@ window.CAPSProfile = (function () {
     set('pfName', user.name);
     set('pfBirth', user.birthDate);
     set('pfChurch', user.church);
-    set('pfRole', user.contactRole);
+    db.setRoleValue(modal.querySelector('#pfRole'), modal.querySelector('#pfRoleOther'), user.contactRole);
     set('pfPhone', user.phone);
     modal.querySelector('#pfWho').innerHTML =
       '<strong>' + esc(user.name || '이름 미등록') + '</strong><small>' + esc(user.email) + '</small>';

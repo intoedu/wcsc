@@ -333,3 +333,44 @@ body.staff { background: var(--brand-900); }
 .cs-reject .btn { margin-top: 12px; }
 .cs-foot { margin-top: 16px; font-size: 13px; color: var(--muted); text-align: center; line-height: 1.7; }
 .cs-done { padding: 8px 0 18px; font-size: 15px; line-height: 1.8; color: var(--ink-2); text-align: center; }
+
+/* ---------- 내 정보 수정 ---------- */
+.acct-modal { z-index: 250; }
+.acct-modal .auth-panel { width: min(100%, 480px); }
+.ac-head {
+  position: relative; padding: 24px 28px 20px; background: var(--brand-800); color: #fff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.ac-head h2 { font-size: 20px; letter-spacing: -.02em; }
+.ac-head p { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-top: 8px; }
+.ac-head p strong { font-size: 15px; color: #fff; }
+.ac-head p span {
+  padding: 2px 9px; border-radius: 6px; background: rgba(255,255,255,.18);
+  font-size: 12px; font-weight: 700;
+}
+.ac-head .auth-close { color: rgba(255,255,255,.8); }
+.ac-head .auth-close:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+.ac-sec {
+  font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--gold-ink);
+  padding: 3px 9px; border-radius: 6px; background: var(--gold-100);
+  border: 1px solid var(--gold-border); display: inline-block; margin-bottom: 14px;
+}
+.ac-block { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.ac-block .btn { margin-top: 18px; }
+.ac-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--line-2); font-size: 14px;
+}
+.ac-row:last-of-type { border-bottom: none; }
+.ac-row span { color: var(--muted); flex: none; }
+.ac-row strong { text-align: right; word-break: break-all; }
+.ac-note { margin-top: 10px; font-size: 13px; line-height: 1.75; color: var(--muted); }
+.ac-foot { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; }
+.ac-foot .link-btn { font-size: 13.5px; color: #B3261E; }
+
+/* 저장 완료 안내 */
+.auth-ok {
+  margin-top: 16px; padding: 12px 15px; background: #E9F6EF; border: 1px solid #B7E0C9;
+  border-radius: 9px; color: #14663C; font-size: 14px; font-weight: 600; line-height: 1.7;
+}

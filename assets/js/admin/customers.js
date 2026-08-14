@@ -25,17 +25,22 @@
   function field(label, name, value, opts) {
     var o = opts || {};
     var lock = o.locked ? ' disabled' : '';
-    return '<div class="field' + (o.locked ? ' is-locked' : '') + '"><label for="c_' + name + '">' + h(label) +
+    // noName 인 칸은 저장할 때 폼에서 자동으로 읽지 않습니다
+    // (직분 '기타' 직접 입력칸 — 최종 값은 db.roleValue 로 계산합니다).
+    var nm = o.noName ? '' : ' name="' + name + '"';
+    return '<div class="field' + (o.locked ? ' is-locked' : '') + '" id="cf_' + name + '">' +
+      '<label for="c_' + name + '">' + h(label) +
       (o.required ? ' <em class="req">필수</em>' : '') +
       (o.locked ? ' <span class="lock-tag">승인 필요</span>' : '') + '</label>' +
       (o.type === 'textarea'
-        ? '<textarea id="c_' + name + '" name="' + name + '" rows="3"' + lock + '>' + h(value || '') + '</textarea>'
+        ? '<textarea id="c_' + name + '"' + nm + ' rows="3"' + lock + '>' + h(value || '') + '</textarea>'
         : o.type === 'select'
-          ? '<select id="c_' + name + '" name="' + name + '"' + lock + '><option value="">선택</option>' +
+          ? '<select id="c_' + name + '"' + nm + lock + '><option value="">선택</option>' +
             o.options.map(function (op) {
               return '<option' + (op === value ? ' selected' : '') + '>' + h(op) + '</option>';
             }).join('') + '</select>'
-          : '<input type="' + (o.type || 'text') + '" id="c_' + name + '" name="' + name + '" value="' + h(value || '') + '"' +
+          : '<input type="' + (o.type || 'text') + '" id="c_' + name + '"' + nm +
+            ' value="' + h(value || '') + '"' +
             (o.placeholder ? ' placeholder="' + h(o.placeholder) + '"' : '') + lock + '>') +
       '</div>';
   }
@@ -188,9 +193,9 @@
           '<div class="drawer-section"><h3>담당자</h3>' +
             field('담당자 성함', 'contactName', c.contactName, { locked: lk.locked }) +
             field('직분', 'contactRole', c.contactRole, {
-              type: 'select', locked: lk.locked,
-              options: ['담임목사', '부목사', '전도사', '장로', '집사', '행정 간사', '기타'],
+              type: 'select', locked: lk.locked, options: db.ROLE_OPTIONS,
             }) +
+            field('직분 직접 입력', 'contactRoleOther', '', { locked: lk.locked, noName: true }) +
             field('연락처', 'phone', c.phone, { type: 'tel', placeholder: '010-0000-0000', locked: lk.locked }) +
             field('이메일', 'email', c.email, { type: 'email', locked: lk.locked }) +
           '</div>' +
@@ -235,6 +240,11 @@
         '</div>',
 
       onMount: function (body) {
+        /* 직분에서 '기타'를 고르면 직접 입력칸이 나타납니다. */
+        var roleSel = body.querySelector('#c_contactRole');
+        var roleOther = body.querySelector('#c_contactRoleOther');
+        db.setRoleValue(roleSel, roleOther, c.contactRole);
+
         var ask = body.querySelector('#cConsentAsk');
         if (ask) ask.addEventListener('click', function () { askConsent(c, A.state); });
 
@@ -256,6 +266,10 @@
             if (input.disabled) return;
             data[input.name] = input.value.trim();
           });
+          // 직분은 select + 직접 입력을 합쳐 최종 값으로 저장합니다.
+          if (!roleSel.disabled) data.contactRole = db.roleValue(roleSel, roleOther);
+          else delete data.contactRole;
+
           if (isNew && !data.name) {
             A.toast('교회명을 입력해 주세요.', 'err');
             form.querySelector('#c_name').focus();

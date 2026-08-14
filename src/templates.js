@@ -196,6 +196,7 @@ ${o.body}
   <script src="${base}assets/js/data.js" defer></script>
   <script src="${base}assets/js/db.js" defer></script>
   <script src="${base}assets/js/profile.js" defer></script>
+  <script src="${base}assets/js/account.js" defer></script>
   <script src="${base}assets/js/auth-ui.js" defer></script>
   <script src="${base}assets/js/consent-ui.js" defer></script>
   <script src="${base}assets/js/live-content.js" defer></script>

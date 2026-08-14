@@ -92,8 +92,9 @@ window.CAPSAuthUI = (function () {
             '<div class="field"><label for="suChurch">교회명 <em class="req">필수</em></label>' +
               '<input type="text" id="suChurch" autocomplete="organization" required></div>' +
             '<div class="field"><label for="suRole">직분 <em class="req">필수</em></label>' +
-              '<select id="suRole" required><option value="">선택해 주세요</option>' +
-              '<option>담임목사</option><option>부목사</option><option>전도사</option><option>장로</option><option>권사</option><option>집사</option><option>행정 간사</option><option>성도</option><option>기타</option></select></div>' +
+              '<select id="suRole" required>' + db.roleOptionsHtml() + '</select></div>' +
+            '<div class="field" id="suRoleOtherBox" hidden><label for="suRoleOther">직분 직접 입력 <em class="req">필수</em></label>' +
+              '<input type="text" id="suRoleOther"></div>' +
             '<div class="field"><label for="suPhone">연락처 <em class="req">필수</em></label>' +
               '<input type="tel" id="suPhone" autocomplete="tel" required placeholder="01000000000">' +
               '<p class="field-hint">숫자 11자리까지 입력됩니다. 하이픈은 자동으로 들어갑니다.</p></div>' +
@@ -127,6 +128,9 @@ window.CAPSAuthUI = (function () {
     if (!v('suName')) return ['성함을 입력해 주세요.', 'suName'];
     if (!v('suChurch')) return ['교회명을 입력해 주세요.', 'suChurch'];
     if (!v('suRole')) return ['직분을 선택해 주세요.', 'suRole'];
+    if (!db.roleValue(modal.querySelector('#suRole'), modal.querySelector('#suRoleOther'))) {
+      return ['직분을 직접 입력해 주세요.', 'suRoleOther'];
+    }
     if (!v('suPhone')) return ['연락처를 입력해 주세요.', 'suPhone'];
     if (!db.isValidPhone(v('suPhone'))) return ['연락처를 정확히 입력해 주세요.', 'suPhone'];
     if (!modal.querySelector('#suAgree').checked) return ['개인정보 수집 · 이용에 동의해 주세요.', 'suAgree'];
@@ -147,7 +151,7 @@ window.CAPSAuthUI = (function () {
       name: v('suName'),
       birthDate: v('suBirth'),
       church: v('suChurch'),
-      contactRole: v('suRole'),
+      contactRole: db.roleValue(modal.querySelector('#suRole'), modal.querySelector('#suRoleOther')),
       phone: db.formatPhone(v('suPhone')),
     };
   }
@@ -155,6 +159,9 @@ window.CAPSAuthUI = (function () {
   function wire() {
     /* 연락처는 숫자 11자리까지만 입력됩니다. */
     db.bindPhoneInput(modal.querySelector('#suPhone'));
+
+    /* 직분에서 '기타'를 고르면 직접 입력칸이 나타납니다. */
+    db.bindRoleSelect(modal.querySelector('#suRole'), modal.querySelector('#suRoleOther'));
 
     /* 비밀번호 확인 실시간 표시 */
     var pw = modal.querySelector('#suPw');
@@ -403,6 +410,7 @@ window.CAPSAuthUI = (function () {
             '<small>' + esc(user.email) + '</small>' +
             '<em>' + esc(db.roleLabel(user.role)) + '</em>' + pending +
           '</p>' +
+          '<button type="button" class="user-menu-item" id="acctOpen">내 정보 수정</button>' +
           '<a class="user-menu-item" href="' + base() + 'status.html">내 신청 내역</a>' +
           adminLink +
           '<button type="button" class="user-menu-item is-danger" id="signOutBtn">로그아웃</button>' +
@@ -422,6 +430,14 @@ window.CAPSAuthUI = (function () {
         btn.setAttribute('aria-expanded', 'false');
       }
     });
+    var acct = slot.querySelector('#acctOpen');
+    if (acct) {
+      acct.addEventListener('click', function () {
+        menu.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        if (window.CAPSAccount) window.CAPSAccount.open();
+      });
+    }
     slot.querySelector('#signOutBtn').addEventListener('click', function () {
       db.auth.signOut().then(function () { window.location.reload(); });
     });

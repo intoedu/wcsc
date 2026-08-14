@@ -336,6 +336,10 @@ window.CAPSAdmin = (function () {
       if (e.key === 'Escape') closeDrawer();
     });
 
+    el('admAccount').addEventListener('click', function () {
+      if (window.CAPSAccount) window.CAPSAccount.open();
+    });
+
     el('admSignOut').addEventListener('click', function () {
       db.auth.signOut().then(function () { window.location.reload(); });
     });

@@ -122,10 +122,12 @@
             </div>
             <div class="field">
               <label for="spRole">직분 <em class="req">필수</em></label>
-              <select id="spRole" required>
-                <option value="">선택해 주세요</option>
-                <option>담임목사</option><option>부목사</option><option>전도사</option><option>장로</option><option>권사</option><option>집사</option><option>행정 간사</option><option>성도</option><option>기타</option>
-              </select>
+              <!-- 옵션은 db.js 의 공용 목록으로 채웁니다 -->
+              <select id="spRole" required></select>
+            </div>
+            <div class="field" id="spRoleOtherBox" hidden>
+              <label for="spRoleOther">직분 직접 입력 <em class="req">필수</em></label>
+              <input type="text" id="spRoleOther">
             </div>
             <div class="field">
               <label for="spPhone">연락처 <em class="req">필수</em></label>
@@ -171,6 +173,7 @@
 <script src="assets/js/data.js"></script>
 <script src="assets/js/db.js"></script>
 <script src="assets/js/profile.js"></script>
+<script src="assets/js/account.js"></script>
 <script src="assets/js/staff.js"></script>
 </body>
 </html>

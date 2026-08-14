@@ -70,6 +70,12 @@ window.CAPSDB = (function () {
 
   var SUB_STATUS = { active: '이용중', paused: '일시정지', ended: '종료' };
 
+  /* 회원가입 · 내 정보 · 고객 관리에서 함께 쓰는 직분 목록.
+     '기타'를 고르면 직접 입력칸이 열립니다. */
+  var ROLE_OPTIONS = [
+    '담임목사', '부목사', '전도사', '장로', '권사', '집사', '행정 간사', '성도', '기타',
+  ];
+
   /* ---------------- 공통 유틸 ---------------- */
 
   function nowIso() {
@@ -323,6 +329,23 @@ window.CAPSDB = (function () {
           setSession(users.filter(function (u) { return u.id === session.id; })[0]);
           return Promise.resolve(publicUser(session));
         },
+        /** 로그인 방식 목록 — 데모는 이메일/비밀번호만 있습니다. */
+        providers: function () { return session ? ['password'] : []; },
+        changePassword: function (data) {
+          if (!session) return Promise.reject(new Error('로그인이 필요합니다.'));
+          var rows = read('users');
+          var me = rows.filter(function (u) { return u.id === session.id; })[0];
+          if (!me) return Promise.reject(new Error('계정을 찾을 수 없습니다.'));
+          if (me.password !== data.current) {
+            return Promise.reject(new Error('현재 비밀번호가 맞지 않습니다.'));
+          }
+          if (String(data.next || '').length < 6) {
+            return Promise.reject(new Error('새 비밀번호는 6자 이상으로 입력해 주세요.'));
+          }
+          me.password = data.next;
+          write('users', rows);
+          return Promise.resolve();
+        },
       },
 
       list: function (name, opts) {
@@ -534,6 +557,47 @@ window.CAPSDB = (function () {
           return guard().then(function () {
             return fb.authMod.sendPasswordResetEmail(fb.auth, String(email).trim())
               .catch(function (err) { throw new Error(authMessage(err)); });
+          });
+        },
+        /**
+         * 로그인 방식 목록 ('password' · 'google.com' 등).
+         * 비밀번호 변경 화면을 보여줄지 판단하는 데 씁니다.
+         */
+        providers: function () {
+          var u = fb.auth && fb.auth.currentUser;
+          if (!u) return [];
+          return (u.providerData || []).map(function (p) { return p.providerId; });
+        },
+        /** 비밀번호 변경 — 현재 비밀번호로 다시 인증한 뒤 바꿉니다. */
+        changePassword: function (data) {
+          return guard().then(function () {
+            var user = fb.auth.currentUser;
+            if (!user) throw new Error('로그인이 필요합니다.');
+            var hasPw = (user.providerData || []).some(function (p) {
+              return p.providerId === 'password';
+            });
+            if (!hasPw) {
+              throw new Error(
+                '이 계정은 구글 로그인으로 만들어져 센터에 비밀번호가 없습니다. ' +
+                '비밀번호는 구글 계정 설정에서 관리해 주세요.'
+              );
+            }
+            if (String(data.next || '').length < 6) {
+              throw new Error('새 비밀번호는 6자 이상으로 입력해 주세요.');
+            }
+            var cred = fb.authMod.EmailAuthProvider.credential(user.email, data.current);
+            return fb.authMod.reauthenticateWithCredential(user, cred)
+              .catch(function (err) {
+                var code = (err && err.code) || '';
+                if (/wrong-password|invalid-credential|invalid-login/.test(code)) {
+                  throw new Error('현재 비밀번호가 맞지 않습니다.');
+                }
+                throw new Error(authMessage(err));
+              })
+              .then(function () {
+                return fb.authMod.updatePassword(user, data.next)
+                  .catch(function (err) { throw new Error(authMessage(err)); });
+              });
           });
         },
         updateProfile: function (patch) {
@@ -942,6 +1006,59 @@ window.CAPSDB = (function () {
      * 전화번호 입력칸을 숫자 11자리로 제한하고 하이픈을 자동으로 넣습니다.
      * (하이픈은 표시용이고, 실제로 입력받는 숫자는 최대 11자리입니다.)
      */
+    /* =====================================================
+       직분 선택 — 목록에 없으면 '기타'로 직접 입력합니다.
+
+       화면에서는 select 하나와 text 하나를 짝지어 두고,
+       저장되는 값은 언제나 실제 직분 이름입니다 ('기타'가 남지 않습니다).
+       ===================================================== */
+
+    ROLE_OPTIONS: ROLE_OPTIONS,
+
+    /** select 옵션 태그 문자열 */
+    roleOptionsHtml: function () {
+      return '<option value="">선택해 주세요</option>' +
+        ROLE_OPTIONS.map(function (r) { return '<option>' + r + '</option>'; }).join('');
+    },
+
+    /** '기타'를 고르면 직접 입력칸이 나타나도록 묶습니다. */
+    bindRoleSelect: function (select, input) {
+      if (!select || !input) return;
+      var box = input.closest('.field') || input;
+      var sync = function (keep) {
+        var other = select.value === '기타';
+        box.hidden = !other;
+        input.disabled = !other || select.disabled;
+        if (!other && !keep) input.value = '';
+        if (other) input.setAttribute('placeholder', '직분을 직접 입력해 주세요');
+      };
+      select.addEventListener('change', function () { sync(false); });
+      sync(true);
+      return sync;
+    },
+
+    /** 최종 직분 값 — '기타'면 직접 입력한 내용 */
+    roleValue: function (select, input) {
+      var v = ((select && select.value) || '').trim();
+      if (v !== '기타') return v;
+      return ((input && input.value) || '').trim();
+    },
+
+    /** 저장된 직분을 select + input 에 채웁니다 (목록에 없으면 기타로) */
+    setRoleValue: function (select, input, value) {
+      if (!select) return;
+      var v = String(value || '').trim();
+      if (!v) select.value = '';
+      else if (ROLE_OPTIONS.indexOf(v) > -1 && v !== '기타') select.value = v;
+      else {
+        select.value = '기타';
+        if (input) input.value = v;
+      }
+      select.dispatchEvent(new Event('change'));
+      // change 로 초기화되지 않도록 다시 채웁니다.
+      if (input && select.value === '기타') input.value = v === '기타' ? '' : v;
+    },
+
     bindPhoneInput: function (input) {
       if (!input) return;
       input.setAttribute('inputmode', 'numeric');

@@ -56,6 +56,12 @@
         db.auth.signOut().then(function () { window.location.reload(); });
       });
     }
+    var acct = document.getElementById('spAccount');
+    if (acct) {
+      acct.addEventListener('click', function () {
+        if (window.CAPSAccount) window.CAPSAccount.open();
+      });
+    }
     var again = document.getElementById('spRecheck');
     if (again) {
       again.addEventListener('click', function () { window.location.reload(); });
@@ -123,6 +129,7 @@
         '승인 후 이 화면에서 [승인 확인]을 눌러주세요.',
         who,
         '<button type="button" class="btn btn-primary" id="spRecheck">승인 확인</button>' +
+        '<button type="button" class="btn btn-outline" id="spAccount">내 정보 수정</button>' +
         '<a class="btn btn-outline" href="index.html">홈페이지로 이동</a>' +
         '<button type="button" class="btn btn-outline" id="spSignOut">로그아웃</button>');
       return;
@@ -155,6 +162,9 @@
     if (!val('spName')) return ['성함을 입력해 주세요.', 'spName'];
     if (!val('spChurch')) return ['교회명을 입력해 주세요.', 'spChurch'];
     if (!val('spRole')) return ['직분을 선택해 주세요.', 'spRole'];
+    if (!db.roleValue(document.getElementById('spRole'), document.getElementById('spRoleOther'))) {
+      return ['직분을 직접 입력해 주세요.', 'spRoleOther'];
+    }
     if (!val('spPhone')) return ['연락처를 입력해 주세요.', 'spPhone'];
     if (!db.isValidPhone(val('spPhone'))) return ['연락처를 정확히 입력해 주세요.', 'spPhone'];
     if (!document.getElementById('spAgree').checked) {
@@ -175,7 +185,7 @@
       name: val('spName'),
       birthDate: val('spBirth'),
       church: val('spChurch'),
-      contactRole: val('spRole'),
+      contactRole: db.roleValue(document.getElementById('spRole'), document.getElementById('spRoleOther')),
       phone: db.formatPhone(val('spPhone')),
       staffRequest: true,
     };
@@ -206,6 +216,10 @@
 
   /* 연락처는 숫자 11자리까지만 입력됩니다. */
   db.bindPhoneInput(document.getElementById('spPhone'));
+
+  /* 직분 목록과 '기타' 직접 입력칸 */
+  document.getElementById('spRole').innerHTML = db.roleOptionsHtml();
+  db.bindRoleSelect(document.getElementById('spRole'), document.getElementById('spRoleOther'));
 
   /* 비밀번호 확인 실시간 표시 */
   (function () {
