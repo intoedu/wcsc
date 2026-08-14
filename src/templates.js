@@ -92,7 +92,7 @@ function header(base, active) {
       ${logoMark()}
       <span class="brand-text">
         <strong>우리교회지원센터</strong>
-        <small>Woori Church Support Center</small>
+        <small>Wori Church Support Center</small>
       </span>
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
@@ -122,7 +122,7 @@ function footer(base) {
         ${logoMark()}
         <span class="brand-text">
           <strong>우리교회지원센터</strong>
-          <small>Woori Church Support Center</small>
+          <small>Wori Church Support Center</small>
         </span>
       </a>
       <p class="footer-desc">${esc(site.description)}</p>
@@ -276,6 +276,7 @@ function serviceCard(s, base) {
     <h3 data-live="svc.${s.id}.name">${esc(s.name)}</h3>
     <p class="svc-tag" data-live="svc.${s.id}.tagline">${esc(s.tagline)}</p>
     <p class="svc-sum" data-live="svc.${s.id}.summary">${esc(s.summary)}</p>
+    <span class="svc-price">${esc(s.price || '상담 후 결정')}<em>${esc(s.billing || '건별 견적')}</em></span>
     <span class="svc-more">자세히 보기 ${icon('arrow', 'ico ico-sm')}</span>
   </a>`;
 }

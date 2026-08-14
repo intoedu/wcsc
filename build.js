@@ -33,8 +33,8 @@ function buildIndex() {
   <div class="hero-bg" aria-hidden="true"></div>
   <div class="wrap hero-in">
     <div class="hero-copy">
-      <p class="hero-eyebrow">Woori Church Support Center</p>
-      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">우리교회지원센터</span>가 맡습니다</h1>
+      <p class="hero-eyebrow">Wori Church Support Center</p>
+      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">우리</span>가 맡습니다</h1>
       <p class="hero-lead">
         홈페이지와 주보 제작부터 교역자 청빙, 음향, 부동산, 앱, 행정까지.
         한국 교회에 필요한 8개 지원 항목을 한 창구에서 상담하고 진행합니다.
@@ -386,20 +386,51 @@ ${pageHero({
 
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('한눈에 비교', '항목별 소요 기간과 진행 방식')}
+    ${sectionHead(
+      '비용은 세 가지 방식',
+      '항목 성격에 따라 과금 방식이 다릅니다',
+      '어떤 방식이든 상담과 견적에는 비용이 들지 않습니다.'
+    )}
+    <div class="bill-grid">
+      <article class="bill-card">
+        <span class="bill-tag">월 구독</span>
+        <h3>홈페이지 제작</h3>
+        <p class="bill-price">제작비 0원 + <strong>월 3만원</strong></p>
+        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 연 36만원이며 운영과 수정이 계속 포함됩니다.</p>
+      </article>
+      <article class="bill-card">
+        <span class="bill-tag">1회 결제</span>
+        <h3>디자인 제작 · 부동산</h3>
+        <p class="bill-price">디자인 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
+        <p>필요할 때 한 번만 결제하는 항목입니다. 주보처럼 매주 반복되는 경우에는 월 정기 계약으로 묶을 수 있습니다.</p>
+      </article>
+      <article class="bill-card">
+        <span class="bill-tag">건별 견적</span>
+        <h3>교역자 구인 · 음향 · AKC</h3>
+        <p class="bill-price"><strong>상담 후 결정</strong></p>
+        <p>교회 상황에 따라 범위가 크게 달라지는 항목입니다. 상담 후 항목별 내역이 적힌 견적서를 드립니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('한눈에 비교', '항목별 비용과 과금 방식, 접수 창구')}
     <div class="table-scroll">
       <table class="cmp-table">
         <thead>
-          <tr><th scope="col">항목</th><th scope="col">이런 경우에</th><th scope="col">소요 기간</th><th scope="col">진행 방식</th></tr>
+          <tr><th scope="col">항목</th><th scope="col">비용</th><th scope="col">과금 방식</th><th scope="col">소요 기간</th><th scope="col">접수</th></tr>
         </thead>
         <tbody>
           ${services
             .map(
               (s) => `<tr>
             <th scope="row"><a href="../services/${s.slug}.html">${esc(s.name)}</a></th>
-            <td>${esc(s.problems[0].title)}</td>
+            <td class="cmp-price">${esc(s.price || '상담 후 결정')}</td>
+            <td>${esc(s.billing || '건별 견적')}</td>
             <td>${esc(s.duration)}</td>
-            <td>${esc(s.priceNote.split('.')[0])}.</td>
+            <td>${s.externalApply ? `<span class="cmp-tag">${esc(s.externalApplyLabel || '외부')}</span>` : '센터'}</td>
           </tr>`
             )
             .join('\n          ')}
@@ -455,6 +486,8 @@ function buildServicePage(s, i) {
       <div class="svc-hero-side">
         <span class="svc-hero-ico">${icon(s.icon)}</span>
         <dl class="svc-meta">
+          <div><dt>비용</dt><dd class="svc-meta-price">${esc(s.price || '상담 후 결정')}</dd></div>
+          <div><dt>과금 방식</dt><dd>${esc(s.billing || '건별 견적')}</dd></div>
           <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           <div><dt>지원 지역</dt><dd>전국</dd></div>
@@ -525,6 +558,7 @@ function buildServicePage(s, i) {
       <div class="split-col">
         <h2 class="split-title">비용 안내</h2>
         <div class="price-card">
+          <p class="price-figure">${esc(s.price || '상담 후 결정')}<small>${esc(s.billing || '건별 견적')}</small></p>
           <p data-live="svc.${s.id}.priceNote">${esc(s.priceNote)}</p>
           <dl class="price-meta">
             <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
