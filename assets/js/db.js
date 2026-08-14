@@ -87,6 +87,7 @@ window.CAPSDB = (function () {
 
   var LISTING_STATUS = {
     pending: '승인 대기',
+    awaiting_payment: '입금 대기',
     published: '게시중',
     rejected: '반려',
     hidden: '게시 중지',
@@ -123,16 +124,35 @@ window.CAPSDB = (function () {
     agent: ['delegation', 'deed', 'lease', 'other'],
   };
 
+  /** 주 용도 — '기타'를 고르면 직접 입력칸이 열립니다. */
   var LISTING_USES = {
-    chapel: '예배 공간',
-    office: '사무 공간',
-    education: '교육관 · 소그룹실',
-    parsonage: '사택',
+    church: '교회',
+    education: '교육관',
+    prayer: '기도원',
+    retreat: '수양관',
+    land: '종교부지',
     other: '기타',
   };
 
   var LISTING_REGIONS = ['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
     '광주', '전남', '전북', '대구', '경북', '부산', '울산', '경남', '제주'];
+
+  /** 제목 예시 — 보는 사람이 한 줄로 판단할 수 있게 쓰도록 돕습니다. */
+  var LISTING_TITLE_EXAMPLES = [
+    '뷰가 좋은 3층 예배실 — 한강 조망, 주차 12대',
+    '지하철 5분 · 주차 8대, 2층 예배 공간 65평',
+    '리모델링 완료된 교육관 — 소그룹실 3칸',
+    '단독 건물 전체, 사택 포함 (즉시 입주)',
+    '상가 1층 · 간판 설치 가능, 유동인구 많은 자리',
+  ];
+
+  /** 연락 가능 시간 예시 */
+  var LISTING_HOURS_EXAMPLES = [
+    '평일 09:00 – 18:00',
+    '평일 · 토요일 10:00 – 20:00 (주일 제외)',
+    '주일 오후 제외 언제든',
+    '문자 남겨주시면 회신드립니다',
+  ];
 
   /** 게시 등록비 (원) — 게시판에 올려 드리는 비용이며 중개 수수료가 아닙니다. */
   var LISTING_FEE = 60000;
@@ -143,6 +163,14 @@ window.CAPSDB = (function () {
   /** 증빙 파일 제한 — storage.rules 와 같은 값을 유지해야 합니다. */
   var PROOF_MAX_BYTES = 10 * 1024 * 1024;
   var PROOF_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+
+  /* 매물 사진 — 게시판에 그대로 공개됩니다 (증빙 서류와 달리).
+     올릴 때 브라우저에서 긴 변 1600px · JPEG 로 줄이므로 용량 걱정이 줄어듭니다. */
+  var PHOTO_MAX_COUNT = 10;
+  var PHOTO_MIN_HINT = 3;
+  var PHOTO_MAX_BYTES = 15 * 1024 * 1024; // 줄이기 전 원본 기준
+  var PHOTO_LONG_EDGE = 1600;
+  var PHOTO_QUALITY = 0.82;
 
   /* ---------------- 공통 유틸 ---------------- */
 
@@ -224,8 +252,9 @@ window.CAPSDB = (function () {
 
     /* 데모 초기 데이터 */
     function seed() {
-      if (window.localStorage.getItem(PREFIX + '__seeded')) return;
-      window.localStorage.setItem(PREFIX + '__seeded', '1');
+      // 판 번호를 올리면 데모 데이터가 새 구조로 다시 깔립니다.
+      if (window.localStorage.getItem(PREFIX + '__seeded') === '2') return;
+      window.localStorage.setItem(PREFIX + '__seeded', '2');
 
       write('users', [
         {
@@ -291,31 +320,68 @@ window.CAPSDB = (function () {
           customerId: 'cust-2' },
       ]);
 
+      /* 예시 글(lst-0)은 "이렇게 쓰시면 됩니다" 를 보여 주는 견본입니다.
+         제목 · 연락 가능 시간 · 사진까지 모두 채워 두었습니다. */
+      var sampleShot = function (n) {
+        return { path: '', url: 'assets/img/sample/listing-' + n + '.svg',
+          name: '예시 이미지 ' + n + '.svg', size: 0, sample: true };
+      };
+
       write('listings', [
+        { id: 'lst-0', userId: 'demo-owner', status: 'published', sample: true,
+          kind: 'rent_monthly', holder: 'owner', use: 'church', useOther: '',
+          title: '뷰가 좋은 3층 예배실 — 한강 조망, 주차 12대',
+          region: '서울', addressRough: '서울 광진구 자양동',
+          area: '82평 (271㎡)', floor: '3층 / 7층 (엘리베이터)', parking: '12대 (주일 인근 공영주차장 무료)',
+          deposit: 50000000, monthly: 3800000, salePrice: 0, maintenance: 320000,
+          moveIn: '즉시 입주 가능 (협의 시 6월 이후도 가능)',
+          religiousUse: '건축물대장 종교집회장 — 용도 변경 없이 바로 사용 가능',
+          desc: '한강이 보이는 3층 전체입니다. 남향이라 오전 예배 때 조명을 거의 켜지 않아도 됩니다.\n\n'
+            + '· 본당 250석 규모, 강단과 음향 배선이 그대로 남아 있습니다 (스피커 4조 포함 양도 가능)\n'
+            + '· 유아실 1칸, 소그룹실 2칸, 사무실 1칸이 따로 있습니다\n'
+            + '· 엘리베이터가 있어 어르신들 접근이 편합니다\n'
+            + '· 같은 층에 다른 세대가 없어 찬양 시간 민원 걱정이 적습니다\n'
+            + '· 지하철 2호선 구의역에서 걸어서 7분입니다\n\n'
+            + '이전 교회가 더 큰 곳으로 옮기면서 내놓았습니다. 보증금과 월세는 조건에 따라 협의 가능합니다.',
+          contactName: '김요한 장로', contactPhone: '010-2345-6789',
+          contactHours: '평일 · 토요일 10:00 – 20:00 (주일 제외)',
+          photos: [sampleShot(1), sampleShot(2), sampleShot(3), sampleShot(4)],
+          proof: { path: 'demo/deed-0.pdf', name: '등기부등본.pdf', size: 268000, kind: 'deed', uploadedAt: d(12) },
+          fee: { amount: LISTING_FEE, paid: true, paidAt: d(11), noticeSentAt: d(12), invoiceId: '' },
+          rejectNote: '', views: 213,
+          reviewedBy: 'demo-owner', reviewedAt: d(11), publishedAt: d(11),
+          expiresAt: new Date(Date.now() + 79 * 864e5).toISOString(),
+          hiddenAt: '', createdAt: d(12), updatedAt: d(11) },
+
         { id: 'lst-1', userId: 'demo-owner', status: 'published',
-          kind: 'rent_monthly', holder: 'owner', use: 'chapel',
+          kind: 'rent_monthly', holder: 'owner', use: 'church', useOther: '',
           title: '2층 예배실 (지하철 5분, 주차 8대)', region: '경기', addressRough: '경기 부천시 원미구',
           area: '65평 (215㎡)', floor: '2층 / 5층', parking: '8대',
           deposit: 30000000, monthly: 2200000, salePrice: 0, maintenance: 250000,
           moveIn: '협의 가능', religiousUse: '건물주 동의 완료 (종교시설 사용 가능)',
           desc: '기존 교회가 사용하던 공간으로 강단·음향 배선이 남아 있습니다.\n엘리베이터 있고, 주말 주차가 넉넉합니다.',
           contactName: '관리자', contactPhone: '02-0000-0000',
+          contactHours: '평일 09:00 – 18:00',
+          photos: [],
           proof: { path: 'demo/deed-1.pdf', name: '등기부등본.pdf', size: 214000, kind: 'deed', uploadedAt: d(20) },
-          fee: { amount: LISTING_FEE, paid: true, paidAt: d(19), invoiceId: '' },
+          fee: { amount: LISTING_FEE, paid: true, paidAt: d(19), noticeSentAt: d(20), invoiceId: '' },
           rejectNote: '', views: 41,
           reviewedBy: 'demo-owner', reviewedAt: d(19), publishedAt: d(19),
           expiresAt: new Date(Date.now() + 70 * 864e5).toISOString(),
           hiddenAt: '', createdAt: d(20), updatedAt: d(19) },
+
         { id: 'lst-2', userId: 'demo-owner', status: 'pending',
-          kind: 'rent_jeonse', holder: 'tenant', use: 'education',
+          kind: 'rent_jeonse', holder: 'tenant', use: 'education', useOther: '',
           title: '교육관으로 쓰던 지하 1층 (전세)', region: '서울', addressRough: '서울 강북구 수유동',
           area: '40평 (132㎡)', floor: '지하 1층 / 4층', parking: '2대',
           deposit: 180000000, monthly: 0, salePrice: 0, maintenance: 120000,
           moveIn: '2026년 10월 이후', religiousUse: '건물주 확인 필요',
           desc: '소그룹실 3칸으로 나뉘어 있습니다. 계약 기간이 남아 승계 조건 협의 가능합니다.',
           contactName: '관리자', contactPhone: '02-0000-0000',
+          contactHours: '주일 오후 제외 언제든',
+          photos: [],
           proof: { path: 'demo/lease-2.pdf', name: '임대차계약서.pdf', size: 331000, kind: 'lease', uploadedAt: d(1) },
-          fee: { amount: LISTING_FEE, paid: false, paidAt: '', invoiceId: '' },
+          fee: { amount: LISTING_FEE, paid: false, paidAt: '', noticeSentAt: '', invoiceId: '' },
           rejectNote: '', views: 0,
           reviewedBy: '', reviewedAt: '', publishedAt: '', expiresAt: '',
           hiddenAt: '', createdAt: d(1), updatedAt: d(1) },
@@ -954,10 +1020,15 @@ window.CAPSDB = (function () {
     PROOF_FOR: PROOF_FOR,
     LISTING_USES: LISTING_USES,
     LISTING_REGIONS: LISTING_REGIONS,
+    LISTING_TITLE_EXAMPLES: LISTING_TITLE_EXAMPLES,
+    LISTING_HOURS_EXAMPLES: LISTING_HOURS_EXAMPLES,
     LISTING_FEE: LISTING_FEE,
     LISTING_DAYS: LISTING_DAYS,
     PROOF_MAX_BYTES: PROOF_MAX_BYTES,
     PROOF_TYPES: PROOF_TYPES,
+    PHOTO_MAX_COUNT: PHOTO_MAX_COUNT,
+    PHOTO_MIN_HINT: PHOTO_MIN_HINT,
+    PHOTO_MAX_BYTES: PHOTO_MAX_BYTES,
 
     files: adapter.files,
 
@@ -1118,16 +1189,22 @@ window.CAPSDB = (function () {
        부동산 매물 게시판 (listings)
 
        흐름
-         1. 등록자가 매물 정보 + 권리 증빙 서류를 올립니다   → pending
-         2. 등록비(6만원) 입금                              → fee.paid
-         3. 관리자가 서류를 확인하고 게시하거나 반려합니다    → published / rejected
-         4. 필요하면 관리자가 내립니다                       → hidden
-         5. 게시 기간(기본 90일)이 지나면                    → expired
+         1. 등록자가 매물 정보 · 사진 · 권리 증빙 서류를 올립니다   → pending
+         2. 관리자가 서류를 확인하고 승인하면서
+            입금 계좌를 카카오톡으로 보냅니다                       → awaiting_payment
+         3. 입금이 확인되면 게시됩니다                              → published
+         4. 서류가 맞지 않으면 사유와 함께 반려                     → rejected
+         5. 필요하면 관리자가 내립니다                              → hidden
+         6. 게시 기간(기본 90일)이 지나면                           → expired
+
+       계좌를 화면에 붙여 두지 않고 승인 시점에 카카오톡으로 보내는 이유는,
+       확인되지 않은 글에 입금이 먼저 들어오는 일을 막기 위한 것입니다.
 
        센터는 게시판만 관리합니다. 중개·상담·계약은 하지 않으며,
-       연락은 등록자와 보는 사람이 직접 합니다.
+       연락은 등록자와 보는 사람이 직접 합니다. 그래서 글에는
+       연락처와 함께 **연락 가능 시간**을 받아 함께 보여 줍니다.
 
-       증빙 서류는 게시판에 절대 보이지 않습니다.
+       사진은 게시판에 공개되지만, 증빙 서류는 절대 보이지 않습니다.
        (Storage 규칙으로 올린 본인과 승인된 직원만 열 수 있습니다.)
        ===================================================== */
 
@@ -1147,6 +1224,9 @@ window.CAPSDB = (function () {
       if (status === 'published' && row.expiresAt) {
         days = Math.ceil((new Date(row.expiresAt).getTime() - Date.now()) / 864e5);
       }
+      var use = row.use === 'other'
+        ? (String(row.useOther || '').trim() || '기타')
+        : (LISTING_USES[row.use] || row.use || '');
       return {
         status: status,
         label: LISTING_STATUS[status] || status,
@@ -1155,8 +1235,9 @@ window.CAPSDB = (function () {
         days: days,
         kindLabel: LISTING_KIND[row.kind] || row.kind || '-',
         holderLabel: LISTING_HOLDER[row.holder] || row.holder || '-',
-        useLabel: LISTING_USES[row.use] || row.use || '',
+        useLabel: use,
         proofLabel: row.proof ? (LISTING_PROOFS[row.proof.kind] || '권리 증빙 서류') : '',
+        photos: Array.isArray(row.photos) ? row.photos : [],
       };
     },
 
@@ -1217,6 +1298,109 @@ window.CAPSDB = (function () {
       return adapter.files.url(path);
     },
 
+    /* -------- 매물 사진 --------
+       증빙 서류와 달리 사진은 게시판에 그대로 공개됩니다.
+       올릴 때 브라우저에서 긴 변 1600px · JPEG 로 줄여 용량을 낮춥니다. */
+
+    /** 사진 파일 검사 — 통과하면 빈 문자열 */
+    checkPhoto: function (file) {
+      if (!file) return '사진 파일을 선택해 주세요.';
+      if (String(file.type || '').toLowerCase().indexOf('image/') !== 0) {
+        return '사진(JPG · PNG · HEIC)만 올릴 수 있습니다.';
+      }
+      if (file.size > PHOTO_MAX_BYTES) {
+        return '사진 한 장은 15MB 이하로 올려 주세요.';
+      }
+      return '';
+    },
+
+    /**
+     * 사진을 긴 변 1600px JPEG 로 줄입니다.
+     * 브라우저가 못 하는 경우(예: HEIC 디코딩 실패)에는 원본을 그대로 씁니다.
+     */
+    shrinkPhoto: function (file) {
+      return new Promise(function (resolve) {
+        if (!window.URL || !window.URL.createObjectURL) { resolve(file); return; }
+        var url = window.URL.createObjectURL(file);
+        var img = new window.Image();
+        var done = function (out) {
+          window.URL.revokeObjectURL(url);
+          resolve(out || file);
+        };
+        img.onerror = function () { done(null); };
+        img.onload = function () {
+          try {
+            var long = Math.max(img.naturalWidth, img.naturalHeight);
+            var scale = long > PHOTO_LONG_EDGE ? PHOTO_LONG_EDGE / long : 1;
+            var w = Math.round(img.naturalWidth * scale);
+            var h = Math.round(img.naturalHeight * scale);
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob(function (blob) {
+              if (!blob || blob.size >= file.size) { done(null); return; }
+              // File 로 감싸 이름·형식을 유지합니다 (지원하지 않으면 Blob 그대로).
+              var name = String(file.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
+              try {
+                done(new File([blob], name, { type: 'image/jpeg' }));
+              } catch (e) {
+                blob.name = name;
+                done(blob);
+              }
+            }, 'image/jpeg', PHOTO_QUALITY);
+          } catch (e) {
+            done(null);
+          }
+        };
+        img.src = url;
+      });
+    },
+
+    /** 사진 한 장 올리기 → 문서에 담을 정보 */
+    uploadPhoto: function (file) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('로그인이 필요합니다.'));
+      var bad = api.checkPhoto(file);
+      if (bad) return Promise.reject(new Error(bad));
+
+      return api.shrinkPhoto(file).then(function (small) {
+        var safe = String(small.name || file.name || 'photo.jpg')
+          .replace(/[^\w.\-가-힣]+/g, '_')
+          .slice(-80);
+        var path = 'listing-photos/' + me.id + '/' +
+          Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7) + '-' + safe;
+        return adapter.files.upload(path, small).then(function () {
+          return adapter.files.url(path).then(function (url) {
+            return {
+              path: path,
+              url: url || '',
+              name: file.name || safe,
+              size: small.size || 0,
+              uploadedAt: nowIso(),
+            };
+          });
+        });
+      });
+    },
+
+    /** 사진 주소 — 저장된 url 이 있으면 그대로 씁니다. */
+    photoUrl: function (photo) {
+      if (!photo) return Promise.resolve('');
+      if (photo.url) return Promise.resolve(photo.url);
+      if (!photo.path) return Promise.resolve('');
+      return adapter.files.url(photo.path);
+    },
+
+    /** 사진 파일 삭제 (문서에서 뺀 뒤 호출) */
+    deletePhoto: function (photo) {
+      if (!photo || !photo.path) return Promise.resolve();
+      return adapter.files.remove(photo.path).catch(function () { return null; });
+    },
+
     /** 매물 등록 — 언제나 '승인 대기'로 시작합니다. */
     submitListing: function (data, proof) {
       var me = adapter.auth.current();
@@ -1225,17 +1409,18 @@ window.CAPSDB = (function () {
         return Promise.reject(new Error('권리를 확인할 수 있는 서류를 먼저 올려 주세요.'));
       }
       var record = Object.assign({
-        kind: 'rent_monthly', holder: 'owner', use: 'other',
+        kind: 'rent_monthly', holder: 'owner', use: 'church', useOther: '',
         title: '', region: '', addressRough: '', area: '', floor: '', parking: '',
         deposit: 0, monthly: 0, salePrice: 0, maintenance: 0,
         moveIn: '', religiousUse: '', desc: '',
-        contactName: '', contactPhone: '',
+        contactName: '', contactPhone: '', contactHours: '',
+        photos: [],
       }, data, {
         userId: me.id,
         userEmail: me.email || '',
         proof: proof,
         status: 'pending',
-        fee: { amount: LISTING_FEE, paid: false, paidAt: '', invoiceId: '' },
+        fee: { amount: LISTING_FEE, paid: false, paidAt: '', noticeSentAt: '', invoiceId: '' },
         rejectNote: '',
         views: 0,
         reviewedBy: '',
@@ -1267,7 +1452,30 @@ window.CAPSDB = (function () {
       return adapter.update('listings', id, patch);
     },
 
-    /** 관리자 → 게시 (승인) */
+    /**
+     * 관리자 → 1단계: 서류 확인 완료, 계좌를 카카오톡으로 보냄 → 입금 대기
+     * 계좌를 화면에 붙여 두지 않고 승인할 때 카카오톡으로 보내는 이유는,
+     * 확인되지 않은 글에 입금이 먼저 들어오는 일을 막기 위한 것입니다.
+     */
+    noticeListingFee: function (id) {
+      var me = adapter.auth.current();
+      return adapter.update('listings', id, {
+        status: 'awaiting_payment',
+        rejectNote: '',
+        fee: {
+          amount: LISTING_FEE,
+          paid: false,
+          paidAt: '',
+          noticeSentAt: nowIso(),
+          invoiceId: '',
+        },
+        reviewedBy: me ? me.id : '',
+        reviewedAt: nowIso(),
+        updatedAt: nowIso(),
+      });
+    },
+
+    /** 관리자 → 2단계: 입금 확인 후 게시 */
     approveListing: function (id, opts) {
       var o = opts || {};
       var me = adapter.auth.current();
@@ -1335,14 +1543,20 @@ window.CAPSDB = (function () {
       return adapter.update('listings', id, { status: 'expired', updatedAt: nowIso() });
     },
 
-    /** 매물 삭제 — 증빙 서류도 함께 지웁니다. */
+    /** 매물 삭제 — 증빙 서류와 사진도 함께 지웁니다. */
     deleteListing: function (row) {
       var id = typeof row === 'string' ? row : (row && row.id);
-      var path = typeof row === 'object' && row && row.proof ? row.proof.path : '';
       if (!id) return Promise.resolve();
+      var doc = typeof row === 'object' ? row : null;
+      var paths = [];
+      if (doc && doc.proof && doc.proof.path) paths.push(doc.proof.path);
+      (doc && Array.isArray(doc.photos) ? doc.photos : []).forEach(function (ph) {
+        if (ph && ph.path) paths.push(ph.path);
+      });
       return adapter.remove('listings', id).then(function () {
-        if (!path) return null;
-        return adapter.files.remove(path).catch(function () { return null; });
+        return Promise.all(paths.map(function (p) {
+          return adapter.files.remove(p).catch(function () { return null; });
+        }));
       });
     },
 

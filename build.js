@@ -975,13 +975,41 @@ function buildListings() {
     .join('');
   const kindOpts = kinds.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
 
-  const useOpts = [
-    ['chapel', '예배 공간'],
-    ['office', '사무 공간'],
-    ['education', '교육관 · 소그룹실'],
-    ['parsonage', '사택'],
+  /* 주 용도 — '기타'를 고르면 직접 입력칸이 열립니다.
+     (assets/js/db.js 의 LISTING_USES 와 같은 목록을 유지해야 합니다) */
+  const uses = [
+    ['church', '교회'],
+    ['education', '교육관'],
+    ['prayer', '기도원'],
+    ['retreat', '수양관'],
+    ['land', '종교부지'],
     ['other', '기타'],
-  ].map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  ];
+  const useOpts = uses.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  const useFilter = ['<option value="">전체 용도</option>']
+    .concat(uses.filter(([v]) => v !== 'other').map(([v, l]) => `<option value="${v}">${l}</option>`))
+    .join('');
+
+  /** 예시를 눌러 그대로 넣을 수 있는 칩 */
+  const egChips = (target, items) => `<div class="ls-eg" data-eg="${target}">
+            <span class="ls-eg-label">예시</span>
+            ${items.map((t) => `<button type="button" class="ls-eg-chip">${esc(t)}</button>`).join('\n            ')}
+          </div>`;
+
+  const titleExamples = [
+    '뷰가 좋은 3층 예배실 — 한강 조망, 주차 12대',
+    '지하철 5분 · 주차 8대, 2층 예배 공간 65평',
+    '리모델링 완료된 교육관 — 소그룹실 3칸',
+    '단독 건물 전체, 사택 포함 (즉시 입주)',
+    '상가 1층 · 간판 설치 가능, 유동인구 많은 자리',
+  ];
+
+  const hoursExamples = [
+    '평일 09:00 – 18:00',
+    '평일 · 토요일 10:00 – 20:00 (주일 제외)',
+    '주일 오후 제외 언제든',
+    '문자 남겨주시면 회신드립니다',
+  ];
 
   const regionFormOpts = '<option value="">선택해 주세요</option>' +
     ['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
@@ -1004,6 +1032,7 @@ ${pageHero({
   extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
       <span class="ls-hero-pill">기본 게시 <strong>${board.days}일</strong></span>
+      <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
       <span class="ls-hero-pill is-key">권리 증빙 서류 <strong>필수</strong></span>
     </div>
     <div class="ls-hero-actions">
@@ -1021,6 +1050,7 @@ ${pageHero({
         <input type="search" id="lsQ" placeholder="지역 · 제목으로 검색 (예: 부천, 예배실)" aria-label="매물 검색">
       </div>
       <select id="lsKind" aria-label="매물 종류">${kindFilter}</select>
+      <select id="lsUse" aria-label="주 용도">${useFilter}</select>
       <select id="lsRegion" aria-label="지역">${regionOpts}</select>
       <span class="ls-count" id="lsCount"></span>
     </div>
@@ -1113,12 +1143,20 @@ ${pageHero({
             <label for="lsFUse">주 용도 <em>*</em></label>
             <select id="lsFUse" required>${useOpts}</select>
           </div>
+          <div class="field" id="lsUseOtherBox" hidden>
+            <label for="lsFUseOther">용도 직접 입력 <em>*</em></label>
+            <input type="text" id="lsFUseOther" maxlength="20" placeholder="예: 선교관, 카페 겸용">
+          </div>
         </div>
         <div class="field">
           <label for="lsFTitle">제목 <em>*</em></label>
           <input type="text" id="lsFTitle" maxlength="60" required
-            placeholder="예: 2층 예배실 65평, 지하철 5분 · 주차 8대">
-          <small class="hint">한 줄로 특징이 보이도록 적어 주세요. (최대 60자)</small>
+            placeholder="예: 뷰가 좋은 3층 예배실 — 한강 조망, 주차 12대">
+          <small class="hint">
+            보시는 분이 <strong>한 줄만 읽고도 판단</strong>할 수 있게, 가장 큰 장점을 앞에 적어 주세요.
+            (최대 60자 · <span id="lsTitleCount">0</span>자)
+          </small>
+          ${egChips('lsFTitle', titleExamples)}
         </div>
         <div class="grid-2">
           <div class="field">
@@ -1173,7 +1211,31 @@ ${pageHero({
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">4</span> 설명과 연락처</legend>
+        <legend><span class="ls-step">4</span> 사진 (최대 ${board.photoMax}장)</legend>
+        <p class="ls-fs-help">
+          사진이 있는 글이 훨씬 많이 열립니다. <strong>${board.photoMin}장 이상</strong> 올려 주시길 권합니다 —
+          예배 공간 전경, 강단 쪽, 입구 · 외관, 주차장이 있으면 충분합니다.
+          <br>올리면 브라우저에서 자동으로 크기를 줄이므로 원본을 그대로 선택하셔도 됩니다.
+        </p>
+
+        <div class="field">
+          <label class="ls-photo-add" for="lsFPhotos">
+            ${icon('doc', 'ico')}
+            <span><strong>사진 선택하기</strong><small>여러 장을 한 번에 고르실 수 있습니다 (JPG · PNG · HEIC)</small></span>
+          </label>
+          <input type="file" id="lsFPhotos" accept="image/*" multiple class="ls-file-input">
+          <small class="hint">
+            첫 번째 사진이 목록의 대표 사진이 됩니다. 순서는 올린 뒤 바꾸실 수 있습니다.
+            사람 얼굴이나 개인 정보가 찍힌 사진은 피해 주세요.
+          </small>
+        </div>
+
+        <p class="ls-photo-status" id="lsPhotoStatus" hidden></p>
+        <div class="ls-photo-grid" id="lsPhotoGrid"></div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">5</span> 설명과 연락처</legend>
         <div class="field">
           <label for="lsFDesc">상세 설명 <em>*</em></label>
           <textarea id="lsFDesc" rows="7" required
@@ -1191,10 +1253,20 @@ ${pageHero({
             <small class="hint">게시판에 공개됩니다. 문의 전화를 직접 받으실 번호를 적어 주세요.</small>
           </div>
         </div>
+        <div class="field">
+          <label for="lsFHours">연락 가능 시간 <em>*</em></label>
+          <input type="text" id="lsFHours" maxlength="60" required
+            placeholder="예: 평일 · 토요일 10:00 – 20:00 (주일 제외)">
+          <small class="hint">
+            <strong>보시는 분이 이 시간을 먼저 확인하고 전화합니다.</strong>
+            사역 중이나 새벽에 전화받지 않으시려면 꼭 적어 주세요.
+          </small>
+          ${egChips('lsFHours', hoursExamples)}
+        </div>
       </fieldset>
 
       <fieldset class="ls-fs is-proof">
-        <legend><span class="ls-step">5</span> 권리 증명 <em>*</em></legend>
+        <legend><span class="ls-step">6</span> 권리 증명 <em>*</em></legend>
 
         <div class="field">
           <span class="label-txt">이 매물에 대해 어떤 분이신가요? <em>*</em></span>
@@ -1239,12 +1311,26 @@ ${pageHero({
 
       <div class="ls-fee">
         <h3>등록비 ${fee}원 · 기본 게시 ${board.days}일</h3>
-        <ul>
-          <li>먼저 등록하시면 <strong>승인 대기</strong> 상태로 접수됩니다. 이때는 아직 공개되지 않습니다.</li>
-          <li>아래 계좌로 등록비를 보내 주세요. <span class="ls-bank" data-live="site.bank">${esc(board.bank)}</span></li>
-          <li>입금과 서류가 확인되면 관리자가 게시합니다. 보통 영업일 1일 이내입니다.</li>
-          <li>서류가 맞지 않으면 사유와 함께 반려되고, <strong>등록비는 돌려드립니다.</strong></li>
-        </ul>
+        <p class="ls-fee-lead">
+          <strong>지금 입금하지 않으셔도 됩니다.</strong>
+          서류를 먼저 확인한 뒤 계좌를 보내드립니다.
+        </p>
+        <ol class="ls-fee-steps">
+          <li><span>1</span><div><strong>등록 신청</strong>
+            지금 이 버튼을 누르시면 <em>승인 대기</em> 로 접수됩니다. 아직 공개되지 않습니다.</div></li>
+          <li><span>2</span><div><strong>서류 확인 · 계좌 안내</strong>
+            관리자가 권리 증빙 서류를 확인하고 승인하면,
+            <em>입금 계좌를 카카오톡으로 보내드립니다.</em> 보통 영업일 1일 이내입니다.</div></li>
+          <li><span>3</span><div><strong>입금</strong>
+            받으신 계좌로 등록비 ${fee}원을 보내 주세요.</div></li>
+          <li><span>4</span><div><strong>게시</strong>
+            <em>입금이 확인되면 게시글이 올라갑니다.</em> ${board.days}일 동안 게시됩니다.</div></li>
+        </ol>
+        <p class="ls-fee-note">
+          서류가 맞지 않으면 사유와 함께 반려되며, 이 경우 <strong>입금 안내를 보내지 않습니다</strong> —
+          돈이 먼저 나가는 일은 없습니다.
+          진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 언제든 확인하실 수 있습니다.
+        </p>
       </div>
 
       <p class="auth-err" id="lsFormErr" hidden></p>
@@ -1326,6 +1412,10 @@ function buildDataScript() {
   }));
   const js = `/* build.js 가 생성한 파일입니다. 직접 수정하지 마세요. */
 window.CAPS_SERVICES = ${JSON.stringify(payload, null, 2)};
+
+/* 매물 게시판 운영 기준 (src/data/site.js 의 site.listingBoard).
+   계좌는 게시판에 노출하지 않고, 관리자가 승인할 때 카카오톡으로 보냅니다. */
+window.CAPS_LISTING_BOARD = ${JSON.stringify(site.listingBoard, null, 2)};
 `;
   write('assets/js/data.js', js);
 }

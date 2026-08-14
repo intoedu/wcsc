@@ -32,6 +32,7 @@
     count: document.getElementById('lsCount'),
     q: document.getElementById('lsQ'),
     kind: document.getElementById('lsKind'),
+    use: document.getElementById('lsUse'),
     region: document.getElementById('lsRegion'),
     err: document.getElementById('lsFormErr'),
     ok: document.getElementById('lsFormOk'),
@@ -41,6 +42,11 @@
     proofHint: document.getElementById('lsProofHint'),
     proofFile: document.getElementById('lsFProof'),
     fileInfo: document.getElementById('lsFileInfo'),
+    photoInput: document.getElementById('lsFPhotos'),
+    photoGrid: document.getElementById('lsPhotoGrid'),
+    photoStatus: document.getElementById('lsPhotoStatus'),
+    useOtherBox: document.getElementById('lsUseOtherBox'),
+    titleCount: document.getElementById('lsTitleCount'),
   };
 
   var rows = [];      // 공개 매물
@@ -68,31 +74,44 @@
     var v = db.listingView(r);
     var bits = [r.addressRough || r.region, r.area, r.floor]
       .filter(Boolean).map(esc).join(' · ');
+    var cover = v.photos.length ? (v.photos[0].url || '') : '';
 
-    return '<a class="ls-card" href="#view/' + esc(r.id) + '">' +
-      '<span class="ls-card-top">' +
-        '<span class="ls-tag ls-tag-' + esc(r.kind) + '">' + esc(v.kindLabel) + '</span>' +
-        (v.useLabel ? '<span class="ls-tag is-soft">' + esc(v.useLabel) + '</span>' : '') +
-        (v.days != null && v.days <= 7 ? '<span class="ls-tag is-warn">게시 ' + v.days + '일 남음</span>' : '') +
+    return '<a class="ls-card' + (cover ? ' has-shot' : '') + '" href="#view/' + esc(r.id) + '">' +
+      (cover
+        ? '<span class="ls-card-shot">' +
+            '<img src="' + esc(cover) + '" alt="" loading="lazy">' +
+            (v.photos.length > 1
+              ? '<span class="ls-shot-n">사진 ' + v.photos.length + '장</span>' : '') +
+          '</span>'
+        : '<span class="ls-card-noshot">사진이 없는 글입니다</span>') +
+      '<span class="ls-card-body">' +
+        '<span class="ls-card-top">' +
+          '<span class="ls-tag ls-tag-' + esc(r.kind) + '">' + esc(v.kindLabel) + '</span>' +
+          (v.useLabel ? '<span class="ls-tag is-soft">' + esc(v.useLabel) + '</span>' : '') +
+          (v.days != null && v.days <= 7 ? '<span class="ls-tag is-warn">게시 ' + v.days + '일 남음</span>' : '') +
+        '</span>' +
+        '<h3>' + esc(r.title || '(제목 없음)') + '</h3>' +
+        '<p class="ls-card-meta">' + bits + '</p>' +
+        '<strong class="ls-card-price">' + esc(db.listingPrice(r)) + '</strong>' +
+        (r.contactHours
+          ? '<p class="ls-card-hours">연락 ' + esc(r.contactHours) + '</p>' : '') +
+        '<span class="ls-card-more">자세히 보기 →</span>' +
       '</span>' +
-      '<h3>' + esc(r.title || '(제목 없음)') + '</h3>' +
-      '<p class="ls-card-meta">' + bits + '</p>' +
-      '<strong class="ls-card-price">' + esc(db.listingPrice(r)) + '</strong>' +
-      (r.religiousUse ? '<p class="ls-card-use">종교시설 사용 · ' + esc(r.religiousUse) + '</p>' : '') +
-      '<span class="ls-card-more">자세히 보기 →</span>' +
       '</a>';
   }
 
   function filtered() {
     var q = (el.q.value || '').trim().toLowerCase();
     var kind = el.kind.value;
+    var use = el.use ? el.use.value : '';
     var region = el.region.value;
 
     return rows.filter(function (r) {
       if (kind && r.kind !== kind) return false;
+      if (use && r.use !== use) return false;
       if (region && r.region !== region) return false;
       if (!q) return true;
-      var hay = [r.title, r.region, r.addressRough, r.desc, r.area]
+      var hay = [r.title, r.region, r.addressRough, r.desc, r.area, r.useOther]
         .join(' ').toLowerCase();
       return hay.indexOf(q) > -1;
     });
@@ -128,6 +147,29 @@
   function dl(label, value) {
     if (!value) return '';
     return '<div><dt>' + esc(label) + '</dt><dd>' + esc(value) + '</dd></div>';
+  }
+
+  /** 사진 — 큰 사진 하나 + 아래 작은 사진들. 누르면 큰 사진이 바뀝니다. */
+  function gallery(photos) {
+    var list = (photos || []).filter(function (ph) { return ph && (ph.url || ph.path); });
+    if (!list.length) return '';
+    var thumbs = list.length < 2 ? '' :
+      '<div class="ls-thumbs" id="lsThumbs">' +
+        list.map(function (ph, i) {
+          return '<button type="button" class="ls-thumb' + (i ? '' : ' is-on') +
+            '" data-i="' + i + '" aria-label="사진 ' + (i + 1) + '번 보기">' +
+            '<img src="' + esc(ph.url || '') + '" alt="" loading="lazy"></button>';
+        }).join('') +
+      '</div>';
+
+    return '<figure class="ls-gallery">' +
+      '<div class="ls-shot-main">' +
+        '<img id="lsShotMain" src="' + esc(list[0].url || '') + '" alt="매물 사진 1">' +
+        (list.length > 1 ? '<span class="ls-shot-count" id="lsShotCount">1 / ' + list.length + '</span>' : '') +
+      '</div>' +
+      thumbs +
+      '<figcaption>사진은 등록자가 올린 것입니다. 실제 상태는 방문해 확인해 주세요.</figcaption>' +
+      '</figure>';
   }
 
   function priceRows(r) {
@@ -172,6 +214,8 @@
         '<h1>' + esc(r.title || '(제목 없음)') + '</h1>' +
         '<p class="ls-view-price">' + esc(db.listingPrice(r)) + '</p>' +
 
+        gallery(v.photos) +
+
         '<dl class="ls-dl">' +
           dl('위치', r.addressRough || r.region) +
           dl('면적', r.area) +
@@ -180,6 +224,7 @@
           priceRows(r) +
           dl('입주 가능', r.moveIn) +
           dl('종교시설 사용', r.religiousUse) +
+          dl('연락 가능 시간', r.contactHours) +
           dl('게시일', r.publishedAt ? db.formatDate(r.publishedAt, false) : '') +
           dl('게시 종료', r.expiresAt ? db.formatDate(r.expiresAt, false) : '') +
         '</dl>' +
@@ -189,9 +234,18 @@
         '<div class="ls-contact">' +
           '<h2>연락처</h2>' +
           '<p class="ls-contact-who">' + esc(r.contactName || '등록자') + '</p>' +
+          (r.contactHours
+            ? '<p class="ls-contact-when">' +
+                '<span class="ls-when-label">연락 가능 시간</span>' +
+                '<strong>' + esc(r.contactHours) + '</strong>' +
+              '</p>'
+            : '') +
           '<a class="btn btn-primary btn-lg" href="tel:' + esc(digits(r.contactPhone)) + '">' +
             esc(db.formatPhone(r.contactPhone)) + ' 전화하기</a>' +
           '<p class="ls-contact-note">' +
+            (r.contactHours
+              ? '<strong>위 시간에 맞춰 연락해 주세요.</strong> 등록자가 사역 중일 수 있습니다.<br>'
+              : '') +
             '연락과 협상, 계약은 등록자와 직접 진행하십니다. ' +
             '센터는 이 매물을 중개하지 않고, 내용의 정확성과 계약 결과를 보증하지 않습니다.' +
           '</p>' +
@@ -218,6 +272,30 @@
             '</div>'
           : '') +
       '</article>';
+
+    bindGallery(v.photos);
+  }
+
+  /** 썸네일을 누르면 큰 사진이 바뀝니다. */
+  function bindGallery(photos) {
+    var box = document.getElementById('lsThumbs');
+    if (!box) return;
+    var main = document.getElementById('lsShotMain');
+    var count = document.getElementById('lsShotCount');
+    var list = (photos || []).filter(function (ph) { return ph && (ph.url || ph.path); });
+
+    box.addEventListener('click', function (e) {
+      var btn = e.target.closest('.ls-thumb');
+      if (!btn) return;
+      var i = Number(btn.getAttribute('data-i')) || 0;
+      if (!list[i]) return;
+      main.src = list[i].url || '';
+      main.alt = '매물 사진 ' + (i + 1);
+      if (count) count.textContent = (i + 1) + ' / ' + list.length;
+      Array.prototype.forEach.call(box.querySelectorAll('.ls-thumb'), function (b) {
+        b.classList.toggle('is-on', b === btn);
+      });
+    });
   }
 
   /* =========================================================
@@ -231,9 +309,18 @@
 
     if (v.status === 'pending') {
       lines += '<p class="ls-mine-note is-wait">' +
-        (fee.paid
-          ? '서류 확인을 기다리고 있습니다. 확인되면 바로 게시됩니다.'
-          : '등록비 ' + db.money(fee.amount || db.LISTING_FEE) + '원 입금이 확인되지 않았습니다. 입금 후 게시됩니다.') +
+        '<strong>서류를 확인하고 있습니다.</strong> 아직 입금하지 않으셔도 됩니다.<br>' +
+        '확인이 끝나면 <strong>입금 계좌를 카카오톡으로</strong> 보내드립니다. ' +
+        '보통 영업일 1일 이내입니다.' +
+        '</p>';
+    }
+    if (v.status === 'awaiting_payment') {
+      lines += '<p class="ls-mine-note is-pay">' +
+        '<strong>서류 확인이 끝났습니다. 입금해 주세요.</strong><br>' +
+        '등록비 ' + db.money(fee.amount || db.LISTING_FEE) + '원 · ' +
+        '계좌는 <strong>카카오톡으로 보내드렸습니다</strong>' +
+        (fee.noticeSentAt ? ' (' + esc(db.formatDate(fee.noticeSentAt)) + ')' : '') + '.<br>' +
+        '입금이 확인되면 바로 게시됩니다. 카카오톡을 못 받으셨으면 센터로 알려 주세요.' +
         '</p>';
     }
     if (v.status === 'rejected') {
@@ -263,6 +350,7 @@
       '<p class="ls-mine-meta">' +
         esc(v.kindLabel) + ' · ' + esc(r.addressRough || r.region || '') +
         ' · 등록 ' + esc(db.formatDate(r.createdAt, false)) +
+        ' · 사진 ' + v.photos.length + '장' +
         ' · 등록비 ' + (fee.paid ? '입금 확인' : '미확인') +
       '</p>' +
       lines +
@@ -344,13 +432,52 @@
     desc: document.getElementById('lsFDesc'),
     name: document.getElementById('lsFName'),
     phone: document.getElementById('lsFPhone'),
+    hours: document.getElementById('lsFHours'),
+    useOther: document.getElementById('lsFUseOther'),
   };
+
+  /* 폼에 담긴 사진 목록 (아직 저장되지 않은 것도 포함) */
+  var photos = [];
 
   var vows = ['lsVow1', 'lsVow2', 'lsVow3', 'lsVow4'].map(function (id) {
     return document.getElementById(id);
   });
 
   if (f.phone) db.bindPhoneInput(f.phone);
+
+  /* 제목 글자 수 */
+  if (f.title && el.titleCount) {
+    var countTitle = function () {
+      el.titleCount.textContent = f.title.value.length;
+    };
+    f.title.addEventListener('input', countTitle);
+    countTitle();
+  }
+
+  /* 예시 칩 — 누르면 그대로 채워 넣습니다 (그 뒤 고쳐 쓰시면 됩니다). */
+  Array.prototype.forEach.call(document.querySelectorAll('.ls-eg'), function (box) {
+    var target = document.getElementById(box.getAttribute('data-eg'));
+    if (!target) return;
+    box.addEventListener('click', function (e) {
+      var chip = e.target.closest('.ls-eg-chip');
+      if (!chip) return;
+      target.value = chip.textContent;
+      target.focus();
+      target.dispatchEvent(new Event('input'));
+    });
+  });
+
+  /* 주 용도 '기타' → 직접 입력칸 */
+  function syncUse() {
+    if (!f.use || !el.useOtherBox) return;
+    var other = f.use.value === 'other';
+    el.useOtherBox.hidden = !other;
+    if (f.useOther) {
+      f.useOther.disabled = !other;
+      if (!other) f.useOther.value = '';
+    }
+  }
+  if (f.use) f.use.addEventListener('change', syncUse);
 
   /* 금액칸 — 숫자만 받고 콤마를 넣어 줍니다. 힌트에 '○○만원'을 함께 보여 줍니다. */
   function bindMoney(input) {
@@ -419,6 +546,123 @@
     r.addEventListener('change', syncHolder);
   });
 
+  /* =========================================================
+     사진 — 고르면 바로 올리고, 미리보기를 보여 줍니다.
+     증빙 서류와 달리 사진은 게시판에 그대로 공개됩니다.
+     ========================================================= */
+
+  function photoNote(msg, cls) {
+    if (!el.photoStatus) return;
+    el.photoStatus.hidden = !msg;
+    el.photoStatus.className = 'ls-photo-status' + (cls ? ' ' + cls : '');
+    el.photoStatus.innerHTML = msg || '';
+  }
+
+  function renderPhotos() {
+    if (!el.photoGrid) return;
+    var max = db.PHOTO_MAX_COUNT;
+
+    el.photoGrid.innerHTML = photos.map(function (ph, i) {
+      return '<div class="ls-shot' + (i ? '' : ' is-cover') + '">' +
+        '<img src="' + esc(ph.url || '') + '" alt="사진 ' + (i + 1) + '">' +
+        (i ? '' : '<span class="ls-shot-badge">대표 사진</span>') +
+        '<div class="ls-shot-act">' +
+          (i ? '<button type="button" data-up="' + i + '" title="앞으로">←</button>' : '') +
+          (i < photos.length - 1 ? '<button type="button" data-down="' + i + '" title="뒤로">→</button>' : '') +
+          '<button type="button" class="is-danger" data-rm="' + i + '" title="삭제">✕</button>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+
+    if (el.photoInput) {
+      el.photoInput.disabled = photos.length >= max;
+      var label = document.querySelector('.ls-photo-add');
+      if (label) label.classList.toggle('is-full', photos.length >= max);
+    }
+
+    if (!photos.length) {
+      photoNote('아직 올린 사진이 없습니다. ' + db.PHOTO_MIN_HINT +
+        '장 이상 올리시면 훨씬 많이 열립니다.', 'is-wait');
+    } else if (photos.length >= max) {
+      photoNote('<strong>' + photos.length + '장</strong> — 최대치입니다. ' +
+        '바꾸시려면 먼저 지워 주세요.', 'is-full');
+    } else {
+      photoNote('<strong>' + photos.length + '장</strong> 올렸습니다. ' +
+        (photos.length < db.PHOTO_MIN_HINT
+          ? db.PHOTO_MIN_HINT + '장 이상을 권합니다.'
+          : '앞으로 ' + (max - photos.length) + '장 더 올리실 수 있습니다.'), 'is-ok');
+    }
+  }
+
+  if (el.photoInput) {
+    el.photoInput.addEventListener('change', function () {
+      var picked = Array.prototype.slice.call(el.photoInput.files || []);
+      el.photoInput.value = '';
+      if (!picked.length) return;
+
+      var room = db.PHOTO_MAX_COUNT - photos.length;
+      if (room <= 0) {
+        photoNote('사진은 최대 ' + db.PHOTO_MAX_COUNT + '장까지입니다.', 'is-bad');
+        return;
+      }
+      var over = picked.length - room;
+      var files = picked.slice(0, room);
+
+      // 한 장씩 차례로 올립니다 (한꺼번에 올리면 느린 회선에서 실패가 잦습니다).
+      var done = 0;
+      var failed = [];
+      var step = function (i) {
+        if (i >= files.length) {
+          renderPhotos();
+          // renderPhotos() 가 이미 장수를 알려 주므로, 덧붙일 말이 있을 때만 덮어씁니다.
+          if (failed.length) {
+            photoNote('올리지 못한 사진 ' + failed.length + '장: ' + esc(failed.join(', ')), 'is-bad');
+          } else if (over > 0) {
+            photoNote('<strong>' + photos.length + '장</strong> — ' +
+              (photos.length >= db.PHOTO_MAX_COUNT ? '최대치입니다. ' : '') +
+              '한 번에 고른 사진 중 ' + over + '장은 최대 ' + db.PHOTO_MAX_COUNT +
+              '장을 넘어 넣지 않았습니다.', 'is-full');
+          }
+          return;
+        }
+        photoNote('사진 올리는 중… (' + (i + 1) + ' / ' + files.length + ')', 'is-wait');
+        db.uploadPhoto(files[i]).then(function (ph) {
+          photos.push(ph);
+          done++;
+          renderPhotos();
+          step(i + 1);
+        }).catch(function (err) {
+          failed.push((files[i].name || '사진') + ' — ' + (err.message || '실패'));
+          step(i + 1);
+        });
+      };
+      step(0);
+    });
+  }
+
+  if (el.photoGrid) {
+    el.photoGrid.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-rm], button[data-up], button[data-down]');
+      if (!btn) return;
+      var swap = function (a, b) {
+        var t = photos[a]; photos[a] = photos[b]; photos[b] = t;
+      };
+      if (btn.hasAttribute('data-up')) {
+        var u = Number(btn.getAttribute('data-up'));
+        swap(u, u - 1);
+      } else if (btn.hasAttribute('data-down')) {
+        var d2 = Number(btn.getAttribute('data-down'));
+        swap(d2, d2 + 1);
+      } else {
+        var i = Number(btn.getAttribute('data-rm'));
+        var gone = photos.splice(i, 1)[0];
+        // 아직 저장 전이라 파일도 함께 지웁니다.
+        db.deletePhoto(gone);
+      }
+      renderPhotos();
+    });
+  }
+
   /* 파일 선택 — 형식과 용량을 바로 확인해 알려 줍니다. */
   if (el.proofFile) {
     el.proofFile.addEventListener('change', function () {
@@ -443,8 +687,11 @@
     el.editId.value = r ? r.id : '';
     var v = r || {};
     f.kind.value = v.kind || 'rent_monthly';
-    f.use.value = v.use || 'other';
+    f.use.value = v.use || 'church';
+    if (f.useOther) f.useOther.value = v.useOther || '';
+    syncUse();
     f.title.value = v.title || '';
+    if (el.titleCount) el.titleCount.textContent = f.title.value.length;
     f.region.value = v.region || '';
     f.addr.value = v.addressRough || '';
     f.area.value = v.area || '';
@@ -461,6 +708,10 @@
     var me = db.auth.current() || {};
     f.name.value = v.contactName || me.name || '';
     f.phone.value = v.contactPhone || me.phone || '';
+    if (f.hours) f.hours.value = v.contactHours || '';
+
+    photos = Array.isArray(v.photos) ? v.photos.slice() : [];
+    renderPhotos();
 
     var holder = v.holder || 'owner';
     Array.prototype.forEach.call(document.querySelectorAll('input[name="lsHolder"]'), function (radio) {
@@ -524,6 +775,7 @@
     return {
       kind: kind,
       use: f.use.value,
+      useOther: f.use.value === 'other' && f.useOther ? f.useOther.value.trim() : '',
       holder: holderValue(),
       title: f.title.value.trim(),
       region: f.region.value,
@@ -540,17 +792,26 @@
       desc: f.desc.value.trim(),
       contactName: f.name.value.trim(),
       contactPhone: db.formatPhone(f.phone.value),
+      contactHours: f.hours ? f.hours.value.trim() : '',
+      photos: photos.slice(),
     };
   }
 
   /** 저장 전 확인 — 통과하면 빈 문자열 */
   function validate(data, hasProof) {
     if (!data.title) return '제목을 적어 주세요.';
+    if (data.use === 'other' && !data.useOther) return '주 용도를 직접 입력해 주세요.';
     if (!data.region) return '지역을 선택해 주세요.';
     if (!data.addressRough) return '위치를 동 단위까지 적어 주세요.';
     if (!data.desc) return '상세 설명을 적어 주세요.';
     if (!data.contactName) return '연락받을 성함을 적어 주세요.';
     if (!db.isValidPhone(data.contactPhone)) return '연락처를 다시 확인해 주세요.';
+    if (!data.contactHours) {
+      return '연락 가능 시간을 적어 주세요. 보시는 분이 이 시간을 확인하고 전화합니다.';
+    }
+    if (data.photos.length > db.PHOTO_MAX_COUNT) {
+      return '사진은 최대 ' + db.PHOTO_MAX_COUNT + '장까지입니다.';
+    }
     if (data.kind === 'sale' && !data.salePrice) return '매매가를 적어 주세요.';
     if (data.kind === 'rent_jeonse' && !data.deposit) return '전세금을 적어 주세요.';
     if (data.kind === 'rent_monthly' && !data.monthly) return '월세를 적어 주세요.';
@@ -598,7 +859,8 @@
       }).then(function () {
         say(el.ok,
           '<strong>접수되었습니다.</strong> 아직 공개되지 않은 <em>승인 대기</em> 상태입니다.<br>' +
-          '등록비 ' + db.money(db.LISTING_FEE) + '원 입금과 서류가 확인되면 관리자가 게시합니다. ' +
+          '관리자가 서류를 확인하고 승인하면 <strong>입금 계좌를 카카오톡으로 보내드립니다.</strong> ' +
+          '입금이 확인되면 게시글이 올라갑니다. <em>지금 입금하지 않으셔도 됩니다.</em><br>' +
           '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.');
         el.submit.disabled = false;
         el.submit.textContent = '등록 신청하기';
@@ -667,7 +929,7 @@
 
   window.addEventListener('hashchange', route);
 
-  [el.q, el.kind, el.region].forEach(function (input) {
+  [el.q, el.kind, el.use, el.region].forEach(function (input) {
     if (input) input.addEventListener('input', renderList);
     if (input) input.addEventListener('change', renderList);
   });

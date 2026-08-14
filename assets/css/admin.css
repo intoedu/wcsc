@@ -488,3 +488,33 @@ body.admin .float-cta { display: none !important; }
 .btn.is-danger:hover { background: #FDECEA; border-color: #D08A83; color: #8C1D18; }
 .ls-adm-fee { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
 .ls-adm-fee .chk { flex: 1; min-width: 220px; }
+
+.adm-card.is-step { border-left: 4px solid var(--gold-400); }
+.ls-adm-step {
+  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+  border-radius: 50%; background: var(--gold-400); color: var(--gold-ink-deep);
+  font-size: 13px; font-weight: 800; margin-right: 8px; vertical-align: 2px;
+}
+.ls-adm-flow { display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; padding-left: 20px; }
+.ls-adm-flow li { font-size: 14.5px; line-height: 1.7; color: var(--ink-2); list-style: decimal; }
+.ls-adm-flow strong { color: var(--brand-800); }
+
+.ls-kakao { margin-bottom: 18px; }
+.ls-kakao textarea {
+  width: 100%; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 10px;
+  background: var(--bg-soft); font-family: inherit; font-size: 14px; line-height: 1.7;
+  color: var(--ink); resize: vertical;
+}
+
+.ls-adm-shots { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.ls-adm-shots a {
+  position: relative; width: 104px; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--line); display: block;
+}
+.ls-adm-shots a:hover { border-color: var(--brand-500); }
+.ls-adm-shots img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ls-adm-shots span {
+  position: absolute; left: 0; top: 0; padding: 2px 7px;
+  background: var(--gold-400); color: var(--gold-ink-deep); font-size: 10.5px; font-weight: 800;
+  border-bottom-right-radius: 6px;
+}

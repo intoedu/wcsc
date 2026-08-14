@@ -1,6 +1,6 @@
 rules_version = '2';
 
-/* CAPS_RULES_VERSION: 2026-08-14-a  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
+/* CAPS_RULES_VERSION: 2026-08-14-b  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
 
 /* =========================================================
    우리교회지원센터 — Firestore 보안 규칙
@@ -17,7 +17,8 @@ rules_version = '2';
    · 담당자로 배정된 직원은 자기 작업의 진행 정보만 수정할 수 있습니다.
    · 고객 교회의 정보(교회명 · 담당자 · 연락처 등)는 그 교회 계정이
      수정을 승인한 동안에만 직원이 고칠 수 있습니다. (내부 메모는 예외)
-   · 매물 게시판은 승인된 글만 공개됩니다. 등록자가 내용을 고치면
+   · 매물 게시판은 게시(published)된 글만 공개됩니다. 서류 확인만 끝난
+     '입금 대기' 글은 아직 공개되지 않습니다. 등록자가 내용을 고치면
      다시 승인 대기로 돌아가고, 요금·상태는 등록자가 건드릴 수 없습니다.
 
    ⚠ 목록 조회(query)에 대하여
@@ -171,9 +172,12 @@ service cloud.firestore {
     }
 
     /* ---------- listings : 부동산 매물 게시판 ----------
-       공개는 승인(published)된 글만. 나머지는 등록자 본인과 직원만 봅니다.
-       권리 증빙 파일은 Firestore 가 아니라 Storage 에 있고,
-       그쪽 규칙(storage.rules)에서 본인과 직원만 열 수 있게 막았습니다. */
+       공개는 게시(published)된 글만. 나머지는 등록자 본인과 직원만 봅니다.
+       ('입금 대기'는 서류 확인만 끝난 상태로, 아직 공개되지 않습니다.)
+
+       사진은 게시판에 보여 주는 것이 목적이라 Storage 에서 공개로 두었고,
+       권리 증빙 파일은 같은 Storage 의 다른 경로에서 본인과 직원만
+       열 수 있게 막았습니다 (storage.rules 참고). */
     match /listings/{docId} {
       allow read: if resource.data.status == 'published'
         || (signedIn() && resource.data.userId == request.auth.uid)
@@ -196,7 +200,7 @@ service cloud.firestore {
         && request.resource.data.fee == resource.data.fee
         && request.resource.data.publishedAt == resource.data.publishedAt;
 
-      // 직원: 승인 · 반려 · 내리기 · 요금 확인
+      // 직원: 서류 확인(계좌 안내) · 게시 · 반려 · 내리기 · 입금 확인
       allow update: if can('customers');
 
       allow delete: if (signedIn() && resource.data.userId == request.auth.uid)
