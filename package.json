@@ -7,7 +7,7 @@
     "build": "node build.js",
     "start": "npx --yes http-server -p 8123 -c-1",
     "dev": "node build.js && npx --yes http-server -p 8123 -c-1",
-    "rules": "npx --yes firebase-tools deploy --only firestore:rules",
+    "rules": "npx --yes firebase-tools deploy --only firestore:rules,storage",
     "rules:login": "npx --yes firebase-tools login"
   },
   "keywords": [

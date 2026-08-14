@@ -1,6 +1,6 @@
 rules_version = '2';
 
-/* CAPS_RULES_VERSION: 2026-08-13-c  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
+/* CAPS_RULES_VERSION: 2026-08-14-a  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
 
 /* =========================================================
    우리교회지원센터 — Firestore 보안 규칙
@@ -17,6 +17,8 @@ rules_version = '2';
    · 담당자로 배정된 직원은 자기 작업의 진행 정보만 수정할 수 있습니다.
    · 고객 교회의 정보(교회명 · 담당자 · 연락처 등)는 그 교회 계정이
      수정을 승인한 동안에만 직원이 고칠 수 있습니다. (내부 메모는 예외)
+   · 매물 게시판은 승인된 글만 공개됩니다. 등록자가 내용을 고치면
+     다시 승인 대기로 돌아가고, 요금·상태는 등록자가 건드릴 수 없습니다.
 
    ⚠ 목록 조회(query)에 대하여
    Firestore 는 목록 조회 시 "조회 범위가 규칙을 반드시 만족하는지"를 검사합니다.
@@ -166,6 +168,39 @@ service cloud.firestore {
       // 내부 메모처럼 센터에서 관리하는 값은 언제든 수정할 수 있습니다.
       allow update: if can('customers')
         && (!touchesChurchInfo() || editApproved(docId));
+    }
+
+    /* ---------- listings : 부동산 매물 게시판 ----------
+       공개는 승인(published)된 글만. 나머지는 등록자 본인과 직원만 봅니다.
+       권리 증빙 파일은 Firestore 가 아니라 Storage 에 있고,
+       그쪽 규칙(storage.rules)에서 본인과 직원만 열 수 있게 막았습니다. */
+    match /listings/{docId} {
+      allow read: if resource.data.status == 'published'
+        || (signedIn() && resource.data.userId == request.auth.uid)
+        || isStaff();
+
+      // 등록은 언제나 '승인 대기'로 시작하고, 요금은 미납 상태로 만들어집니다.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.fee.paid == false
+        && request.resource.data.reviewedBy == ''
+        && request.resource.data.publishedAt == '';
+
+      // 등록자는 내용만 고칩니다. 고치면 다시 승인 대기로 돌아갑니다.
+      // 상태를 스스로 published 로 올리거나 요금을 납부 처리할 수는 없습니다.
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status == 'pending'
+        && request.resource.data.fee == resource.data.fee
+        && request.resource.data.publishedAt == resource.data.publishedAt;
+
+      // 직원: 승인 · 반려 · 내리기 · 요금 확인
+      allow update: if can('customers');
+
+      allow delete: if (signedIn() && resource.data.userId == request.auth.uid)
+        || can('customers');
     }
 
     /* ---------- subscriptions : 구독 ---------- */

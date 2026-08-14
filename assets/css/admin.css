@@ -452,3 +452,39 @@ body.admin .float-cta { display: none !important; }
 
 .chk-grid { display: grid; gap: 6px 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 560px) { .chk-grid { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   매물 게시판 관리
+   ========================================================= */
+
+/* 보안 규칙 화면의 Firestore / Storage 전환 */
+.adm-tabs { display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 2px solid var(--line-2); }
+.adm-tab {
+  padding: 11px 18px; border: 0; background: none; cursor: pointer;
+  font-size: 15px; font-weight: 700; color: var(--muted);
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+}
+.adm-tab:hover { color: var(--brand-700); }
+.adm-tab.is-on { color: var(--brand-800); border-bottom-color: var(--gold-400); }
+
+.adm-t tr.is-click { cursor: pointer; }
+
+.adm-dl { border-top: 1px solid var(--line-2); }
+.adm-dl > div { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line-2); font-size: 14.5px; }
+.adm-dl dt { flex: none; width: 130px; color: var(--muted); font-weight: 700; }
+.adm-dl dd { flex: 1; color: var(--ink); word-break: break-word; }
+
+.adm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+.adm-hint { font-size: 13px; color: var(--muted); line-height: 1.6; flex: 1; min-width: 200px; }
+
+.ls-adm-state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; }
+.ls-adm-desc {
+  margin-top: 16px; padding: 16px 18px; border-radius: 10px; white-space: pre-wrap;
+  background: var(--bg-soft); border: 1px solid var(--line-2);
+  font-size: 14.5px; line-height: 1.8; color: var(--ink-2);
+}
+.adm-card-lead.strong { font-size: 16px; font-weight: 700; color: var(--ink); }
+.btn.is-danger { color: #8C1D18; border-color: #E5A9A3; }
+.btn.is-danger:hover { background: #FDECEA; border-color: #D08A83; color: #8C1D18; }
+.ls-adm-fee { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ls-adm-fee .chk { flex: 1; min-width: 220px; }

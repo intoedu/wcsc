@@ -55,6 +55,7 @@ function logoMark() {
 const NAV = [
   { href: 'about.html', label: '센터 소개' },
   { href: 'services/index.html', label: '지원 항목', key: 'services' },
+  { href: 'listings.html', label: '매물 게시판' },
   { href: 'process.html', label: '이용 절차' },
   { href: 'faq.html', label: '자주 묻는 질문' },
   { href: 'contact.html', label: '문의' },
@@ -140,6 +141,7 @@ function footer(base) {
         <li><a href="${base}faq.html">자주 묻는 질문</a></li>
         <li><a href="${base}contact.html">문의하기</a></li>
         <li><a href="${base}status.html">신청 조회</a></li>
+        <li><a href="${base}listings.html">매물 게시판</a></li>
         <li><a href="${base}staff.html" class="footer-staff">직원 로그인</a></li>
       </ul>
     </div>

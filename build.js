@@ -944,18 +944,360 @@ ${ctaBand('')}
 }
 
 /* =========================================================
+   부동산 매물 게시판
+
+   센터가 하는 일은 게시판 관리뿐입니다.
+   대신 아무나 남의 건물을 올리지 못하도록 등록할 때
+   권리 증빙 서류(등기부등본 · 임대차계약서 등)를 받고,
+   관리자가 확인한 글만 게시합니다.
+   ========================================================= */
+function buildListings() {
+  const board = site.listingBoard;
+  const fee = board.fee.toLocaleString('ko-KR');
+
+  const doList = board.does.map((t) => `<li>${esc(t)}</li>`).join('\n        ');
+  const dontList = board.doesNot.map((t) => `<li>${esc(t)}</li>`).join('\n        ');
+
+  const regionOpts = ['<option value="">전체 지역</option>']
+    .concat(['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
+      '광주', '전남', '전북', '대구', '경북', '부산', '울산', '경남', '제주']
+      .map((r) => `<option>${r}</option>`))
+    .join('');
+
+  const kinds = [
+    ['rent_monthly', '월세'],
+    ['rent_jeonse', '전세'],
+    ['sale', '매매'],
+    ['share', '공간 공유 · 대여'],
+  ];
+  const kindFilter = ['<option value="">전체 종류</option>']
+    .concat(kinds.map(([v, l]) => `<option value="${v}">${l}</option>`))
+    .join('');
+  const kindOpts = kinds.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+
+  const useOpts = [
+    ['chapel', '예배 공간'],
+    ['office', '사무 공간'],
+    ['education', '교육관 · 소그룹실'],
+    ['parsonage', '사택'],
+    ['other', '기타'],
+  ].map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+
+  const regionFormOpts = '<option value="">선택해 주세요</option>' +
+    ['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
+      '광주', '전남', '전북', '대구', '경북', '부산', '울산', '경남', '제주']
+      .map((r) => `<option>${r}</option>`).join('');
+
+  /** 금액 입력칸 (종류에 따라 보였다 숨습니다) */
+  const money = (id, label, kindsFor, hint) => `<div class="field ls-money" data-kinds="${kindsFor}">
+            <label for="${id}">${esc(label)}</label>
+            <div class="ls-won"><input type="text" id="${id}" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div>
+            <small class="hint" id="${id}Hint">${esc(hint || '')}</small>
+          </div>`;
+
+  const body = `
+${pageHero({
+  eyebrow: '부동산 · 매물 게시판',
+  title: '교회 매물을<br>직접 올리고, 직접 찾습니다',
+  lead: '예배 공간을 내놓는 교회와 구하는 교회가 서로 만나는 게시판입니다. '
+    + '센터는 게시판만 관리합니다 — 중개는 하지 않습니다.',
+  extra: `<div class="ls-hero-meta">
+      <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
+      <span class="ls-hero-pill">기본 게시 <strong>${board.days}일</strong></span>
+      <span class="ls-hero-pill is-key">권리 증빙 서류 <strong>필수</strong></span>
+    </div>
+    <div class="ls-hero-actions">
+      <a class="btn btn-gold btn-lg" href="#new" id="lsNewBtn">매물 등록하기 ${icon('arrow', 'ico ico-sm')}</a>
+      <a class="btn btn-outline btn-lg" href="#mine">내가 올린 매물</a>
+    </div>`,
+})}
+
+<!-- ============ 목록 ============ -->
+<section class="section" id="lsBoard">
+  <div class="wrap">
+    <div class="ls-bar">
+      <div class="ls-search">
+        ${icon('doc', 'ico ico-sm')}
+        <input type="search" id="lsQ" placeholder="지역 · 제목으로 검색 (예: 부천, 예배실)" aria-label="매물 검색">
+      </div>
+      <select id="lsKind" aria-label="매물 종류">${kindFilter}</select>
+      <select id="lsRegion" aria-label="지역">${regionOpts}</select>
+      <span class="ls-count" id="lsCount"></span>
+    </div>
+
+    <div class="ls-grid" id="lsList" aria-live="polite">
+      <p class="ls-loading">매물을 불러오는 중입니다…</p>
+    </div>
+
+    <div class="ls-empty" id="lsEmpty" hidden>
+      <h2>아직 게시된 매물이 없습니다</h2>
+      <p>조건을 바꿔 다시 찾아보시거나, 가지고 계신 매물을 먼저 올려 주세요.</p>
+      <a class="btn btn-primary" href="#new">매물 등록하기</a>
+    </div>
+
+    <div class="ls-scope">
+      <div class="ls-scope-card is-do">
+        <h2>${icon('check', 'ico ico-sm')} 센터가 하는 일</h2>
+        <ul>
+        ${doList}
+        </ul>
+      </div>
+      <div class="ls-scope-card is-dont">
+        <h2>하지 않는 일</h2>
+        <ul>
+        ${dontList}
+        </ul>
+        <p class="ls-scope-note">
+          연락과 협상, 계약은 등록자와 보시는 분이 직접 진행하십니다.
+          계약 검토나 용도 · 법규 확인이 필요하시면
+          <a href="services/realestate.html">부동산 지원</a> 항목으로 신청해 주세요.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 상세 ============ -->
+<section class="section" id="lsDetail" hidden>
+  <div class="wrap narrow">
+    <a class="ls-back" href="#list">← 목록으로</a>
+    <div id="lsDetailBody"></div>
+  </div>
+</section>
+
+<!-- ============ 내가 올린 매물 ============ -->
+<section class="section" id="lsMine" hidden>
+  <div class="wrap narrow">
+    <a class="ls-back" href="#list">← 목록으로</a>
+    ${sectionHead('내 매물', '내가 올린 매물', '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.', 'left')}
+    <div id="lsMineBody"></div>
+  </div>
+</section>
+
+<!-- ============ 등록 ============ -->
+<section class="section" id="lsNew" hidden>
+  <div class="wrap narrow">
+    <a class="ls-back" href="#list">← 목록으로</a>
+    ${sectionHead('매물 등록', '매물 등록하기',
+      '작성해 주신 내용이 그대로 게시됩니다. 관리자가 권리 증빙 서류를 확인한 뒤 게시됩니다.', 'left')}
+
+    <div class="notice-card ls-guard">
+      <h3>${icon('check', 'ico ico-sm')} 왜 서류를 받나요?</h3>
+      <p>
+        아무나 남의 건물을 올릴 수 있으면 이 게시판을 아무도 믿을 수 없습니다.
+        그래서 <strong>소유자는 등기부등본</strong>, <strong>현재 세입자는 임대차계약서</strong>,
+        <strong>대리인은 위임장</strong>으로 권리를 확인합니다.
+      </p>
+      <p class="ls-guard-safe">
+        올려 주신 서류는 <strong>게시판에 공개되지 않습니다.</strong>
+        올린 본인과 확인 담당자만 열 수 있고, 게시가 끝나면 삭제를 요청하실 수 있습니다.
+      </p>
+    </div>
+
+    <div class="auth-gate" id="lsGate" hidden>
+      <p>매물 등록은 로그인 후 이용하실 수 있습니다. 등록 후 진행 상태를 알려드리기 위해 계정이 필요합니다.</p>
+      <button type="button" class="btn btn-primary" id="lsGateLogin">로그인 · 회원가입</button>
+    </div>
+
+    <form class="ls-form" id="lsForm" novalidate hidden>
+      <input type="hidden" id="lsEditId" value="">
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">1</span> 어떤 매물인가요?</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="lsFKind">매물 종류 <em>*</em></label>
+            <select id="lsFKind" required>${kindOpts}</select>
+          </div>
+          <div class="field">
+            <label for="lsFUse">주 용도 <em>*</em></label>
+            <select id="lsFUse" required>${useOpts}</select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="lsFTitle">제목 <em>*</em></label>
+          <input type="text" id="lsFTitle" maxlength="60" required
+            placeholder="예: 2층 예배실 65평, 지하철 5분 · 주차 8대">
+          <small class="hint">한 줄로 특징이 보이도록 적어 주세요. (최대 60자)</small>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="lsFRegion">지역 <em>*</em></label>
+            <select id="lsFRegion" required>${regionFormOpts}</select>
+          </div>
+          <div class="field">
+            <label for="lsFAddr">위치 <em>*</em></label>
+            <input type="text" id="lsFAddr" required placeholder="예: 경기 부천시 원미구">
+            <small class="hint">동 단위까지만 적어 주세요. 상세 주소는 공개되지 않습니다.</small>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">2</span> 공간 정보</legend>
+        <div class="grid-3">
+          <div class="field">
+            <label for="lsFArea">면적</label>
+            <input type="text" id="lsFArea" placeholder="예: 65평 (215㎡)">
+          </div>
+          <div class="field">
+            <label for="lsFFloor">층</label>
+            <input type="text" id="lsFFloor" placeholder="예: 2층 / 5층">
+          </div>
+          <div class="field">
+            <label for="lsFParking">주차</label>
+            <input type="text" id="lsFParking" placeholder="예: 8대 (주일 추가 협의)">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="lsFMoveIn">입주 가능 시기</label>
+            <input type="text" id="lsFMoveIn" placeholder="예: 협의 가능 / 2026년 10월 이후">
+          </div>
+          <div class="field">
+            <label for="lsFReligious">종교시설 사용</label>
+            <input type="text" id="lsFReligious" placeholder="예: 건물주 동의 완료 / 확인 필요">
+            <small class="hint">교회가 들어갈 수 있는지가 가장 많이 묻는 항목입니다.</small>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">3</span> 금액</legend>
+        <div class="grid-2">
+          ${money('lsFDeposit', '보증금 · 전세금', 'rent_monthly rent_jeonse')}
+          ${money('lsFMonthly', '월세 · 대여료', 'rent_monthly share')}
+          ${money('lsFSale', '매매가', 'sale')}
+          ${money('lsFMaint', '관리비 (월)', 'rent_monthly rent_jeonse share', '없으면 비워 두세요.')}
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">4</span> 설명과 연락처</legend>
+        <div class="field">
+          <label for="lsFDesc">상세 설명 <em>*</em></label>
+          <textarea id="lsFDesc" rows="7" required
+            placeholder="공간 상태, 강단·음향 설비, 엘리베이터, 주변 여건, 협의 가능한 조건 등을 적어 주세요."></textarea>
+          <small class="hint">개인 주민번호나 계좌번호는 적지 마세요. 그대로 공개됩니다.</small>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="lsFName">연락받을 성함 <em>*</em></label>
+            <input type="text" id="lsFName" required placeholder="예: 김○○ 집사">
+          </div>
+          <div class="field">
+            <label for="lsFPhone">연락처 <em>*</em></label>
+            <input type="tel" id="lsFPhone" required placeholder="010-0000-0000">
+            <small class="hint">게시판에 공개됩니다. 문의 전화를 직접 받으실 번호를 적어 주세요.</small>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs is-proof">
+        <legend><span class="ls-step">5</span> 권리 증명 <em>*</em></legend>
+
+        <div class="field">
+          <span class="label-txt">이 매물에 대해 어떤 분이신가요? <em>*</em></span>
+          <div class="ls-holder" id="lsHolder">
+            ${[
+              ['owner', '소유자 (임대인)', '내 건물 · 내 상가를 내놓습니다', true],
+              ['tenant', '임차인 (현재 세입자)', '지금 쓰고 있는 공간을 넘깁니다', false],
+              ['agent', '위임받은 대리인', '소유자 · 세입자를 대신해 올립니다', false],
+            ].map(([v, t, d, on]) => `<label class="pick">
+              <input type="radio" name="lsHolder" value="${v}"${on ? ' checked' : ''}>
+              <span class="pick-in">
+                <span class="pick-text"><strong>${esc(t)}</strong><small>${esc(d)}</small></span>
+                <span class="pick-mark">${icon('check', 'ico ico-xs')}</span>
+              </span></label>`).join('\n            ')}
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="lsFProofKind">첨부하는 서류 <em>*</em></label>
+          <select id="lsFProofKind" required></select>
+          <small class="hint" id="lsProofHint"></small>
+        </div>
+
+        <div class="field">
+          <label for="lsFProof">서류 파일 <em>*</em></label>
+          <input type="file" id="lsFProof" accept="application/pdf,image/*" required>
+          <small class="hint">PDF 또는 사진(JPG · PNG), 10MB 이하. 이름 · 주소 · 금액이 보이도록 올려 주세요.</small>
+          <p class="ls-file" id="lsFileInfo" hidden></p>
+        </div>
+
+        <div class="ls-vow">
+          <label class="chk"><input type="checkbox" id="lsVow1">
+            <span>제출한 서류상 <strong>제가 이 매물의 권리자(또는 위임받은 사람)</strong>임을 확인합니다.</span></label>
+          <label class="chk"><input type="checkbox" id="lsVow2">
+            <span>적은 <strong>내용과 금액이 사실</strong>이며, 조건이 바뀌면 직접 수정하겠습니다.</span></label>
+          <label class="chk"><input type="checkbox" id="lsVow3">
+            <span>허위 · 중복 · 광고성 글로 확인되면 <strong>사전 통보 없이 삭제되고 등록비는 환불되지 않는다</strong>는 점에 동의합니다.</span></label>
+          <label class="chk"><input type="checkbox" id="lsVow4">
+            <span>센터는 게시판만 관리하며 <strong>중개 · 계약 · 결과를 보증하지 않는다</strong>는 점을 이해했습니다.</span></label>
+        </div>
+      </fieldset>
+
+      <div class="ls-fee">
+        <h3>등록비 ${fee}원 · 기본 게시 ${board.days}일</h3>
+        <ul>
+          <li>먼저 등록하시면 <strong>승인 대기</strong> 상태로 접수됩니다. 이때는 아직 공개되지 않습니다.</li>
+          <li>아래 계좌로 등록비를 보내 주세요. <span class="ls-bank" data-live="site.bank">${esc(board.bank)}</span></li>
+          <li>입금과 서류가 확인되면 관리자가 게시합니다. 보통 영업일 1일 이내입니다.</li>
+          <li>서류가 맞지 않으면 사유와 함께 반려되고, <strong>등록비는 돌려드립니다.</strong></li>
+        </ul>
+      </div>
+
+      <p class="auth-err" id="lsFormErr" hidden></p>
+      <p class="auth-ok" id="lsFormOk" hidden></p>
+
+      <div class="ls-submit">
+        <button type="submit" class="btn btn-primary btn-lg" id="lsSubmit">등록 신청하기</button>
+        <a class="btn btn-ghost" href="#list">취소</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+${ctaBand('', {
+  title: '공간을 구하고 계신다면, 게시판만으로 부족할 수 있습니다',
+  lead: '용도 변경 가능 여부, 주차와 소음, 교회 명의 등기까지 — 계약 전에 확인해야 할 것을 함께 짚어 드립니다.',
+})}
+`;
+
+  write(
+    'listings.html',
+    layout({
+      title: '교회 매물 게시판 | 우리교회지원센터',
+      description:
+        '교회 예배 공간 매매 · 임대 매물 게시판. 등기부등본이나 임대차계약서로 권리를 확인한 매물만 게시합니다. '
+        + `등록비 ${fee}원, 기본 게시 ${board.days}일.`,
+      base: '',
+      active: 'listings.html',
+      body,
+      scripts: ['listings.js'],
+    })
+  );
+}
+
+/* =========================================================
    보안 규칙을 관리자 화면에서 복사할 수 있도록 내보냅니다.
    firestore.rules 가 원본이고, 이 파일은 그 사본입니다.
    ========================================================= */
 function buildRulesScript() {
-  const file = path.join(ROOT, 'firestore.rules');
-  const text = fs.readFileSync(file, 'utf8');
+  const text = fs.readFileSync(path.join(ROOT, 'firestore.rules'), 'utf8');
   const version = (text.match(/CAPS_RULES_VERSION:\s*([\w.-]+)/) || [])[1] || '(미표기)';
 
-  const js = `/* build.js 가 firestore.rules 에서 생성한 파일입니다. 직접 수정하지 마세요.
-   규칙을 바꿀 때는 firestore.rules 를 고치고 \`npm run build\` 를 실행하세요. */
+  // 매물 증빙 서류를 지키는 저장소 규칙도 함께 내보냅니다.
+  const stFile = path.join(ROOT, 'storage.rules');
+  const stText = fs.existsSync(stFile) ? fs.readFileSync(stFile, 'utf8') : '';
+  const stVersion = (stText.match(/CAPS_STORAGE_VERSION:\s*([\w.-]+)/) || [])[1] || '(미표기)';
+
+  const js = `/* build.js 가 firestore.rules · storage.rules 에서 생성한 파일입니다. 직접 수정하지 마세요.
+   규칙을 바꿀 때는 원본 파일을 고치고 \`npm run build\` 를 실행하세요. */
 window.CAPS_FIRESTORE_RULES = ${JSON.stringify(text)};
 window.CAPS_FIRESTORE_RULES_VERSION = ${JSON.stringify(version)};
+window.CAPS_STORAGE_RULES = ${JSON.stringify(stText)};
+window.CAPS_STORAGE_RULES_VERSION = ${JSON.stringify(stVersion)};
 `;
   write('assets/js/rules-text.js', js);
 }
@@ -999,6 +1341,7 @@ function main() {
   buildApply();
   buildStatus();
   buildContact();
+  buildListings();
   buildDataScript();
   buildRulesScript();
   console.log(`생성 완료 (${out.length}개)`);

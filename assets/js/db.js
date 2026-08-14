@@ -31,7 +31,7 @@ window.CAPSDB = (function () {
   };
 
   var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
-    'serviceContent', 'settings', 'editConsents'];
+    'serviceContent', 'settings', 'editConsents', 'listings'];
 
   /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
      (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
@@ -75,6 +75,74 @@ window.CAPSDB = (function () {
   var ROLE_OPTIONS = [
     '담임목사', '부목사', '전도사', '장로', '권사', '집사', '행정 간사', '성도', '기타',
   ];
+
+  /* =========================================================
+     부동산 매물 게시판 (listings)
+
+     센터가 하는 일은 딱 하나입니다 — 게시판을 관리하는 것.
+     중개·상담·계약은 하지 않으며, 글은 등록자가 직접 씁니다.
+     대신 아무나 남의 건물을 올리지 못하도록,
+     등록할 때 권리 증빙(임대차계약서 · 등기부등본 등)을 받습니다.
+     ========================================================= */
+
+  var LISTING_STATUS = {
+    pending: '승인 대기',
+    published: '게시중',
+    rejected: '반려',
+    hidden: '게시 중지',
+    expired: '기간 만료',
+  };
+
+  var LISTING_KIND = {
+    rent_monthly: '월세',
+    rent_jeonse: '전세',
+    sale: '매매',
+    share: '공간 공유 · 대여',
+  };
+
+  /** 등록자가 이 매물에 대해 어떤 사람인지 */
+  var LISTING_HOLDER = {
+    owner: '소유자 (임대인)',
+    tenant: '임차인 (현재 세입자)',
+    agent: '위임받은 대리인',
+  };
+
+  /** 권리 증빙으로 받을 수 있는 서류 */
+  var LISTING_PROOFS = {
+    deed: '등기부등본 (부동산 등기사항증명서)',
+    lease: '임대차계약서',
+    sale: '매매계약서',
+    delegation: '위임장 (+ 위임인 신분 확인)',
+    other: '그 외 권리를 확인할 수 있는 서류',
+  };
+
+  /** 증빙 서류별로 어떤 입장에서 쓰는 것인지 안내 */
+  var PROOF_FOR = {
+    owner: ['deed', 'sale', 'other'],
+    tenant: ['lease', 'other'],
+    agent: ['delegation', 'deed', 'lease', 'other'],
+  };
+
+  var LISTING_USES = {
+    chapel: '예배 공간',
+    office: '사무 공간',
+    education: '교육관 · 소그룹실',
+    parsonage: '사택',
+    other: '기타',
+  };
+
+  var LISTING_REGIONS = ['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
+    '광주', '전남', '전북', '대구', '경북', '부산', '울산', '경남', '제주'];
+
+  /** 게시 등록비 (원) — 게시판에 올려 드리는 비용이며 중개 수수료가 아닙니다. */
+  var LISTING_FEE = 60000;
+
+  /** 기본 게시 기간 (일) */
+  var LISTING_DAYS = 90;
+
+  /** 증빙 파일 제한 — storage.rules 와 같은 값을 유지해야 합니다. */
+  var PROOF_MAX_BYTES = 10 * 1024 * 1024;
+  var PROOF_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 
   /* ---------------- 공통 유틸 ---------------- */
 
@@ -223,9 +291,52 @@ window.CAPSDB = (function () {
           customerId: 'cust-2' },
       ]);
 
+      write('listings', [
+        { id: 'lst-1', userId: 'demo-owner', status: 'published',
+          kind: 'rent_monthly', holder: 'owner', use: 'chapel',
+          title: '2층 예배실 (지하철 5분, 주차 8대)', region: '경기', addressRough: '경기 부천시 원미구',
+          area: '65평 (215㎡)', floor: '2층 / 5층', parking: '8대',
+          deposit: 30000000, monthly: 2200000, salePrice: 0, maintenance: 250000,
+          moveIn: '협의 가능', religiousUse: '건물주 동의 완료 (종교시설 사용 가능)',
+          desc: '기존 교회가 사용하던 공간으로 강단·음향 배선이 남아 있습니다.\n엘리베이터 있고, 주말 주차가 넉넉합니다.',
+          contactName: '관리자', contactPhone: '02-0000-0000',
+          proof: { path: 'demo/deed-1.pdf', name: '등기부등본.pdf', size: 214000, kind: 'deed', uploadedAt: d(20) },
+          fee: { amount: LISTING_FEE, paid: true, paidAt: d(19), invoiceId: '' },
+          rejectNote: '', views: 41,
+          reviewedBy: 'demo-owner', reviewedAt: d(19), publishedAt: d(19),
+          expiresAt: new Date(Date.now() + 70 * 864e5).toISOString(),
+          hiddenAt: '', createdAt: d(20), updatedAt: d(19) },
+        { id: 'lst-2', userId: 'demo-owner', status: 'pending',
+          kind: 'rent_jeonse', holder: 'tenant', use: 'education',
+          title: '교육관으로 쓰던 지하 1층 (전세)', region: '서울', addressRough: '서울 강북구 수유동',
+          area: '40평 (132㎡)', floor: '지하 1층 / 4층', parking: '2대',
+          deposit: 180000000, monthly: 0, salePrice: 0, maintenance: 120000,
+          moveIn: '2026년 10월 이후', religiousUse: '건물주 확인 필요',
+          desc: '소그룹실 3칸으로 나뉘어 있습니다. 계약 기간이 남아 승계 조건 협의 가능합니다.',
+          contactName: '관리자', contactPhone: '02-0000-0000',
+          proof: { path: 'demo/lease-2.pdf', name: '임대차계약서.pdf', size: 331000, kind: 'lease', uploadedAt: d(1) },
+          fee: { amount: LISTING_FEE, paid: false, paidAt: '', invoiceId: '' },
+          rejectNote: '', views: 0,
+          reviewedBy: '', reviewedAt: '', publishedAt: '', expiresAt: '',
+          hiddenAt: '', createdAt: d(1), updatedAt: d(1) },
+      ]);
+
       write('invoices', []);
       write('serviceContent', []);
       write('settings', []);
+    }
+
+    /* 증빙 파일 (데모) — 브라우저 저장소에 데이터 URL 로 담습니다.
+       용량이 크면 저장하지 않고 파일 정보만 남깁니다. */
+    var FILES = 'caps.files';
+
+    function readFiles() {
+      try {
+        var raw = window.localStorage.getItem(FILES);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
     }
 
     /* ---- 인증 (데모) ---- */
@@ -388,6 +499,39 @@ window.CAPSDB = (function () {
         return function () {
           listeners[name] = listeners[name].filter(function (f) { return f !== cb; });
         };
+      },
+
+      files: {
+        upload: function (path, file) {
+          return new Promise(function (resolve) {
+            var reader = new FileReader();
+            reader.onload = function () { resolve(String(reader.result || '')); };
+            reader.onerror = function () { resolve(''); };
+            reader.readAsDataURL(file);
+          }).then(function (url) {
+            var map = readFiles();
+            map[path] = { name: file.name, size: file.size, type: file.type, url: url };
+            try {
+              window.localStorage.setItem(FILES, JSON.stringify(map));
+            } catch (e) {
+              // 용량 초과 — 파일 내용은 버리고 정보만 남깁니다.
+              map[path].url = '';
+              map[path].tooBig = true;
+              try { window.localStorage.setItem(FILES, JSON.stringify(map)); } catch (e2) { /* 무시 */ }
+            }
+            return path;
+          });
+        },
+        url: function (path) {
+          var map = readFiles();
+          return Promise.resolve((map[path] && map[path].url) || '');
+        },
+        remove: function (path) {
+          var map = readFiles();
+          delete map[path];
+          try { window.localStorage.setItem(FILES, JSON.stringify(map)); } catch (e) { /* 무시 */ }
+          return Promise.resolve();
+        },
       },
     };
   }
@@ -683,7 +827,60 @@ window.CAPSDB = (function () {
           if (stop) stop();
         };
       },
+
+      /* 증빙 파일 — Firebase Storage.
+         계약서에는 민감한 정보가 들어 있어 게시판에는 노출되지 않고,
+         올린 본인과 승인된 직원만 열 수 있습니다 (storage.rules). */
+      files: {
+        upload: function (path, file) {
+          return storageMod().then(function (mod) {
+            return mod.uploadBytes(mod.ref(fb.st, path), file, { contentType: file.type })
+              .then(function () { return path; })
+              .catch(function (err) { throw new Error(storageMessage(err)); });
+          });
+        },
+        url: function (path) {
+          return storageMod().then(function (mod) {
+            return mod.getDownloadURL(mod.ref(fb.st, path))
+              .catch(function () { return ''; });
+          });
+        },
+        remove: function (path) {
+          return storageMod().then(function (mod) {
+            return mod.deleteObject(mod.ref(fb.st, path)).catch(function () { /* 이미 없으면 무시 */ });
+          });
+        },
+      },
     };
+
+    /** Storage SDK 는 필요할 때만 불러옵니다 (게시판을 쓰지 않으면 로드하지 않음). */
+    function storageMod() {
+      return guard().then(function () {
+        if (fb.stMod) return fb.stMod;
+        return import(base + 'firebase-storage.js').then(function (mod) {
+          fb.stMod = mod;
+          fb.st = mod.getStorage(fb.app);
+          return mod;
+        }).catch(function () {
+          throw new Error(
+            '파일 저장소(Firebase Storage) 에 연결할 수 없습니다. ' +
+            'Firebase 콘솔에서 Storage 를 시작했는지 확인해 주세요.');
+        });
+      });
+    }
+
+    function storageMessage(err) {
+      var code = (err && err.code) || '';
+      if (code === 'storage/unauthorized') {
+        return '파일을 올릴 권한이 없습니다. 로그인 상태와 저장소 보안 규칙(storage.rules)을 확인해 주세요.';
+      }
+      if (code === 'storage/quota-exceeded') return '저장소 용량이 부족합니다.';
+      if (code === 'storage/retry-limit-exceeded') return '업로드가 지연되고 있습니다. 잠시 후 다시 시도해 주세요.';
+      if (code === 'storage/unknown' || code === 'storage/unauthenticated') {
+        return '파일을 올리지 못했습니다. 다시 로그인한 뒤 시도해 주세요.';
+      }
+      return (err && err.message) || '파일을 올리지 못했습니다.';
+    }
 
     /** 콘솔에서 바로 켤 수 있도록 링크를 붙입니다. */
     function providerHint(what) {
@@ -749,6 +946,20 @@ window.CAPSDB = (function () {
     CHURCH_FIELDS: CHURCH_FIELDS,
     CONSENT_STATUS: CONSENT_STATUS,
     CONSENT_DAYS: CONSENT_DAYS,
+
+    LISTING_STATUS: LISTING_STATUS,
+    LISTING_KIND: LISTING_KIND,
+    LISTING_HOLDER: LISTING_HOLDER,
+    LISTING_PROOFS: LISTING_PROOFS,
+    PROOF_FOR: PROOF_FOR,
+    LISTING_USES: LISTING_USES,
+    LISTING_REGIONS: LISTING_REGIONS,
+    LISTING_FEE: LISTING_FEE,
+    LISTING_DAYS: LISTING_DAYS,
+    PROOF_MAX_BYTES: PROOF_MAX_BYTES,
+    PROOF_TYPES: PROOF_TYPES,
+
+    files: adapter.files,
 
     auth: adapter.auth,
     list: adapter.list,
@@ -901,6 +1112,263 @@ window.CAPSDB = (function () {
       var me = adapter.auth.current();
       if (!me) return Promise.resolve([]);
       return adapter.list('editConsents', { where: { userId: me.id } });
+    },
+
+    /* =====================================================
+       부동산 매물 게시판 (listings)
+
+       흐름
+         1. 등록자가 매물 정보 + 권리 증빙 서류를 올립니다   → pending
+         2. 등록비(6만원) 입금                              → fee.paid
+         3. 관리자가 서류를 확인하고 게시하거나 반려합니다    → published / rejected
+         4. 필요하면 관리자가 내립니다                       → hidden
+         5. 게시 기간(기본 90일)이 지나면                    → expired
+
+       센터는 게시판만 관리합니다. 중개·상담·계약은 하지 않으며,
+       연락은 등록자와 보는 사람이 직접 합니다.
+
+       증빙 서류는 게시판에 절대 보이지 않습니다.
+       (Storage 규칙으로 올린 본인과 승인된 직원만 열 수 있습니다.)
+       ===================================================== */
+
+    /** 게시 중이고 기간이 남아 있는지 */
+    listingLive: function (row) {
+      if (!row || row.status !== 'published') return false;
+      if (!row.expiresAt) return true;
+      return new Date(row.expiresAt).getTime() > Date.now();
+    },
+
+    /** 화면 표시용 상태 (기간이 지난 게시글은 '기간 만료'로 보여 줍니다) */
+    listingView: function (row) {
+      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, days: null };
+      var status = row.status;
+      if (status === 'published' && !api.listingLive(row)) status = 'expired';
+      var days = null;
+      if (status === 'published' && row.expiresAt) {
+        days = Math.ceil((new Date(row.expiresAt).getTime() - Date.now()) / 864e5);
+      }
+      return {
+        status: status,
+        label: LISTING_STATUS[status] || status,
+        cls: status,
+        live: status === 'published',
+        days: days,
+        kindLabel: LISTING_KIND[row.kind] || row.kind || '-',
+        holderLabel: LISTING_HOLDER[row.holder] || row.holder || '-',
+        useLabel: LISTING_USES[row.use] || row.use || '',
+        proofLabel: row.proof ? (LISTING_PROOFS[row.proof.kind] || '권리 증빙 서류') : '',
+      };
+    },
+
+    /** 금액 요약 — 목록에 한 줄로 보여 줄 문구 */
+    listingPrice: function (row) {
+      if (!row) return '-';
+      var m = api.money;
+      if (row.kind === 'sale') return '매매 ' + m(row.salePrice) + '원';
+      if (row.kind === 'rent_jeonse') return '전세 ' + m(row.deposit) + '원';
+      if (row.kind === 'share') {
+        return row.monthly ? '대여 ' + m(row.monthly) + '원' : '금액 협의';
+      }
+      return '보증금 ' + m(row.deposit) + ' / 월 ' + m(row.monthly) + '원';
+    },
+
+    /** 증빙 서류 파일 검사 (형식 · 용량) — 통과하면 빈 문자열 */
+    checkProof: function (file) {
+      if (!file) return '권리를 확인할 수 있는 서류를 첨부해 주세요.';
+      if (file.size > PROOF_MAX_BYTES) {
+        return '파일 용량은 10MB 이하로 올려 주세요. (현재 ' +
+          Math.round(file.size / 1024 / 102.4) / 10 + 'MB)';
+      }
+      var t = String(file.type || '').toLowerCase();
+      if (PROOF_TYPES.indexOf(t) === -1 && t.indexOf('image/') !== 0) {
+        return 'PDF 또는 사진(JPG · PNG) 파일만 올릴 수 있습니다.';
+      }
+      return '';
+    },
+
+    /** 증빙 서류 업로드 → 문서에 담을 파일 정보 */
+    uploadProof: function (file, kind) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('로그인이 필요합니다.'));
+      var bad = api.checkProof(file);
+      if (bad) return Promise.reject(new Error(bad));
+
+      var safe = String(file.name || 'proof')
+        .replace(/[^\w.\-가-힣]+/g, '_')
+        .slice(-80);
+      var path = 'listing-proofs/' + me.id + '/' +
+        Date.now().toString(36) + '-' + safe;
+
+      return adapter.files.upload(path, file).then(function () {
+        return {
+          path: path,
+          name: file.name || safe,
+          size: file.size || 0,
+          type: file.type || '',
+          kind: kind || 'other',
+          uploadedAt: nowIso(),
+        };
+      });
+    },
+
+    /** 증빙 서류 열기용 주소 (본인 · 직원만 열립니다) */
+    proofUrl: function (path) {
+      if (!path) return Promise.resolve('');
+      return adapter.files.url(path);
+    },
+
+    /** 매물 등록 — 언제나 '승인 대기'로 시작합니다. */
+    submitListing: function (data, proof) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('매물을 등록하려면 로그인해 주세요.'));
+      if (!proof || !proof.path) {
+        return Promise.reject(new Error('권리를 확인할 수 있는 서류를 먼저 올려 주세요.'));
+      }
+      var record = Object.assign({
+        kind: 'rent_monthly', holder: 'owner', use: 'other',
+        title: '', region: '', addressRough: '', area: '', floor: '', parking: '',
+        deposit: 0, monthly: 0, salePrice: 0, maintenance: 0,
+        moveIn: '', religiousUse: '', desc: '',
+        contactName: '', contactPhone: '',
+      }, data, {
+        userId: me.id,
+        userEmail: me.email || '',
+        proof: proof,
+        status: 'pending',
+        fee: { amount: LISTING_FEE, paid: false, paidAt: '', invoiceId: '' },
+        rejectNote: '',
+        views: 0,
+        reviewedBy: '',
+        reviewedAt: '',
+        publishedAt: '',
+        expiresAt: '',
+        hiddenAt: '',
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      });
+      return adapter.add('listings', record);
+    },
+
+    /**
+     * 등록자가 내용을 고칩니다.
+     * 고친 글은 다시 확인해야 하므로 '승인 대기'로 돌아갑니다.
+     * (보안 규칙도 같은 조건을 요구합니다.)
+     */
+    saveListing: function (id, data) {
+      var patch = Object.assign({}, data, {
+        status: 'pending',
+        rejectNote: '',
+        reviewedBy: '',
+        reviewedAt: '',
+        publishedAt: '',
+        expiresAt: '',
+        updatedAt: nowIso(),
+      });
+      return adapter.update('listings', id, patch);
+    },
+
+    /** 관리자 → 게시 (승인) */
+    approveListing: function (id, opts) {
+      var o = opts || {};
+      var me = adapter.auth.current();
+      var days = Number(o.days) > 0 ? Number(o.days) : LISTING_DAYS;
+      var patch = {
+        status: 'published',
+        publishedAt: nowIso(),
+        expiresAt: new Date(Date.now() + days * 864e5).toISOString(),
+        rejectNote: '',
+        hiddenAt: '',
+        reviewedBy: me ? me.id : '',
+        reviewedAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      if (o.fee) patch.fee = o.fee;
+      return adapter.update('listings', id, patch);
+    },
+
+    /** 관리자 → 반려 (사유 필수) */
+    rejectListing: function (id, note) {
+      var me = adapter.auth.current();
+      var reason = String(note || '').trim();
+      if (!reason) {
+        return Promise.reject(new Error('반려 사유를 적어 주세요. 등록자에게 그대로 보입니다.'));
+      }
+      return adapter.update('listings', id, {
+        status: 'rejected',
+        rejectNote: reason,
+        publishedAt: '',
+        expiresAt: '',
+        reviewedBy: me ? me.id : '',
+        reviewedAt: nowIso(),
+        updatedAt: nowIso(),
+      });
+    },
+
+    /** 관리자 → 게시 중지 (내리기) */
+    hideListing: function (id, note) {
+      var me = adapter.auth.current();
+      return adapter.update('listings', id, {
+        status: 'hidden',
+        hiddenAt: nowIso(),
+        rejectNote: String(note || '').trim(),
+        reviewedBy: me ? me.id : '',
+        reviewedAt: nowIso(),
+        updatedAt: nowIso(),
+      });
+    },
+
+    /** 관리자 → 등록비 입금 확인 */
+    markListingFee: function (id, paid, invoiceId) {
+      return adapter.update('listings', id, {
+        fee: {
+          amount: LISTING_FEE,
+          paid: !!paid,
+          paidAt: paid ? nowIso() : '',
+          invoiceId: invoiceId || '',
+        },
+        updatedAt: nowIso(),
+      });
+    },
+
+    /** 기간이 지난 게시글 정리 (목록을 열 때 조용히 처리합니다) */
+    expireListing: function (id) {
+      return adapter.update('listings', id, { status: 'expired', updatedAt: nowIso() });
+    },
+
+    /** 매물 삭제 — 증빙 서류도 함께 지웁니다. */
+    deleteListing: function (row) {
+      var id = typeof row === 'string' ? row : (row && row.id);
+      var path = typeof row === 'object' && row && row.proof ? row.proof.path : '';
+      if (!id) return Promise.resolve();
+      return adapter.remove('listings', id).then(function () {
+        if (!path) return null;
+        return adapter.files.remove(path).catch(function () { return null; });
+      });
+    },
+
+    /**
+     * 공개 목록 — 로그인 없이 누구나 봅니다.
+     * 보안 규칙이 조회 범위를 확인하므로 반드시 status 조건을 붙입니다.
+     */
+    publishedListings: function () {
+      return adapter.list('listings', { where: { status: 'published' } })
+        .then(function (rows) {
+          return rows.filter(function (r) { return api.listingLive(r); });
+        })
+        .catch(function () { return []; });
+    },
+
+    /** 내가 올린 매물 (보안 규칙이 조회 범위를 확인합니다) */
+    myListings: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('listings', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    /** 관리자 화면 — 전체 목록 */
+    allListings: function () {
+      return adapter.list('listings');
     },
 
     /** 관리자 화면에 들어올 수 있는 계정인지 */
