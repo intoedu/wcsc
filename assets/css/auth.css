@@ -50,7 +50,7 @@
 }
 .auth-demo {
   margin-bottom: 18px; padding: 13px 16px; background: var(--gold-100);
-  border: 1px solid #E8D6B0; border-radius: 10px; font-size: 13.5px; color: #6E5117; line-height: 1.8;
+  border: 1px solid var(--gold-border); border-radius: 10px; font-size: 13.5px; color: var(--gold-ink); line-height: 1.8;
 }
 .auth-demo code { background: #fff; padding: 1px 6px; border-radius: 5px; font-family: ui-monospace, monospace; font-size: 12.5px; }
 .auth-reset { display: block; margin: 16px auto 0; }
@@ -148,8 +148,8 @@ body.staff { background: var(--brand-900); }
   position: relative; display: flex; flex-direction: column; justify-content: space-between;
   padding: 44px 52px; color: #fff; overflow: hidden;
   background:
-    radial-gradient(760px 420px at 88% -10%, rgba(245,158,11,.20), transparent 60%),
-    linear-gradient(155deg, #12274A 0%, #1A3E7C 55%, #1D4ED8 100%);
+    radial-gradient(760px 420px at 88% -10%, rgba(242, 200, 47,.20), transparent 60%),
+    linear-gradient(155deg, #12301F 0%, #1B4D2E 55%, #1F7A44 100%);
 }
 .sp-aside::after {
   content: ""; position: absolute; inset: 0; opacity: .5; pointer-events: none;
@@ -180,7 +180,7 @@ body.staff { background: var(--brand-900); }
 .sp-list svg { flex: none; margin-top: 4px; color: #93C5FD; width: 17px; height: 17px; }
 
 .sp-foot { font-size: 13px; color: #6D82A0; }
-.sp-foot a { color: #A9BAD0; text-decoration: underline; text-underline-offset: 3px; }
+.sp-foot a { color: #AFCBB8; text-decoration: underline; text-underline-offset: 3px; }
 .sp-foot a:hover { color: #fff; }
 
 /* 오른쪽 폼 패널 */
@@ -324,7 +324,7 @@ body.staff { background: var(--brand-900); }
 .cs-line strong { text-align: right; }
 .cs-reason {
   margin-top: 14px; padding: 13px 16px; background: var(--gold-100);
-  border: 1px solid #E8D6B0; border-radius: 10px; font-size: 14px; line-height: 1.75; color: #6E5117;
+  border: 1px solid var(--gold-border); border-radius: 10px; font-size: 14px; line-height: 1.75; color: var(--gold-ink);
 }
 .cs-reason strong { display: block; margin-bottom: 4px; }
 .cs-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
