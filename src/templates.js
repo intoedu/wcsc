@@ -52,6 +52,34 @@ function logoMark() {
   </svg>`;
 }
 
+/* =========================================================
+   연락처 표기 — 반드시 이 함수들로 출력하세요.
+
+   관리자 화면 [센터 설정] 에서 연락처를 바꾸면 live-content.js 가
+   data-live 표시가 붙은 곳만 갈아끼웁니다. 그냥 ${site.contact.phone}
+   으로 찍으면 그 자리는 옛 번호가 그대로 남습니다.
+   ========================================================= */
+
+/** 전화번호 (관리자 수정 반영) */
+function phoneText() {
+  return `<span data-live="site.phone">${esc(site.contact.phone)}</span>`;
+}
+
+/** 이메일 (관리자 수정 반영) */
+function emailText() {
+  return `<span data-live="site.email">${esc(site.contact.email)}</span>`;
+}
+
+/** 운영 시간 (관리자 수정 반영) */
+function hoursText() {
+  return `<span data-live="site.hours">${esc(site.contact.hours)}</span>`;
+}
+
+/** 주소 (관리자 수정 반영) */
+function addressText() {
+  return `<span data-live="site.address">${esc(site.contact.address)}</span>`;
+}
+
 const NAV = [
   { href: 'about.html', label: '센터 소개' },
   { href: 'services/index.html', label: '지원 항목', key: 'services' },
@@ -81,10 +109,10 @@ function header(base, active) {
 <header class="site-header" id="siteHeader">
   <div class="topbar">
     <div class="wrap topbar-in">
-      <span class="topbar-item">${icon('clock', 'ico ico-xs')} <span data-live="site.hours">${esc(site.contact.hours)}</span></span>
+      <span class="topbar-item">${icon('clock', 'ico ico-xs')} ${hoursText()}</span>
       <span class="topbar-links">
-        <a href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-xs')} <span data-live="site.phone">${esc(site.contact.phone)}</span></a>
-        <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-xs')} <span data-live="site.email">${esc(site.contact.email)}</span></a>
+        <a href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-xs')} ${phoneText()}</a>
+        <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-xs')} ${emailText()}</a>
       </span>
     </div>
   </div>
@@ -148,10 +176,10 @@ function footer(base) {
     <div class="footer-col">
       <h3>문의</h3>
       <ul class="footer-contact">
-        <li>${icon('phoneCall', 'ico ico-sm')} <a href="${site.contact.phoneHref}" data-live="site.phone">${esc(site.contact.phone)}</a></li>
-        <li>${icon('mail', 'ico ico-sm')} <a href="mailto:${esc(site.contact.email)}" data-live="site.email">${esc(site.contact.email)}</a></li>
-        <li>${icon('clock', 'ico ico-sm')} <span data-live="site.hours">${esc(site.contact.hours)}</span></li>
-        <li>${icon('pin', 'ico ico-sm')} <span data-live="site.address">${esc(site.contact.address)}</span></li>
+        <li>${icon('phoneCall', 'ico ico-sm')} <a href="${site.contact.phoneHref}">${phoneText()}</a></li>
+        <li>${icon('mail', 'ico ico-sm')} <a href="mailto:${esc(site.contact.email)}">${emailText()}</a></li>
+        <li>${icon('clock', 'ico ico-sm')} ${hoursText()}</li>
+        <li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>
       </ul>
     </div>
   </div>
@@ -294,7 +322,7 @@ function ctaBand(base, opts) {
     </div>
     <div class="cta-actions">
       <a class="btn btn-gold btn-lg" href="${base}apply.html">지원 신청하기</a>
-      <a class="btn btn-ghost-light btn-lg" href="${site.contact.phoneHref}">전화 상담 ${esc(site.contact.phone)}</a>
+      <a class="btn btn-ghost-light btn-lg" href="${site.contact.phoneHref}">전화 상담 ${phoneText()}</a>
     </div>
   </div>
 </section>`;
@@ -303,6 +331,10 @@ function ctaBand(base, opts) {
 module.exports = {
   esc,
   icon,
+  phoneText,
+  emailText,
+  hoursText,
+  addressText,
   applyLink,
   externalNote,
   logoMark,

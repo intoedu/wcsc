@@ -12,7 +12,9 @@ const path = require('path');
 const T = require('./src/templates');
 
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
-  applyLink, externalNote, site, services } = T;
+  applyLink, externalNote, site, services,
+  // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
+  phoneText, emailText, hoursText, addressText } = T;
 
 const ROOT = __dirname;
 const out = [];
@@ -785,7 +787,7 @@ ${pageHero({
 
       <div class="form-submit">
         <button type="submit" class="btn btn-primary btn-lg btn-block" id="submitBtn">신청서 제출하기</button>
-        <p class="form-note">제출 후 접수번호가 발급됩니다. 문의: <a href="${site.contact.phoneHref}">${esc(site.contact.phone)}</a></p>
+        <p class="form-note">제출 후 접수번호가 발급됩니다. 문의: <a href="${site.contact.phoneHref}">${phoneText()}</a></p>
       </div>
       <p class="form-error" id="formError" hidden></p>
     </form>
@@ -858,8 +860,8 @@ ${pageHero({
 
     <div class="notice-card">
       <p>
-        접수번호를 잊으셨다면 <a href="${site.contact.phoneHref}">${esc(site.contact.phone)}</a> 로 전화 주시거나
-        <a href="mailto:${esc(site.contact.email)}">${esc(site.contact.email)}</a> 로 교회명과 담당자 성함을 보내주세요. 확인해 안내드립니다.
+        접수번호를 잊으셨다면 <a href="${site.contact.phoneHref}">${phoneText()}</a> 로 전화 주시거나
+        <a href="mailto:${esc(site.contact.email)}">${emailText()}</a> 로 교회명과 담당자 성함을 보내주세요. 확인해 안내드립니다.
       </p>
     </div>
   </div>
@@ -896,13 +898,13 @@ ${pageHero({
       <a class="contact-card" href="${site.contact.phoneHref}">
         <span class="contact-ico">${icon('phoneCall')}</span>
         <h2>전화 문의</h2>
-        <strong>${esc(site.contact.phone)}</strong>
-        <p>${esc(site.contact.hours)}</p>
+        <strong>${phoneText()}</strong>
+        <p>${hoursText()}</p>
       </a>
       <a class="contact-card" href="mailto:${esc(site.contact.email)}">
         <span class="contact-ico">${icon('mail')}</span>
         <h2>이메일</h2>
-        <strong>${esc(site.contact.email)}</strong>
+        <strong>${emailText()}</strong>
         <p>영업일 기준 1일 이내 회신드립니다.</p>
       </a>
       <a class="contact-card is-accent" href="apply.html">
@@ -920,9 +922,9 @@ ${pageHero({
     ${sectionHead('찾아오시는 길', '방문 상담은 사전 예약제로 운영합니다')}
     <div class="notice-card">
       <ul class="footer-contact contact-list">
-        <li>${icon('pin', 'ico ico-sm')} <span>${esc(site.contact.address)}</span></li>
-        <li>${icon('clock', 'ico ico-sm')} <span>${esc(site.contact.hours)}</span></li>
-        <li>${icon('phoneCall', 'ico ico-sm')} <span>방문 전 <a href="${site.contact.phoneHref}">${esc(site.contact.phone)}</a> 로 예약해 주세요.</span></li>
+        <li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>
+        <li>${icon('clock', 'ico ico-sm')} ${hoursText()}</li>
+        <li>${icon('phoneCall', 'ico ico-sm')} <span>방문 전 <a href="${site.contact.phoneHref}">${phoneText()}</a> 로 예약해 주세요.</span></li>
       </ul>
     </div>
   </div>
