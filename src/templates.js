@@ -1,6 +1,6 @@
 'use strict';
 
-const { site, services } = require('./data/site');
+const { site, categories, services } = require('./data/site');
 
 /** HTML 특수문자 이스케이프 */
 function esc(str) {
@@ -301,6 +301,48 @@ function externalNote(s) {
   </p>`;
 }
 
+/**
+ * 항목을 갈래별로 묶어 보여 줍니다.
+ * 8개를 한 줄로 늘어놓으면 무엇부터 볼지 알기 어려워, 자리별로 나눴습니다.
+ * 갈래에 들어가지 않는 항목이 생기면 맨 아래 '그 밖에' 로 따로 나옵니다.
+ */
+function serviceGroups(base) {
+  const rest = services.filter((s) => !categories.some((c) => c.id === s.category));
+
+  const block = (c, list) => `<section class="svc-cat" id="cat-${c.id}">
+      <div class="svc-cat-head">
+        <span class="svc-cat-ico">${icon(c.icon)}</span>
+        <div>
+          <h2 class="svc-cat-name">${esc(c.name)}</h2>
+          <p class="svc-cat-tag">${esc(c.tagline)}</p>
+        </div>
+        <span class="svc-cat-count">${list.length}개 항목</span>
+      </div>
+      ${c.desc ? `<p class="svc-cat-desc">${esc(c.desc)}</p>` : ''}
+      <div class="svc-grid">
+        ${list.map((s) => serviceCard(s, base)).join('\n        ')}
+      </div>
+    </section>`;
+
+  return categories
+    .map((c) => {
+      const list = services.filter((s) => s.category === c.id);
+      return list.length ? block(c, list) : '';
+    })
+    .filter(Boolean)
+    .concat(
+      rest.length
+        ? [block({ id: 'etc', name: '그 밖에', tagline: '아래 항목도 함께 진행합니다', icon: 'briefcase' }, rest)]
+        : []
+    )
+    .join('\n    ');
+}
+
+/** 항목이 속한 갈래 (없으면 null) */
+function categoryOf(s) {
+  return categories.filter((c) => c.id === s.category)[0] || null;
+}
+
 function serviceCard(s, base) {
   return `<a class="svc-card" href="${base}services/${s.slug}.html">
     <span class="svc-no">${s.no}</span>
@@ -330,6 +372,9 @@ function ctaBand(base, opts) {
 }
 
 module.exports = {
+  categories,
+  serviceGroups,
+  categoryOf,
   esc,
   icon,
   phoneText,

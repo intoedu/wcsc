@@ -288,6 +288,29 @@ table { border-collapse: collapse; width: 100%; }
 
 /* ---------- service cards ---------- */
 .svc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+/* ---------- 항목 갈래 ---------- */
+.svc-cat + .svc-cat { margin-top: 56px; padding-top: 52px; border-top: 1px solid var(--line); }
+.svc-cat-head { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+.svc-cat-ico {
+  flex: none; display: grid; place-items: center; width: 48px; height: 48px;
+  border-radius: 13px; background: var(--brand-700); color: #fff;
+}
+.svc-cat-ico .ico { width: 26px; height: 26px; }
+.svc-cat-name { font-size: 25px; letter-spacing: -.04em; color: var(--brand-800); }
+.svc-cat-tag { margin-top: 2px; font-size: 15px; color: var(--muted); }
+.svc-cat-count {
+  margin-left: auto; flex: none; white-space: nowrap;
+  padding: 5px 13px; border-radius: 999px; background: var(--gold-100);
+  border: 1px solid var(--gold-border);
+  font-size: 12.5px; font-weight: 800; letter-spacing: .04em; color: var(--gold-ink-deep);
+}
+.svc-cat-desc {
+  max-width: 62em; margin-bottom: 24px;
+  font-size: 15.5px; line-height: 1.8; color: var(--ink-2);
+}
+/* 갈래 안에서는 항목 수가 2~3개라 4칸 격자가 너무 넓어 보입니다. */
+.svc-cat .svc-grid { grid-template-columns: repeat(3, 1fr); }
 .svc-card {
   position: relative; display: flex; flex-direction: column; gap: 8px;
   padding: 26px 22px 22px; background: #fff; border: 1px solid var(--line);
@@ -821,6 +844,8 @@ table { border-collapse: collapse; width: 100%; }
    ========================================================= */
 @media (max-width: 1080px) {
   .svc-grid, .why-grid, .prep-grid { grid-template-columns: repeat(2, 1fr); }
+  .svc-cat .svc-grid { grid-template-columns: repeat(2, 1fr); }
+  .does-list { grid-template-columns: 1fr; }
   .steps { grid-template-columns: repeat(3, 1fr); }
   .mega-in { grid-template-columns: repeat(3, 1fr); }
   .footer-top { grid-template-columns: 1fr 1fr; }
@@ -867,6 +892,10 @@ table { border-collapse: collapse; width: 100%; }
   .wrap, .wrap.narrow { width: min(100% - 32px, var(--wrap)); }
   .svc-grid, .why-grid, .prep-grid, .steps, .feat-grid, .prob-grid, .contact-grid,
   .grid-2, .pick-grid, .footer-top { grid-template-columns: 1fr; }
+  .svc-cat .svc-grid { grid-template-columns: 1fr; }
+  .svc-cat-head { flex-wrap: wrap; gap: 12px; }
+  .svc-cat-name { font-size: 21px; }
+  .svc-cat-count { margin-left: 0; }
   .hero h1 { font-size: 30px; }
   .hero-lead { font-size: 16px; }
   .btn-lg { width: 100%; }
@@ -1035,14 +1064,12 @@ table { border-collapse: collapse; width: 100%; }
 .ls-scope-card.is-do { border-top: 4px solid var(--gold-400); }
 .ls-scope-card.is-do h2 { color: var(--brand-800); }
 .ls-scope-card.is-do li::before { background: var(--gold-400); }
-.ls-scope-card.is-dont { background: var(--bg-soft); }
-.ls-scope-card.is-dont h2 { color: var(--muted); }
-.ls-scope-card.is-dont li::before {
-  background: none; border-radius: 0; top: 12px; width: 9px; height: 2px; background-color: var(--muted);
-}
-.ls-scope-note {
+.ls-scope-card.is-tip { background: var(--bg-soft); }
+.ls-scope-card.is-tip h2 { color: var(--brand-800); }
+.ls-scope-note { font-size: 14.5px; line-height: 1.75; color: var(--ink-2); }
+.ls-scope-fine {
   margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);
-  font-size: 13.5px; line-height: 1.7; color: var(--muted);
+  font-size: 12.5px; line-height: 1.7; color: var(--muted);
 }
 .ls-scope-note a { color: var(--brand-700); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 
@@ -1410,26 +1437,24 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
 .track-list dd { font-size: 14.5px; line-height: 1.7; color: var(--ink-2); }
 
 /* ---------- 하는 일 / 하지 않는 일 ---------- */
-.scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-.scope-card { padding: 28px 26px; border-radius: var(--radius); border: 1px solid var(--line); background: #fff; }
-.scope-card h3 { display: flex; align-items: center; gap: 8px; font-size: 17.5px; letter-spacing: -.03em; margin-bottom: 16px; }
-.scope-card ul { display: flex; flex-direction: column; gap: 10px; }
-.scope-card li { position: relative; padding-left: 21px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
-.scope-card.is-do { border-top: 4px solid var(--gold-400); }
-.scope-card.is-do h3 { color: var(--brand-800); }
-.scope-card.is-do li::before {
-  content: ""; position: absolute; left: 0; top: 9px; width: 9px; height: 9px;
-  border-radius: 50%; background: var(--gold-400);
+/* 해 드리는 일 — 두 칸으로 나누지 않고 한 줄씩 시원하게 */
+.does-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; }
+.does-list li {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 16px 20px; background: #fff; border: 1px solid var(--line);
+  border-radius: 12px; font-size: 15.5px; line-height: 1.65; color: var(--ink);
 }
-.scope-card.is-dont { background: var(--bg-soft); }
-.scope-card.is-dont h3 { color: var(--muted); }
-.scope-card.is-dont li::before {
-  content: ""; position: absolute; left: 0; top: 13px; width: 10px; height: 2px; background: var(--muted);
+.does-list li .ico {
+  flex: none; margin-top: 2px; padding: 3px; border-radius: 50%;
+  background: var(--brand-700); color: #fff; stroke-width: 3;
 }
 .scope-note {
   margin-top: 22px; padding: 18px 22px; border-radius: 12px; max-width: 62em;
   background: var(--gold-100); border: 1px solid var(--gold-border);
   color: var(--gold-ink); font-size: 15px; line-height: 1.75;
+}
+.scope-fine {
+  margin-top: 14px; max-width: 62em; font-size: 13px; line-height: 1.7; color: var(--muted);
 }
 
 /* ---------- 어떤 문서에 쓰나요 ---------- */
