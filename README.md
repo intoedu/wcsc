@@ -632,7 +632,7 @@ npm run rules         # firestore.rules 를 caps-4e079 에 게시
 #### 방법 3 — GitHub에서 직접 복사
 
 ```
-raw.githubusercontent.com/intoedu/Caps-Home-Page/claude/church-support-platform-b296qn/firestore.rules
+raw.githubusercontent.com/intoedu/wcsc/claude/church-support-platform-b296qn/firestore.rules
 ```
 
 ### 첫 최고관리자 만들기
@@ -791,7 +791,9 @@ npm run build
 - [ ] **교역자 구인 게시판** — 매물 게시판과 달리 아직 없습니다. 유료화 여부와 범위 결정 필요 (기획서 5.2)
 - [ ] **접수번호 접두어** — 기획서는 `WCSC-260812-4821` 제안. 지금은 `CAPS-` 유지 (기존 발급 번호와 형식 통일)
 - [ ] **@IM 접수 건 취합** — 홈페이지 · 디자인은 @IM 접수라 센터 시스템에 안 들어옵니다. 월 구독 청구 주체 협의 필요
-- [ ] **저장소 · 공개 주소** — 기획서는 `intoedu/wcsc` · `intoedu.github.io/wcsc/`. 현재 저장소는 `Caps-Home-Page`
+- [x] **저장소 · 공개 주소** — `intoedu/wcsc` · `https://intoedu.github.io/wcsc/` 로 바꿨습니다.
+      Supabase 의 `Site URL` · `Redirect URLs` 도 이 주소로 맞춰야 구글 로그인이 돌아옵니다
+      (`Redirect URLs` 는 끝에 `/**` 를 붙여야 신청·직원·매물 페이지에서 눌러도 제자리로 옵니다)
 - [ ] **인투오피스 전자서명 상세** — 실제로 쓰는 전자서명 엔진(자체 개발 / 외부 솔루션 연동),
       월 발송 건수 제한, 문서 보관 기간, 계정 수를 확정해 `services[7].priceNote` 에 넣어 주세요.
       대행 업무(회계 · 문서 작성 · 신고 · 급여)는 [하지 않는 일] 로 명시해 두었습니다 (`needsReview: true`)
