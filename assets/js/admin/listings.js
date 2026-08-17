@@ -18,7 +18,9 @@
 
   var ST_CLASS = {
     pending: 'hold', awaiting_payment: 'progress', published: 'done',
-    rejected: 'canceled', hidden: 'canceled', expired: 'received',
+    rejected: 'canceled', hidden: 'canceled',
+    done: 'received',    // 거래 완료 — 잘 끝난 것이므로 반려와 구분합니다
+    expired: 'received', // (옛 기간 제한 시절의 글)
   };
 
   var BOARD = window.CAPS_LISTING_BOARD || {};
@@ -133,7 +135,9 @@
       ['등록', db.formatDate(row.createdAt)],
       ['최종 수정', db.formatDate(row.updatedAt)],
       ['게시일', row.publishedAt ? db.formatDate(row.publishedAt) : ''],
-      ['게시 종료', row.expiresAt ? db.formatDate(row.expiresAt, false) : ''],
+      ['게시한 지', v.up != null ? v.up + '일' : ''],
+      // 기한이 있던 옛 글에만 나옵니다.
+      ['게시 종료 (옛 기준)', row.expiresAt ? db.formatDate(row.expiresAt, false) : ''],
     ]));
 
     var body =
@@ -141,7 +145,9 @@
         '<span class="st st-' + h(ST_CLASS[v.status] || 'received') + '">' + h(v.label) + '</span>' +
         '<span class="st ' + (fee.paid ? 'st-done' : 'st-hold') + '">등록비 ' +
           (fee.paid ? '입금 확인' : '미확인') + '</span>' +
-        (v.days != null ? '<span class="sub">게시 ' + v.days + '일 남음</span>' : '') +
+        (v.status === 'published' && v.up != null
+          ? '<span class="sub">게시한 지 ' + v.up + '일</span>' : '') +
+        (v.days != null ? '<span class="sub">옛 기한 ' + v.days + '일 남음</span>' : '') +
       '</div>' +
 
       '<div class="adm-card">' +
@@ -228,11 +234,8 @@
             '<span>등록비 ' + money(fee.amount || db.LISTING_FEE) + ' 입금을 확인했습니다.</span></label>' +
           '<button type="button" class="btn btn-outline btn-sm" id="lsFeeSave">입금 여부만 저장</button>' +
         '</div>' +
-        '<div class="field">' +
-          '<label for="lsDays">게시 기간 (일)</label>' +
-          '<input type="number" id="lsDays" min="7" max="365" step="1" value="' + db.LISTING_DAYS + '">' +
-          '<small class="hint">기본 ' + db.LISTING_DAYS + '일입니다. 기간이 지나면 목록에서 자동으로 내려갑니다.</small>' +
-        '</div>' +
+        '<p class="field-hint">게시에는 <strong>기한이 없습니다</strong> — 거래가 끝날 때까지 올라가 있습니다. ' +
+          '팔리면 등록자가 직접 [거래 완료] 로 내릴 수 있고, 여기서 내려 드릴 수도 있습니다.</p>' +
         '<div class="field">' +
           '<label for="lsNote">반려 · 중지 사유</label>' +
           '<textarea id="lsNote" rows="3" placeholder="예: 제출하신 등기부등본의 소유자 이름이 등록자와 다릅니다.">' +
@@ -241,7 +244,7 @@
         '</div>' +
         '<div class="adm-actions">' +
           (v.status === 'published'
-            ? '<button type="button" class="btn btn-primary btn-sm" id="lsRepub">게시 기간 다시 설정</button>' +
+            ? '<button type="button" class="btn btn-primary btn-sm" id="lsDone">거래 완료로 내리기</button>' +
               '<button type="button" class="btn btn-outline btn-sm" id="lsHide">게시 중지 (내리기)</button>'
             : '<button type="button" class="btn btn-primary btn-sm" id="lsApprove">게시하기</button>' +
               (v.status === 'pending' ? '' :
@@ -255,7 +258,6 @@
       sub: v.kindLabel + ' · ' + (row.addressRough || row.region || '') + ' · ' + db.listingPrice(row),
       body: body,
       onMount: function (mount) {
-        var days = mount.querySelector('#lsDays');
         var note = mount.querySelector('#lsNote');
         var paid = mount.querySelector('#lsFeePaid');
 
@@ -300,19 +302,31 @@
           }).catch(function (err) { A.toast(err.message || '저장에 실패했습니다.', 'err'); });
         });
 
-        var approve = mount.querySelector('#lsApprove') || mount.querySelector('#lsRepub');
+        var approve = mount.querySelector('#lsApprove');
         if (approve) {
           approve.addEventListener('click', function () {
             if (!paid.checked &&
               !window.confirm('등록비 입금이 확인되지 않았습니다. 그래도 게시하시겠습니까?\n' +
                 '(보통은 계좌 안내 → 입금 확인 → 게시 순서로 진행합니다.)')) return;
             feeStep()
-              .then(function () { return db.approveListing(row.id, { days: Number(days.value) }); })
+              .then(function () { return db.approveListing(row.id); })
               .then(function () {
                 A.closeDrawer();
                 A.toast('게시했습니다. 이제 게시판에 공개됩니다.');
               })
               .catch(function (err) { A.toast(err.message || '게시에 실패했습니다.', 'err'); });
+          });
+        }
+
+        var done = mount.querySelector('#lsDone');
+        if (done) {
+          done.addEventListener('click', function () {
+            if (!window.confirm('거래가 끝난 것으로 보고 목록에서 내립니다.\n' +
+              '등록자 화면에는 [거래 완료] 로 남습니다. 계속하시겠습니까?')) return;
+            db.markListingDone(row.id).then(function () {
+              A.closeDrawer();
+              A.toast('거래 완료로 내렸습니다.');
+            }).catch(function (err) { A.toast(err.message || '처리에 실패했습니다.', 'err'); });
           });
         }
 
@@ -367,18 +381,15 @@
         return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
       });
 
-      // 기간이 지난 글은 목록을 열 때 조용히 정리합니다.
-      all.forEach(function (r) {
-        if (r.status === 'published' && !db.listingLive(r)) db.expireListing(r.id);
-      });
-
       var counts = {
         pending: all.filter(function (r) { return r.status === 'pending'; }).length,
         waiting: all.filter(function (r) { return r.status === 'awaiting_payment'; }).length,
         published: all.filter(function (r) { return db.listingLive(r); }).length,
+        // 기한이 없어졌으니, 오래 올라가 있는 글을 대신 세어 둡니다.
+        // (팔렸는데 안 내린 글일 수 있어 한 번 확인해 볼 대상입니다)
         soon: all.filter(function (r) {
           var v = db.listingView(r);
-          return v.days != null && v.days <= 7;
+          return v.status === 'published' && v.up != null && v.up >= 90;
         }).length,
       };
 
@@ -387,6 +398,12 @@
         if (filter === 'pending' && r.status !== 'pending') return false;
         if (filter === 'waiting' && r.status !== 'awaiting_payment') return false;
         if (filter === 'published' && !db.listingLive(r)) return false;
+        if (filter === 'done' && r.status !== 'done') return false;
+        // 오래 올라가 있는 글 — 팔렸는데 안 내린 글일 수 있어 한 번 확인해 볼 대상입니다.
+        if (filter === 'old') {
+          var vv = db.listingView(r);
+          if (!(vv.status === 'published' && vv.up != null && vv.up >= 90)) return false;
+        }
         if (!needle) return true;
         return [r.title, r.region, r.addressRough, r.contactName, r.contactPhone, r.userEmail]
           .join(' ').toLowerCase().indexOf(needle) > -1;
@@ -416,7 +433,7 @@
           '<div class="adm-stat is-accent"><strong>' + counts.pending + '</strong><span>승인 대기 (서류 확인)</span></div>' +
           '<div class="adm-stat is-accent"><strong>' + counts.waiting + '</strong><span>입금 대기</span></div>' +
           '<div class="adm-stat"><strong>' + counts.published + '</strong><span>게시중</span></div>' +
-          '<div class="adm-stat"><strong>' + counts.soon + '</strong><span>7일 내 만료</span></div>' +
+          '<div class="adm-stat"><strong>' + counts.soon + '</strong><span>90일 넘게 게시</span></div>' +
         '</div>' +
 
         '<div class="adm-toolbar">' +
@@ -425,6 +442,8 @@
             '<option value="pending"' + (filter === 'pending' ? ' selected' : '') + '>승인 대기만 (서류 확인)</option>' +
             '<option value="waiting"' + (filter === 'waiting' ? ' selected' : '') + '>입금 대기만</option>' +
             '<option value="published"' + (filter === 'published' ? ' selected' : '') + '>게시중만</option>' +
+            '<option value="old"' + (filter === 'old' ? ' selected' : '') + '>90일 넘게 게시된 글</option>' +
+            '<option value="done"' + (filter === 'done' ? ' selected' : '') + '>거래 완료만</option>' +
             '<option value="all"' + (filter === 'all' ? ' selected' : '') + '>전체 보기</option>' +
           '</select>' +
         '</div>' +
@@ -448,7 +467,8 @@
                   '<span class="sub">' + h(v.proofLabel || '서류 없음') + '</span>' +
                   '<span class="sub">' + h(u ? (u.name || u.email) : (r.userEmail || '-')) + '</span></td>' +
                 '<td><span class="st st-' + h(ST_CLASS[v.status] || 'received') + '">' + h(v.label) + '</span>' +
-                  (v.days != null ? '<span class="sub">' + v.days + '일 남음</span>' : '') + '</td>' +
+                  (v.status === 'published' && v.up != null
+                    ? '<span class="sub">' + v.up + '일째</span>' : '') + '</td>' +
                 '<td>' + (fee.paid
                   ? '<span class="st st-done">확인</span>'
                   : fee.noticeSentAt

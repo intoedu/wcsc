@@ -1137,6 +1137,8 @@ table { border-collapse: collapse; width: 100%; }
 .ls-state.is-published { background: #E6F4EC; color: #14532D; }
 .ls-state.is-pending { background: var(--gold-100); color: var(--gold-ink-deep); }
 .ls-state.is-rejected, .ls-state.is-hidden { background: #FDECEA; color: #8C1D18; }
+/* 거래 완료 — 잘 끝난 것이므로 반려(빨강)와 구분해 회색으로 둡니다. */
+.ls-state.is-done, .ls-state.is-expired { background: var(--bg-soft); color: var(--muted); }
 
 /* ---------- 등록 폼 ---------- */
 .ls-guard { margin-bottom: 28px; }

@@ -334,13 +334,22 @@
       lines += '<p class="ls-mine-note is-no"><strong>게시가 중지되었습니다.</strong> ' +
         esc(r.rejectNote || '자세한 사유는 센터로 문의해 주세요.') + '</p>';
     }
+    if (v.status === 'done') {
+      lines += '<p class="ls-mine-note is-wait"><strong>거래 완료로 내려졌습니다.</strong> ' +
+        '다시 올리시려면 [내용 수정] 에서 확인하신 뒤 다시 신청해 주세요.</p>';
+    }
     if (v.status === 'expired') {
-      lines += '<p class="ls-mine-note is-wait">게시 기간이 끝났습니다. ' +
-        '다시 올리시려면 내용을 확인하신 뒤 재신청해 주세요.</p>';
+      lines += '<p class="ls-mine-note is-wait">게시 기간이 끝났습니다 (옛 기준). ' +
+        '지금은 기한 없이 거래가 끝날 때까지 올라갑니다 — 다시 신청해 주세요.</p>';
     }
     if (v.status === 'published') {
-      lines += '<p class="ls-mine-note is-ok">게시 중입니다. ' +
-        (v.days != null ? v.days + '일 남았습니다.' : '') + '</p>';
+      lines += '<p class="ls-mine-note is-ok"><strong>게시 중입니다.</strong> ' +
+        '기한은 없습니다 — 거래가 끝날 때까지 올라가 있습니다.' +
+        (v.up != null ? ' (게시한 지 ' + v.up + '일)' : '') +
+        '<br>거래가 끝나면 아래 <strong>[거래 완료]</strong> 를 눌러 내려 주세요. ' +
+        '내리지 않으면 계속 문의 전화가 옵니다.' +
+        (v.days != null ? '<br>옛 기준 기한이 ' + v.days + '일 남아 있습니다.' : '') +
+        '</p>';
     }
 
     return '<div class="ls-mine-card">' +
@@ -358,7 +367,9 @@
       lines +
       '<div class="ls-mine-act">' +
         (v.status === 'published'
-          ? '<a class="btn btn-ghost btn-sm" href="#view/' + esc(r.id) + '">게시된 모습 보기</a>' : '') +
+          ? '<a class="btn btn-ghost btn-sm" href="#view/' + esc(r.id) + '">게시된 모습 보기</a>' +
+            '<button type="button" class="btn btn-primary btn-sm" data-done="' + esc(r.id) + '">거래 완료</button>'
+          : '') +
         '<a class="btn btn-ghost btn-sm" href="#edit/' + esc(r.id) + '">내용 수정</a>' +
         '<button type="button" class="btn btn-ghost btn-sm is-danger" data-del="' + esc(r.id) + '">삭제</button>' +
       '</div>' +
@@ -394,6 +405,24 @@
   }
 
   if (el.mineBody) {
+    /* 거래 완료 — 팔린 것을 아는 사람은 등록자이므로 직접 내리실 수 있게 합니다. */
+    el.mineBody.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-done]');
+      if (!btn) return;
+      var id = btn.getAttribute('data-done');
+      if (!window.confirm('거래가 끝난 것으로 목록에서 내립니다.\n' +
+        '게시판에서는 바로 보이지 않게 되고, 내 매물에는 [거래 완료] 로 남습니다.\n' +
+        '다시 올리시려면 내용을 고쳐 재신청하시면 됩니다. 계속하시겠습니까?')) return;
+      btn.disabled = true;
+      db.markListingDone(id).then(function () {
+        renderMine();
+        load();
+      }).catch(function (err) {
+        btn.disabled = false;
+        window.alert(err.message || '처리하지 못했습니다.');
+      });
+    });
+
     el.mineBody.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-del]');
       if (!btn) return;
