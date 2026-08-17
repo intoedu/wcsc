@@ -488,6 +488,9 @@ function buildServicePage(s, i) {
       </div>
       <div class="svc-hero-side">
         <span class="svc-hero-ico">${icon(s.icon)}</span>
+        ${s.siteLink ? `<a class="btn btn-gold svc-site-btn" href="${s.siteLink.url}" target="_blank" rel="noopener">
+          ${esc(s.siteLink.label)} 바로가기 ↗
+        </a>` : ''}
         <dl class="svc-meta">
           <div><dt>비용</dt><dd class="svc-meta-price">${esc(s.price || '상담 후 결정')}</dd></div>
           <div><dt>과금 방식</dt><dd>${esc(s.billing || '건별 견적')}</dd></div>
@@ -516,7 +519,62 @@ function buildServicePage(s, i) {
   </div>
 </section>
 
+${s.campTypes ? `
 <section class="section section-alt">
+  <div class="wrap">
+    ${sectionHead('캠프 종류', '두 가지 방식 중에 고르실 수 있습니다',
+      '같은 캠프를 우리 교회가 찾아가서 참석하실 수도, 우리 교회로 불러 여실 수도 있습니다.')}
+    <div class="camp-grid">
+      ${s.campTypes.map((c) => `<article class="camp-card">
+        <span class="camp-tag">${esc(c.tag)}</span>
+        <h3>${esc(c.title)}</h3>
+        <p class="camp-lead">${esc(c.lead)}</p>
+        <ul class="camp-points">
+          ${c.points.map((t) => `<li>${esc(t)}</li>`).join('\n          ')}
+        </ul>
+        <p class="camp-note">${esc(c.note)}</p>
+      </article>`).join('\n      ')}
+    </div>
+    ${s.siteLink ? `<p class="camp-site">
+      <a class="btn btn-primary btn-lg" href="${s.siteLink.url}" target="_blank" rel="noopener">
+        ${esc(s.siteLink.label)} 바로가기 ↗</a>
+      <span>${esc(s.siteLink.desc)}</span>
+    </p>` : ''}
+  </div>
+</section>` : ''}
+
+${s.campTracks ? `
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('캠프 갈래', '영성캠프와 영역캠프',
+      '영혼을 정렬하는 영성캠프에서, 일터와 학교로 나아가는 영역캠프까지 이어집니다.')}
+    <div class="track-grid">
+      ${s.campTracks.map((t) => `<article class="track-card">
+        <h3>${esc(t.title)}</h3>
+        <p class="track-lead">${esc(t.lead)}</p>
+        <dl class="track-list">
+          ${t.items.map((i) => `<div><dt>${esc(i.name)}</dt><dd>${esc(i.desc)}</dd></div>`).join('\n          ')}
+        </dl>
+      </article>`).join('\n      ')}
+    </div>
+  </div>
+</section>` : ''}
+
+${s.useCases ? `
+<section class="section section-alt">
+  <div class="wrap">
+    ${sectionHead('어떤 문서에 쓰나요', '교회에서 서명이 필요한 거의 모든 곳',
+      '아래는 자주 쓰이는 예입니다. 서명란이 있는 문서라면 무엇이든 올려 쓰실 수 있습니다.')}
+    <div class="use-grid">
+      ${s.useCases.map((u) => `<article class="use-card">
+        <h3>${esc(u.group)}</h3>
+        <ul>${u.items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+      </article>`).join('\n      ')}
+    </div>
+  </div>
+</section>` : ''}
+
+<section class="section${s.useCases ? '' : ' section-alt'}">
   <div class="wrap">
     ${sectionHead('지원 내용', '이런 것들을 해 드립니다')}
     <div class="feat-grid" data-live-list="svc.${s.id}.features">
@@ -549,7 +607,26 @@ function buildServicePage(s, i) {
   </div>
 </section>
 
+${s.scope ? `
 <section class="section section-alt">
+  <div class="wrap">
+    ${sectionHead('범위', '하는 일과 하지 않는 일',
+      '헷갈릴 수 있는 부분이라 분명하게 적어 둡니다.')}
+    <div class="scope-grid">
+      <article class="scope-card is-do">
+        <h3>${icon('check', 'ico ico-sm')} 이런 것을 합니다</h3>
+        <ul>${s.scope.does.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+      </article>
+      <article class="scope-card is-dont">
+        <h3>이런 것은 하지 않습니다</h3>
+        <ul>${s.scope.doesNot.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+      </article>
+    </div>
+    <p class="scope-note">${esc(s.scope.note)}</p>
+  </div>
+</section>` : ''}
+
+<section class="section${s.scope ? '' : ' section-alt'}">
   <div class="wrap">
     <div class="split">
       <div class="split-col">
