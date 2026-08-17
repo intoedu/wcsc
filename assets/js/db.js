@@ -1203,7 +1203,26 @@ window.CAPSDB = (function () {
       });
     }
 
-    function emitAuth() {
+    /* 계정 상태를 한 줄로 만들어 견줍니다.
+       Supabase 는 탭을 다시 보게 될 때마다 SIGNED_IN 을 다시 흘려 줍니다
+       (세션을 되살리고 토큰을 갱신하면서). 그걸 그대로 화면에 전하면
+       "로그인 상태가 바뀌었다" 고 오해해 열려 있던 화면을 다시 그리고,
+       쓰고 있던 신청서 내용이 날아갑니다.
+
+       그래서 정말 달라졌을 때만 알립니다 — 로그인 · 로그아웃 · 직분 ·
+       승인 · 권한 · 이름 같은 값이 하나라도 달라지면 알리고, 똑같으면
+       조용히 넘깁니다. */
+    function sigOf(p) {
+      try { return p ? JSON.stringify(p) : ''; } catch (e) { return p ? 'x' : ''; }
+    }
+
+    var lastSig = null; // null = 아직 첫 확인 전
+
+    /** @param {boolean} [force] 내용이 같아도 반드시 알립니다 (연결 실패 안내 등) */
+    function emitAuth(force) {
+      var sig = sigOf(profile);
+      if (!force && lastSig !== null && sig === lastSig) return;
+      lastSig = sig;
       authListeners.forEach(function (cb) {
         try { cb(profile); } catch (e) { /* 개별 리스너 오류 무시 */ }
       });
@@ -1258,7 +1277,7 @@ window.CAPSDB = (function () {
       Promise.race([call, timer]).catch(function (err) {
         loadError = err;
         // 이미 그려진 화면(관리자 게이트 등)이 원인을 다시 보여 주도록 알립니다.
-        ready.then(emitAuth, function () { /* 이미 실패로 처리됨 */ });
+        ready.then(function () { emitAuth(true); }, function () { /* 이미 실패로 처리됨 */ });
       });
     }
 
@@ -1274,13 +1293,15 @@ window.CAPSDB = (function () {
         authUser = user;
         return loadProfile(user).then(function (p) {
           profile = p;
+          lastSig = sigOf(profile); // 기준선
+
           sb.auth.onAuthStateChange(function (event, session) {
             authUser = session ? session.user : null;
             // 토큰 갱신만 된 경우에는 다시 읽지 않습니다.
             if (event === 'TOKEN_REFRESHED' && profile) return;
             loadProfile(authUser).then(function (next) {
               profile = next;
-              emitAuth();
+              emitAuth(); // 내용이 같으면 emitAuth 가 알아서 넘깁니다
             });
           });
         });

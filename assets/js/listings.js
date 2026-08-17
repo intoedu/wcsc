@@ -797,11 +797,32 @@
     say(el.ok, '');
   }
 
+  /* 쓰다 만 내용이 있는지 — 있으면 함부로 비우지 않습니다. */
+  function formDirty() {
+    if (photos.length) return true;
+    if (el.proofFile && el.proofFile.files && el.proofFile.files.length) return true;
+    var typed = [f.title, f.addr, f.area, f.floor, f.parking, f.moveIn, f.religious,
+      f.deposit, f.monthly, f.sale, f.maint, f.desc, f.hours];
+    for (var i = 0; i < typed.length; i++) {
+      if (typed[i] && String(typed[i].value || '').trim()) return true;
+    }
+    // 이름 · 연락처는 계정 정보로 미리 채워지므로, 그것과 달라졌을 때만 셉니다.
+    var me = db.auth.current() || {};
+    if (f.name && f.name.value.trim() && f.name.value.trim() !== (me.name || '')) return true;
+    if (f.phone && f.phone.value.trim() && f.phone.value.trim() !== (me.phone || '')) return true;
+    return false;
+  }
+
   function openForm(editId) {
     var me = db.auth.current();
     el.gate.hidden = !!me;
     el.form.hidden = !me;
     if (!me) return;
+
+    // 같은 화면을 다시 여는 것이고 이미 쓰고 계신 내용이 있으면 그대로 둡니다.
+    // (탭을 옮겼다 돌아오거나 로그인 상태를 다시 확인할 때 여기까지 옵니다.)
+    // 다른 매물을 수정하러 오신 경우에는 바꿔 채워야 하므로 대상이 같을 때만 지킵니다.
+    if ((el.editId.value || '') === (editId || '') && formDirty()) return;
 
     if (!editId) { fillForm(null); return; }
     el.form.hidden = true;
