@@ -12,7 +12,7 @@ const path = require('path');
 const T = require('./src/templates');
 
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
-  applyLink, externalNote, site, services,
+  applyLink, externalNote, site, categories, services, serviceGroups, categoryOf,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
@@ -85,9 +85,7 @@ function buildIndex() {
       '교회에 필요한 일, 여기서 함께 정리합니다',
       '어느 항목이 필요한지 확실하지 않아도 괜찮습니다. 상황을 알려주시면 담당자가 함께 정리해 드립니다.'
     )}
-    <div class="svc-grid">
-      ${services.map((s) => serviceCard(s, '')).join('\n      ')}
-    </div>
+    ${serviceGroups('')}
   </div>
 </section>
 
@@ -204,10 +202,8 @@ ${pageHero({
 
 <section class="section">
   <div class="wrap">
-    ${sectionHead('지원 범위', '8개 항목, 한 창구')}
-    <div class="svc-grid">
-      ${services.map((s) => serviceCard(s, '')).join('\n      ')}
-    </div>
+    ${sectionHead('지원 범위', '세 갈래, 8개 항목 — 한 창구')}
+    ${serviceGroups('')}
   </div>
 </section>
 
@@ -374,15 +370,14 @@ function buildServicesIndex() {
   const body = `
 ${pageHero({
   eyebrow: '지원 항목',
-  title: '8개 항목,<br>한 창구에서 진행합니다',
-  lead: '항목을 여러 개 선택해 한 번에 신청하실 수 있습니다. 담당자 한 명이 전체 일정을 조율합니다.',
+  title: '세 갈래 8개 항목,<br>한 창구에서 진행합니다',
+  lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 보이는 교회 · 사역 현장 · 교회 살림. '
+    + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
 })}
 
 <section class="section">
   <div class="wrap">
-    <div class="svc-grid">
-      ${services.map((s) => serviceCard(s, '../')).join('\n      ')}
-    </div>
+    ${serviceGroups('../')}
   </div>
 </section>
 
@@ -611,19 +606,12 @@ ${s.useCases ? `
 ${s.scope ? `
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('범위', '하는 일과 하지 않는 일',
-      '헷갈릴 수 있는 부분이라 분명하게 적어 둡니다.')}
-    <div class="scope-grid">
-      <article class="scope-card is-do">
-        <h3>${icon('check', 'ico ico-sm')} 이런 것을 합니다</h3>
-        <ul>${s.scope.does.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
-      </article>
-      <article class="scope-card is-dont">
-        <h3>이런 것은 하지 않습니다</h3>
-        <ul>${s.scope.doesNot.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
-      </article>
-    </div>
-    <p class="scope-note">${esc(s.scope.note)}</p>
+    ${sectionHead('이렇게 해 드립니다', s.scope.headline || '신청하시면 여기까지 진행됩니다')}
+    <ul class="does-list">
+      ${s.scope.does.map((t) => `<li>${icon('check', 'ico ico-sm')}<span>${esc(t)}</span></li>`).join('\n      ')}
+    </ul>
+    ${s.scope.note ? `<p class="scope-note">${esc(s.scope.note)}</p>` : ''}
+    ${s.scope.fineprint ? `<p class="scope-fine">${esc(s.scope.fineprint)}</p>` : ''}
   </div>
 </section>` : ''}
 
@@ -1037,7 +1025,7 @@ function buildListings() {
   const fee = board.fee.toLocaleString('ko-KR');
 
   const doList = board.does.map((t) => `<li>${esc(t)}</li>`).join('\n        ');
-  const dontList = board.doesNot.map((t) => `<li>${esc(t)}</li>`).join('\n        ');
+
 
   const regionOpts = ['<option value="">전체 지역</option>']
     .concat(['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
@@ -1136,7 +1124,7 @@ ${pageHero({
   eyebrow: '부동산 · 매물 게시판',
   title: '교회 매물을<br>직접 올리고, 직접 찾습니다',
   lead: '예배 공간을 내놓는 교회와 구하는 교회가 서로 만나는 게시판입니다. '
-    + '센터는 게시판만 관리합니다 — 중개는 하지 않습니다.',
+    + '서류를 확인한 글만 올라갑니다 — 허위 매물 걱정 없이 조건만 보세요.',
   extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
       <span class="ls-hero-pill">기본 게시 <strong>${board.days}일</strong></span>
@@ -1175,22 +1163,19 @@ ${pageHero({
 
     <div class="ls-scope">
       <div class="ls-scope-card is-do">
-        <h2>${icon('check', 'ico ico-sm')} 센터가 하는 일</h2>
+        <h2>${icon('check', 'ico ico-sm')} 센터가 해 드리는 일</h2>
         <ul>
         ${doList}
         </ul>
       </div>
-      <div class="ls-scope-card is-dont">
-        <h2>하지 않는 일</h2>
-        <ul>
-        ${dontList}
-        </ul>
+      <div class="ls-scope-card is-tip">
+        <h2>계약 전에 꼭 확인하세요</h2>
         <p class="ls-scope-note">
-          연락과 협상, 계약은 등록자와 보시는 분이 직접 진행하십니다.
-          <strong>용도 변경 가능 여부, 주차와 소음, 교회 명의 등기</strong>는 계약 전에 꼭 확인하셔야 하지만
-          센터가 대신 확인해 드리지 않습니다 — 관할 지자체 건축과와 공인중개사 · 법무사 · 세무사에게
-          확인해 주세요.
+          마음에 드는 공간을 찾으셨다면, 계약 전에 <strong>용도 변경 가능 여부, 주차와 소음,
+          교회 명의 등기</strong>를 확인해 두시는 것이 좋습니다. 나중에 바로잡기 어려운 것들입니다.
+          관할 지자체 건축과와 공인중개사 · 법무사 · 세무사에게 확인해 주세요.
         </p>
+        <p class="ls-scope-fine">${esc(board.fineprint)}</p>
       </div>
     </div>
   </div>
@@ -1416,7 +1401,7 @@ ${pageHero({
           <label class="chk"><input type="checkbox" id="lsVow3">
             <span>허위 · 중복 · 광고성 글로 확인되면 <strong>사전 통보 없이 삭제되고 등록비는 환불되지 않는다</strong>는 점에 동의합니다.</span></label>
           <label class="chk"><input type="checkbox" id="lsVow4">
-            <span>센터는 게시판만 관리하며 <strong>중개 · 계약 · 결과를 보증하지 않는다</strong>는 점을 이해했습니다.</span></label>
+            <span>센터는 <strong>게시판 운영</strong>까지이며, <strong>연락 · 협상 · 계약은 제가 직접 진행</strong>한다는 점을 이해했습니다.</span></label>
         </div>
       </fieldset>
 
