@@ -91,7 +91,9 @@ window.CAPSDB = (function () {
     published: '게시중',
     rejected: '반려',
     hidden: '게시 중지',
-    expired: '기간 만료',
+    done: '거래 완료',
+    // 게시 기간을 두던 때의 글입니다. 지금은 기한이 없습니다.
+    expired: '기간 지남',
   };
 
   var LISTING_KIND = {
@@ -158,7 +160,10 @@ window.CAPSDB = (function () {
   var LISTING_FEE = 60000;
 
   /** 기본 게시 기간 (일) */
-  var LISTING_DAYS = 90;
+  /* 게시 기간 — 0 은 "기한 없음" 입니다.
+     거래가 끝날 때까지 올려 두고, 팔리면 등록자나 센터가 내립니다.
+     (예전에는 90일이 지나면 자동으로 내려갔습니다) */
+  var LISTING_DAYS = 0;
 
   /** 증빙 파일 제한 — storage.rules 와 같은 값을 유지해야 합니다. */
   var PROOF_MAX_BYTES = 10 * 1024 * 1024;
@@ -1885,21 +1890,28 @@ window.CAPSDB = (function () {
        (Storage 규칙으로 올린 본인과 승인된 직원만 열 수 있습니다.)
        ===================================================== */
 
-    /** 게시 중이고 기간이 남아 있는지 */
+    /** 게시 중인지 — 기한은 없습니다 (팔릴 때까지).
+        expiresAt 이 남아 있는 옛 글만 그 날짜를 봅니다. */
     listingLive: function (row) {
       if (!row || row.status !== 'published') return false;
       if (!row.expiresAt) return true;
       return new Date(row.expiresAt).getTime() > Date.now();
     },
 
-    /** 화면 표시용 상태 (기간이 지난 게시글은 '기간 만료'로 보여 줍니다) */
+    /** 화면 표시용 상태 */
     listingView: function (row) {
-      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, days: null };
+      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, days: null, up: null };
       var status = row.status;
       if (status === 'published' && !api.listingLive(row)) status = 'expired';
+      // 남은 날수(days)는 기한이 있던 옛 글에만 있습니다.
       var days = null;
       if (status === 'published' && row.expiresAt) {
         days = Math.ceil((new Date(row.expiresAt).getTime() - Date.now()) / 864e5);
+      }
+      // 올린 지 며칠 됐는지 — 기한이 없어졌으니 이걸로 오래된 글을 가려냅니다.
+      var up = null;
+      if (row.publishedAt) {
+        up = Math.max(0, Math.floor((Date.now() - new Date(row.publishedAt).getTime()) / 864e5));
       }
       var use = row.use === 'other'
         ? (String(row.useOther || '').trim() || '기타')
@@ -1910,6 +1922,7 @@ window.CAPSDB = (function () {
         cls: status,
         live: status === 'published',
         days: days,
+        up: up,
         kindLabel: LISTING_KIND[row.kind] || row.kind || '-',
         holderLabel: LISTING_HOLDER[row.holder] || row.holder || '-',
         useLabel: use,
@@ -2152,11 +2165,13 @@ window.CAPSDB = (function () {
     approveListing: function (id, opts) {
       var o = opts || {};
       var me = adapter.auth.current();
+      // 기한을 두지 않습니다 — 거래가 끝날 때까지 올려 둡니다.
+      // (직원이 굳이 기한을 지정하면 그때만 넣습니다)
       var days = Number(o.days) > 0 ? Number(o.days) : LISTING_DAYS;
       var patch = {
         status: 'published',
         publishedAt: nowIso(),
-        expiresAt: new Date(Date.now() + days * 864e5).toISOString(),
+        expiresAt: days > 0 ? new Date(Date.now() + days * 864e5).toISOString() : '',
         rejectNote: '',
         hiddenAt: '',
         reviewedBy: me ? me.id : '',
@@ -2211,9 +2226,17 @@ window.CAPSDB = (function () {
       });
     },
 
-    /** 기간이 지난 게시글 정리 (목록을 열 때 조용히 처리합니다) */
-    expireListing: function (id) {
-      return adapter.update('listings', id, { status: 'expired', updatedAt: nowIso() });
+    /** 거래가 끝나 내립니다.
+     *
+     *  팔린 것을 가장 먼저 아는 사람은 등록자입니다 — 센터가 알 방법이 없어,
+     *  등록자가 직접 내릴 수 있게 했습니다 (접근 규칙에서도 허용했습니다).
+     *  다시 올리시려면 내용을 고쳐 재검토를 받으시면 됩니다.
+     */
+    markListingDone: function (id) {
+      return adapter.update('listings', id, {
+        status: 'done',
+        updatedAt: nowIso(),
+      });
     },
 
     /** 매물 삭제 — 증빙 서류와 사진도 함께 지웁니다. */

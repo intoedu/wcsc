@@ -36,10 +36,10 @@ function buildIndex() {
   <div class="wrap hero-in">
     <div class="hero-copy">
       <p class="hero-eyebrow">Wori Church Support Center</p>
-      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">우리</span>가 맡습니다</h1>
+      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">전문가</span>가 맡습니다</h1>
       <p class="hero-lead">
         홈페이지와 주보 제작부터 교역자 청빙, 음향, 부동산, 앱, 행정까지.
-        한국 교회에 필요한 8개 지원 항목을 한 창구에서 상담하고 진행합니다.
+        한국 교회에 필요한 8개 지원 항목을 전담창구 4곳이 나눠 맡습니다.
       </p>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
@@ -72,7 +72,7 @@ function buildIndex() {
 <section class="stats">
   <div class="wrap stats-in">
     <div class="stat"><strong>8</strong><span>지원 항목</span></div>
-    <div class="stat"><strong>1</strong><span>전담 창구</span></div>
+    <div class="stat"><strong>4</strong><span>전담창구</span></div>
     <div class="stat"><strong>1~2일</strong><span>상담 연락</span></div>
     <div class="stat"><strong>전국</strong><span>지원 지역</span></div>
   </div>
@@ -202,7 +202,7 @@ ${pageHero({
 
 <section class="section">
   <div class="wrap">
-    ${sectionHead('지원 범위', '세 갈래, 8개 항목 — 한 창구')}
+    ${sectionHead('지원 범위', '세 갈래, 8개 항목 — 전담창구 4곳')}
     ${serviceGroups('')}
   </div>
 </section>
@@ -370,8 +370,8 @@ function buildServicesIndex() {
   const body = `
 ${pageHero({
   eyebrow: '지원 항목',
-  title: '세 갈래 8개 항목,<br>한 창구에서 진행합니다',
-  lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 보이는 교회 · 사역 현장 · 교회 살림. '
+  title: '세 갈래 8개 항목,<br>전담창구 4곳이 맡습니다',
+  lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 알리는 교회 · 모이는 교회 · 세우는 교회. '
     + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
 })}
 
@@ -1127,7 +1127,7 @@ ${pageHero({
     + '서류를 확인한 글만 올라갑니다 — 허위 매물 걱정 없이 조건만 보세요.',
   extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
-      <span class="ls-hero-pill">기본 게시 <strong>${board.days}일</strong></span>
+      <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
       <span class="ls-hero-pill is-key">권리 증빙 서류 <strong>필수</strong></span>
     </div>
@@ -1406,7 +1406,7 @@ ${pageHero({
       </fieldset>
 
       <div class="ls-fee">
-        <h3>등록비 ${fee}원 · 기본 게시 ${board.days}일</h3>
+        <h3>등록비 ${fee}원 · 팔릴 때까지 게시</h3>
         <p class="ls-fee-lead">
           <strong>지금 입금하지 않으셔도 됩니다.</strong>
           서류를 먼저 확인한 뒤 계좌를 보내드립니다.
@@ -1420,7 +1420,8 @@ ${pageHero({
           <li><span>3</span><div><strong>입금</strong>
             받으신 계좌로 등록비 ${fee}원을 보내 주세요.</div></li>
           <li><span>4</span><div><strong>게시</strong>
-            <em>입금이 확인되면 게시글이 올라갑니다.</em> ${board.days}일 동안 게시됩니다.</div></li>
+            <em>입금이 확인되면 게시글이 올라갑니다.</em> 기한은 없습니다 — 거래가 끝날 때까지 올라가 있습니다.
+            팔리시면 <a href="#mine">내가 올린 매물</a> 에서 <strong>[거래 완료]</strong> 를 눌러 내려 주세요.</div></li>
         </ol>
         <p class="ls-fee-note">
           서류가 맞지 않으면 사유와 함께 반려되며, 이 경우 <strong>입금 안내를 보내지 않습니다</strong> —
@@ -1442,7 +1443,7 @@ ${pageHero({
 
 ${ctaBand('', {
   title: '내놓으실 공간이 있으신가요?',
-  lead: '권리 증빙 서류만 준비되면 6만원으로 90일 동안 올려 드립니다. '
+  lead: '권리 증빙 서류만 준비되면 6만원 한 번으로 팔릴 때까지 올려 드립니다. '
     + '게시판 이용이나 다른 지원 항목이 궁금하시면 편하게 문의해 주세요.',
 })}
 `;
@@ -1453,7 +1454,7 @@ ${ctaBand('', {
       title: '교회 매물 게시판 | 우리교회지원센터',
       description:
         '교회 예배 공간 매매 · 임대 매물 게시판. 등기부등본이나 임대차계약서로 권리를 확인한 매물만 게시합니다. '
-        + `등록비 ${fee}원, 기본 게시 ${board.days}일.`,
+        + `등록비 ${fee}원 한 번으로 거래가 끝날 때까지 게시됩니다.`,
       base: '',
       active: 'listings.html',
       body,
