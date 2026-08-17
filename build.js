@@ -396,9 +396,10 @@ ${pageHero({
     <div class="bill-grid">
       <article class="bill-card">
         <span class="bill-tag">월 구독</span>
-        <h3>홈페이지 제작</h3>
-        <p class="bill-price">제작비 0원 + <strong>월 3만원</strong></p>
-        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 연 36만원이며 운영과 수정이 계속 포함됩니다.</p>
+        <h3>홈페이지 제작 · 인투오피스</h3>
+        <p class="bill-price">홈페이지 <strong>월 3만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
+        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원에 운영과 수정이 계속 포함되고,
+          인투오피스는 교회 규모와 관계없이 같은 금액입니다. 둘 다 월 단위로 중단하실 수 있습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">1회 결제</span>
