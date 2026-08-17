@@ -222,6 +222,7 @@ ${o.body}
   </main>
   ${footer(base)}
   <a class="float-cta" href="${base}apply.html">지원 신청</a>
+  <script src="${base}assets/js/supabase-config.js" defer></script>
   <script src="${base}assets/js/firebase-config.js" defer></script>
   <script src="${base}assets/js/data.js" defer></script>
   <script src="${base}assets/js/db.js" defer></script>

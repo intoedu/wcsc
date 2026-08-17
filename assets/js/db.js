@@ -189,9 +189,16 @@ window.CAPSDB = (function () {
       '-' + String(Math.floor(1000 + Math.random() * 9000));
   }
 
+  /** Firebase 설정이 채워져 있는지 (옛 백엔드) */
   function isConfigured() {
     var c = window.FIREBASE_CONFIG || {};
     return !!(c.apiKey && c.projectId && c.authDomain);
+  }
+
+  /** Supabase 설정이 채워져 있는지 (기본 백엔드) */
+  function hasSupabase() {
+    var c = window.SUPABASE_CONFIG || {};
+    return !!(c.url && c.anonKey);
   }
 
   /** 문서 목록에 정렬·필터 적용 (두 어댑터 공통) */
@@ -994,10 +1001,557 @@ window.CAPSDB = (function () {
   }
 
   /* =========================================================
+     Supabase 어댑터
+
+     Postgres + Auth + Storage. Firebase 어댑터와 같은 API 를 제공하므로
+     화면 코드는 어느 쪽이 붙어 있는지 몰라도 됩니다.
+
+     · 표 이름과 열 이름은 Postgres 관례대로 snake_case 이고,
+       화면이 쓰는 camelCase 와는 이 어댑터가 맨 위 단계에서만 바꿔 줍니다.
+       (jsonb 안쪽 키는 건드리지 않습니다 — extra · perms · fee · proof · photos)
+     · 접근 제어는 전부 데이터베이스의 RLS 정책이 합니다. supabase.sql 참고.
+     ========================================================= */
+
+  function SupabaseAdapter() {
+    var cfg = window.SUPABASE_CONFIG || {};
+    var sb = null;
+    var profile = null;   // public.users 행 (화면이 보는 계정 정보)
+    var authUser = null;  // auth 사용자 (로그인 방식 확인에 씁니다)
+    var authListeners = [];
+    var loadError = null;
+
+    var LOAD_MSG =
+      'Supabase 연결에 실패했습니다. 인터넷 연결을 확인해 주세요. ' +
+      '(사내 방화벽이 supabase.co 를 막고 있을 수도 있습니다.)';
+
+    /* ---------- 이름 바꾸기 ---------- */
+
+    /** 화면이 쓰는 컬렉션 이름 → 표 이름 */
+    var TABLE = {
+      users: 'users',
+      requests: 'requests',
+      customers: 'customers',
+      subscriptions: 'subscriptions',
+      invoices: 'invoices',
+      serviceContent: 'service_content',
+      settings: 'settings',
+      editConsents: 'edit_consents',
+      listings: 'listings',
+    };
+
+    /** 문서 통째로 jsonb 한 칸에 담는 표 (내용이 자유로워서) */
+    var DOC_TABLES = { serviceContent: true, settings: true };
+
+    /** 기본 키가 id 가 아닌 표 */
+    var PK = { editConsents: 'customer_id' };
+
+    /** 비어 있으면 '' 가 아니라 null 이어야 하는 열 (uuid) */
+    var UUID_KEYS = ['userId', 'customerId', 'assigneeId'];
+
+    function snake(k) {
+      return k.replace(/[A-Z]/g, function (c) { return '_' + c.toLowerCase(); });
+    }
+
+    function camel(k) {
+      return k.replace(/_([a-z0-9])/g, function (_, c) { return c.toUpperCase(); });
+    }
+
+    /** 화면 → DB. 맨 위 단계 키만 바꿉니다. */
+    function toRow(name, data) {
+      if (DOC_TABLES[name]) {
+        var doc = Object.assign({}, data);
+        delete doc.id;
+        return { data: doc };
+      }
+      var out = {};
+      Object.keys(data || {}).forEach(function (k) {
+        if (k === 'id') return; // 기본 키는 따로 넣습니다
+        var v = data[k];
+        if (UUID_KEYS.indexOf(k) > -1 && (v === '' || v === undefined)) v = null;
+        out[snake(k)] = v === undefined ? null : v;
+      });
+      return out;
+    }
+
+    /** DB → 화면 */
+    function fromRow(name, row) {
+      if (!row) return null;
+      if (DOC_TABLES[name]) {
+        return Object.assign({ id: row.id }, row.data || {});
+      }
+      var out = {};
+      Object.keys(row).forEach(function (k) {
+        if (k === 'inserted_at') return; // DB 내부 정렬용
+        var key = camel(k);
+        var v = row[k];
+        if (v === null && UUID_KEYS.indexOf(key) > -1) v = '';
+        out[key] = v;
+      });
+      // editConsents 는 고객 아이디가 곧 문서 아이디입니다.
+      if (name === 'editConsents') out.id = row.customer_id;
+      return out;
+    }
+
+    /* ---------- 접속 ---------- */
+
+    /** UMD 묶음을 필요할 때 한 번만 읽습니다 (CDN 이 아니라 저장소 안 파일). */
+    function loadSdk() {
+      if (window.supabase && window.supabase.createClient) return Promise.resolve(window.supabase);
+      return new Promise(function (resolve, reject) {
+        var base = document.currentScript && document.currentScript.src;
+        var prefix = base ? base.replace(/assets\/js\/db\.js.*$/, '') : '';
+        var el = document.createElement('script');
+        el.src = prefix + 'assets/vendor/supabase-2.112.3.js';
+        el.onload = function () {
+          if (window.supabase && window.supabase.createClient) resolve(window.supabase);
+          else reject(new Error('Supabase 라이브러리를 읽지 못했습니다.'));
+        };
+        el.onerror = function () { reject(new Error('Supabase 라이브러리를 읽지 못했습니다.')); };
+        document.head.appendChild(el);
+      });
+    }
+
+    function emitAuth() {
+      authListeners.forEach(function (cb) {
+        try { cb(profile); } catch (e) { /* 개별 리스너 오류 무시 */ }
+      });
+    }
+
+    /** 로그인한 계정의 users 행을 읽습니다. (가입 트리거가 만들어 둡니다) */
+    function loadProfile(user) {
+      if (!user) return Promise.resolve(null);
+      return sb.from('users').select('*').eq('id', user.id).maybeSingle()
+        .then(function (res) {
+          if (res.data) return fromRow('users', res.data);
+          // 트리거가 도는 사이 잠깐 없을 수 있어 한 번 더 봅니다.
+          return new Promise(function (r) { window.setTimeout(r, 700); })
+            .then(function () {
+              return sb.from('users').select('*').eq('id', user.id).maybeSingle();
+            })
+            .then(function (again) {
+              return again.data ? fromRow('users', again.data) : null;
+            });
+        })
+        .catch(function () { return null; });
+    }
+
+    /* 서버에 정말 닿는지 뒤에서 한 번 두드려 봅니다.
+       getSession() 은 브라우저에 저장된 값만 읽어서, 서버가 죽어 있어도 성공합니다.
+       그대로 두면 연결이 끊긴 상태에서 로그인 창만 뜨고 눌러도 아무 일이 없어,
+       쓰는 분이 원인을 알 수 없습니다. 그래서 누구나 읽을 수 있는 settings 를
+       한 줄만 세어 보고, 네트워크 자체가 막혔을 때만 연결 실패로 표시합니다.
+       (권한 오류 · 표 없음 같은 것은 로그인을 막을 이유가 아니라 무시합니다.)
+
+       확인은 첫 화면을 붙잡지 않습니다 — 응답이 늦어도 헤더와 로그인 단추는
+       바로 나오고, 실패했을 때만 그때 다시 알려 줍니다. */
+    var PING_TIMEOUT = 12000;
+
+    function offline(msg) {
+      return /Failed to fetch|NetworkError|Load failed|fetch failed|ERR_/i.test(msg || '');
+    }
+
+    function watchdog() {
+      var call = sb.from('settings').select('id', { count: 'exact', head: true })
+        .then(
+          function (res) { return (res && res.error && res.error.message) || ''; },
+          function (err) { return (err && err.message) || 'fetch failed'; }
+        )
+        .then(function (msg) { if (offline(msg)) throw new Error(msg); });
+
+      // 응답이 아예 오지 않는 경우 (막힌 방화벽 등) 무한정 기다리지 않습니다.
+      var timer = new Promise(function (_, reject) {
+        window.setTimeout(function () { reject(new Error('fetch failed (timeout)')); }, PING_TIMEOUT);
+      });
+
+      Promise.race([call, timer]).catch(function (err) {
+        loadError = err;
+        // 이미 그려진 화면(관리자 게이트 등)이 원인을 다시 보여 주도록 알립니다.
+        ready.then(emitAuth, function () { /* 이미 실패로 처리됨 */ });
+      });
+    }
+
+    var ready = loadSdk().then(function (lib) {
+      sb = lib.createClient(cfg.url, cfg.anonKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      });
+
+      watchdog();
+
+      return sb.auth.getSession().then(function (res) {
+        var user = res.data && res.data.session ? res.data.session.user : null;
+        authUser = user;
+        return loadProfile(user).then(function (p) {
+          profile = p;
+          sb.auth.onAuthStateChange(function (event, session) {
+            authUser = session ? session.user : null;
+            // 토큰 갱신만 된 경우에는 다시 읽지 않습니다.
+            if (event === 'TOKEN_REFRESHED' && profile) return;
+            loadProfile(authUser).then(function (next) {
+              profile = next;
+              emitAuth();
+            });
+          });
+        });
+      });
+    }).catch(function (err) {
+      loadError = err;
+      authListeners.forEach(function (cb) {
+        try { cb(null); } catch (e) { /* 무시 */ }
+      });
+    });
+
+    function guard() {
+      return ready.then(function () {
+        if (loadError) throw new Error(LOAD_MSG);
+      });
+    }
+
+    /** Supabase 오류를 사람이 읽는 문구로 */
+    function say(err) {
+      var msg = (err && (err.message || err.error_description)) || '';
+      var map = [
+        [/Invalid login credentials/i, '이메일 또는 비밀번호가 맞지 않습니다.'],
+        [/Email not confirmed/i, '이메일 확인이 끝나지 않았습니다. 받은 편지함의 확인 링크를 눌러 주세요.'],
+        [/User already registered|already been registered/i, '이미 가입된 이메일입니다.'],
+        [/Password should be at least/i, '비밀번호는 6자 이상으로 입력해 주세요.'],
+        [/Unable to validate email address|invalid format/i, '이메일 형식을 확인해 주세요.'],
+        [/For security purposes|rate limit|Too many/i, '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.'],
+        [/provider is not enabled/i,
+          'Supabase 대시보드 [Authentication → Providers] 에서 이 로그인 방법을 켜야 합니다.'],
+        [/row-level security|violates row-level/i, '이 작업을 할 권한이 없습니다.'],
+        [/Failed to fetch|NetworkError/i, '네트워크 연결을 확인해 주세요.'],
+      ];
+      for (var i = 0; i < map.length; i++) if (map[i][0].test(msg)) return map[i][1];
+      return msg || '처리 중 문제가 발생했습니다.';
+    }
+
+    function fail(res) {
+      if (res && res.error) throw new Error(say(res.error));
+      return res;
+    }
+
+    /* ---------- 저장소 (파일) ---------- */
+
+    /** 'listing-photos/uid/a.jpg' → { bucket, key } */
+    function split(path) {
+      var i = String(path || '').indexOf('/');
+      if (i < 0) return { bucket: 'listing-photos', key: String(path || '') };
+      return { bucket: path.slice(0, i), key: path.slice(i + 1) };
+    }
+
+    return {
+      mode: 'supabase',
+      ready: ready,
+      loadError: function () { return loadError && LOAD_MSG; },
+
+      auth: {
+        current: function () { return profile; },
+        onChange: function (cb) {
+          authListeners.push(cb);
+          ready.then(function () { cb(profile); });
+          return function () {
+            authListeners = authListeners.filter(function (f) { return f !== cb; });
+          };
+        },
+
+        signUp: function (data) {
+          return guard().then(function () {
+            return sb.auth.signUp({
+              email: String(data.email || '').trim(),
+              password: data.password,
+              options: {
+                // 가입 트리거(handle_new_user)가 이 값으로 users 행을 만듭니다.
+                data: {
+                  name: (data.name || '').trim(),
+                  phone: (data.phone || '').trim(),
+                  church: (data.church || '').trim(),
+                  contactRole: (data.contactRole || '').trim(),
+                  birthDate: (data.birthDate || '').trim(),
+                  staffRequest: !!data.staffRequest,
+                },
+              },
+            }).then(function (res) {
+              fail(res);
+              if (!res.data.session) {
+                // 대시보드에서 "Confirm email" 이 켜져 있는 경우입니다.
+                throw new Error(
+                  '가입 확인 메일을 보냈습니다. 메일의 링크를 눌러 확인을 마친 뒤 로그인해 주세요.');
+              }
+              authUser = res.data.user;
+              return loadProfile(res.data.user).then(function (p) {
+                profile = p;
+                emitAuth();
+                return p;
+              });
+            });
+          });
+        },
+
+        signIn: function (data) {
+          return guard().then(function () {
+            return sb.auth.signInWithPassword({
+              email: String(data.email || '').trim(),
+              password: data.password,
+            }).then(function (res) {
+              fail(res);
+              authUser = res.data.user;
+              return loadProfile(res.data.user).then(function (p) {
+                profile = p;
+                emitAuth();
+                return p;
+              });
+            });
+          });
+        },
+
+        /**
+         * 구글 계정으로 로그인 또는 가입.
+         * Supabase 는 팝업이 아니라 페이지를 옮겼다 돌아오는 방식이라,
+         * 직원 신청 여부 같은 값은 sessionStorage 에 두고 돌아온 뒤 씁니다.
+         */
+        signInGoogle: function (intent) {
+          return guard().then(function () {
+            if (intent) {
+              window.sessionStorage.setItem('caps.signup.intent', JSON.stringify({
+                name: intent.name || '', phone: intent.phone || '',
+                church: intent.church || '', contactRole: intent.contactRole || '',
+                birthDate: intent.birthDate || '', staffRequest: !!intent.staffRequest,
+              }));
+            }
+            return sb.auth.signInWithOAuth({
+              provider: 'google',
+              options: { redirectTo: window.location.href },
+            }).then(function (res) {
+              if (res.error) {
+                window.sessionStorage.removeItem('caps.signup.intent');
+                throw new Error(say(res.error));
+              }
+              // 여기서 페이지가 구글로 넘어갑니다.
+              return null;
+            });
+          });
+        },
+
+        signOut: function () {
+          return guard().then(function () {
+            return sb.auth.signOut().then(function () {
+              profile = null;
+              authUser = null;
+              emitAuth();
+            });
+          });
+        },
+
+        resetPassword: function (email) {
+          return guard().then(function () {
+            return sb.auth.resetPasswordForEmail(String(email || '').trim(), {
+              redirectTo: window.location.origin + window.location.pathname,
+            }).then(fail).then(function () { return true; });
+          });
+        },
+
+        /** 로그인 방식 목록 ('password' · 'google' 등) */
+        providers: function () {
+          if (!authUser) return [];
+          var list = (authUser.identities || []).map(function (i) { return i.provider; });
+          if (list.length) return list;
+          // identities 를 못 읽는 경우에는 app_metadata 로 넘어갑니다.
+          var meta = authUser.app_metadata || {};
+          return meta.providers || (meta.provider ? [meta.provider] : ['email']);
+        },
+
+        /** 비밀번호 변경 — 현재 비밀번호로 다시 확인한 뒤 바꿉니다. */
+        changePassword: function (data) {
+          return guard().then(function () {
+            if (!profile) throw new Error('로그인이 필요합니다.');
+            if (String(data.next || '').length < 6) {
+              throw new Error('새 비밀번호는 6자 이상으로 입력해 주세요.');
+            }
+            return sb.auth.signInWithPassword({
+              email: profile.email,
+              password: data.current,
+            }).then(function (res) {
+              if (res.error) throw new Error('현재 비밀번호가 맞지 않습니다.');
+              return sb.auth.updateUser({ password: data.next }).then(fail);
+            }).then(function () { return true; });
+          });
+        },
+
+        updateProfile: function (patch) {
+          return guard().then(function () {
+            if (!profile) throw new Error('로그인이 필요합니다.');
+            return sb.from('users').update(toRow('users', patch)).eq('id', profile.id)
+              .then(fail)
+              .then(function () {
+                profile = Object.assign({}, profile, patch);
+                emitAuth();
+                return profile;
+              });
+          });
+        },
+      },
+
+      list: function (name, opts) {
+        return guard().then(function () {
+          var o = opts || {};
+          var q = sb.from(TABLE[name] || name).select('*');
+          if (o.where) {
+            Object.keys(o.where).forEach(function (key) {
+              q = q.eq(snake(key), o.where[key]);
+            });
+          }
+          return q.then(function (res) {
+            if (res.error) throw new Error(say(res.error));
+            var rows = (res.data || []).map(function (r) { return fromRow(name, r); });
+            var rest = Object.assign({}, o);
+            delete rest.where;
+            return applyQuery(rows, rest);
+          });
+        });
+      },
+
+      get: function (name, id) {
+        return guard().then(function () {
+          return sb.from(TABLE[name] || name).select('*')
+            .eq(PK[name] || 'id', id).maybeSingle()
+            .then(function (res) {
+              if (res.error) throw new Error(say(res.error));
+              return fromRow(name, res.data);
+            });
+        });
+      },
+
+      add: function (name, data) {
+        return guard().then(function () {
+          var row = toRow(name, Object.assign({ createdAt: nowIso() }, data));
+          return sb.from(TABLE[name] || name).insert(row).select().single()
+            .then(function (res) {
+              if (res.error) throw new Error(say(res.error));
+              return fromRow(name, res.data);
+            });
+        });
+      },
+
+      set: function (name, id, data) {
+        return guard().then(function () {
+          var pk = PK[name] || 'id';
+          var row = toRow(name, data);
+          row[pk] = id;
+          return sb.from(TABLE[name] || name).upsert(row, { onConflict: pk }).select().single()
+            .then(function (res) {
+              if (res.error) throw new Error(say(res.error));
+              return fromRow(name, res.data);
+            });
+        });
+      },
+
+      update: function (name, id, patch) {
+        return guard().then(function () {
+          if (DOC_TABLES[name]) {
+            // 문서 표는 부분 수정 대신 기존 내용에 덮어씁니다.
+            return sb.from(TABLE[name]).select('data').eq('id', id).maybeSingle()
+              .then(function (res) {
+                var merged = Object.assign({}, (res.data && res.data.data) || {}, patch);
+                delete merged.id;
+                return sb.from(TABLE[name]).upsert({ id: id, data: merged }, { onConflict: 'id' })
+                  .then(fail);
+              });
+          }
+          return sb.from(TABLE[name] || name).update(toRow(name, patch))
+            .eq(PK[name] || 'id', id).then(fail);
+        });
+      },
+
+      remove: function (name, id) {
+        return guard().then(function () {
+          return sb.from(TABLE[name] || name).delete().eq(PK[name] || 'id', id).then(fail);
+        });
+      },
+
+      /**
+       * 값이 바뀌면 목록 전체를 다시 읽어 넘깁니다.
+       * (Firestore 의 onSnapshot 과 같은 모양으로 맞춘 것입니다)
+       */
+      watch: function (name, cb) {
+        var dead = false;
+        var channel = null;
+        var table = TABLE[name] || name;
+
+        var pull = function () {
+          if (dead) return;
+          sb.from(table).select('*').then(function (res) {
+            if (dead) return;
+            if (res.error) { cb([]); return; }
+            cb((res.data || []).map(function (r) { return fromRow(name, r); }));
+          });
+        };
+
+        ready.then(function () {
+          if (dead) return;
+          if (loadError) { cb([]); return; }
+          pull();
+          channel = sb.channel('wcsc-' + table)
+            .on('postgres_changes', { event: '*', schema: 'public', table: table }, pull)
+            .subscribe();
+        });
+
+        return function () {
+          dead = true;
+          if (channel) sb.removeChannel(channel);
+        };
+      },
+
+      files: {
+        upload: function (path, file) {
+          return guard().then(function () {
+            var at = split(path);
+            return sb.storage.from(at.bucket)
+              .upload(at.key, file, { contentType: file.type, upsert: true })
+              .then(function (res) {
+                if (res.error) throw new Error(say(res.error));
+                return path;
+              });
+          });
+        },
+
+        /**
+         * 사진은 공개 버킷이라 주소가 그대로 열리고,
+         * 증빙 서류는 비공개라 잠깐 동안만 열리는 주소를 만들어 줍니다.
+         */
+        url: function (path) {
+          return guard().then(function () {
+            var at = split(path);
+            if (at.bucket === 'listing-proofs') {
+              return sb.storage.from(at.bucket).createSignedUrl(at.key, 60 * 10)
+                .then(function (res) {
+                  return (res.data && res.data.signedUrl) || '';
+                })
+                .catch(function () { return ''; });
+            }
+            var pub = sb.storage.from(at.bucket).getPublicUrl(at.key);
+            return (pub.data && pub.data.publicUrl) || '';
+          });
+        },
+
+        remove: function (path) {
+          return guard().then(function () {
+            var at = split(path);
+            return sb.storage.from(at.bucket).remove([at.key]).catch(function () { return null; });
+          });
+        },
+      },
+    };
+  }
+
+  /* =========================================================
      공개 API
      ========================================================= */
 
-  var adapter = isConfigured() ? FirebaseAdapter() : LocalAdapter();
+  /* Supabase 설정이 있으면 그쪽을, 없고 Firebase 설정이 있으면 Firebase 를,
+     둘 다 없으면 브라우저 저장소(데모)를 씁니다. */
+  var adapter = hasSupabase() ? SupabaseAdapter()
+    : isConfigured() ? FirebaseAdapter()
+    : LocalAdapter();
 
   var api = {
     mode: adapter.mode,

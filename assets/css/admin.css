@@ -518,3 +518,4 @@ body.admin .float-cta { display: none !important; }
   background: var(--gold-400); color: var(--gold-ink-deep); font-size: 10.5px; font-weight: 800;
   border-bottom-right-radius: 6px;
 }
+.rules-text.is-short { min-height: 72px; margin-top: 10px; }

@@ -1,0 +1,892 @@
+-- =========================================================
+-- 우리교회지원센터 (WCSC) — Supabase 전체 설정
+--
+-- WCSC_SUPABASE_VERSION: 20260817025200
+--
+-- 새 Supabase 프로젝트를 쓰실 때는 이 파일 하나를 SQL Editor 에 통째로
+-- 붙여넣고 실행하시면 됩니다. 표 · 접근 규칙(RLS) · 저장소 버킷 ·
+-- 가입 트리거가 한 번에 만들어집니다.
+--
+-- 이 파일은 supabase/migrations/*.sql 을 순서대로 이어 붙인 것입니다.
+-- 직접 고치지 마시고, 마이그레이션 파일을 고친 뒤 npm run build 를 실행하세요.
+-- =========================================================
+
+-- ---------------------------------------------------------
+-- 20260817022909_wcsc_core_tables.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 우리교회지원센터 (WCSC) — 기본 표
+--
+-- 날짜 값은 앱이 ISO 문자열로 다루고 "비어 있음"을 '' 로 표현하므로
+-- text 로 둡니다 (ISO-8601 은 문자열 정렬이 시간 순서와 같습니다).
+-- DB 쪽 정렬·보관용으로 inserted_at timestamptz 를 따로 둡니다.
+-- =========================================================
+
+-- 계정 (auth.users 와 1:1)
+create table public.users (
+  id            uuid primary key references auth.users(id) on delete cascade,
+  email         text not null default '',
+  name          text not null default '',
+  phone         text not null default '',
+  church        text not null default '',
+  contact_role  text not null default '',
+  birth_date    text not null default '',
+  role          text not null default 'client'
+                check (role in ('owner', 'admin', 'staff', 'client')),
+  approved      boolean not null default false,
+  perms         jsonb not null default '{}'::jsonb,
+  created_at    text not null default '',
+  inserted_at   timestamptz not null default now()
+);
+comment on table public.users is '계정 정보. 직분(role)과 승인(approved)은 권한자만 바꿀 수 있습니다.';
+
+-- 지원 신청
+create table public.requests (
+  id            uuid primary key default gen_random_uuid(),
+  code          text not null unique,
+  user_id       uuid references auth.users(id) on delete set null,
+  status        text not null default 'received'
+                check (status in ('received','consulting','proposed','progress','hold','done','canceled')),
+  services      text[] not null default '{}',
+  church_name   text not null default '',
+  denomination  text not null default '',
+  contact_name  text not null default '',
+  contact_role  text not null default '',
+  phone         text not null default '',
+  email         text not null default '',
+  location      text not null default '',
+  size          text not null default '',
+  budget        text not null default '',
+  timeline      text not null default '',
+  message       text not null default '',
+  prefer        text not null default '',
+  marketing     boolean not null default false,
+  extra         jsonb not null default '{}'::jsonb,
+  assignee      text not null default '',
+  due_date      text not null default '',
+  memo          text not null default '',
+  tasks         jsonb not null default '[]'::jsonb,
+  customer_id   uuid,
+  created_at    text not null default '',
+  inserted_at   timestamptz not null default now()
+);
+create index requests_user_id_idx on public.requests (user_id);
+create index requests_status_idx on public.requests (status);
+create index requests_assignee_idx on public.requests (assignee);
+
+-- 고객 교회
+create table public.customers (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid references auth.users(id) on delete set null,
+  name          text not null default '',
+  denomination  text not null default '',
+  contact_name  text not null default '',
+  contact_role  text not null default '',
+  phone         text not null default '',
+  email         text not null default '',
+  location      text not null default '',
+  size          text not null default '',
+  memo          text not null default '',
+  created_at    text not null default '',
+  inserted_at   timestamptz not null default now()
+);
+comment on column public.customers.memo is '센터 내부 메모. 교회 승인 없이도 수정할 수 있는 유일한 항목입니다.';
+
+alter table public.requests
+  add constraint requests_customer_fk
+  foreign key (customer_id) references public.customers(id) on delete set null;
+
+-- 교회 정보 수정 동의 (고객 한 곳당 가장 최근 요청 한 건)
+create table public.edit_consents (
+  customer_id       uuid primary key references public.customers(id) on delete cascade,
+  customer_name     text not null default '',
+  user_id           uuid not null references auth.users(id) on delete cascade,
+  fields            text[] not null default '{}',
+  reason            text not null default '',
+  status            text not null default 'pending'
+                    check (status in ('pending','approved','rejected','used','canceled','expired')),
+  requested_by      text not null default '',
+  requested_by_name text not null default '',
+  requested_at      text not null default '',
+  responded_at      text not null default '',
+  reject_note       text not null default '',
+  expires_at        text not null default '',
+  used_at           text not null default '',
+  created_at        text not null default '',
+  inserted_at       timestamptz not null default now()
+);
+create index edit_consents_user_id_idx on public.edit_consents (user_id);
+
+-- 부동산 매물
+create table public.listings (
+  id             uuid primary key default gen_random_uuid(),
+  user_id        uuid not null references auth.users(id) on delete cascade,
+  user_email     text not null default '',
+  status         text not null default 'pending'
+                 check (status in ('pending','awaiting_payment','published','rejected','hidden','expired')),
+  kind           text not null default 'rent_monthly',
+  holder         text not null default 'owner' check (holder in ('owner','tenant','agent')),
+  use            text not null default 'church',
+  use_other      text not null default '',
+  title          text not null default '',
+  region         text not null default '',
+  address_rough  text not null default '',
+  area           text not null default '',
+  floor          text not null default '',
+  parking        text not null default '',
+  deposit        bigint not null default 0,
+  monthly        bigint not null default 0,
+  sale_price     bigint not null default 0,
+  maintenance    bigint not null default 0,
+  move_in        text not null default '',
+  religious_use  text not null default '',
+  "desc"         text not null default '',
+  contact_name   text not null default '',
+  contact_phone  text not null default '',
+  contact_hours  text not null default '',
+  photos         jsonb not null default '[]'::jsonb,
+  proof          jsonb,
+  fee            jsonb not null default '{"amount":60000,"paid":false,"paidAt":"","noticeSentAt":"","invoiceId":""}'::jsonb,
+  reject_note    text not null default '',
+  views          integer not null default 0,
+  reviewed_by    text not null default '',
+  reviewed_at    text not null default '',
+  published_at   text not null default '',
+  expires_at     text not null default '',
+  hidden_at      text not null default '',
+  sample         boolean not null default false,
+  created_at     text not null default '',
+  updated_at     text not null default '',
+  inserted_at    timestamptz not null default now()
+);
+create index listings_status_idx on public.listings (status);
+create index listings_user_id_idx on public.listings (user_id);
+comment on column public.listings.proof is '권리 증빙 파일 정보. 파일 자체는 listing-proofs 버킷에 있고 본인·직원만 열 수 있습니다.';
+
+-- 구독
+create table public.subscriptions (
+  id           uuid primary key default gen_random_uuid(),
+  customer_id  uuid references public.customers(id) on delete cascade,
+  service_id   text not null default '',
+  plan         text not null default '',
+  monthly_fee  bigint not null default 0,
+  status       text not null default 'active' check (status in ('active','paused','ended')),
+  start_date   text not null default '',
+  billing_day  integer not null default 1,
+  memo         text not null default '',
+  created_at   text not null default '',
+  inserted_at  timestamptz not null default now()
+);
+
+-- 청구 · 정산
+create table public.invoices (
+  id            uuid primary key default gen_random_uuid(),
+  customer_id   uuid references public.customers(id) on delete set null,
+  customer_name text not null default '',
+  month         text not null default '',
+  item          text not null default '',
+  amount        bigint not null default 0,
+  paid          boolean not null default false,
+  paid_at       text not null default '',
+  memo          text not null default '',
+  created_at    text not null default '',
+  inserted_at   timestamptz not null default now()
+);
+create index invoices_month_idx on public.invoices (month);
+
+-- 지원 항목 공개 내용 (관리자 수정본) · 센터 설정
+-- 두 표는 문서 통째로 덮어쓰는 성격이라 data jsonb 하나로 둡니다.
+create table public.service_content (
+  id          text primary key,
+  data        jsonb not null default '{}'::jsonb,
+  inserted_at timestamptz not null default now()
+);
+
+create table public.settings (
+  id          text primary key,
+  data        jsonb not null default '{}'::jsonb,
+  inserted_at timestamptz not null default now()
+);
+
+
+-- ---------------------------------------------------------
+-- 20260817022927_wcsc_security_helpers.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 권한 확인 도우미
+--
+-- users 표의 정책 안에서 users 를 다시 읽어야 하므로 (무한 재귀를 피하려고)
+-- security definer 로 두고 search_path 를 고정합니다.
+-- =========================================================
+
+create or replace function public.is_staff()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.users u
+    where u.id = auth.uid()
+      and u.approved
+      and u.role in ('owner', 'admin', 'staff')
+  );
+$$;
+comment on function public.is_staff() is '승인된 직원(최고관리자·관리자·직원)인지';
+
+create or replace function public.is_owner()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.users u
+    where u.id = auth.uid() and u.approved and u.role = 'owner'
+  );
+$$;
+
+-- 특정 권한 보유 여부. 최고관리자는 항상 통과합니다.
+create or replace function public.can(perm text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.users u
+    where u.id = auth.uid()
+      and u.approved
+      and (
+        u.role = 'owner'
+        or (u.role in ('admin', 'staff') and coalesce((u.perms ->> perm)::boolean, false))
+      )
+  );
+$$;
+comment on function public.can(text) is '권한 보유 여부 (requests · services · customers · settlement · members · settings)';
+
+-- 그 고객이 정보 수정을 승인해 두었는지.
+-- 기한(expires_at)은 문자열이라 앱이 확인하고, 지나면 status 를 expired 로 바꿉니다.
+create or replace function public.edit_approved(target uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.edit_consents c
+    where c.customer_id = target and c.status = 'approved'
+  );
+$$;
+
+grant execute on function public.is_staff(), public.is_owner(),
+  public.can(text), public.edit_approved(uuid) to anon, authenticated;
+
+
+-- ---------------------------------------------------------
+-- 20260817022950_wcsc_column_guards.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 열 단위 잠금
+--
+-- Postgres 정책의 WITH CHECK 는 이전 값(OLD)을 볼 수 없어서,
+-- "이 열만은 못 바꾼다" 는 규칙은 트리거로 막습니다.
+-- (Firestore 규칙에서 request.resource.data.x == resource.data.x 로 하던 부분)
+-- =========================================================
+
+-- 본인은 이름 · 연락처 등만. 직분 · 승인 · 권한은 잠급니다.
+create or replace function public.users_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.can('members') then
+    return new;
+  end if;
+  if new.role is distinct from old.role
+     or new.approved is distinct from old.approved
+     or new.perms is distinct from old.perms then
+    raise exception '직분 · 승인 · 권한은 본인이 바꿀 수 없습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger users_guard
+  before update on public.users
+  for each row execute function public.users_guard();
+
+-- 교회가 알려준 정보는 그 교회가 승인한 동안에만 고칠 수 있습니다.
+-- (내부 메모 memo 는 언제든 수정 가능 — 센터가 관리하는 값이라서)
+create or replace function public.customers_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.name          is distinct from old.name
+     or new.denomination is distinct from old.denomination
+     or new.location     is distinct from old.location
+     or new.size         is distinct from old.size
+     or new.contact_name is distinct from old.contact_name
+     or new.contact_role is distinct from old.contact_role
+     or new.phone        is distinct from old.phone
+     or new.email        is distinct from old.email then
+    if not public.edit_approved(old.id) then
+      raise exception '교회 정보를 고치려면 그 교회의 수정 승인이 필요합니다.' using errcode = '42501';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger customers_guard
+  before update on public.customers
+  for each row execute function public.customers_guard();
+
+-- 매물: 등록자는 내용만. 상태를 스스로 올리거나 요금을 납부 처리할 수 없습니다.
+create or replace function public.listings_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.can('customers') then
+    return new;
+  end if;
+  if new.user_id is distinct from old.user_id then
+    raise exception '등록자를 바꿀 수 없습니다.' using errcode = '42501';
+  end if;
+  if new.fee is distinct from old.fee then
+    raise exception '등록비 상태는 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  if new.published_at is distinct from old.published_at
+     or new.reviewed_by is distinct from old.reviewed_by
+     or new.expires_at is distinct from old.expires_at then
+    raise exception '게시 정보는 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger listings_guard
+  before update on public.listings
+  for each row execute function public.listings_guard();
+
+-- 동의: 교회 계정은 승인 · 거절만. 어떤 항목을 고치겠다는 내용 자체는 못 바꿉니다.
+create or replace function public.edit_consents_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.can('customers') then
+    return new;
+  end if;
+  if new.fields is distinct from old.fields
+     or new.reason is distinct from old.reason
+     or new.user_id is distinct from old.user_id
+     or new.customer_name is distinct from old.customer_name
+     or new.requested_by is distinct from old.requested_by
+     or new.requested_at is distinct from old.requested_at then
+    raise exception '요청 내용은 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger edit_consents_guard
+  before update on public.edit_consents
+  for each row execute function public.edit_consents_guard();
+
+
+-- ---------------------------------------------------------
+-- 20260817023020_wcsc_rls_policies.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 접근 규칙 (RLS) — firestore.rules 와 같은 내용입니다.
+--
+-- 기본 원칙
+--  · 홈페이지 내용(지원 항목, 센터 설정)은 로그인 없이 누구나 읽습니다.
+--  · 신청서는 로그인한 사용자가 자기 것만 만들고 읽습니다.
+--  · 고객 · 구독 · 청구 정보는 승인된 직원만 읽습니다.
+--  · 교회 정보는 그 교회가 수정을 승인한 동안에만 직원이 고칠 수 있습니다.
+--  · 매물 게시판은 게시(published)된 글만 공개됩니다.
+-- =========================================================
+
+alter table public.users           enable row level security;
+alter table public.requests        enable row level security;
+alter table public.customers       enable row level security;
+alter table public.edit_consents   enable row level security;
+alter table public.listings        enable row level security;
+alter table public.subscriptions   enable row level security;
+alter table public.invoices        enable row level security;
+alter table public.service_content enable row level security;
+alter table public.settings        enable row level security;
+
+/* ---------- users : 계정 ---------- */
+create policy users_read on public.users for select to authenticated
+  using (id = (select auth.uid()) or public.is_staff());
+
+-- 가입 시 본인 문서를 만듭니다. 스스로 관리자가 될 수는 없습니다.
+create policy users_insert_self on public.users for insert to authenticated
+  with check (
+    id = (select auth.uid())
+    and role in ('client', 'staff')
+    and (case when role = 'client' then approved else not approved end)
+    and perms = '{}'::jsonb
+  );
+
+-- 본인 수정 (직분 · 승인 · 권한은 트리거가 막습니다)
+create policy users_update_self on public.users for update to authenticated
+  using (id = (select auth.uid())) with check (id = (select auth.uid()));
+
+create policy users_update_staff on public.users for update to authenticated
+  using (public.can('members')) with check (public.can('members'));
+
+create policy users_delete on public.users for delete to authenticated
+  using (public.can('members'));
+
+/* ---------- requests : 지원 신청 ---------- */
+create policy requests_read on public.requests for select to authenticated
+  using (user_id = (select auth.uid()) or public.is_staff());
+
+create policy requests_insert on public.requests for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and status = 'received'
+    and assignee = ''
+    and memo = ''
+  );
+
+create policy requests_update_staff on public.requests for update to authenticated
+  using (public.can('requests')) with check (public.can('requests'));
+
+-- 담당자로 배정된 직원은 자기 작업의 진행 정보만 (열 제한은 아래 트리거 없이
+-- 정책만으로는 어려워, 담당자 본인 행에 한정하는 것으로 둡니다)
+create policy requests_update_assignee on public.requests for update to authenticated
+  using (public.is_staff() and assignee = (select auth.uid())::text)
+  with check (public.is_staff() and assignee = (select auth.uid())::text);
+
+create policy requests_delete on public.requests for delete to authenticated
+  using (public.can('requests'));
+
+/* ---------- customers : 고객 교회 ---------- */
+create policy customers_read on public.customers for select to authenticated
+  using (public.is_staff());
+
+create policy customers_insert on public.customers for insert to authenticated
+  with check (public.can('customers'));
+
+-- 교회 정보 열은 customers_guard 트리거가 승인 여부를 확인합니다.
+create policy customers_update on public.customers for update to authenticated
+  using (public.can('customers')) with check (public.can('customers'));
+
+create policy customers_delete on public.customers for delete to authenticated
+  using (public.can('customers'));
+
+/* ---------- edit_consents : 교회 정보 수정 동의 ---------- */
+create policy consents_read on public.edit_consents for select to authenticated
+  using (public.is_staff() or user_id = (select auth.uid()));
+
+create policy consents_insert on public.edit_consents for insert to authenticated
+  with check (public.can('customers') and status = 'pending');
+
+-- 직원이 스스로 approved 로 만들 수는 없습니다 — 그래야 승인이 의미가 있습니다.
+create policy consents_update_staff on public.edit_consents for update to authenticated
+  using (public.can('customers'))
+  with check (public.can('customers') and status in ('pending', 'canceled', 'used', 'expired'));
+
+create policy consents_update_client on public.edit_consents for update to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()) and status in ('approved', 'rejected'));
+
+create policy consents_delete on public.edit_consents for delete to authenticated
+  using (public.can('customers'));
+
+/* ---------- listings : 부동산 매물 게시판 ---------- */
+-- 게시된 글은 로그인 없이 누구나 읽습니다.
+create policy listings_read_public on public.listings for select to anon, authenticated
+  using (status = 'published');
+
+create policy listings_read_own on public.listings for select to authenticated
+  using (user_id = (select auth.uid()) or public.is_staff());
+
+-- 등록은 언제나 '승인 대기'로 시작하고, 요금은 미납 상태로 만들어집니다.
+create policy listings_insert on public.listings for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and status = 'pending'
+    and (fee ->> 'paid')::boolean is not true
+    and reviewed_by = ''
+    and published_at = ''
+  );
+
+-- 등록자는 내용만. 고치면 다시 승인 대기로 돌아갑니다.
+create policy listings_update_own on public.listings for update to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()) and status = 'pending');
+
+create policy listings_update_staff on public.listings for update to authenticated
+  using (public.can('customers')) with check (public.can('customers'));
+
+create policy listings_delete on public.listings for delete to authenticated
+  using (user_id = (select auth.uid()) or public.can('customers'));
+
+/* ---------- subscriptions · invoices ---------- */
+create policy subs_read on public.subscriptions for select to authenticated
+  using (public.can('customers') or public.can('settlement'));
+create policy subs_write on public.subscriptions for all to authenticated
+  using (public.can('customers')) with check (public.can('customers'));
+
+create policy invoices_all on public.invoices for all to authenticated
+  using (public.can('settlement')) with check (public.can('settlement'));
+
+/* ---------- serviceContent · settings : 홈페이지가 로그인 없이 읽습니다 ---------- */
+create policy content_read on public.service_content for select to anon, authenticated
+  using (true);
+create policy content_write on public.service_content for all to authenticated
+  using (public.can('services')) with check (public.can('services'));
+
+create policy settings_read on public.settings for select to anon, authenticated
+  using (true);
+create policy settings_write on public.settings for all to authenticated
+  using (public.can('settings')) with check (public.can('settings'));
+
+
+-- ---------------------------------------------------------
+-- 20260817023039_wcsc_storage_buckets.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 파일 저장소 — 공개 범위가 정반대인 두 버킷
+--
+--   listing-photos  매물 사진   누구나 봅니다 (게시판에 보여 주는 것이 목적)
+--   listing-proofs  권리 증빙   올린 본인과 승인된 직원만
+--
+-- 계약서 · 등기부등본에는 이름 · 주소 · 금액이 들어 있어
+-- 게시판에는 절대 노출되지 않아야 합니다. 두 버킷을 섞지 마세요.
+-- 파일 경로는 <올린 사람 uid>/<파일명> 규칙을 씁니다.
+-- =========================================================
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values
+  ('listing-photos', 'listing-photos', true, 5242880,
+   array['image/jpeg','image/png','image/webp','image/heic','image/heif','image/gif']),
+  ('listing-proofs', 'listing-proofs', false, 10485760,
+   array['application/pdf','image/jpeg','image/png','image/webp','image/heic','image/heif'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+/* ---------- 매물 사진 : 읽기는 공개, 쓰기는 본인만 ---------- */
+create policy listing_photos_read on storage.objects for select to anon, authenticated
+  using (bucket_id = 'listing-photos');
+
+create policy listing_photos_insert on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'listing-photos'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
+create policy listing_photos_update on storage.objects for update to authenticated
+  using (
+    bucket_id = 'listing-photos'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
+create policy listing_photos_delete on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'listing-photos'
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_staff())
+  );
+
+/* ---------- 권리 증빙 : 올린 본인과 승인된 직원만 ---------- */
+create policy listing_proofs_read on storage.objects for select to authenticated
+  using (
+    bucket_id = 'listing-proofs'
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_staff())
+  );
+
+create policy listing_proofs_insert on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'listing-proofs'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
+create policy listing_proofs_delete on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'listing-proofs'
+    and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_staff())
+  );
+
+
+-- ---------------------------------------------------------
+-- 20260817023109_wcsc_auth_trigger_and_realtime.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 가입하면 계정 문서를 자동으로 만듭니다.
+--
+-- 구글 로그인처럼 화면이 개입할 틈이 없는 경우에도 빠짐없이 만들어지도록
+-- auth.users 에 트리거를 답니다. 가입 화면이 넘긴 값(options.data)은
+-- raw_user_meta_data 로 들어옵니다.
+-- 직원 신청(staffRequest)은 승인 대기로 시작합니다.
+-- =========================================================
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  m     jsonb   := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  staff boolean := coalesce((m ->> 'staffRequest')::boolean, false);
+begin
+  insert into public.users (
+    id, email, name, phone, church, contact_role, birth_date,
+    role, approved, perms, created_at
+  )
+  values (
+    new.id,
+    coalesce(new.email, ''),
+    coalesce(nullif(m ->> 'name', ''), m ->> 'full_name', ''),
+    coalesce(m ->> 'phone', ''),
+    coalesce(m ->> 'church', ''),
+    coalesce(m ->> 'contactRole', ''),
+    coalesce(m ->> 'birthDate', ''),
+    case when staff then 'staff' else 'client' end,
+    not staff,
+    '{}'::jsonb,
+    to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- =========================================================
+-- 실시간 구독 — 관리자 화면이 값이 바뀌는 즉시 다시 그리도록
+-- (Firestore 의 onSnapshot 에 해당합니다)
+-- =========================================================
+alter publication supabase_realtime add table public.users;
+alter publication supabase_realtime add table public.requests;
+alter publication supabase_realtime add table public.customers;
+alter publication supabase_realtime add table public.edit_consents;
+alter publication supabase_realtime add table public.listings;
+alter publication supabase_realtime add table public.subscriptions;
+alter publication supabase_realtime add table public.invoices;
+alter publication supabase_realtime add table public.service_content;
+alter publication supabase_realtime add table public.settings;
+
+
+-- ---------------------------------------------------------
+-- 20260817023141_wcsc_lock_function_execute.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 함수 호출 권한 정리
+--
+-- security definer 함수가 REST(/rest/v1/rpc/...)로 그대로 열려 있으면
+-- 의도치 않게 밖에서 부를 수 있습니다. 필요한 만큼만 남깁니다.
+--
+--  · 트리거 전용 함수 → 아무도 직접 못 부르게 (트리거는 영향받지 않습니다)
+--  · 권한 확인 함수   → 로그인한 사용자만. RLS 정책이 호출자 권한으로
+--                       평가되므로 authenticated 에는 남겨 두어야 합니다.
+--                       (본인 권한 여부만 알려 주므로 알려져도 문제없습니다)
+-- =========================================================
+
+-- 트리거 전용
+revoke execute on function public.handle_new_user()      from public, anon, authenticated;
+revoke execute on function public.users_guard()          from public, anon, authenticated;
+revoke execute on function public.customers_guard()      from public, anon, authenticated;
+revoke execute on function public.listings_guard()       from public, anon, authenticated;
+revoke execute on function public.edit_consents_guard()  from public, anon, authenticated;
+
+-- 권한 확인 — 익명에게는 필요 없습니다 (익명이 쓰는 정책은 조건이 상수입니다)
+revoke execute on function public.is_staff()             from public, anon;
+revoke execute on function public.is_owner()             from public, anon;
+revoke execute on function public.can(text)              from public, anon;
+revoke execute on function public.edit_approved(uuid)    from public, anon;
+
+grant execute on function public.is_staff()          to authenticated;
+grant execute on function public.is_owner()          to authenticated;
+grant execute on function public.can(text)           to authenticated;
+grant execute on function public.edit_approved(uuid) to authenticated;
+
+
+-- ---------------------------------------------------------
+-- 20260817024044_wcsc_guards_allow_service_role.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 열 잠금 트리거 — 관리 도구는 통과시킵니다
+--
+-- 앞의 트리거들은 "본인이 자기 직분을 올릴 수 없다" 같은 규칙을 강제합니다.
+-- 그런데 그 규칙이 Supabase 대시보드 · SQL Editor · service_role 키에도
+-- 똑같이 걸려, 첫 최고관리자를 지정하는 한 줄조차 막히는 문제가 있었습니다.
+--
+--   update public.users set role = 'owner' ... ;
+--   → ERROR: 직분 · 승인 · 권한은 본인이 바꿀 수 없습니다.
+--
+-- 원인은 can('members') 가 auth.uid() 를 보는데, 대시보드에서 실행하면
+-- 로그인한 사용자가 없어 auth.uid() 가 null 이라 항상 false 가 되기 때문입니다.
+--
+-- 그래서 "브라우저에서 온 요청인지" 를 먼저 확인하고, 아니면(= 관리 도구에서
+-- 직접 실행한 SQL 이면) 규칙을 건너뜁니다. 브라우저에서 오는 anon ·
+-- authenticated 요청은 언제나 auth.uid() 가 채워지므로 그대로 막힙니다.
+-- =========================================================
+
+-- 로그인한 사용자가 없는 요청 = 대시보드 · SQL Editor · service_role
+create or replace function public.no_end_user()
+returns boolean
+language sql
+stable
+as $$
+  select auth.uid() is null;
+$$;
+
+revoke execute on function public.no_end_user() from public, anon, authenticated;
+
+/* ---------- users : 직분 · 승인 · 권한 ---------- */
+create or replace function public.users_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.no_end_user() or public.can('members') then return new; end if;
+  if new.role is distinct from old.role
+     or new.approved is distinct from old.approved
+     or new.perms is distinct from old.perms then
+    raise exception '직분 · 승인 · 권한은 본인이 바꿀 수 없습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+/* ---------- customers : 교회 정보는 승인이 있어야 ---------- */
+create or replace function public.customers_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.no_end_user() then return new; end if;
+  if new.name          is distinct from old.name
+     or new.denomination is distinct from old.denomination
+     or new.location     is distinct from old.location
+     or new.size         is distinct from old.size
+     or new.contact_name is distinct from old.contact_name
+     or new.contact_role is distinct from old.contact_role
+     or new.phone        is distinct from old.phone
+     or new.email        is distinct from old.email then
+    if not public.edit_approved(old.id) then
+      raise exception '교회 정보를 고치려면 그 교회의 수정 승인이 필요합니다.' using errcode = '42501';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+/* ---------- listings : 등록비 · 게시 정보는 센터만 ---------- */
+create or replace function public.listings_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.no_end_user() or public.can('customers') then return new; end if;
+  if new.user_id is distinct from old.user_id then
+    raise exception '등록자를 바꿀 수 없습니다.' using errcode = '42501';
+  end if;
+  if new.fee is distinct from old.fee then
+    raise exception '등록비 상태는 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  if new.published_at is distinct from old.published_at
+     or new.reviewed_by is distinct from old.reviewed_by
+     or new.expires_at is distinct from old.expires_at then
+    raise exception '게시 정보는 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+/* ---------- edit_consents : 요청 내용은 센터만 ---------- */
+create or replace function public.edit_consents_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.no_end_user() or public.can('customers') then return new; end if;
+  if new.fields is distinct from old.fields
+     or new.reason is distinct from old.reason
+     or new.user_id is distinct from old.user_id
+     or new.customer_name is distinct from old.customer_name
+     or new.requested_by is distinct from old.requested_by
+     or new.requested_at is distinct from old.requested_at then
+    raise exception '요청 내용은 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+
+-- ---------------------------------------------------------
+-- 20260817025200_wcsc_tighten_function_grants.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 함수 권한 마무리 (Supabase 보안 점검 결과 반영)
+--
+-- 1) no_end_user() 에 search_path 를 고정합니다.
+--    검색 경로가 열려 있으면, 같은 이름의 함수를 다른 스키마에 만들어
+--    바꿔치기하는 수법을 막을 수 없습니다.
+--
+-- 2) 정책이 실제로 쓰지 않는 함수는 REST 에서 닫습니다.
+--    · is_staff() · can()      → 정책이 "호출자 권한으로" 평가하므로
+--                                authenticated 에 EXECUTE 가 있어야 합니다. (유지)
+--    · is_owner() · edit_approved() → 어떤 정책도 쓰지 않고, 화면에서도
+--                                부르지 않습니다. 열어 둘 이유가 없어 닫습니다.
+--                                (edit_approved 는 customers_guard 안에서만
+--                                 쓰이는데, 그 트리거는 security definer 라
+--                                 호출자 권한과 무관하게 동작합니다.)
+-- =========================================================
+
+create or replace function public.no_end_user()
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$
+  select auth.uid() is null;
+$$;
+
+revoke execute on function public.no_end_user() from public, anon, authenticated;
+
+revoke execute on function public.is_owner()           from public, anon, authenticated;
+revoke execute on function public.edit_approved(uuid)  from public, anon, authenticated;

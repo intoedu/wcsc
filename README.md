@@ -5,25 +5,39 @@
 
 - 홈페이지 내용은 **로그인 없이 누구나** 볼 수 있습니다.
 - 신청서 제출과 관리자 화면은 **로그인**이 필요합니다.
-- 데이터베이스는 **Firebase** (Firestore + Authentication) 를 사용합니다.
+- 데이터베이스는 **Supabase** (Postgres + Auth + Storage) 를 사용합니다.
+  Firebase 로도 그대로 돌아가지만, 지금 운영에 쓰는 것은 Supabase 입니다.
 - 설정이 비어 있으면 **로컬 데모 모드**로 동작하므로, 설정 없이도 전체 기능을 바로 확인할 수 있습니다.
 
 ---
 
 ## 1. 현재 연결 상태
 
-**Firebase 프로젝트 `caps-4e079` 에 연결되어 있습니다.** (`assets/js/firebase-config.js`)
+**Supabase 프로젝트 `tbxosynzszcgtieonsui` 에 연결되어 있습니다.** (`assets/js/supabase-config.js`)
 
 ```bash
 npm start     # http://localhost:8123
 ```
 
-실제 데이터가 Firestore에 저장되므로, 로컬에서 테스트한 내용도 운영 데이터에 그대로 들어갑니다.
+실제 데이터가 Supabase(Postgres)에 저장되므로, 로컬에서 테스트한 내용도 운영 데이터에 그대로 들어갑니다.
 테스트로 만든 신청·고객은 관리자 화면에서 삭제하세요.
+
+### 어느 백엔드를 쓰는지 고르는 규칙
+
+`assets/js/db.js` 가 **위에서부터 차례로** 확인해 하나를 고릅니다.
+
+| 순서 | 조건 | 동작 |
+|------|------|------|
+| 1 | `supabase-config.js` 의 `url` · `anonKey` 가 채워져 있음 | **Supabase** (현재 상태) |
+| 2 | `firebase-config.js` 의 `apiKey` 가 채워져 있음 | Firebase (옛 백엔드) |
+| 3 | 둘 다 비어 있음 | 로컬 데모 모드 |
+
+세 가지 모두 화면 쪽에서는 **똑같은 함수**를 씁니다. 백엔드를 바꿔도 화면 코드는 고치지 않습니다.
 
 ### 데모 모드로 되돌리려면
 
-`firebase-config.js` 의 `apiKey` 를 빈 문자열(`''`)로 두면 브라우저 저장소를 쓰는 데모 모드로 돌아갑니다.
+`supabase-config.js` 의 `url` 과 `firebase-config.js` 의 `apiKey` 를 모두 빈 문자열(`''`)로 두면
+브라우저 저장소를 쓰는 데모 모드로 돌아갑니다.
 이 모드에서는 예시 데이터와 함께 아래 계정으로 로그인해 화면을 둘러볼 수 있습니다.
 
 | 구분 | 계정 | 비밀번호 |
@@ -493,15 +507,94 @@ npm start     # http://localhost:8123
 
 사진은 5MB, 증빙은 10MB 제한입니다. 두 경로를 섞지 않도록 `storage.rules` 에서 따로 막았습니다.
 
-> ⚠️ Firebase 로 운영하려면 **`storage.rules` 를 따로 게시해야 합니다.**
+Supabase 에서는 이 두 경로가 **저장소 버킷 두 개**로 만들어집니다 (`supabase.sql` 이 함께 만듭니다).
+
+| 버킷 | 공개 | 용량 제한 |
+|------|------|-----------|
+| `listing-photos` | 공개 | 5MB |
+| `listing-proofs` | 비공개 (10분짜리 서명 링크로만 열림) | 10MB |
+
+> ⚠️ Firebase 로 운영하실 때는 **`storage.rules` 를 따로 게시해야 합니다.**
 > Firestore 규칙과 별개입니다 — 관리자 → 보안 규칙 화면의 **[Storage 규칙]** 탭에서 복사하세요.
 > Firebase 콘솔에서 **Storage 를 먼저 시작**해 두어야 사진·서류 업로드가 됩니다.
 
 ---
 
-## 5. Firebase 연결 (실제 운영 전환)
+## 5. Supabase 연결 (현재 운영 백엔드)
 
-`assets/js/firebase-config.js` 의 값만 채우면 즉시 Firebase로 전환됩니다. 다른 코드는 고치지 않아도 됩니다.
+`assets/js/supabase-config.js` 의 두 값만 채우면 됩니다. 다른 코드는 고치지 않아도 됩니다.
+
+```js
+window.SUPABASE_CONFIG = {
+  url: 'https://<프로젝트>.supabase.co',
+  anonKey: 'sb_publishable_...',
+};
+```
+
+### 새 프로젝트에 설치하는 순서
+
+1. [Supabase 대시보드](https://supabase.com/dashboard) 에서 프로젝트 생성 (지역: `Northeast Asia (Seoul)` 권장)
+2. **SQL Editor → New query** 에 저장소의 **`supabase.sql` 전체**를 붙여넣고 **[Run]**
+   · 표 · 접근 규칙(RLS) · 저장소 버킷 · 가입 트리거가 **한 번에** 만들어집니다
+   · 관리자 화면 → **센터 관리 → 보안 규칙 → [Supabase SQL]** 탭에서 그대로 복사할 수 있습니다
+3. **Project Settings → API** 에서 `Project URL` 과 `publishable key` 를 복사해 `supabase-config.js` 에 넣기
+4. **Authentication → Providers → Email** 사용 설정, **"Confirm email" 은 끄기**
+   · 가입하자마자 신청서를 이어서 제출하는 흐름이라, 확인 메일을 기다리면 흐름이 끊깁니다
+   · (선택) `Google` 도 함께 켜기
+5. **Authentication → URL Configuration** 의 `Site URL` · `Redirect URLs` 에 배포 주소 넣기 (구글 로그인에 필요)
+6. 회원가입한 뒤 **첫 최고관리자 지정** — SQL Editor 에서 한 줄:
+
+```sql
+update public.users set role = 'owner', approved = true
+where email = '본인이메일@example.com';
+```
+
+> `anonKey`(publishable) 는 **공개해도 되는 값**입니다. 브라우저에 그대로 나가는 것을 전제로 만들어진 키입니다.
+> 실제 접근 제어는 데이터베이스의 **RLS 정책**이 합니다.
+> 반대로 `service_role` 키는 RLS 를 통째로 무시하므로 **절대 저장소에 넣지 마세요.**
+
+### 규칙을 고칠 때
+
+`supabase.sql` 은 **직접 고치지 않습니다.** `supabase/migrations/*.sql` 을 고치고 `npm run build` 를 실행하면
+파일 이름순으로 이어 붙여 `supabase.sql` 이 다시 만들어집니다. 맨 위 `WCSC_SUPABASE_VERSION` 이 마지막
+마이그레이션 번호이므로, 관리자 화면의 `규칙 판` 과 비교하면 무엇이 반영됐는지 알 수 있습니다.
+
+| 파일 | 내용 |
+|------|------|
+| `..._wcsc_core_tables.sql` | 표 9개 |
+| `..._wcsc_security_helpers.sql` | `is_staff()` · `is_owner()` · `can()` · `edit_approved()` |
+| `..._wcsc_column_guards.sql` | 열 잠금 트리거 (직분·요금·게시일 등) |
+| `..._wcsc_rls_policies.sql` | 접근 규칙 — `firestore.rules` 와 같은 내용 |
+| `..._wcsc_storage_buckets.sql` | 사진·증빙 버킷과 그 정책 |
+| `..._wcsc_auth_trigger_and_realtime.sql` | 가입 시 `users` 행 생성 · 실시간 반영 |
+| `..._wcsc_lock_function_execute.sql` | 함수 호출 권한 정리 |
+| `..._wcsc_guards_allow_service_role.sql` | 대시보드·SQL Editor 에서는 열 잠금을 통과 |
+| `..._wcsc_tighten_function_grants.sql` | 안 쓰는 함수를 REST 에서 닫기 |
+
+### 왜 정책만으로 안 되고 트리거가 있는지
+
+Postgres 의 `WITH CHECK` 는 **바뀐 뒤의 값만** 봅니다. "요금을 **원래 값에서** 바꾸지 마라" 같은
+규칙은 이전 값(`OLD`)을 봐야 하므로 정책으로 쓸 수 없습니다. 그래서 그런 규칙만 `BEFORE UPDATE`
+트리거로 따로 두었습니다. Firestore 의 `request.resource.data.fee == resource.data.fee` 와 같은 역할입니다.
+
+### 실제 DB 에서 확인한 것
+
+RLS 정책을 실제 프로젝트에 올린 뒤, 역할별로 흉내 내어 확인했습니다 (확인 후 시험 데이터는 지웠습니다).
+
+| 역할 | 되는 것 | 막히는 것 |
+|------|---------|-----------|
+| 익명 | 게시된 매물 · 항목 내용 · 센터 설정 읽기 | 고객 · 계정 · 신청서 |
+| 고객 | 자기 신청서 · 자기 매물 · 자기 계정, 자기 교회 수정 승인 | 남의 글 수정, 요금 납부 처리, 스스로 게시, 최고관리자 승격 |
+| 직원 | 권한(`perms`)이 켜진 화면만 | 스스로 동의 승인, 권한 없는 정산·설정, 스스로 직분 변경 |
+| 직원 + 교회 승인 | 그 교회 정보 수정 | — |
+| 최고관리자 | 전부 | — |
+
+---
+
+## 5-1. Firebase 연결 (옛 백엔드 — 그대로 남겨 둡니다)
+
+`assets/js/supabase-config.js` 의 `url` 을 비우고 `assets/js/firebase-config.js` 를 채우면 Firebase 로 돌아갑니다.
+다른 코드는 고치지 않아도 됩니다.
 
 1. [Firebase 콘솔](https://console.firebase.google.com) 에서 프로젝트 생성
 2. **Authentication** → 시작하기 → `이메일/비밀번호` 사용 설정 (원하면 `Google` 도 함께)
@@ -557,19 +650,22 @@ approved: true
 > `firebaseConfig` 값은 공개되어도 되는 식별자입니다. 비밀 키가 아닙니다.
 > 실제 보안은 `firestore.rules` 가 담당합니다 — 규칙을 반드시 게시하세요.
 
-### 데이터 구조 (Firestore 컬렉션)
+### 데이터 구조
 
-| 컬렉션 | 내용 | 공개 읽기 |
-|--------|------|-----------|
-| `users` | 계정, 직분, 권한, 승인 여부 | ✕ |
-| `requests` | 지원 신청 (접수번호, 상태, 담당자, 메모, 할 일) | ✕ (본인 것만) |
-| `customers` | 고객 교회 정보 | ✕ |
-| `editConsents` | 교회 정보 수정 승인 (문서 아이디 = 고객 아이디) | ✕ (본인 교회 것만) |
-| `listings` | 부동산 매물 글 (상태, 요금, 권리 증빙 정보) | ○ (게시된 것만) |
-| `subscriptions` | 월 정기 계약 | ✕ |
-| `invoices` | 월별 청구·입금 | ✕ |
-| `serviceContent` | 관리자가 수정한 항목 내용 | ○ |
-| `settings` | 센터 연락처·공지 | ○ |
+화면 코드는 어느 백엔드든 같은 이름(`users`, `editConsents` …)을 씁니다.
+Supabase 에서는 Postgres 관례에 맞춰 `edit_consents` 처럼 바뀌는데, 그 변환은 `db.js` 가 알아서 합니다.
+
+| 화면에서 쓰는 이름 | Supabase 표 | 내용 | 공개 읽기 |
+|--------------------|-------------|------|-----------|
+| `users` | `users` | 계정, 직분, 권한, 승인 여부 | ✕ |
+| `requests` | `requests` | 지원 신청 (접수번호, 상태, 담당자, 메모, 할 일) | ✕ (본인 것만) |
+| `customers` | `customers` | 고객 교회 정보 | ✕ |
+| `editConsents` | `edit_consents` | 교회 정보 수정 승인 (기본키 = 고객 아이디) | ✕ (본인 교회 것만) |
+| `listings` | `listings` | 부동산 매물 글 (상태, 요금, 권리 증빙 정보) | ○ (게시된 것만) |
+| `subscriptions` | `subscriptions` | 월 정기 계약 | ✕ |
+| `invoices` | `invoices` | 월별 청구·입금 | ✕ |
+| `serviceContent` | `service_content` | 관리자가 수정한 항목 내용 | ○ |
+| `settings` | `settings` | 센터 연락처·공지 | ○ |
 
 ---
 
@@ -605,8 +701,11 @@ listings.html            부동산 매물 게시판 (목록 · 상세 · 등록 
 staff.html               직원 전용 로그인 · 계정 신청
 admin.html               관리자 시스템 (승인된 직원만)
 
-firestore.rules          Firestore 보안 규칙  ← 원본 (관리자 [보안 규칙] 화면에 그대로 표시됩니다)
-storage.rules            Storage 보안 규칙   ← 매물 권리 증빙 서류 파일을 지킵니다
+supabase/migrations/*.sql  Supabase 설치 스크립트 원본  ← 여기를 고칩니다
+supabase.sql               위 파일들을 이어 붙인 결과 (build.js 가 만듭니다 — 직접 고치지 마세요)
+
+firestore.rules          Firestore 보안 규칙  ← 옛 백엔드용 원본
+storage.rules            Storage 보안 규칙   ← 〃 (매물 권리 증빙 서류 파일)
 firebase.json            firebase CLI 설정 (npm run rules 로 게시)
 .firebaserc              대상 프로젝트 (caps-4e079)
 build.js                 정적 페이지 생성기
@@ -619,8 +718,10 @@ assets/css/style.css     공개 페이지 스타일
 assets/css/auth.css      로그인 모달 · 헤더 로그인 상태 (공용)
 assets/css/admin.css     관리자 화면 스타일
 
-assets/js/firebase-config.js  Firebase 설정  ← 여기를 채우면 실제 운영
-assets/js/db.js               데이터 계층 (firebase / local 어댑터)
+assets/js/supabase-config.js  Supabase 설정  ← 여기를 채우면 실제 운영 (현재 사용 중)
+assets/js/firebase-config.js  Firebase 설정  ← 옛 백엔드
+assets/vendor/supabase-*.js   Supabase SDK (저장소에 함께 둡니다 — CDN 을 타지 않습니다)
+assets/js/db.js               데이터 계층 (supabase / firebase / local 어댑터)
 assets/js/auth-ui.js          로그인·회원가입 모달
 assets/js/profile.js          추가 정보 입력 (교회·직분·연락처 필수, 닫을 수 없음)
 assets/js/consent-ui.js       교회 정보 수정 승인 (고객 쪽 안내 띠 · 승인 창)
@@ -656,19 +757,25 @@ npm run build
 
 콘텐츠에 자리표시자가 남아 있습니다. **공개 전에 반드시 교체하세요.**
 
-- [x] **Firebase 설정** — `caps-4e079` 프로젝트 연결 완료
-- [ ] **Authentication → 이메일/비밀번호 사용 설정** ← 켜지 않으면 이메일 가입이 막힙니다
-      (`console.firebase.google.com/project/caps-4e079/authentication/providers`)
-- [ ] **Firestore 보안 규칙** — `firestore.rules` (판 `2026-08-14-b`) 를 콘솔 [규칙] 탭에 붙여넣고 게시
-      ← 정보 수정 승인과 매물 게시판이 이 규칙에 의존합니다. 게시하지 않으면 잠금이 서버에서 적용되지 않습니다
-- [ ] **Storage 시작 + Storage 규칙** — 콘솔에서 Storage 를 시작한 뒤 `storage.rules` (판 `2026-08-14-b`) 게시
-      ← 매물 권리 증빙 서류를 여기에 올립니다. 시작하지 않으면 업로드가 안 되고, 규칙을 게시하지 않으면
-      계약서 파일이 누구에게나 열립니다
-- [ ] **승인된 도메인** — Authentication → 설정에 배포 주소 추가
-- [ ] **첫 최고관리자** — Firestore에서 `role: "owner"`, `approved: true` 로 지정
-- [ ] **Google 로그인** — 쓰실 경우 Authentication → 로그인 방법에서 Google 사용 설정
-- [ ] **보안 규칙 게시** — 관리자 화면 **[보안 규칙]** 의 두 탭(Firestore · Storage)을 각각 복사해 콘솔에 붙여넣고 게시
-      (또는 `npm run rules` 한 줄 — Firestore·Storage 규칙을 함께 올립니다)
+### 백엔드 (Supabase)
+
+- [x] **Supabase 프로젝트 연결** — `tbxosynzszcgtieonsui` (`assets/js/supabase-config.js`)
+- [x] **표 · 접근 규칙(RLS) · 저장소 버킷 · 가입 트리거** — 판 `20260817025200` 까지 적용 완료
+- [x] **접근 규칙 실제 검증** — 익명 · 고객 · 다른 고객 · 직원 · 최고관리자 다섯 역할로 확인 완료
+- [ ] **Authentication → Providers → Email 사용 설정, "Confirm email" 끄기** ← 켜 두면 가입 직후
+      신청서 제출로 이어지는 흐름이 끊깁니다
+      (`supabase.com/dashboard/project/tbxosynzszcgtieonsui/auth/providers`)
+- [ ] **Authentication → URL Configuration** — `Site URL` 과 `Redirect URLs` 에 배포 주소 넣기
+- [ ] **첫 최고관리자** — 가입한 뒤 SQL Editor 에서 한 줄 (관리자 → 보안 규칙 화면에도 적혀 있습니다)
+
+      update public.users set role = 'owner', approved = true
+      where email = '본인이메일@example.com';
+
+- [ ] **Google 로그인** — 쓰실 경우 Authentication → Providers 에서 Google 사용 설정
+
+> 옛 Firebase 프로젝트(`caps-4e079`)는 지금 쓰지 않습니다. 되돌릴 때 필요한 절차는 5-1 절에 남겨 두었습니다.
+### 콘텐츠
+
 - [ ] **연락처** — `src/data/site.js` 의 `site.contact` (전화 `02-0000-0000`, 이메일, 주소가 모두 임시값). 또는 관리자 화면 → 센터 설정에서 입력
 - [ ] **AKC 캠프 상세** — 2026 여름 · 겨울 캠프의 확정 일정과 참가비 반영 (`needsReview: true`).
       방식(등록형 / 찾아가는), 갈래(영성 / 영역), 장소(안성), 홈페이지 바로가기는 이미 들어가 있습니다
@@ -679,7 +786,7 @@ npm run build
       알림톡(비즈메시지) 자동 발송이 필요하면 채널 등록과 템플릿 심사가 별도로 필요합니다
 - [ ] **매물 게시판 결제 방식** — 현재는 계좌이체 후 관리자 확인입니다. PG 연동이 필요하면 별도 결정
 - [ ] **예시 매물 글** — 데모 모드에는 견본 글(`뷰가 좋은 3층 예배실…`)이 사진과 함께 들어 있습니다.
-      Firebase 로 전환하면 없으므로, 필요하면 같은 내용으로 한 건 올려 두세요
+      실제 백엔드(Supabase)에는 없으므로, 필요하면 같은 내용으로 한 건 올려 두세요
       (사진은 `assets/img/sample/listing-*.svg`, 실제 사진이 아닌 예시 도안입니다)
 - [ ] **교역자 구인 게시판** — 매물 게시판과 달리 아직 없습니다. 유료화 여부와 범위 결정 필요 (기획서 5.2)
 - [ ] **접수번호 접두어** — 기획서는 `WCSC-260812-4821` 제안. 지금은 `CAPS-` 유지 (기존 발급 번호와 형식 통일)
@@ -739,8 +846,11 @@ npm run build
 ## 11. 기술 사항
 
 - 프레임워크·빌드 도구 없음 — 순수 HTML / CSS / 바닐라 JS (생성 스크립트만 Node 사용)
+- Supabase SDK 는 저장소에 함께 두고(`assets/vendor/supabase-*.js`) 필요할 때만 불러옵니다 —
+  **CDN 을 타지 않으므로** 외부 서비스가 멈춰도 로그인이 막히지 않습니다
 - Firebase JS SDK는 필요할 때 CDN에서 동적으로 불러옵니다 (`import()`) — 데모 모드에서는 아예 로드하지 않습니다
-- 데이터 계층이 어댑터로 분리되어 있어 나중에 다른 백엔드로 옮기기 쉽습니다 (`assets/js/db.js`)
+- 데이터 계층이 어댑터로 분리되어 있어 백엔드를 갈아끼워도 화면 코드는 그대로입니다 (`assets/js/db.js`).
+  실제로 Firebase → Supabase 전환에서 화면 코드는 한 줄도 고치지 않았습니다
 - 폰트: Pretendard (CDN), 실패 시 시스템 한글 폰트로 대체
 - 반응형: 1180 / 1100 / 1080 / 900 / 820 / 680px 구간. 관리자 화면도 모바일 대응
   (메뉴는 **1100px 이하에서 접힘 메뉴**로 바뀝니다 — 한글 메뉴 6개가 한 줄에 들어가지 않습니다)

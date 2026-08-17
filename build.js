@@ -1451,7 +1451,40 @@ ${ctaBand('', {
    보안 규칙을 관리자 화면에서 복사할 수 있도록 내보냅니다.
    firestore.rules 가 원본이고, 이 파일은 그 사본입니다.
    ========================================================= */
-function buildRulesScript() {
+function buildSupabaseSql() {
+  const dir = path.join(ROOT, 'supabase', 'migrations');
+  if (!fs.existsSync(dir)) return;
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
+  if (!files.length) return;
+
+  const version = files[files.length - 1].split('_')[0];
+  const header = `-- =========================================================
+-- 우리교회지원센터 (WCSC) — Supabase 전체 설정
+--
+-- WCSC_SUPABASE_VERSION: ${version}
+--
+-- 새 Supabase 프로젝트를 쓰실 때는 이 파일 하나를 SQL Editor 에 통째로
+-- 붙여넣고 실행하시면 됩니다. 표 · 접근 규칙(RLS) · 저장소 버킷 ·
+-- 가입 트리거가 한 번에 만들어집니다.
+--
+-- 이 파일은 supabase/migrations/*.sql 을 순서대로 이어 붙인 것입니다.
+-- 직접 고치지 마시고, 마이그레이션 파일을 고친 뒤 npm run build 를 실행하세요.
+-- =========================================================
+
+`;
+
+  const body = files
+    .map((f) => `-- ---------------------------------------------------------\n-- ${f}\n-- ---------------------------------------------------------\n\n` +
+      fs.readFileSync(path.join(dir, f), 'utf8').trimEnd())
+    .join('\n\n\n');
+
+  write('supabase.sql', header + body + '\n');
+
+  // 관리자 [보안 규칙] 화면에서 그대로 복사할 수 있도록 내보냅니다.
+  return { version, text: header + body + '\n' };
+}
+
+function buildRulesScript(sql) {
   const text = fs.readFileSync(path.join(ROOT, 'firestore.rules'), 'utf8');
   const version = (text.match(/CAPS_RULES_VERSION:\s*([\w.-]+)/) || [])[1] || '(미표기)';
 
@@ -1460,8 +1493,11 @@ function buildRulesScript() {
   const stText = fs.existsSync(stFile) ? fs.readFileSync(stFile, 'utf8') : '';
   const stVersion = (stText.match(/CAPS_STORAGE_VERSION:\s*([\w.-]+)/) || [])[1] || '(미표기)';
 
-  const js = `/* build.js 가 firestore.rules · storage.rules 에서 생성한 파일입니다. 직접 수정하지 마세요.
-   규칙을 바꿀 때는 원본 파일을 고치고 \`npm run build\` 를 실행하세요. */
+  const js = `/* build.js 가 supabase/migrations · firestore.rules · storage.rules 에서
+   생성한 파일입니다. 직접 수정하지 마세요.
+   내용을 바꿀 때는 원본 파일을 고치고 \`npm run build\` 를 실행하세요. */
+window.CAPS_SUPABASE_SQL = ${JSON.stringify((sql && sql.text) || '')};
+window.CAPS_SUPABASE_SQL_VERSION = ${JSON.stringify((sql && sql.version) || '(미표기)')};
 window.CAPS_FIRESTORE_RULES = ${JSON.stringify(text)};
 window.CAPS_FIRESTORE_RULES_VERSION = ${JSON.stringify(version)};
 window.CAPS_STORAGE_RULES = ${JSON.stringify(stText)};
@@ -1515,7 +1551,7 @@ function main() {
   buildContact();
   buildListings();
   buildDataScript();
-  buildRulesScript();
+  buildRulesScript(buildSupabaseSql());
   console.log(`생성 완료 (${out.length}개)`);
   out.forEach((f) => console.log('  ' + f));
 }
