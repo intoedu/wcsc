@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>홈페이지 제작 | 우리교회지원센터</title>
+  <meta name="description" content="교회 소개, 예배 시간, 설교 영상, 주보, 오시는 길까지. 성도와 새가족 모두에게 필요한 정보를 담은 홈페이지를 제작하고 운영까지 지원합니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="홈페이지 제작 | 우리교회지원센터">
+  <meta property="og:description" content="교회 소개, 예배 시간, 설교 영상, 주보, 오시는 길까지. 성도와 새가족 모두에게 필요한 정보를 담은 홈페이지를 제작하고 운영까지 지원합니다.">
+  <meta property="og:site_name" content="우리교회지원센터">
+  <meta name="theme-color" content="#1F7A44">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/auth.css">
+</head>
+<body data-service="homepage">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+<header class="site-header" id="siteHeader">
+  <div class="topbar">
+    <div class="wrap topbar-in">
+      <span class="topbar-item"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></span>
+      <span class="topbar-links">
+        <a href="tel:0200000000"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <span data-live="site.phone">02-0000-0000</span></a>
+        <a href="mailto:help@caps.or.kr"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <span data-live="site.email">help@caps.or.kr</span></a>
+      </span>
+    </div>
+  </div>
+  <div class="wrap header-in">
+    <a class="brand" href="../index.html">
+      <svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <rect width="40" height="40" rx="10" fill="var(--brand-800)"/>
+    <path d="M20 9.5v21M13 16.5h14" stroke="var(--gold-400)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M27.5 25.4a8.4 8.4 0 0 1-15 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>
+      <span class="brand-text">
+        <strong>우리교회지원센터</strong>
+        <small>Wori Church Support Center</small>
+      </span>
+    </a>
+    <nav class="nav" id="nav" aria-label="주 메뉴">
+      <a class="nav-link" href="../about.html">센터 소개</a><a class="nav-link is-active" href="../services/index.html">지원 항목</a><a class="nav-link" href="../listings.html">매물 게시판</a><a class="nav-link" href="../process.html">이용 절차</a><a class="nav-link" href="../faq.html">자주 묻는 질문</a><a class="nav-link" href="../contact.html">문의</a>
+      <span id="authSlot"></span>
+      <a class="btn btn-primary btn-sm nav-cta" href="../apply.html">지원 신청</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mega" id="mega" hidden>
+    <div class="wrap mega-in"><a class="mega-item" href="../services/homepage.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+          <span class="mega-text"><strong>홈페이지 제작</strong><small>처음 찾아오는 사람이 가장 먼저 보는 교회의 얼굴</small></span>
+        </a><a class="mega-item" href="../services/design.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.6-1.9-.2-1 .5-1.9 1.6-1.9h1.6A4.2 4.2 0 0 0 21 13C21 7.5 16.9 3 12 3Z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="11" cy="7.6" r="1.1"/><circle cx="15.6" cy="9.2" r="1.1"/></svg></span>
+          <span class="mega-text"><strong>디자인 제작</strong><small>배너 · 포스터 · 현수막 · 주보를 한 곳에서</small></span>
+        </a><a class="mega-item" href="../services/staffing.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5M15.8 4.5a3.6 3.6 0 0 1 0 6.9"/></svg></span>
+          <span class="mega-text"><strong>교역자 구인</strong><small>필요한 사역자를 알려주시면, 저희가 연결해 드립니다</small></span>
+        </a><a class="mega-item" href="../services/sound.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.4"/><circle cx="12" cy="14.6" r="3.6"/><circle cx="12" cy="6.6" r="1.4"/></svg></span>
+          <span class="mega-text"><strong>음향 세팅</strong><small>설교가 또렷하게 들리는 예배당</small></span>
+        </a><a class="mega-item" href="../services/realestate.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5.6c0-.9.6-1.6 1.5-1.6h5c.9 0 1.5.7 1.5 1.6V21M13 21V10.4h4.5c.9 0 1.5.7 1.5 1.6V21"/><path d="M8 8h2M8 12h2M8 16h2M16 14h1"/></svg></span>
+          <span class="mega-text"><strong>부동산</strong><small>교회 매물 게시판 — 올리고, 찾습니다</small></span>
+        </a><a class="mega-item" href="../services/akc.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.4 7 6.6 15.8M13.6 7l3.8 8.8M7.4 18h9.2"/></svg></span>
+          <span class="mega-text"><strong>AKC</strong><small>어라이즈 코리아 캠프 — 여름 · 겨울, 두 가지 방식으로</small></span>
+        </a><a class="mega-item" href="../services/smartchurch.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.4"/><path d="M10.6 5.6h2.8"/><path d="M10.4 18.4h3.2"/></svg></span>
+          <span class="mega-text"><strong>스마트처치 앱</strong><small>성도의 휴대폰 안에 들어가는 교회</small></span>
+        </a><a class="mega-item" href="../services/intooffice.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7.2" width="19" height="12.6" rx="2"/><path d="M8.6 7.2V5.4c0-.9.7-1.6 1.6-1.6h3.6c.9 0 1.6.7 1.6 1.6v1.8"/><path d="M2.5 12.4h19"/></svg></span>
+          <span class="mega-text"><strong>인투오피스</strong><small>교회 서류에 도장 받으러 다니지 마세요 — 전자서명</small></span>
+        </a></div>
+  </div>
+</header>
+  <main id="main">
+
+<section class="svc-hero">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="현재 위치">
+      <a href="../index.html">홈</a> <svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      <a href="../services/index.html">지원 항목</a> <svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      <span>홈페이지 제작</span>
+    </nav>
+    <div class="svc-hero-in">
+      <div class="svc-hero-copy">
+        <p class="eyebrow"><span class="svc-hero-no">01</span> 지원 항목</p>
+        <h1 data-live="svc.homepage.name">홈페이지 제작</h1>
+        <p class="svc-hero-tag" data-live="svc.homepage.tagline">처음 찾아오는 사람이 가장 먼저 보는 교회의 얼굴</p>
+        <p class="lead" data-live="svc.homepage.summary">교회 소개, 예배 시간, 설교 영상, 주보, 오시는 길까지. 성도와 새가족 모두에게 필요한 정보를 담은 홈페이지를 제작하고 운영까지 지원합니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="https://koreayjk.github.io/aim/request.html" target="_blank" rel="noopener"
+      data-apply="homepage">@IM에서 신청하기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-outline btn-lg" href="tel:0200000000">전화 상담</a>
+        </div>
+        <p class="apply-external-note" data-apply-note="homepage">
+    이 항목의 신청은 <strong>@IM</strong> 접수 페이지에서 진행됩니다.
+    버튼을 누르면 새 창으로 열립니다.
+  </p>
+      </div>
+      <div class="svc-hero-side">
+        <span class="svc-hero-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+        
+        <dl class="svc-meta">
+          <div><dt>비용</dt><dd class="svc-meta-price">제작비 0원 + 월 관리비 3만원</dd></div>
+          <div><dt>과금 방식</dt><dd>월 관리비</dd></div>
+          <div><dt>소요 기간</dt><dd data-live="svc.homepage.duration">약 4~8주 (자료 준비 상황에 따라 조정)</dd></div>
+          <div><dt>상담 · 견적</dt><dd>무료</dd></div>
+          <div><dt>지원 지역</dt><dd>전국</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="sec-head">
+    <p class="eyebrow">이런 경우에 필요합니다</p>
+    <h2>교회에서 자주 겪는 상황</h2>
+    
+  </div>
+    <div class="prob-grid">
+      <article class="prob-card">
+        <h3>“검색해도 정보가 안 나옵니다”</h3>
+        <p>예배 시간과 주소를 확인하려는 새가족이 블로그나 지도 앱만 보고 발길을 돌립니다.</p>
+      </article>
+      <article class="prob-card">
+        <h3>“만들어 둔 홈페이지가 방치돼 있습니다”</h3>
+        <p>몇 해 전 공지가 그대로 올라와 있고, 수정하려면 만든 사람을 수소문해야 합니다.</p>
+      </article>
+      <article class="prob-card">
+        <h3>“휴대폰에서 글씨가 깨집니다”</h3>
+        <p>대부분의 성도가 휴대폰으로 접속하는데 화면이 잘리거나 확대해야 읽을 수 있습니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+<section class="section section-alt">
+  <div class="wrap">
+    <div class="sec-head">
+    <p class="eyebrow">지원 내용</p>
+    <h2>이런 것들을 해 드립니다</h2>
+    
+  </div>
+    <div class="feat-grid" data-live-list="svc.homepage.features">
+      <article class="feat-card">
+        <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+        <h3>반응형 디자인</h3>
+        <p>휴대폰·태블릿·PC에서 모두 제대로 보이도록 설계합니다. 어르신 성도를 고려해 본문 글자 크기를 넉넉하게 잡습니다.</p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+        <h3>설교 영상 연동</h3>
+        <p>유튜브 채널을 연결하면 새 설교가 자동으로 올라옵니다. 매주 따로 등록할 필요가 없습니다.</p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+        <h3>주보 · 공지 게시판</h3>
+        <p>담당 집사님이 직접 올릴 수 있는 관리자 화면을 드립니다. 파일 올리기와 글쓰기 수준의 조작만 필요합니다.</p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+        <h3>교회 소개 · 오시는 길</h3>
+        <p>섬기는 사람들, 예배 안내, 지도와 주차 정보를 정리해 새가족이 방문 전에 필요한 것을 모두 확인할 수 있게 합니다.</p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+        <h3>검색 노출 설정</h3>
+        <p>네이버·구글 검색 등록과 기본 SEO 설정을 해 드립니다. 교회 이름으로 검색했을 때 홈페이지가 먼저 나오도록 합니다.</p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+        <h3>도메인 · 서버 대행</h3>
+        <p>도메인 구입과 연결, 보안 인증서, 서버 관리까지 대행합니다. 교회에서 따로 신경 쓸 일이 없습니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="sec-head">
+    <p class="eyebrow">진행 순서</p>
+    <h2>홈페이지 제작은 이렇게 진행됩니다</h2>
+    
+  </div>
+    <ol class="timeline">
+      <li class="tl-item">
+        <div class="tl-marker"><span>1</span></div>
+        <div class="tl-body"><h3>상담 · 자료 정리</h3><p>필요한 메뉴 구성과 보유 자료(사진, 소개글, 로고)를 함께 정리합니다.</p></div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-marker"><span>2</span></div>
+        <div class="tl-body"><h3>시안 제작</h3><p>교회 분위기에 맞는 시안을 드리고 의견을 반영합니다.</p></div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-marker"><span>3</span></div>
+        <div class="tl-body"><h3>개발 · 콘텐츠 입력</h3><p>확정된 시안으로 제작하고 초기 콘텐츠를 채워 넣습니다.</p></div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-marker"><span>4</span></div>
+        <div class="tl-body"><h3>검수 · 오픈</h3><p>테스트 주소로 확인 후 실제 도메인에 오픈합니다.</p></div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-marker"><span>5</span></div>
+        <div class="tl-body"><h3>사용 교육 · 운영 지원</h3><p>관리자 사용법을 교육하고 매뉴얼을 드립니다. 이후 수정 요청을 지원합니다.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+
+
+<section class="section section-alt">
+  <div class="wrap">
+    <div class="split">
+      <div class="split-col">
+        <h2 class="split-title">제공 내역</h2>
+        <ul class="check-list" data-live-list="svc.homepage.deliverables">
+          <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>반응형 홈페이지 일체 (PC · 모바일)</span></li>
+          <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>관리자 페이지 계정 및 사용 매뉴얼</span></li>
+          <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>도메인 연결 및 SSL 보안 인증서 설정</span></li>
+          <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>검색엔진 등록 (네이버 · 구글)</span></li>
+          <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>오픈 후 지원 기간 내 수정 · 장애 대응</span></li>
+        </ul>
+      </div>
+      <div class="split-col">
+        <h2 class="split-title">비용 안내</h2>
+        <div class="price-card">
+          <p class="price-figure">제작비 0원 + 월 관리비 3만원<small>월 관리비</small></p>
+          <p data-live="svc.homepage.priceNote">제작비는 0원입니다. 만든 뒤 월 관리비 3만원(연 36만원)만 내시면 됩니다. 이 3만원은 홈페이지를 쓰는 값이 아니라 관리비입니다 — 서버와 도메인 유지, 보안 인증서 갱신, 내용 수정, 장애 대응이 여기에 들어갑니다. 교회 예산 결의를 기다리지 않고 시작할 수 있고, 만들어 놓고 방치되는 문제도 이 구조로 막습니다. 페이지 수나 게시판 종류처럼 범위가 크게 달라지는 경우에는 상담 후 항목별 내역이 적힌 견적서를 드립니다.</p>
+          <dl class="price-meta">
+            <div><dt>소요 기간</dt><dd data-live="svc.homepage.duration">약 4~8주 (자료 준비 상황에 따라 조정)</dd></div>
+            <div><dt>상담 · 견적</dt><dd>무료</dd></div>
+          </dl>
+          <a class="btn btn-primary btn-block" href="https://koreayjk.github.io/aim/request.html" target="_blank" rel="noopener"
+      data-apply="homepage">@IM에서 신청하기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="sec-head">
+    <p class="eyebrow">자주 묻는 질문</p>
+    <h2>홈페이지 제작 관련 질문</h2>
+    
+  </div>
+    <div class="faq" data-live-list="svc.homepage.faqs">
+    <details class="faq-item" open>
+      <summary id="svc-homepage-0"><span>기존 홈페이지 자료를 옮길 수 있나요?</span><i aria-hidden="true"></i></summary>
+      <div class="faq-body"><p>가능합니다. 기존 사이트의 게시글과 자료를 확인한 뒤 이전 가능한 범위를 알려드립니다. 게시판 구조가 크게 다를 경우 일부는 수동 정리가 필요할 수 있습니다.</p></div>
+    </details>
+    <details class="faq-item">
+      <summary id="svc-homepage-1"><span>교회에 컴퓨터를 잘 다루는 사람이 없습니다.</span><i aria-hidden="true"></i></summary>
+      <div class="faq-body"><p>관리자 화면은 글쓰기와 파일 올리기 수준으로 단순하게 만듭니다. 오픈 시 사용 교육을 진행하고 그림이 들어간 매뉴얼을 드리며, 이후에도 문의하시면 안내해 드립니다.</p></div>
+    </details>
+    <details class="faq-item">
+      <summary id="svc-homepage-2"><span>온라인 헌금 기능도 넣을 수 있나요?</span><i aria-hidden="true"></i></summary>
+      <div class="faq-body"><p>계좌 안내 방식은 기본 제공되며, 결제 연동 방식은 별도 심사와 수수료가 발생합니다. 교회 상황에 맞는 방식을 상담 때 안내해 드립니다.</p></div>
+    </details>
+  </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap cta-in">
+    <div>
+      <h2>홈페이지 제작, 지금 신청하실 수 있습니다</h2>
+      <p>신청서를 남기시면 영업일 기준 1~2일 안에 담당자가 연락드립니다. 상담과 견적은 무료입니다.</p>
+    </div>
+    <div class="cta-actions">
+      <a class="btn btn-gold btn-lg" href="../apply.html">지원 신청하기</a>
+      <a class="btn btn-ghost-light btn-lg" href="tel:0200000000">전화 상담 <span data-live="site.phone">02-0000-0000</span></a>
+    </div>
+  </div>
+</section>
+
+<nav class="svc-nav" aria-label="다른 항목">
+  <div class="wrap svc-nav-in">
+    <a class="svc-nav-link is-prev" href="../services/intooffice.html">
+      <span>이전 항목</span><strong>인투오피스</strong>
+    </a>
+    <a class="svc-nav-all" href="../services/index.html">전체 항목</a>
+    <a class="svc-nav-link is-next" href="../services/design.html">
+      <span>다음 항목</span><strong>디자인 제작</strong>
+    </a>
+  </div>
+</nav>
+
+  </main>
+  <footer class="site-footer">
+  <div class="wrap footer-top">
+    <div class="footer-brand">
+      <a class="brand brand-light" href="../index.html">
+        <svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <rect width="40" height="40" rx="10" fill="var(--brand-800)"/>
+    <path d="M20 9.5v21M13 16.5h14" stroke="var(--gold-400)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M27.5 25.4a8.4 8.4 0 0 1-15 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>
+        <span class="brand-text">
+          <strong>우리교회지원센터</strong>
+          <small>Wori Church Support Center</small>
+        </span>
+      </a>
+      <p class="footer-desc">우리교회지원센터는 교회에 필요를 채워주는 곳입니다. 홈페이지 제작부터 디자인, 교역자 구인, 음향, 부동산, 캠프, 앱, 행정까지 8개 항목을 한 창구와 한 명의 담당자로 지원합니다. 전국 모든 교회 — 규모 · 지역 · 교단 제한이 없습니다.</p>
+      <a class="btn btn-gold" href="../apply.html">지원 신청하기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="footer-col">
+      <h3>지원 항목</h3>
+      <ul><li><a href="../services/homepage.html">홈페이지 제작</a></li><li><a href="../services/design.html">디자인 제작</a></li><li><a href="../services/staffing.html">교역자 구인</a></li><li><a href="../services/sound.html">음향 세팅</a></li><li><a href="../services/realestate.html">부동산</a></li><li><a href="../services/akc.html">AKC</a></li><li><a href="../services/smartchurch.html">스마트처치 앱</a></li><li><a href="../services/intooffice.html">인투오피스</a></li></ul>
+    </div>
+    <div class="footer-col">
+      <h3>센터 안내</h3>
+      <ul>
+        <li><a href="../about.html">센터 소개</a></li>
+        <li><a href="../process.html">이용 절차</a></li>
+        <li><a href="../faq.html">자주 묻는 질문</a></li>
+        <li><a href="../contact.html">문의하기</a></li>
+        <li><a href="../status.html">신청 조회</a></li>
+        <li><a href="../listings.html">매물 게시판</a></li>
+        <li><a href="../staff.html" class="footer-staff">직원 로그인</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>문의</h3>
+      <ul class="footer-contact">
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:0200000000"><span data-live="site.phone">02-0000-0000</span></a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:help@caps.or.kr"><span data-live="site.email">help@caps.or.kr</span></a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/></svg> <span data-live="site.address">서울특별시 ○○구 ○○로 00, 0층</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <p>© <span id="year">2026</span> 우리교회지원센터. All rights reserved.</p>
+    <p class="footer-note">한국 교회를 위한 통합 지원 기관</p>
+  </div>
+</footer>
+  <a class="float-cta" href="../apply.html">지원 신청</a>
+  <script src="../assets/js/supabase-config.js" defer></script>
+  <script src="../assets/js/firebase-config.js" defer></script>
+  <script src="../assets/js/data.js" defer></script>
+  <script src="../assets/js/db.js" defer></script>
+  <script src="../assets/js/profile.js" defer></script>
+  <script src="../assets/js/account.js" defer></script>
+  <script src="../assets/js/auth-ui.js" defer></script>
+  <script src="../assets/js/consent-ui.js" defer></script>
+  <script src="../assets/js/live-content.js" defer></script>
+  <script src="../assets/js/app.js" defer></script>
+  
+</body>
+</html>
