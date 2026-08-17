@@ -167,12 +167,40 @@ window.CAPSDB = (function () {
   /* 매물 사진 — 게시판에 그대로 공개됩니다 (증빙 서류와 달리).
      올릴 때 브라우저에서 긴 변 1600px · JPEG 로 줄이므로 용량 걱정이 줄어듭니다. */
   var PHOTO_MAX_COUNT = 10;
-  var PHOTO_MIN_HINT = 3;
+  // 권장 범위입니다 — 막는 값이 아닙니다. 실제 제한은 PHOTO_MAX_COUNT 하나뿐입니다.
+  var PHOTO_MIN_HINT = 5;
+  var PHOTO_REC_TOP = 7;
   var PHOTO_MAX_BYTES = 15 * 1024 * 1024; // 줄이기 전 원본 기준
   var PHOTO_LONG_EDGE = 1600;
   var PHOTO_QUALITY = 0.82;
 
   /* ---------------- 공통 유틸 ---------------- */
+
+  /**
+   * 저장소에 쓸 파일 이름을 만듭니다.
+   *
+   * Supabase Storage 는 키에 영문 · 숫자 · 몇 가지 기호만 받습니다.
+   * `카카오톡_사진.jpg` · `스크린샷 2026년 8월.png` 처럼 한글이 든 이름은
+   * "Invalid key" 로 거부되는데, 우리 화면에서는 그 사진 한 장만 조용히
+   * 빠진 것처럼 보여 원인을 찾기 어렵습니다.
+   *
+   * 그래서 키에서는 한글을 빼고, 사람이 보는 이름(name)은 원본 그대로 둡니다.
+   * 이름이 통째로 한글이면 남는 게 확장자뿐이라, 그때는 'file' 을 붙여 줍니다.
+   */
+  function safeKey(name, fallbackExt) {
+    var raw = String(name || '');
+    var dot = raw.lastIndexOf('.');
+    var ext = dot > 0 ? raw.slice(dot + 1) : '';
+    var base = dot > 0 ? raw.slice(0, dot) : raw;
+
+    var clean = function (s) { return s.replace(/[^A-Za-z0-9._-]+/g, '-').replace(/-{2,}/g, '-'); };
+
+    base = clean(base).replace(/^[-.]+|[-.]+$/g, '').slice(0, 60);
+    ext = clean(ext).toLowerCase().slice(0, 8) || String(fallbackExt || '');
+
+    if (!base) base = 'file';
+    return ext ? base + '.' + ext : base;
+  }
 
   function nowIso() {
     return new Date().toISOString();
@@ -399,10 +427,56 @@ window.CAPSDB = (function () {
       write('settings', []);
     }
 
-    /* 증빙 파일 (데모) — 브라우저 저장소에 데이터 URL 로 담습니다.
-       용량이 크면 저장하지 않고 파일 정보만 남깁니다. */
+    /* 파일 (데모) — 사진과 증빙 서류를 브라우저에 담습니다.
+       IndexedDB 를 씁니다. localStorage 는 5MB 남짓이라 휴대폰 사진 네댓 장이면
+       꽉 차 버리는데, 그때 조용히 실패하면 "올렸습니다" 라고 해 놓고 빈 칸이
+       나오기 때문입니다. IndexedDB 는 수백 MB 까지 들어갑니다.
+       IndexedDB 를 못 쓰는 브라우저에서는 localStorage 로 물러서고,
+       그 경우 용량이 넘치면 성공한 척하지 않고 오류를 냅니다. */
     var FILES = 'caps.files';
+    var DB_NAME = 'caps.files.db';
+    var DB_STORE = 'files';
+    var idbReady = null;
 
+    function openIdb() {
+      if (idbReady) return idbReady;
+      idbReady = new Promise(function (resolve) {
+        if (!window.indexedDB) return resolve(null);
+        var req;
+        try {
+          req = window.indexedDB.open(DB_NAME, 1);
+        } catch (e) {
+          return resolve(null);
+        }
+        req.onupgradeneeded = function () {
+          if (!req.result.objectStoreNames.contains(DB_STORE)) req.result.createObjectStore(DB_STORE);
+        };
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { resolve(null); };
+        req.onblocked = function () { resolve(null); };
+      });
+      return idbReady;
+    }
+
+    function idbRun(mode, fn) {
+      return openIdb().then(function (idb) {
+        if (!idb) return Promise.reject(new Error('no-idb'));
+        return new Promise(function (resolve, reject) {
+          var tx = idb.transaction(DB_STORE, mode);
+          var req = fn(tx.objectStore(DB_STORE));
+          tx.onabort = function () { reject(tx.error || new Error('저장 공간이 가득 찼습니다.')); };
+          tx.onerror = function () { reject(tx.error || new Error('저장하지 못했습니다.')); };
+          if (req) {
+            req.onsuccess = function () { resolve(req.result); };
+            req.onerror = function () { reject(req.error); };
+          } else {
+            tx.oncomplete = function () { resolve(); };
+          }
+        });
+      });
+    }
+
+    /* localStorage 쪽 (IndexedDB 를 못 쓸 때만) */
     function readFiles() {
       try {
         var raw = window.localStorage.getItem(FILES);
@@ -411,6 +485,11 @@ window.CAPSDB = (function () {
         return {};
       }
     }
+
+    var FULL_MSG =
+      '브라우저 저장 공간이 가득 찼습니다. 데모 모드는 사진을 이 브라우저에만 담기 때문에 ' +
+      '여러 장을 넣기 어렵습니다. 이미 올린 사진을 지우고 다시 시도하시거나, ' +
+      '실제 운영 설정(Supabase)에서 올려 주세요.';
 
     /* ---- 인증 (데모) ---- */
     var authListeners = [];
@@ -576,34 +655,47 @@ window.CAPSDB = (function () {
 
       files: {
         upload: function (path, file) {
-          return new Promise(function (resolve) {
+          return new Promise(function (resolve, reject) {
             var reader = new FileReader();
             reader.onload = function () { resolve(String(reader.result || '')); };
-            reader.onerror = function () { resolve(''); };
+            reader.onerror = function () { reject(new Error('파일을 읽지 못했습니다.')); };
             reader.readAsDataURL(file);
           }).then(function (url) {
-            var map = readFiles();
-            map[path] = { name: file.name, size: file.size, type: file.type, url: url };
-            try {
-              window.localStorage.setItem(FILES, JSON.stringify(map));
-            } catch (e) {
-              // 용량 초과 — 파일 내용은 버리고 정보만 남깁니다.
-              map[path].url = '';
-              map[path].tooBig = true;
-              try { window.localStorage.setItem(FILES, JSON.stringify(map)); } catch (e2) { /* 무시 */ }
-            }
-            return path;
+            var rec = { name: file.name, size: file.size, type: file.type, url: url };
+            return idbRun('readwrite', function (store) { return store.put(rec, path); })
+              .then(function () { return path; })
+              .catch(function (err) {
+                if (err && err.message !== 'no-idb') throw new Error(FULL_MSG);
+                // IndexedDB 를 못 쓰는 브라우저 — localStorage 로 물러섭니다.
+                var map = readFiles();
+                map[path] = rec;
+                try {
+                  window.localStorage.setItem(FILES, JSON.stringify(map));
+                } catch (e) {
+                  // 여기서 성공한 척하면 빈 사진이 올라간 것처럼 보입니다.
+                  throw new Error(FULL_MSG);
+                }
+                return path;
+              });
           });
         },
         url: function (path) {
-          var map = readFiles();
-          return Promise.resolve((map[path] && map[path].url) || '');
+          return idbRun('readonly', function (store) { return store.get(path); })
+            .then(function (rec) { return (rec && rec.url) || ''; })
+            .catch(function () {
+              var map = readFiles();
+              return (map[path] && map[path].url) || '';
+            });
         },
         remove: function (path) {
-          var map = readFiles();
-          delete map[path];
-          try { window.localStorage.setItem(FILES, JSON.stringify(map)); } catch (e) { /* 무시 */ }
-          return Promise.resolve();
+          return idbRun('readwrite', function (store) { return store.delete(path); })
+            .catch(function () { /* 없으면 그만 */ })
+            .then(function () {
+              var map = readFiles();
+              if (!map[path]) return;
+              delete map[path];
+              try { window.localStorage.setItem(FILES, JSON.stringify(map)); } catch (e) { /* 무시 */ }
+            });
         },
       },
     };
@@ -1219,6 +1311,15 @@ window.CAPSDB = (function () {
         [/provider is not enabled/i,
           'Supabase 대시보드 [Authentication → Providers] 에서 이 로그인 방법을 켜야 합니다.'],
         [/row-level security|violates row-level/i, '이 작업을 할 권한이 없습니다.'],
+        // 저장소는 파일 이름에 영문 · 숫자만 받습니다. safeKey() 가 미리 걸러 주지만,
+        // 혹시 새어 나가면 무슨 일인지 알아볼 수 있도록 우리말로 바꿔 둡니다.
+        [/Invalid key/i,
+          '파일 이름에 쓸 수 없는 글자가 있어 올리지 못했습니다. ' +
+          '이름을 영문·숫자로 바꿔서 다시 올려 주세요.'],
+        [/exceeded the maximum allowed size|Payload too large|413/i,
+          '파일이 너무 큽니다. 사진은 5MB, 서류는 10MB 까지입니다.'],
+        [/mime type .* is not supported|invalid_mime_type/i,
+          '이 형식은 올릴 수 없습니다. 사진은 JPG · PNG · HEIC, 서류는 PDF 나 사진으로 올려 주세요.'],
         [/Failed to fetch|NetworkError/i, '네트워크 연결을 확인해 주세요.'],
       ];
       for (var i = 0; i < map.length; i++) if (map[i][0].test(msg)) return map[i][1];
@@ -1582,6 +1683,7 @@ window.CAPSDB = (function () {
     PROOF_TYPES: PROOF_TYPES,
     PHOTO_MAX_COUNT: PHOTO_MAX_COUNT,
     PHOTO_MIN_HINT: PHOTO_MIN_HINT,
+    PHOTO_REC_TOP: PHOTO_REC_TOP,
     PHOTO_MAX_BYTES: PHOTO_MAX_BYTES,
 
     files: adapter.files,
@@ -1828,9 +1930,7 @@ window.CAPSDB = (function () {
       var bad = api.checkProof(file);
       if (bad) return Promise.reject(new Error(bad));
 
-      var safe = String(file.name || 'proof')
-        .replace(/[^\w.\-가-힣]+/g, '_')
-        .slice(-80);
+      var safe = safeKey(file.name, 'pdf');
       var path = 'listing-proofs/' + me.id + '/' +
         Date.now().toString(36) + '-' + safe;
 
@@ -1922,9 +2022,7 @@ window.CAPSDB = (function () {
       if (bad) return Promise.reject(new Error(bad));
 
       return api.shrinkPhoto(file).then(function (small) {
-        var safe = String(small.name || file.name || 'photo.jpg')
-          .replace(/[^\w.\-가-힣]+/g, '_')
-          .slice(-80);
+        var safe = safeKey(small.name || file.name, 'jpg');
         var path = 'listing-photos/' + me.id + '/' +
           Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7) + '-' + safe;
         return adapter.files.upload(path, small).then(function () {

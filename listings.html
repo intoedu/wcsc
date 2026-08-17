@@ -305,10 +305,12 @@
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">4</span> 사진 (최대 10장)</legend>
+        <legend><span class="ls-step">4</span> 사진 <em class="ls-legend-note">최대 10장</em></legend>
         <p class="ls-fs-help">
-          사진이 있는 글이 훨씬 많이 열립니다. <strong>3장 이상</strong> 올려 주시길 권합니다 —
-          예배 공간 전경, 강단 쪽, 입구 · 외관, 주차장이 있으면 충분합니다.
+          사진이 있는 글이 훨씬 많이 열립니다.
+          <strong>5~7장</strong>이면 충분합니다 —
+          예배 공간 전경, 강단 쪽, 입구 · 외관, 주차장.
+          <strong>10장까지</strong> 올리실 수 있습니다.
           <br>올리면 브라우저에서 자동으로 크기를 줄이므로 원본을 그대로 선택하셔도 됩니다.
         </p>
 
@@ -349,18 +351,34 @@
         </div>
         <div class="field">
           <label for="lsFHours">연락 가능 시간 <em>*</em></label>
-          <input type="text" id="lsFHours" maxlength="60" required
-            placeholder="예: 평일 · 토요일 10:00 – 20:00 (주일 제외)">
+          <input type="text" id="lsFHours" maxlength="140" required
+            placeholder="예: 평일 낮 10–18시 · 토요일 10–17시 / 주일 오전 9–12시 제외">
           <small class="hint">
             <strong>보시는 분이 이 시간을 먼저 확인하고 전화합니다.</strong>
             사역 중이나 새벽에 전화받지 않으시려면 꼭 적어 주세요.
           </small>
-          <div class="ls-eg" data-eg="lsFHours">
-            <span class="ls-eg-label">예시</span>
-            <button type="button" class="ls-eg-chip">평일 09:00 – 18:00</button>
-            <button type="button" class="ls-eg-chip">평일 · 토요일 10:00 – 20:00 (주일 제외)</button>
-            <button type="button" class="ls-eg-chip">주일 오후 제외 언제든</button>
-            <button type="button" class="ls-eg-chip">문자 남겨주시면 회신드립니다</button>
+          <div class="ls-eg is-pick" data-eg="lsFHours">
+            <div class="ls-eg-row">
+              <span class="ls-eg-label">연락 되는 때</span>
+              <button type="button" class="ls-eg-chip" data-add="ok">평일 낮 10–18시</button>
+              <button type="button" class="ls-eg-chip" data-add="ok">평일 저녁 7–9시</button>
+              <button type="button" class="ls-eg-chip" data-add="ok">토요일 10–17시</button>
+              <button type="button" class="ls-eg-chip" data-add="ok">주일 오후 2–5시</button>
+              <button type="button" class="ls-eg-chip" data-add="ok">문자 남겨주시면 회신</button>
+            </div>
+            <div class="ls-eg-row">
+              <span class="ls-eg-label is-avoid">예배 · 기도회</span>
+              <button type="button" class="ls-eg-chip is-avoid" data-add="avoid">주일 오전 9–12시</button>
+              <button type="button" class="ls-eg-chip is-avoid" data-add="avoid">주일 오후 1–3시</button>
+              <button type="button" class="ls-eg-chip is-avoid" data-add="avoid">수요 예배 저녁 7–9시</button>
+              <button type="button" class="ls-eg-chip is-avoid" data-add="avoid">금요 기도회 밤 9–11시</button>
+              <button type="button" class="ls-eg-chip is-avoid" data-add="avoid">새벽 기도 5–7시</button>
+            </div>
+            <p class="ls-eg-tip">
+              누르면 <strong>칸에 더해집니다</strong> — 여러 개 고르셔도 됩니다.
+              아래쪽(예배 · 기도회)은 <strong>&ldquo;… 제외&rdquo;</strong>로 들어갑니다.
+              시간(<code>9–12시</code>)이 교회마다 다르니, 넣으신 뒤 칸에서 직접 고쳐 주세요.
+            </p>
           </div>
         </div>
       </fieldset>

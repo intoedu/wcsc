@@ -732,7 +732,8 @@ window.CAPS_LISTING_BOARD = {
   "fee": 60000,
   "days": 90,
   "photoMax": 10,
-  "photoMin": 3,
+  "photoMin": 5,
+  "photoRecTop": 7,
   "bank": "○○은행 000-0000-0000-00 (예금주: 우리교회지원센터)",
   "does": [
     "권리 증빙 서류를 확인해 실제 매물주 · 세입자인지 봅니다.",

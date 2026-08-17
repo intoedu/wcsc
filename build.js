@@ -1085,12 +1085,39 @@ function buildListings() {
     '상가 1층 · 간판 설치 가능, 유동인구 많은 자리',
   ];
 
-  const hoursExamples = [
-    '평일 09:00 – 18:00',
-    '평일 · 토요일 10:00 – 20:00 (주일 제외)',
-    '주일 오후 제외 언제든',
-    '문자 남겨주시면 회신드립니다',
+  /* 연락 가능 시간은 교회 일정에 매여 있어, 빈칸에서 문장을 짓기가 번거롭습니다.
+     그래서 흔한 예배 · 사역 시간을 조각으로 두고 눌러서 더하게 했습니다.
+     시간 숫자는 넣은 뒤 칸에서 직접 고치면 됩니다. */
+  const hoursOk = [
+    '평일 낮 10–18시',
+    '평일 저녁 7–9시',
+    '토요일 10–17시',
+    '주일 오후 2–5시',
+    '문자 남겨주시면 회신',
   ];
+  const hoursAvoid = [
+    '주일 오전 9–12시',
+    '주일 오후 1–3시',
+    '수요 예배 저녁 7–9시',
+    '금요 기도회 밤 9–11시',
+    '새벽 기도 5–7시',
+  ];
+
+  const hoursPicker = `<div class="ls-eg is-pick" data-eg="lsFHours">
+            <div class="ls-eg-row">
+              <span class="ls-eg-label">연락 되는 때</span>
+              ${hoursOk.map((t) => `<button type="button" class="ls-eg-chip" data-add="ok">${esc(t)}</button>`).join('\n              ')}
+            </div>
+            <div class="ls-eg-row">
+              <span class="ls-eg-label is-avoid">예배 · 기도회</span>
+              ${hoursAvoid.map((t) => `<button type="button" class="ls-eg-chip is-avoid" data-add="avoid">${esc(t)}</button>`).join('\n              ')}
+            </div>
+            <p class="ls-eg-tip">
+              누르면 <strong>칸에 더해집니다</strong> — 여러 개 고르셔도 됩니다.
+              아래쪽(예배 · 기도회)은 <strong>&ldquo;… 제외&rdquo;</strong>로 들어갑니다.
+              시간(<code>9–12시</code>)이 교회마다 다르니, 넣으신 뒤 칸에서 직접 고쳐 주세요.
+            </p>
+          </div>`;
 
   const regionFormOpts = '<option value="">선택해 주세요</option>' +
     ['서울', '경기', '인천', '강원', '대전', '세종', '충남', '충북',
@@ -1293,10 +1320,12 @@ ${pageHero({
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">4</span> 사진 (최대 ${board.photoMax}장)</legend>
+        <legend><span class="ls-step">4</span> 사진 <em class="ls-legend-note">최대 ${board.photoMax}장</em></legend>
         <p class="ls-fs-help">
-          사진이 있는 글이 훨씬 많이 열립니다. <strong>${board.photoMin}장 이상</strong> 올려 주시길 권합니다 —
-          예배 공간 전경, 강단 쪽, 입구 · 외관, 주차장이 있으면 충분합니다.
+          사진이 있는 글이 훨씬 많이 열립니다.
+          <strong>${board.photoMin}~${board.photoRecTop}장</strong>이면 충분합니다 —
+          예배 공간 전경, 강단 쪽, 입구 · 외관, 주차장.
+          <strong>${board.photoMax}장까지</strong> 올리실 수 있습니다.
           <br>올리면 브라우저에서 자동으로 크기를 줄이므로 원본을 그대로 선택하셔도 됩니다.
         </p>
 
@@ -1337,13 +1366,13 @@ ${pageHero({
         </div>
         <div class="field">
           <label for="lsFHours">연락 가능 시간 <em>*</em></label>
-          <input type="text" id="lsFHours" maxlength="60" required
-            placeholder="예: 평일 · 토요일 10:00 – 20:00 (주일 제외)">
+          <input type="text" id="lsFHours" maxlength="140" required
+            placeholder="예: 평일 낮 10–18시 · 토요일 10–17시 / 주일 오전 9–12시 제외">
           <small class="hint">
             <strong>보시는 분이 이 시간을 먼저 확인하고 전화합니다.</strong>
             사역 중이나 새벽에 전화받지 않으시려면 꼭 적어 주세요.
           </small>
-          ${egChips('lsFHours', hoursExamples)}
+          ${hoursPicker}
         </div>
       </fieldset>
 

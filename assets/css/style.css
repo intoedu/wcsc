@@ -1260,6 +1260,23 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
 }
 .ls-eg-chip:hover { border-style: solid; border-color: var(--gold-500); background: var(--gold-100); color: var(--gold-ink-deep); }
 
+/* 연락 가능 시간 — 눌러서 더하는 조각 */
+.ls-eg.is-pick { display: block; margin-top: 10px; }
+.ls-eg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.ls-eg-label.is-avoid { color: var(--brand-700); background: var(--brand-50); }
+.ls-eg-chip.is-on {
+  border-style: solid; border-color: var(--gold-600);
+  background: var(--gold-500); color: var(--gold-ink-deep); font-weight: 700;
+}
+.ls-eg-chip.is-avoid.is-on {
+  border-color: var(--brand-700); background: var(--brand-700); color: #fff;
+}
+.ls-eg-tip { margin: 2px 0 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.ls-eg-tip code {
+  padding: 1px 5px; border-radius: 4px; background: var(--bg-soft);
+  font-size: 12.5px; color: var(--ink-2);
+}
+
 .ls-fs-help { margin: 16px 0 4px; font-size: 14.5px; line-height: 1.75; color: var(--ink-2); }
 
 /* ---------- 사진 올리기 ---------- */

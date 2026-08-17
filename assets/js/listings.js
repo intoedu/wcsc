@@ -457,13 +457,66 @@
   }
 
   /* 예시 칩 — 누르면 그대로 채워 넣습니다 (그 뒤 고쳐 쓰시면 됩니다). */
-  Array.prototype.forEach.call(document.querySelectorAll('.ls-eg'), function (box) {
+  Array.prototype.forEach.call(document.querySelectorAll('.ls-eg:not(.is-pick)'), function (box) {
     var target = document.getElementById(box.getAttribute('data-eg'));
     if (!target) return;
     box.addEventListener('click', function (e) {
       var chip = e.target.closest('.ls-eg-chip');
       if (!chip) return;
       target.value = chip.textContent;
+      target.focus();
+      target.dispatchEvent(new Event('input'));
+    });
+  });
+
+  /* 연락 가능 시간 — 조각을 눌러 여러 개를 더합니다.
+     교회 일정은 대개 "언제 되고, 언제는 안 된다" 두 가지라, 그대로 나눠 두었습니다.
+     넣은 뒤에는 그냥 글자이므로 시간을 직접 고치실 수 있고,
+     고쳐 쓰신 내용은 다음에 칩을 눌러도 지우지 않고 뒤에 덧붙입니다. */
+  Array.prototype.forEach.call(document.querySelectorAll('.ls-eg.is-pick'), function (box) {
+    var target = document.getElementById(box.getAttribute('data-eg'));
+    if (!target) return;
+
+    var pick = { ok: [], avoid: [] };
+    var composed = '';
+
+    function compose() {
+      var s = pick.ok.join(' · ');
+      if (pick.avoid.length) s += (s ? ' / ' : '') + pick.avoid.join(' · ') + ' 제외';
+      return s;
+    }
+
+    function paint() {
+      Array.prototype.forEach.call(box.querySelectorAll('.ls-eg-chip'), function (c) {
+        var list = pick[c.getAttribute('data-add')] || [];
+        c.classList.toggle('is-on', list.indexOf(c.textContent.trim()) > -1);
+        c.setAttribute('aria-pressed', list.indexOf(c.textContent.trim()) > -1 ? 'true' : 'false');
+      });
+    }
+
+    box.addEventListener('click', function (e) {
+      var chip = e.target.closest('.ls-eg-chip');
+      if (!chip) return;
+
+      var kind = chip.getAttribute('data-add');
+      var txt = chip.textContent.trim();
+      var now = target.value.trim();
+
+      if (now && now !== composed.trim()) {
+        // 직접 쓰신 글이 있습니다 — 지우지 않고 뒤에 붙입니다.
+        pick.ok = [];
+        pick.avoid = [];
+        target.value = now + ' · ' + txt + (kind === 'avoid' ? ' 제외' : '');
+      } else {
+        var list = pick[kind];
+        var at = list.indexOf(txt);
+        if (at > -1) list.splice(at, 1);
+        else list.push(txt);
+        target.value = compose();
+      }
+
+      composed = target.value;
+      paint();
       target.focus();
       target.dispatchEvent(new Event('input'));
     });
@@ -582,17 +635,20 @@
       if (label) label.classList.toggle('is-full', photos.length >= max);
     }
 
+    var rec = db.PHOTO_MIN_HINT + '~' + db.PHOTO_REC_TOP + '장';
+
     if (!photos.length) {
-      photoNote('아직 올린 사진이 없습니다. ' + db.PHOTO_MIN_HINT +
-        '장 이상 올리시면 훨씬 많이 열립니다.', 'is-wait');
+      photoNote('아직 올린 사진이 없습니다. ' + rec +
+        '이면 충분하고, 최대 ' + max + '장까지 올리실 수 있습니다.', 'is-wait');
     } else if (photos.length >= max) {
       photoNote('<strong>' + photos.length + '장</strong> — 최대치입니다. ' +
         '바꾸시려면 먼저 지워 주세요.', 'is-full');
     } else {
       photoNote('<strong>' + photos.length + '장</strong> 올렸습니다. ' +
         (photos.length < db.PHOTO_MIN_HINT
-          ? db.PHOTO_MIN_HINT + '장 이상을 권합니다.'
-          : '앞으로 ' + (max - photos.length) + '장 더 올리실 수 있습니다.'), 'is-ok');
+          ? rec + '을 권합니다. '
+          : '') +
+        '앞으로 ' + (max - photos.length) + '장 더 올리실 수 있습니다.', 'is-ok');
     }
   }
 
