@@ -87,6 +87,9 @@ window.CAPSDB = (function () {
 
   var LISTING_STATUS = {
     pending: '승인 대기',
+    // 저장되는 값은 아니고, 화면에서만 쓰는 이름입니다.
+    // pending 이면서 전에 승인받은 적이 있는 글 = 수정 재검토입니다.
+    edit_pending: '수정 승인 요청',
     awaiting_payment: '입금 대기',
     published: '게시중',
     rejected: '반려',
@@ -1903,6 +1906,13 @@ window.CAPSDB = (function () {
       if (!row) return { status: 'none', label: '-', cls: 'none', live: false, days: null, up: null };
       var status = row.status;
       if (status === 'published' && !api.listingLive(row)) status = 'expired';
+
+      /* 새 등록과 수정 재검토는 봐야 할 것이 다릅니다.
+         새 등록  : 서류부터 처음 확인 (등록비도 아직)
+         수정 재검토: 이미 확인한 글 · 등록비도 받았음 → 바뀐 내용만 봅니다
+         전에 승인받은 적이 있으면(firstPublishedAt) 수정 재검토로 봅니다. */
+      var isEdit = row.status === 'pending' && !!(row.firstPublishedAt || row.editRequestedAt);
+      if (isEdit) status = 'edit_pending';
       // 남은 날수(days)는 기한이 있던 옛 글에만 있습니다.
       var days = null;
       if (status === 'published' && row.expiresAt) {
@@ -1921,6 +1931,11 @@ window.CAPSDB = (function () {
         label: LISTING_STATUS[status] || status,
         cls: status,
         live: status === 'published',
+        // 저장된 값 그대로 (pending 등). 위 status 는 화면용 이름입니다.
+        rawStatus: row.status,
+        isEdit: isEdit,
+        editRequestedAt: row.editRequestedAt || '',
+        firstPublishedAt: row.firstPublishedAt || '',
         days: days,
         up: up,
         kindLabel: LISTING_KIND[row.kind] || row.kind || '-',
@@ -2112,6 +2127,8 @@ window.CAPSDB = (function () {
         reviewedBy: '',
         reviewedAt: '',
         publishedAt: '',
+        firstPublishedAt: '',
+        editRequestedAt: '',
         expiresAt: '',
         hiddenAt: '',
         createdAt: nowIso(),
@@ -2125,7 +2142,11 @@ window.CAPSDB = (function () {
      * 고친 글은 다시 확인해야 하므로 '승인 대기'로 돌아갑니다.
      * (보안 규칙도 같은 조건을 요구합니다.)
      */
-    saveListing: function (id, data) {
+    saveListing: function (id, data, prev) {
+      /* 전에 승인받은 적이 있는 글이면 "수정 승인 요청" 으로 남깁니다.
+         관리자 화면에서 새 등록과 갈라 보여 주기 위한 표시입니다.
+         (firstPublishedAt 은 센터만 다루므로 여기서 건드리지 않습니다) */
+      var wasLive = !!(prev && (prev.firstPublishedAt || prev.publishedAt));
       var patch = Object.assign({}, data, {
         status: 'pending',
         rejectNote: '',
@@ -2135,6 +2156,7 @@ window.CAPSDB = (function () {
         expiresAt: '',
         updatedAt: nowIso(),
       });
+      if (wasLive) patch.editRequestedAt = nowIso();
       return adapter.update('listings', id, patch);
     },
 
@@ -2171,6 +2193,9 @@ window.CAPSDB = (function () {
       var patch = {
         status: 'published',
         publishedAt: nowIso(),
+        // 처음 게시한 시각은 한 번만 채우고 그대로 둡니다.
+        firstPublishedAt: (o.row && o.row.firstPublishedAt) || nowIso(),
+        editRequestedAt: '',
         expiresAt: days > 0 ? new Date(Date.now() + days * 864e5).toISOString() : '',
         rejectNote: '',
         hiddenAt: '',

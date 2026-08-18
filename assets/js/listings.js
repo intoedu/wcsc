@@ -316,6 +316,14 @@
         '보통 영업일 1일 이내입니다.' +
         '</p>';
     }
+    if (v.status === 'edit_pending') {
+      lines += '<p class="ls-mine-note is-wait">' +
+        '<strong>수정 승인을 기다리고 있습니다.</strong>' +
+        (v.editRequestedAt ? ' (' + esc(db.formatDate(v.editRequestedAt)) + " 요청)" : '') + '<br>' +
+        '확인하는 동안에는 게시판에서 잠시 내려가 있습니다. 바뀐 내용이 확인되면 다시 게시됩니다.<br>' +
+        '<strong>등록비를 다시 내지 않으셔도 됩니다.</strong>' +
+        '</p>';
+    }
     if (v.status === 'awaiting_payment') {
       lines += '<p class="ls-mine-note is-pay">' +
         '<strong>서류 확인이 끝났습니다. 입금해 주세요.</strong><br>' +
@@ -959,17 +967,25 @@
         ? db.uploadProof(file, el.proofKind.value)
         : Promise.resolve(Object.assign({}, keptProof, { kind: el.proofKind.value }));
 
+      // 전에 게시된 적이 있는 글을 고치는 것이면 안내 문구가 달라집니다.
+      var isEditOfLive = !!(editId && existing &&
+        (existing.firstPublishedAt || existing.publishedAt));
+
       step.then(function (proof) {
         if (editId && existing) {
-          return db.saveListing(editId, Object.assign({}, data, { proof: proof }));
+          return db.saveListing(editId, Object.assign({}, data, { proof: proof }), existing);
         }
         return db.submitListing(data, proof);
       }).then(function () {
-        say(el.ok,
-          '<strong>접수되었습니다.</strong> 아직 공개되지 않은 <em>승인 대기</em> 상태입니다.<br>' +
-          '관리자가 서류를 확인하고 승인하면 <strong>입금 계좌를 카카오톡으로 보내드립니다.</strong> ' +
-          '입금이 확인되면 게시글이 올라갑니다. <em>지금 입금하지 않으셔도 됩니다.</em><br>' +
-          '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.');
+        say(el.ok, isEditOfLive
+          ? '<strong>수정 승인을 요청했습니다.</strong> 확인하는 동안에는 게시판에서 잠시 내려갑니다.<br>' +
+            '관리자가 바뀐 내용을 확인하면 다시 게시됩니다. ' +
+            '<em>등록비를 다시 내지 않으셔도 됩니다.</em><br>' +
+            '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.'
+          : '<strong>접수되었습니다.</strong> 아직 공개되지 않은 <em>승인 대기</em> 상태입니다.<br>' +
+            '관리자가 서류를 확인하고 승인하면 <strong>입금 계좌를 카카오톡으로 보내드립니다.</strong> ' +
+            '입금이 확인되면 게시글이 올라갑니다. <em>지금 입금하지 않으셔도 됩니다.</em><br>' +
+            '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.');
         el.submit.disabled = false;
         el.submit.textContent = '등록 신청하기';
         el.editId.value = '';

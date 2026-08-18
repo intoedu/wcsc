@@ -17,7 +17,7 @@
   var q = '';
 
   var ST_CLASS = {
-    pending: 'hold', awaiting_payment: 'progress', published: 'done',
+    pending: 'hold', edit_pending: 'hold', awaiting_payment: 'progress', published: 'done',
     rejected: 'canceled', hidden: 'canceled',
     done: 'received',    // 거래 완료 — 잘 끝난 것이므로 반려와 구분합니다
     expired: 'received', // (옛 기간 제한 시절의 글)
@@ -134,6 +134,9 @@
       ['사진', v.photos.length + '장'],
       ['등록', db.formatDate(row.createdAt)],
       ['최종 수정', db.formatDate(row.updatedAt)],
+      // 수정 재검토 건은 언제 요청했는지가 따로 보여야 합니다.
+      ['수정 승인 요청', v.editRequestedAt ? db.formatDate(v.editRequestedAt) : ''],
+      ['처음 게시일', v.firstPublishedAt ? db.formatDate(v.firstPublishedAt) : ''],
       ['게시일', row.publishedAt ? db.formatDate(row.publishedAt) : ''],
       ['게시한 지', v.up != null ? v.up + '일' : ''],
       // 기한이 있던 옛 글에만 나옵니다.
@@ -190,6 +193,25 @@
         ? '<div class="consent-note is-wait"><strong>지난 반려 · 중지 사유</strong><br>' + h(row.rejectNote) + '</div>'
         : '') +
 
+      /* ---- 수정 승인 요청 — 새 등록과 봐야 할 것이 다릅니다 ---- */
+      (v.status === 'edit_pending'
+        ? '<div class="adm-card is-step">' +
+            '<h2>수정 승인 요청</h2>' +
+            '<p class="adm-card-lead">' +
+              '<strong>이미 승인해 게시했던 글을 등록자가 고쳤습니다.</strong>' +
+              (v.editRequestedAt ? ' 요청 시각: <strong>' + h(db.formatDate(v.editRequestedAt)) + '</strong>' : '') +
+              (v.firstPublishedAt ? ' · 처음 게시: ' + h(db.formatDate(v.firstPublishedAt, false)) : '') +
+              '<br>서류를 처음부터 다시 볼 필요는 없습니다 — <strong>바뀐 내용</strong>만 확인하고 다시 게시해 주세요. ' +
+              '<strong>등록비는 이미 받았습니다</strong> (다시 받지 않습니다).' +
+              '<br>확인하는 동안 이 글은 게시판에서 내려가 있습니다.' +
+            '</p>' +
+            '<div class="adm-actions">' +
+              '<button type="button" class="btn btn-primary btn-sm" id="lsEditOk">수정 승인 · 다시 게시</button>' +
+              '<button type="button" class="btn btn-outline btn-sm" id="lsReject">반려</button>' +
+            '</div>' +
+          '</div>'
+        : '') +
+
       /* ---- 1단계: 서류 확인 → 계좌를 카카오톡으로 ---- */
       (v.status === 'pending'
         ? '<div class="adm-card is-step">' +
@@ -219,6 +241,7 @@
       '<div class="adm-card' + (v.status === 'awaiting_payment' ? ' is-step' : '') + '">' +
         '<h2>' +
           (v.status === 'published' ? '게시 관리'
+            : v.status === 'edit_pending' ? '등록비 · 게시 상태'
             : '<span class="ls-adm-step">2</span> 입금 확인 · 게시') +
         '</h2>' +
         (v.status === 'awaiting_payment'
@@ -246,8 +269,9 @@
           (v.status === 'published'
             ? '<button type="button" class="btn btn-primary btn-sm" id="lsDone">거래 완료로 내리기</button>' +
               '<button type="button" class="btn btn-outline btn-sm" id="lsHide">게시 중지 (내리기)</button>'
-            : '<button type="button" class="btn btn-primary btn-sm" id="lsApprove">게시하기</button>' +
-              (v.status === 'pending' ? '' :
+            : '<button type="button" class="btn btn-primary btn-sm" id="lsApprove">' +
+                (v.status === 'edit_pending' ? '수정 승인 · 다시 게시' : '게시하기') + '</button>' +
+              (v.status === 'pending' || v.status === 'edit_pending' ? '' :
                 '<button type="button" class="btn btn-outline btn-sm" id="lsReject">반려</button>')) +
           '<button type="button" class="btn btn-outline btn-sm is-danger" id="lsDelete">삭제</button>' +
         '</div>' +
@@ -302,21 +326,27 @@
           }).catch(function (err) { A.toast(err.message || '저장에 실패했습니다.', 'err'); });
         });
 
+        var isEdit = v.status === 'edit_pending';
+
+        var doApprove = function () {
+          // 수정 재검토는 등록비를 이미 받은 글이라 다시 묻지 않습니다.
+          if (!isEdit && !paid.checked &&
+            !window.confirm('등록비 입금이 확인되지 않았습니다. 그래도 게시하시겠습니까?\n' +
+              '(보통은 계좌 안내 → 입금 확인 → 게시 순서로 진행합니다.)')) return;
+          feeStep()
+            // row 를 넘겨 처음 게시일(firstPublishedAt)을 그대로 지킵니다.
+            .then(function () { return db.approveListing(row.id, { row: row }); })
+            .then(function () {
+              A.closeDrawer();
+              A.toast(isEdit ? '수정 내용을 승인해 다시 게시했습니다.' : '게시했습니다. 이제 게시판에 공개됩니다.');
+            })
+            .catch(function (err) { A.toast(err.message || '게시에 실패했습니다.', 'err'); });
+        };
+
         var approve = mount.querySelector('#lsApprove');
-        if (approve) {
-          approve.addEventListener('click', function () {
-            if (!paid.checked &&
-              !window.confirm('등록비 입금이 확인되지 않았습니다. 그래도 게시하시겠습니까?\n' +
-                '(보통은 계좌 안내 → 입금 확인 → 게시 순서로 진행합니다.)')) return;
-            feeStep()
-              .then(function () { return db.approveListing(row.id); })
-              .then(function () {
-                A.closeDrawer();
-                A.toast('게시했습니다. 이제 게시판에 공개됩니다.');
-              })
-              .catch(function (err) { A.toast(err.message || '게시에 실패했습니다.', 'err'); });
-          });
-        }
+        if (approve) approve.addEventListener('click', doApprove);
+        var editOk = mount.querySelector('#lsEditOk');
+        if (editOk) editOk.addEventListener('click', doApprove);
 
         var done = mount.querySelector('#lsDone');
         if (done) {
@@ -371,6 +401,7 @@
     icon: 'listings',
     perm: 'customers',
     badge: function (state) {
+      // 수정 승인 요청도 처리해야 할 건입니다 (저장값은 pending 입니다).
       return (state.listings || []).filter(function (r) {
         return r.status === 'pending' || r.status === 'awaiting_payment';
       }).length;
@@ -382,7 +413,10 @@
       });
 
       var counts = {
-        pending: all.filter(function (r) { return r.status === 'pending'; }).length,
+        // 새로 올라온 글 (한 번도 승인받지 않은 글)
+        pending: all.filter(function (r) { return db.listingView(r).status === 'pending'; }).length,
+        // 이미 승인받았던 글의 수정 재검토
+        edits: all.filter(function (r) { return db.listingView(r).status === 'edit_pending'; }).length,
         waiting: all.filter(function (r) { return r.status === 'awaiting_payment'; }).length,
         published: all.filter(function (r) { return db.listingLive(r); }).length,
         // 기한이 없어졌으니, 오래 올라가 있는 글을 대신 세어 둡니다.
@@ -395,7 +429,8 @@
 
       var needle = q.trim().toLowerCase();
       var rows = all.filter(function (r) {
-        if (filter === 'pending' && r.status !== 'pending') return false;
+        if (filter === 'pending' && db.listingView(r).status !== 'pending') return false;
+        if (filter === 'edits' && db.listingView(r).status !== 'edit_pending') return false;
         if (filter === 'waiting' && r.status !== 'awaiting_payment') return false;
         if (filter === 'published' && !db.listingLive(r)) return false;
         if (filter === 'done' && r.status !== 'done') return false;
@@ -430,7 +465,8 @@
         '</div>' +
 
         '<div class="adm-stats">' +
-          '<div class="adm-stat is-accent"><strong>' + counts.pending + '</strong><span>승인 대기 (서류 확인)</span></div>' +
+          '<div class="adm-stat is-accent"><strong>' + counts.pending + '</strong><span>새 등록 (서류 확인)</span></div>' +
+          '<div class="adm-stat is-accent"><strong>' + counts.edits + '</strong><span>수정 승인 요청</span></div>' +
           '<div class="adm-stat is-accent"><strong>' + counts.waiting + '</strong><span>입금 대기</span></div>' +
           '<div class="adm-stat"><strong>' + counts.published + '</strong><span>게시중</span></div>' +
           '<div class="adm-stat"><strong>' + counts.soon + '</strong><span>90일 넘게 게시</span></div>' +
@@ -439,7 +475,8 @@
         '<div class="adm-toolbar">' +
           '<input type="search" id="lsSearch" placeholder="제목 · 지역 · 연락처 검색" value="' + h(q) + '">' +
           '<select id="lsFilter">' +
-            '<option value="pending"' + (filter === 'pending' ? ' selected' : '') + '>승인 대기만 (서류 확인)</option>' +
+            '<option value="pending"' + (filter === 'pending' ? ' selected' : '') + '>새 등록만 (서류 확인)</option>' +
+            '<option value="edits"' + (filter === 'edits' ? ' selected' : '') + '>수정 승인 요청만</option>' +
             '<option value="waiting"' + (filter === 'waiting' ? ' selected' : '') + '>입금 대기만</option>' +
             '<option value="published"' + (filter === 'published' ? ' selected' : '') + '>게시중만</option>' +
             '<option value="old"' + (filter === 'old' ? ' selected' : '') + '>90일 넘게 게시된 글</option>' +
@@ -468,18 +505,26 @@
                   '<span class="sub">' + h(u ? (u.name || u.email) : (r.userEmail || '-')) + '</span></td>' +
                 '<td><span class="st st-' + h(ST_CLASS[v.status] || 'received') + '">' + h(v.label) + '</span>' +
                   (v.status === 'published' && v.up != null
-                    ? '<span class="sub">' + v.up + '일째</span>' : '') + '</td>' +
+                    ? '<span class="sub">' + v.up + '일째</span>' : '') +
+                  // 수정 승인 요청은 "언제 요청했는지" 가 처리 순서를 정합니다.
+                  (v.status === 'edit_pending' && v.editRequestedAt
+                    ? '<span class="sub">' + h(db.formatDate(v.editRequestedAt)) + ' 요청</span>' : '') + '</td>' +
                 '<td>' + (fee.paid
                   ? '<span class="st st-done">확인</span>'
                   : fee.noticeSentAt
                     ? '<span class="st st-progress">안내 발송</span>'
                     : '<span class="st st-hold">미확인</span>') + '</td>' +
-                '<td class="nowrap">' + h(db.formatDate(r.createdAt, false)) + '</td>' +
+                '<td class="nowrap">' + h(db.formatDate(r.createdAt, false)) +
+                  (v.status === 'edit_pending' && v.editRequestedAt
+                    ? '<span class="sub">수정 ' + h(db.formatDate(v.editRequestedAt, false)) + '</span>' : '') +
+                  '</td>' +
                 '</tr>';
             }).join('')
           : A.emptyRow(6,
-              filter === 'pending' ? '승인 대기 중인 매물이 없습니다'
-                : filter === 'waiting' ? '입금을 기다리는 매물이 없습니다' : '매물이 없습니다',
+              filter === 'pending' ? '새로 올라온 매물이 없습니다'
+                : filter === 'edits' ? '수정 승인을 기다리는 매물이 없습니다'
+                : filter === 'waiting' ? '입금을 기다리는 매물이 없습니다'
+                : filter === 'done' ? '거래 완료로 내린 매물이 없습니다' : '매물이 없습니다',
               '홈페이지 [매물 게시판] 에서 등록된 글이 여기로 들어옵니다.')) +
         '</tbody></table></div>';
 
