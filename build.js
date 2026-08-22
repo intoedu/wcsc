@@ -12,7 +12,7 @@ const path = require('path');
 const T = require('./src/templates');
 
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
-  applyLink, externalNote, site, categories, services, serviceGroups, categoryOf,
+  applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
@@ -83,9 +83,9 @@ function buildIndex() {
     ${sectionHead(
       '지원 항목',
       '교회에 필요한 일, 여기서 함께 정리합니다',
-      '어느 항목이 필요한지 확실하지 않아도 괜찮습니다. 상황을 알려주시면 담당자가 함께 정리해 드립니다.'
+      '항목을 하나씩 고르지 않으셔도 됩니다. 세 갈래 가운데 지금 급한 자리부터 보십시오.'
     )}
-    ${serviceGroups('')}
+    ${categoryCards('')}
   </div>
 </section>
 

@@ -36,6 +36,12 @@ const icons = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/>',
   pin: '<path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/>',
   doc: '<path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/>',
+  /* 세로 화면 안에 재생 표시 — 숏츠 */
+  shorts:
+    '<rect x="6.6" y="2.5" width="10.8" height="19" rx="2.4"/><path d="m10.8 9.4 4.4 2.6-4.4 2.6Z"/>',
+  /* 두 사람이 마주 놓인 종이를 함께 보는 모양 — 소그룹 나눔집 */
+  share:
+    '<path d="M4 4.6h6.2c1 0 1.8.8 1.8 1.8V19a1.6 1.6 0 0 0-1.6-1.6H4Z"/><path d="M20 4.6h-6.2c-1 0-1.8.8-1.8 1.8V19a1.6 1.6 0 0 1 1.6-1.6H20Z"/><path d="M6.4 8.4h2.8M6.4 11.6h2.8M14.8 8.4h2.8M14.8 11.6h2.8"/>',
 };
 
 function icon(name, cls) {
@@ -338,6 +344,52 @@ function serviceGroups(base) {
     .join('\n    ');
 }
 
+/**
+ * 첫 화면용 — 갈래 카드만 보여 줍니다.
+ *
+ * 항목 11개를 첫 화면에 늘어놓으면 무엇부터 볼지 알기 어렵습니다.
+ * 지금 급한 자리(갈래)를 먼저 고르시게 하고, 그 안의 항목은
+ * 카드 안에 이름만 적어 둡니다. 무료인 갈래(커뮤니티)는 아래 띠로 따로 냅니다.
+ */
+function categoryCards(base) {
+  const paid = categories.filter((c) => !c.free);
+  const free = categories.filter((c) => c.free);
+
+  const card = (c) => {
+    const list = services.filter((s) => s.category === c.id);
+    return `<a class="cat-card" href="${base}services/index.html#cat-${c.id}">
+      <span class="cat-card-ico">${icon(c.icon)}</span>
+      <h3 class="cat-card-name">${esc(c.name)}</h3>
+      <p class="cat-card-tag">${esc(c.tagline)}</p>
+      <ul class="cat-card-list">
+        ${list.map((s) => `<li>${esc(s.name)}</li>`).join('\n        ')}
+      </ul>
+      <span class="cat-card-go">${list.length}개 항목 보기 ${icon('arrow', 'ico ico-sm')}</span>
+    </a>`;
+  };
+
+  const band = (c) => {
+    const list = services.filter((s) => s.category === c.id);
+    const items = c.highlights || [];
+    return `<a class="cat-free" href="${base}services/${(list[0] || {}).slug || 'index'}.html">
+      <div class="cat-free-main">
+        <span class="cat-free-tag">가입 무료</span>
+        <h3>${esc(c.name)}</h3>
+        <p>${esc(c.tagline)}</p>
+      </div>
+      ${items.length ? `<ul class="cat-free-list">
+        ${items.map((t) => `<li>${esc(t)}</li>`).join('\n        ')}
+      </ul>` : ''}
+      <span class="cat-free-go">${icon('arrow', 'ico')}</span>
+    </a>`;
+  };
+
+  return `<div class="cat-cards">
+      ${paid.map(card).join('\n      ')}
+    </div>
+    ${free.map(band).join('\n    ')}`;
+}
+
 /** 항목이 속한 갈래 (없으면 null) */
 function categoryOf(s) {
   return categories.filter((c) => c.id === s.category)[0] || null;
@@ -374,6 +426,7 @@ function ctaBand(base, opts) {
 module.exports = {
   categories,
   serviceGroups,
+  categoryCards,
   categoryOf,
   esc,
   icon,
