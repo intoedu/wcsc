@@ -55,14 +55,18 @@ function buildIndex() {
     <div class="hero-panel">
       <div class="hero-card">
         <p class="hero-card-label">지원 항목</p>
-        <ul class="hero-card-list">
-          ${services
-            .map(
-              (s) =>
-                `<li><a href="services/${s.slug}.html"><span class="hc-no">${s.no}</span><span class="hc-name">${esc(
-                  s.name
-                )}</span>${icon('arrow', 'ico ico-sm')}</a></li>`
-            )
+        <ul class="hero-card-list is-cats">
+          ${categories
+            .filter((c) => !c.free)
+            .map((c) => {
+              const list = services.filter((s) => s.category === c.id);
+              return `<li><a href="services/index.html#cat-${c.id}">
+              <span class="hc-cat">
+                <span class="hc-name">${esc(c.name)}</span>
+                <span class="hc-items">${list.map((s) => esc(s.name)).join(' · ')}</span>
+              </span>
+              ${icon('arrow', 'ico ico-sm')}</a></li>`;
+            })
             .join('\n          ')}
         </ul>
       </div>
@@ -72,7 +76,7 @@ function buildIndex() {
 
 <section class="stats">
   <div class="wrap stats-in">
-    <div class="stat"><strong>8</strong><span>지원 항목</span></div>
+    <div class="stat"><strong>11</strong><span>지원 항목</span></div>
     <div class="stat"><strong>1명</strong><span>담당자</span></div>
     <div class="stat"><strong>1~2일</strong><span>상담 연락</span></div>
     <div class="stat"><strong>전국</strong><span>지원 지역</span></div>
