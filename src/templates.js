@@ -49,13 +49,23 @@ function icon(name, cls) {
   return `<svg class="${cls || 'ico'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 }
 
-/** 브랜드 로고 마크 */
-function logoMark() {
-  return `<svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-    <rect width="40" height="40" rx="10" fill="var(--brand-800)"/>
-    <path d="M20 9.5v21M13 16.5h14" stroke="var(--gold-400)" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M27.5 25.4a8.4 8.4 0 0 1-15 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-  </svg>`;
+/**
+ * 브랜드 로고.
+ *
+ * 글자 자체가 로고(워드마크)라 옆에 센터 이름을 또 쓰지 않습니다.
+ * 어두운 바탕(푸터)에서는 진한 초록이 묻히므로 흰색 판본을 씁니다.
+ * 가로세로비 899:549 를 width/height 로 박아 두어 글이 흔들리지 않게 합니다.
+ */
+function logoMark(base, opt) {
+  const o = opt || {};
+  /* 헤더는 높이가 76px 뿐이라 두 줄 판본은 작아집니다 — 가로 한 줄 판본을 씁니다.
+     푸터처럼 세로로 여유가 있는 곳은 원본 두 줄 판본이 더 낫습니다. */
+  const row = o.row !== false;
+  const file = (row ? 'logo-row' : 'logo') + (o.light ? '-light' : '') + '.png';
+  const w = row ? 1780 : 899;
+  const h = row ? 307 : 549;
+  return `<img class="logo-img${row ? ' is-row' : ''}" src="${base || ''}assets/img/${file}"
+    width="${w}" height="${h}" alt="우리교회지원센터" decoding="async">`;
 }
 
 /* =========================================================
@@ -124,12 +134,8 @@ function header(base, active) {
     </div>
   </div>
   <div class="wrap header-in">
-    <a class="brand" href="${base}index.html">
-      ${logoMark()}
-      <span class="brand-text">
-        <strong>우리교회지원센터</strong>
-        <small>Wori Church Support Center</small>
-      </span>
+    <a class="brand" href="${base}index.html" aria-label="우리교회지원센터 홈으로">
+      ${logoMark(base, { row: true })}
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
       ${links}
@@ -154,12 +160,8 @@ function footer(base) {
   return `<footer class="site-footer">
   <div class="wrap footer-top">
     <div class="footer-brand">
-      <a class="brand brand-light" href="${base}index.html">
-        ${logoMark()}
-        <span class="brand-text">
-          <strong>우리교회지원센터</strong>
-          <small>Wori Church Support Center</small>
-        </span>
+      <a class="brand brand-light" href="${base}index.html" aria-label="우리교회지원센터 홈으로">
+        ${logoMark(base, { light: true, row: false })}
       </a>
       <p class="footer-desc">${esc(site.description)}</p>
       <a class="btn btn-gold" href="${base}apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>

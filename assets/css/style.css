@@ -117,6 +117,10 @@ table { border-collapse: collapse; width: 100%; }
 .header-in { display: flex; align-items: center; gap: 24px; height: var(--header-h); }
 
 .brand { display: inline-flex; align-items: center; gap: 11px; flex: none; }
+/* 로고는 글자가 곧 그림이라 높이로 크기를 잡습니다 (가로세로비 899:549) */
+.logo-img { height: 62px; width: auto; flex: none; display: block; }
+.logo-img.is-row { height: 44px; }
+.brand-light .logo-img { height: 78px; }
 .logo-mark { width: 40px; height: 40px; flex: none; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
 .brand-text strong { font-size: 17px; letter-spacing: -.03em; color: var(--brand-900); }
