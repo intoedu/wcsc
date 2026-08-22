@@ -39,7 +39,7 @@ function buildIndex() {
       <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">전문가</span>가 맡습니다</h1>
       <p class="hero-lead">
         홈페이지와 주보 제작부터 교역자 청빙, 음향, 부동산, 앱, 행정까지.
-        한국 교회에 필요한 8개 지원 항목을 전담창구 4곳이 나눠 맡습니다.
+        한국 교회에 필요한 여러 항목을 한곳에서 이어서 맡습니다.
       </p>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
@@ -72,7 +72,7 @@ function buildIndex() {
 <section class="stats">
   <div class="wrap stats-in">
     <div class="stat"><strong>8</strong><span>지원 항목</span></div>
-    <div class="stat"><strong>4</strong><span>전담창구</span></div>
+    <div class="stat"><strong>1명</strong><span>담당자</span></div>
     <div class="stat"><strong>1~2일</strong><span>상담 연락</span></div>
     <div class="stat"><strong>전국</strong><span>지원 지역</span></div>
   </div>
@@ -202,7 +202,7 @@ ${pageHero({
 
 <section class="section">
   <div class="wrap">
-    ${sectionHead('지원 범위', '세 갈래, 8개 항목 — 전담창구 4곳')}
+    ${sectionHead('지원 범위', '세 갈래, 8개 항목')}
     ${serviceGroups('')}
   </div>
 </section>
@@ -370,7 +370,7 @@ function buildServicesIndex() {
   const body = `
 ${pageHero({
   eyebrow: '지원 항목',
-  title: '세 갈래 8개 항목,<br>전담창구 4곳이 맡습니다',
+  title: '세 갈래 8개 항목을<br>한곳에서 맡습니다',
   lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 알리는 교회 · 모이는 교회 · 세우는 교회. '
     + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
 })}
