@@ -13,6 +13,7 @@ const T = require('./src/templates');
 
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
   applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
+  plans, planRules, trial, invite, talents,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
@@ -370,8 +371,8 @@ function buildServicesIndex() {
   const body = `
 ${pageHero({
   eyebrow: '지원 항목',
-  title: '세 갈래 8개 항목을<br>한곳에서 맡습니다',
-  lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 알리는 교회 · 모이는 교회 · 세우는 교회. '
+  title: '네 갈래 11개 항목을<br>한곳에서 맡습니다',
+  lead: '교회가 겪는 자리별로 묶었습니다 — 보이는 교회 · 사역하는 교회 · 세우는 교회, 그리고 가입이 무료인 커뮤니티 센터. '
     + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
 })}
 
@@ -399,9 +400,10 @@ ${pageHero({
       </article>
       <article class="bill-card">
         <span class="bill-tag">1회 결제</span>
-        <h3>디자인 제작 · 부동산</h3>
-        <p class="bill-price">디자인 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
-        <p>필요할 때 한 번만 결제하는 항목입니다. 주보처럼 매주 반복되는 경우에는 월 정기 계약으로 묶을 수 있습니다.</p>
+        <h3>마케팅 지원 · 부동산</h3>
+        <p class="bill-price">디자인 시안 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
+        <p>필요할 때 한 번만 결제하는 항목입니다. 요금제에 가입하시면 시안은 달란트로 신청하시게 되고,
+          주보처럼 매주 반복되는 경우에는 사역 요금제에 매주 제작이 들어 있습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">건별 견적</span>
@@ -951,6 +953,160 @@ ${pageHero({
 /* =========================================================
    문의
    ========================================================= */
+/* =========================================================
+   요금제
+   ========================================================= */
+const won = (n) => n.toLocaleString('ko-KR');
+
+function planCard(p) {
+  const monthly = p.free ? '0원' : `${won(p.price)}원`;
+  const perMonth = p.free ? '' : `${won(Math.round(p.yearly / 12))}원`;
+
+  return `<article class="plan${p.popular ? ' is-popular' : ''}${p.free ? ' is-free' : ''}" id="plan-${p.id}">
+      ${p.popular ? '<span class="plan-flag">가장 많이 고르십니다</span>' : ''}
+      <h3 class="plan-name">${esc(p.name)}</h3>
+      <p class="plan-tag">${esc(p.tagline)}</p>
+
+      <p class="plan-price" data-month="${monthly}" data-year="${perMonth || monthly}">
+        <strong>${monthly}</strong><span>${p.free ? '' : ' / 월'}</span>
+      </p>
+      ${p.free
+        ? '<p class="plan-sub">가입비도 월 요금도 없습니다</p>'
+        : `<p class="plan-sub plan-year">연납 ${won(p.yearly)}원 — <b>2개월 무료</b></p>`}
+
+      <p class="plan-lead">${esc(p.lead)}</p>
+
+      <dl class="plan-quota">
+        <div><dt>나눔집</dt><dd>${esc(p.quota.sharing)}</dd></div>
+        <div><dt>AI 숏츠</dt><dd>${esc(p.quota.shorts)}</dd></div>
+        <div><dt>달란트</dt><dd>${p.quota.talents ? `월 ${p.quota.talents}` : '—'}</dd></div>
+      </dl>
+
+      ${p.inherits ? `<p class="plan-inherit">${esc(p.inherits)} 요금제에 더해서</p>` : ''}
+      <ul class="plan-list">
+        ${p.includes.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n        ')}
+      </ul>
+      ${p.note ? `<p class="plan-note">${esc(p.note)}</p>` : ''}
+
+      <a class="btn ${p.popular ? 'btn-primary' : 'btn-ghost'} plan-cta"
+         href="apply.html?plan=${p.id}">${p.free ? '무료로 시작하기' : '30일 체험 신청'}</a>
+    </article>`;
+}
+
+function buildPricing() {
+  const body = `
+${pageHero({
+  eyebrow: '요금제',
+  title: '먼저 30일 써 보시고<br>정하십시오',
+  lead: '카드 등록 없이 시작합니다. 체험이 끝나면 자동으로 무료 회원으로 내려가니, '
+    + '모르는 사이에 결제되는 일이 없습니다.',
+})}
+
+<section class="section">
+  <div class="wrap">
+    <div class="plan-switch" id="planSwitch" role="group" aria-label="결제 주기">
+      <button type="button" class="is-on" data-cycle="month">월 납부</button>
+      <button type="button" data-cycle="year">연납 <span>2개월 무료</span></button>
+    </div>
+
+    <div class="plans">
+      ${plans.map(planCard).join('\n      ')}
+    </div>
+
+    <ul class="plan-rules">
+      <li>${icon('check', 'ico ico-xs')}<span>${esc(planRules.vat)}이며, ${esc(planRules.cancel)}</span></li>
+      <li>${icon('check', 'ico ico-xs')}<span><b>${esc(planRules.smallChurch.label)}</b> — ${esc(planRules.smallChurch.desc)}</span></li>
+      <li>${icon('check', 'ico ico-xs')}<span><b>${esc(planRules.yearlyLabel)}</b> — ${esc(planRules.yearlyNote)}</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    ${sectionHead('무료 체험', trial.headline, trial.lead)}
+    <div class="trial-grid">
+      <div class="trial-box">
+        <p class="trial-plan">체험 기간에는 <b>${esc(trial.planName)} 요금제</b>를 그대로 엽니다</p>
+        <dl class="trial-list">
+          ${trial.includes.map((t) => `<div><dt>${esc(t.k)}</dt><dd>${esc(t.v)}</dd></div>`).join('\n          ')}
+        </dl>
+      </div>
+      <div class="trial-side">
+        <h3>왜 30일인가</h3>
+        <p>${esc(trial.why)}</p>
+        <ul class="trial-rules">
+          ${trial.rules.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n          ')}
+        </ul>
+        <a class="btn btn-primary" href="apply.html?trial=1">30일 체험 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('초대 할인', invite.headline, invite.lead)}
+    <div class="inv-tiers">
+      ${invite.tiers.map((t, i) => `<div class="inv-tier${i === invite.tiers.length - 1 ? ' is-top' : ''}">
+        <strong>${t.pct}%</strong>
+        <span>${t.count}곳${i === invite.tiers.length - 1 ? ' 이상' : ''} 초대</span>
+      </div>`).join('\n      ')}
+    </div>
+    <ul class="inv-rules">
+      ${invite.rules.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n      ')}
+    </ul>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    ${sectionHead('달란트', talents.headline, talents.lead)}
+    <div class="tal-grid">
+      <div class="tal-table-wrap">
+        <table class="tal-table">
+          <thead>
+            <tr><th>자료</th><th>달란트</th><th>회원이 아니면</th></tr>
+          </thead>
+          <tbody>
+            ${talents.items.map((t) => `<tr>
+              <td>${esc(t.name)}${t.note ? ` <small>(${esc(t.note)})</small>` : ''}</td>
+              <td class="tal-n">${t.talents === 0 ? '0' : t.talents}</td>
+              <td class="tal-r">${won(t.retail)}원</td>
+            </tr>`).join('\n            ')}
+          </tbody>
+        </table>
+        <p class="tal-note">${esc(talents.note)}</p>
+      </div>
+      <div class="tal-side">
+        <h3>모자라면 더 쓰실 수 있습니다</h3>
+        <ul class="tal-packs">
+          ${talents.packs.map((k) => `<li><strong>${k.count} 달란트</strong><span>${won(k.price)}원</span></li>`).join('\n          ')}
+        </ul>
+        <p>낱개로 사셔도 회원이 아닐 때 정가의 절반 안팎입니다.
+          요금제에 들어 있는 달란트를 먼저 쓰고, 모자란 만큼만 채우시면 됩니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+${ctaBand('')}
+`;
+
+  write(
+    'pricing.html',
+    layout({
+      title: '요금제 | 우리교회지원센터',
+      description:
+        '커뮤니티(무료)부터 입문 14,900원, 기본 39,000원, 사역 89,000원, 전체 179,000원까지. '
+        + '30일 무료 체험은 카드 등록 없이 시작하고, 초대하면 최대 30% 할인됩니다.',
+      base: '',
+      active: 'pricing.html',
+      body,
+      scripts: ['pricing.js'],
+    })
+  );
+}
+
 function buildContact() {
   const body = `
 ${pageHero({
@@ -1561,6 +1717,7 @@ function main() {
   buildProcess();
   buildFaq();
   buildServicesIndex();
+  buildPricing();
   services.forEach(buildServicePage);
   buildApply();
   buildStatus();

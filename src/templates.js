@@ -1,6 +1,6 @@
 'use strict';
 
-const { site, categories, services } = require('./data/site');
+const { site, categories, services, plans, planRules, trial, invite, talents } = require('./data/site');
 
 /** HTML 특수문자 이스케이프 */
 function esc(str) {
@@ -89,6 +89,7 @@ function addressText() {
 const NAV = [
   { href: 'about.html', label: '센터 소개' },
   { href: 'services/index.html', label: '지원 항목', key: 'services' },
+  { href: 'pricing.html', label: '요금제' },
   { href: 'listings.html', label: '매물 게시판' },
   { href: 'process.html', label: '이용 절차' },
   { href: 'faq.html', label: '자주 묻는 질문' },
@@ -427,6 +428,11 @@ module.exports = {
   categories,
   serviceGroups,
   categoryCards,
+  plans,
+  planRules,
+  trial,
+  invite,
+  talents,
   categoryOf,
   esc,
   icon,
