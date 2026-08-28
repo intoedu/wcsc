@@ -10,9 +10,10 @@
 const fs = require('fs');
 const path = require('path');
 const T = require('./src/templates');
+const Boards = require('./src/boards');
 
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
-  applyLink, externalNote, site, categories, services, serviceGroups, categoryOf,
+  applyLink, externalNote, site, categories, services, serviceGroups, categoryOf, boardTabs,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
@@ -1120,6 +1121,8 @@ function buildListings() {
           </div>`;
 
   const body = `
+${boardTabs('', 'listings.html')}
+
 ${pageHero({
   eyebrow: '부동산 · 매물 게시판',
   title: '교회 매물을<br>직접 올리고, 직접 찾습니다',
@@ -1550,6 +1553,15 @@ window.CAPS_SERVICES = ${JSON.stringify(payload, null, 2)};
 /* 매물 게시판 운영 기준 (src/data/site.js 의 site.listingBoard).
    계좌는 게시판에 노출하지 않고, 관리자가 승인할 때 카카오톡으로 보냅니다. */
 window.CAPS_LISTING_BOARD = ${JSON.stringify(site.listingBoard, null, 2)};
+
+/* 중고 장터 — 센터의 몫은 등록비가 아니라 설치 대행료입니다. */
+window.CAPS_MARKET_BOARD = ${JSON.stringify(site.marketBoard, null, 2)};
+
+/* 교회 게스트하우스 운영 기준 */
+window.CAPS_GUEST_BOARD = ${JSON.stringify(site.guestHouseBoard, null, 2)};
+
+/* 집회 티켓팅 운영 기준 */
+window.CAPS_TICKET_BOARD = ${JSON.stringify(site.ticketBoard, null, 2)};
 `;
   write('assets/js/data.js', js);
 }
@@ -1566,6 +1578,9 @@ function main() {
   buildStatus();
   buildContact();
   buildListings();
+  Boards.buildMarket(write);
+  Boards.buildGuesthouse(write);
+  Boards.buildTickets(write);
   buildDataScript();
   buildRulesScript(buildSupabaseSql());
   console.log(`생성 완료 (${out.length}개)`);
