@@ -80,10 +80,40 @@ function addressText() {
   return `<span data-live="site.address">${esc(site.contact.address)}</span>`;
 }
 
+/**
+ * 게시판 네 갈래.
+ * 처음엔 부동산 매물 하나였습니다. 교역자를 돕는다는 뼈대는 그대로 두되,
+ * 물건을 사고파는 일 · 방을 내어 주는 일 · 집회에 신청하는 일은
+ * 교역자만의 일이 아니라 성도가 함께 하는 일이라 갈래를 넷으로 나눴습니다.
+ */
+const BOARDS = [
+  { href: 'listings.html', label: '부동산 매물', sub: '예배 공간 매매 · 임대' },
+  { href: 'market.html', label: '중고 장터', sub: '음향 · 악기 · 집기 (설치까지)' },
+  { href: 'guesthouse.html', label: '게스트하우스', sub: '교회가 내어 주는 방' },
+  { href: 'tickets.html', label: '집회 티켓팅', sub: '찬양집회 · 수련회 신청' },
+];
+
+/** 게시판 네 갈래를 오가는 탭. 모든 게시판 페이지 맨 위에 같은 모양으로 붙습니다. */
+function boardTabs(base, active) {
+  const items = BOARDS.map((b) => {
+    const on = b.href === active;
+    return `<a class="board-tab${on ? ' is-on' : ''}" href="${base}${b.href}"${on ? ' aria-current="page"' : ''}>
+        <strong>${esc(b.label)}</strong>
+        <small>${esc(b.sub)}</small>
+      </a>`;
+  }).join('\n      ');
+
+  return `<nav class="board-tabs" aria-label="게시판 갈래">
+  <div class="wrap board-tabs-in">
+      ${items}
+  </div>
+</nav>`;
+}
+
 const NAV = [
   { href: 'about.html', label: '센터 소개' },
   { href: 'services/index.html', label: '지원 항목', key: 'services' },
-  { href: 'listings.html', label: '매물 게시판' },
+  { href: 'listings.html', label: '게시판', key: 'boards' },
   { href: 'process.html', label: '이용 절차' },
   { href: 'faq.html', label: '자주 묻는 질문' },
   { href: 'contact.html', label: '문의' },
@@ -91,7 +121,9 @@ const NAV = [
 
 function header(base, active) {
   const links = NAV.map((n) => {
-    const isOn = active === n.href || (n.key && active && active.startsWith('services/'));
+    const isOn = active === n.href
+      || (n.key === 'services' && active && active.startsWith('services/'))
+      || (n.key === 'boards' && BOARDS.some((x) => x.href === active));
     return `<a class="nav-link${isOn ? ' is-active' : ''}" href="${base}${n.href}">${n.label}</a>`;
   }).join('');
 
@@ -169,7 +201,10 @@ function footer(base) {
         <li><a href="${base}faq.html">자주 묻는 질문</a></li>
         <li><a href="${base}contact.html">문의하기</a></li>
         <li><a href="${base}status.html">신청 조회</a></li>
-        <li><a href="${base}listings.html">매물 게시판</a></li>
+        <li><a href="${base}listings.html">부동산 매물</a></li>
+        <li><a href="${base}market.html">중고 장터</a></li>
+        <li><a href="${base}guesthouse.html">게스트하우스</a></li>
+        <li><a href="${base}tickets.html">집회 티켓팅</a></li>
         <li><a href="${base}staff.html" class="footer-staff">직원 로그인</a></li>
       </ul>
     </div>
@@ -372,6 +407,8 @@ function ctaBand(base, opts) {
 }
 
 module.exports = {
+  BOARDS,
+  boardTabs,
   categories,
   serviceGroups,
   categoryOf,

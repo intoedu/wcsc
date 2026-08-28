@@ -1,6 +1,6 @@
 rules_version = '2';
 
-/* CAPS_RULES_VERSION: 2026-08-14-b  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
+/* CAPS_RULES_VERSION: 2026-08-28-a  ← 관리자 화면 [보안 규칙] 에 표시되는 판 번호 */
 
 /* =========================================================
    우리교회지원센터 — Firestore 보안 규칙
@@ -205,6 +205,125 @@ service cloud.firestore {
 
       allow delete: if (signedIn() && resource.data.userId == request.auth.uid)
         || can('customers');
+    }
+
+    /* ---------- marketItems : 중고 장터 ----------
+       부동산 매물과 같은 흐름이되 등록비가 없어 fee 조건이 빠집니다.
+       '거래 완료(done)'로 내리는 것은 판 사람이 가장 먼저 아는 일이라
+       등록자에게 허용합니다. */
+    match /marketItems/{docId} {
+      allow read: if resource.data.status == 'published'
+        || (signedIn() && resource.data.userId == request.auth.uid)
+        || isStaff();
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reviewedBy == ''
+        && request.resource.data.publishedAt == '';
+
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status in ['pending', 'done']
+        && request.resource.data.publishedAt == resource.data.publishedAt;
+
+      allow update: if can('customers');
+
+      allow delete: if (signedIn() && resource.data.userId == request.auth.uid)
+        || can('customers');
+    }
+
+    /* ---------- installRequests : 설치 대행 문의 ----------
+       게시판에 공개되지 않습니다 — 본인과 직원만 봅니다. */
+    match /installRequests/{docId} {
+      allow read: if (signedIn() && resource.data.userId == request.auth.uid) || isStaff();
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'received'
+        && request.resource.data.quoteAmount == 0;
+
+      // 견적은 직원만 적습니다.
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.quoteAmount == resource.data.quoteAmount
+        && request.resource.data.status in ['received', 'canceled'];
+
+      allow update: if can('requests');
+      allow delete: if can('requests');
+    }
+
+    /* ---------- guestHouses : 교회 게스트하우스 ---------- */
+    match /guestHouses/{docId} {
+      allow read: if resource.data.status == 'published'
+        || (signedIn() && resource.data.userId == request.auth.uid)
+        || isStaff();
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reviewedBy == ''
+        && request.resource.data.publishedAt == '';
+
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status in ['pending', 'done']
+        && request.resource.data.publishedAt == resource.data.publishedAt;
+
+      allow update: if can('customers');
+
+      allow delete: if (signedIn() && resource.data.userId == request.auth.uid)
+        || can('customers');
+    }
+
+    /* ---------- events : 집회 티켓팅 ----------
+       마감(closed)된 집회도 읽힙니다 — "마감되었습니다"를 읽어야 하니까요.
+       taken(신청 합계)은 주최자가 건드릴 수 없습니다. */
+    match /events/{docId} {
+      allow read: if resource.data.status in ['published', 'closed', 'done']
+        || (signedIn() && resource.data.userId == request.auth.uid)
+        || isStaff();
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.taken == 0
+        && request.resource.data.reviewedBy == ''
+        && request.resource.data.publishedAt == '';
+
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status in ['pending', 'done', 'closed', 'published']
+        && request.resource.data.taken == resource.data.taken
+        && request.resource.data.publishedAt == resource.data.publishedAt;
+
+      allow update: if can('customers');
+
+      allow delete: if (signedIn() && resource.data.userId == request.auth.uid
+          && resource.data.taken == 0)
+        || can('customers');
+    }
+
+    /* ---------- ticketOrders : 집회 신청 내역 ----------
+       신청자 본인 · 집회를 연 주최자 · 직원만 봅니다.
+       (Firebase 쪽은 정원을 서버에서 잠글 방법이 없어 데모 용도입니다 —
+        실제 운영은 Supabase 의 reserve_tickets() 를 씁니다.) */
+    match /ticketOrders/{docId} {
+      allow read: if (signedIn() && resource.data.userId == request.auth.uid) || isStaff();
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'confirmed'
+        && request.resource.data.qty > 0;
+
+      allow update: if (signedIn() && resource.data.userId == request.auth.uid
+          && request.resource.data.status == 'canceled')
+        || can('customers');
+
+      allow delete: if can('customers');
     }
 
     /* ---------- subscriptions : 구독 ---------- */

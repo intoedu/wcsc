@@ -1481,3 +1481,572 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
   .use-grid { grid-template-columns: 1fr; }
   .camp-card, .track-card, .scope-card { padding: 24px 20px; }
 }
+
+/* =========================================================
+   게시판 네 갈래 — 공통 탭
+
+   부동산 매물 · 중고 장터 · 게스트하우스 · 집회 티켓팅.
+   네 곳이 한 곳처럼 보여야 해서, 매물 게시판의 ls-* 를 그대로 나눠 씁니다.
+   ========================================================= */
+
+.board-tabs {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.board-tabs-in {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 0;
+}
+.board-tab {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--ink-2);
+  transition: background .15s, border-color .15s, color .15s;
+}
+.board-tab:hover { background: #fff; border-color: var(--line); }
+.board-tab strong { display: block; font-size: 15px; color: var(--ink); }
+.board-tab small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
+.board-tab.is-on {
+  background: #fff;
+  border-color: var(--brand-500);
+  box-shadow: var(--shadow-sm);
+}
+.board-tab.is-on strong { color: var(--brand-700); }
+
+@media (max-width: 860px) {
+  .board-tabs-in {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(150px, 1fr);
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .board-tab small { display: none; }
+}
+
+/* ---------- 목록 · 상세 공통 덧붙임 ---------- */
+
+.ls-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.ls-toggle input { accent-color: var(--brand-700); }
+
+.ls-tag.is-gold { background: var(--gold-100); color: var(--gold-ink); }
+.ls-tag.is-soft { background: var(--bg-soft); color: var(--muted); }
+.ls-tag.is-warn { background: #FBEEDD; color: var(--warn); }
+
+.ls-empty.is-inline {
+  padding: 40px 20px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.ls-gate {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  text-align: center;
+}
+.ls-gate p { margin: 0 0 16px; color: var(--ink-2); }
+
+.ls-gone {
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.ls-counter { float: right; font-weight: 400; font-size: 12.5px; color: var(--muted); }
+
+/* 상세 — 이름표 · 값 줄 */
+.ls-view-head { margin-bottom: 20px; }
+.ls-view-head h1 { margin: 10px 0 6px; font-size: clamp(24px, 3.4vw, 34px); }
+.ls-view-sub { margin: 0 0 6px; color: var(--muted); }
+.ls-view-desc { margin: 28px 0; }
+.ls-view-desc h2 { font-size: 18px; margin: 0 0 10px; }
+.ls-view-desc p { margin: 0; line-height: 1.75; color: var(--ink-2); }
+.ls-view-desc.is-rules {
+  padding: 18px 20px;
+  border-left: 3px solid var(--gold-400);
+  background: var(--gold-100);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.ls-view-desc.is-rules p { color: var(--gold-ink); }
+.ls-view-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.ls-dls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 24px;
+  margin: 24px 0;
+}
+.ls-dls .ls-dl {
+  display: flex;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line-2);
+}
+.ls-dls .ls-dl dt { flex: 0 0 108px; color: var(--muted); font-size: 14px; }
+.ls-dls .ls-dl dd { margin: 0; color: var(--ink); font-size: 14.5px; }
+.ls-dls.is-tight .ls-dl { padding: 7px 0; }
+.ls-dls code {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--bg-soft);
+  font-size: 14px;
+  letter-spacing: .06em;
+}
+
+/* 조각 이름표 (있는 것 · 모시는 분) */
+.ls-chiprow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0;
+}
+.ls-chiprow-label {
+  flex: 0 0 100%;
+  font-size: 13px;
+  color: var(--muted);
+}
+.ls-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--brand-100);
+  background: var(--brand-50);
+  color: var(--brand-800);
+  font-size: 13.5px;
+}
+.ls-pill.is-soft {
+  border-color: var(--line);
+  background: var(--bg-soft);
+  color: var(--ink-2);
+}
+
+/* 연락처 상자 */
+.ls-contact { margin: 28px 0; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); }
+.ls-contact h2 { margin: 0 0 12px; font-size: 17px; }
+.ls-contact-name { margin: 0 0 4px; font-weight: 600; }
+.ls-contact-phone { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
+.ls-contact-phone a { color: var(--brand-700); text-decoration: none; }
+.ls-contact-hours { margin: 0 0 10px; color: var(--ink-2); font-size: 14px; }
+.ls-contact-fine { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+
+/* ---------- 사진 ---------- */
+
+.ls-photo-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.ls-photo-count { font-size: 13.5px; color: var(--muted); }
+.ls-photo-count.is-ok { color: var(--ok); }
+.ls-photo-count.is-bad { color: #B0342C; }
+.ls-photo-count.is-full { color: var(--warn); }
+
+.ls-gal { margin: 24px 0; }
+.ls-gal-main {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+.ls-gal-main img { display: block; width: 100%; height: auto; max-height: 560px; object-fit: contain; }
+.ls-gal-strip {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.ls-gal-thumb {
+  flex: 0 0 84px;
+  height: 62px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+.ls-gal-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ls-gal-thumb.is-on { border-color: var(--brand-600); }
+.ls-gal-n { margin: 8px 0 0; font-size: 13px; color: var(--muted); text-align: right; }
+
+/* ---------- 네모칸 묶음 ---------- */
+
+.ls-chks { display: flex; flex-wrap: wrap; gap: 8px; }
+.ls-chk {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.ls-chk input { margin-top: 2px; accent-color: var(--brand-700); }
+.ls-chk:has(input:checked) {
+  border-color: var(--brand-500);
+  background: var(--brand-50);
+  color: var(--brand-800);
+}
+.ls-chk.is-wide {
+  display: flex;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.ls-vows { display: grid; gap: 4px; }
+
+.ls-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+.ls-fs-lead { margin: 0 0 14px; color: var(--ink-2); font-size: 14.5px; line-height: 1.7; }
+
+/* 내가 올린 것 — 카드 */
+.ls-mine {
+  padding: 20px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.ls-mine-head { display: flex; gap: 14px; align-items: flex-start; }
+.ls-mine-head h3 { margin: 6px 0 4px; font-size: 17px; }
+.ls-mine-shot {
+  flex: 0 0 84px;
+  width: 84px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.ls-mine-note.is-bad { color: #B0342C; }
+.ls-mine-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+/* =========================================================
+   중고 장터 — 설치 대행
+
+   센터가 실제로 돈을 받는 자리라, 목록 · 상세 · 신청 세 군데에
+   같은 모양으로 붙여 둡니다.
+   ========================================================= */
+
+.ls-tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+.ls-tier-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.ls-tier-card h3 { margin: 0 0 8px; font-size: 17px; }
+.ls-tier-card p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.7; }
+.ls-tier-price {
+  margin: 0 0 10px !important;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--brand-700);
+}
+.ls-tier-price span { font-size: 15px; font-weight: 600; color: var(--muted); }
+.ls-tier-note { margin: 16px 0 0; color: var(--muted); font-size: 13px; }
+.ls-tier-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+
+.ls-tier-pick { display: grid; gap: 10px; }
+.ls-tier { display: block; cursor: pointer; }
+.ls-tier input { position: absolute; opacity: 0; pointer-events: none; }
+.ls-tier-in {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.ls-tier-in strong { font-size: 15.5px; }
+.ls-tier-in b { color: var(--brand-700); font-size: 15.5px; }
+.ls-tier-in small { grid-column: 1 / -1; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.ls-tier input:checked + .ls-tier-in {
+  border-color: var(--brand-500);
+  background: var(--brand-50);
+  box-shadow: var(--shadow-sm);
+}
+.ls-tier input:focus-visible + .ls-tier-in { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+
+.ls-quote {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--gold-100);
+  color: var(--gold-ink);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.ls-quote small { color: var(--gold-ink); opacity: .85; }
+
+.ls-install-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 24px 0;
+  padding: 22px 24px;
+  border-radius: var(--radius);
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+}
+.ls-install-band h2 { margin: 0 0 6px; font-size: 18px; color: var(--brand-800); }
+.ls-install-band p { margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.7; }
+.ls-install-note { margin-top: 8px !important; font-size: 13.5px; color: var(--muted); }
+
+.ls-iv-item {
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+}
+.ls-iv-label { margin: 0 0 4px; font-size: 12.5px; color: var(--muted); }
+.ls-iv-title { margin: 0 0 4px; font-weight: 700; }
+.ls-iv-meta { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.ls-iv-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+
+/* =========================================================
+   집회 티켓팅
+   ========================================================= */
+
+.ls-grid.is-poster {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.tk-card {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow .15s, transform .15s;
+}
+.tk-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.tk-card-poster {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  background: var(--bg-soft);
+}
+.tk-card-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tk-card-noposter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted);
+  font-size: 14px;
+}
+.tk-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.tk-badge.is-full { background: #4A2A24; color: #fff; }
+.tk-badge.is-soon { background: var(--gold-400); color: var(--gold-ink-deep); }
+.tk-badge.is-few { background: #B0342C; color: #fff; }
+.tk-badge.is-done { background: var(--bg-soft); color: var(--muted); }
+
+.tk-card-body { display: block; padding: 16px 18px 18px; }
+.tk-card-body h3 { margin: 8px 0 4px; font-size: 16.5px; line-height: 1.4; }
+.tk-card-sub { margin: 0 0 8px; font-size: 13.5px; color: var(--muted); }
+.tk-card-when { margin: 0 0 2px; font-size: 13.5px; color: var(--brand-700); font-weight: 600; }
+.tk-card-where { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.tk-card-price { display: block; margin-bottom: 10px; font-size: 15px; }
+.tk-open {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+/* 정원 막대 */
+.tk-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line-2);
+  overflow: hidden;
+}
+.tk-bar-in { display: block; height: 100%; background: var(--brand-500); }
+.tk-bar-txt { display: block; margin-top: 5px; font-size: 12.5px; color: var(--muted); }
+.tk-mine-bar { margin: 14px 0; }
+
+/* 신청 상태 — 예매 시작 전 · 신청 중 · 마감 */
+.tk-status {
+  margin: 24px 0;
+  padding: 22px 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.tk-status-title { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.tk-status-sub { margin: 0 0 14px; color: var(--ink-2); font-size: 14px; line-height: 1.7; }
+.tk-status.is-open { border-color: var(--brand-100); background: var(--brand-50); }
+.tk-status.is-open .tk-status-title { color: var(--brand-800); }
+.tk-status.is-open .btn { margin-top: 14px; }
+.tk-status.is-soon { border-color: var(--gold-border); background: var(--gold-100); }
+.tk-status.is-soon .tk-status-title { color: var(--gold-ink); }
+.tk-status.is-full { border-color: #E2C9C5; background: #FBF0EE; }
+.tk-status.is-full .tk-status-title { color: #8C2B22; }
+.tk-status.is-done .tk-status-title,
+.tk-status.is-shut .tk-status-title { color: var(--muted); }
+
+.tk-shut { padding: 40px 24px; text-align: center; }
+.tk-shut-msg { font-size: 18px; font-weight: 700; color: #8C2B22; }
+
+.tk-apply h1 { margin: 6px 0 8px; font-size: clamp(22px, 3vw, 30px); }
+.tk-apply-when { margin: 0 0 2px; color: var(--brand-700); font-weight: 600; }
+.tk-apply-price { margin: 0 0 20px; font-size: 18px; font-weight: 700; }
+.tk-notice {
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  border-left: 3px solid var(--gold-400);
+  background: var(--gold-100);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.tk-notice h2 { margin: 0 0 8px; font-size: 15px; color: var(--gold-ink); }
+.tk-notice p { margin: 0; color: var(--gold-ink); font-size: 14px; line-height: 1.75; }
+
+/* ---------- 좌석도 (선택 기능) ---------- */
+
+.tk-seatmap {
+  margin: 14px 0;
+  padding: 18px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  overflow-x: auto;
+}
+.tk-stage {
+  margin: 0 auto 16px;
+  padding: 7px 0;
+  max-width: 420px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  letter-spacing: .3em;
+  text-align: center;
+}
+.tk-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+}
+.tk-row-name {
+  flex: 0 0 26px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  padding-right: 4px;
+}
+.tk-seat {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .12s;
+}
+.tk-seat:hover:not(:disabled) { border-color: var(--brand-500); transform: translateY(-1px); }
+.tk-seat.is-picked { background: var(--brand-600); border-color: var(--brand-700); color: #fff; }
+.tk-seat.is-taken { background: var(--line); color: var(--muted); cursor: not-allowed; }
+.tk-seat.is-off {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--line);
+  color: transparent;
+}
+.tk-seatmap.is-edit .tk-seat { cursor: pointer; }
+.tk-seatmap.is-edit .tk-seat.is-off { color: var(--muted); }
+
+.tk-seat-note { margin: 12px 0 0; font-size: 13px; color: var(--ink-2); }
+.tk-seat-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.tk-key { display: inline-flex; align-items: center; gap: 5px; }
+.tk-key i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+.tk-key i.is-picked { background: var(--brand-600); border-color: var(--brand-700); }
+.tk-key i.is-taken { background: var(--line); }
+.tk-key i.is-off { background: transparent; border-style: dashed; }
+
+.tk-seat-sum { margin: 10px 0 0; font-size: 14px; color: var(--ink-2); }
+.tk-seat-sum small { color: var(--muted); }
+
+/* ---------- 신청자 명단 (주최자용) ---------- */
+
+.tk-roster { margin-top: 14px; overflow-x: auto; }
+.tk-roster-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tk-roster-table th,
+.tk-roster-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line-2);
+  text-align: left;
+  white-space: nowrap;
+}
+.tk-roster-table th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+.tk-roster-sum { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.tk-roster-empty { margin: 10px 0 0; font-size: 13.5px; color: var(--muted); }
+
+/* 목록이 아닐 때는 큰 머리말을 접습니다 (같은 문구를 두 번 읽지 않도록) */
+body[data-mk-pane]:not([data-mk-pane="list"]) .page-hero,
+body[data-gh-pane]:not([data-gh-pane="list"]) .page-hero,
+body[data-tk-pane]:not([data-tk-pane="list"]) .page-hero { display: none; }
