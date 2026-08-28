@@ -3101,7 +3101,7 @@ window.CAPSDB = (function () {
           var mine = (orders || []).filter(function (r) {
             return r.userId === me.id && r.status !== 'canceled';
           });
-          if (mine.length) throw new Error('이미 신청하셨습니다. [내 신청] 에서 확인해 주세요.');
+          if (mine.length) throw new Error('이미 신청하셨습니다. [내 신청 내역] 에서 확인해 주세요.');
           if (v.seating) {
             if (seats.length !== qty) throw new Error('좌석을 ' + qty + '개 골라 주세요.');
             var taken = api.takenSeats(orders);

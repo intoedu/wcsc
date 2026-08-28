@@ -628,6 +628,7 @@ Supabase 에서는 이 두 경로가 **저장소 버킷 두 개**로 만들어�
 | `20260828010000_wcsc_market_guesthouse_tickets` | 표 5개 · RLS · 예약 함수 · 실시간 구독 |
 | `20260828020000_wcsc_reserve_closed_message` | 마감된 집회에 신청했을 때 나오는 말을 갈라 줍니다 |
 | `20260828030000_wcsc_ticket_taken_guard_fix` | 신청해도 정원이 차지 않던 문제 |
+| `20260828040000_wcsc_reserve_duplicate_message` | 두 번 신청했을 때 인덱스 이름이 그대로 나오던 문제 |
 
 > ✅ **세 마이그레이션 모두 운영 프로젝트(`wcsc`)에 적용했습니다.**
 > 새 프로젝트에 설치하실 때는 `supabase.sql` 하나만 실행하시면 같은 상태가 됩니다.
