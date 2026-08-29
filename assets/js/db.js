@@ -31,7 +31,8 @@ window.CAPSDB = (function () {
   };
 
   var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
-    'serviceContent', 'settings', 'editConsents', 'listings'];
+    'serviceContent', 'settings', 'editConsents', 'listings',
+    'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders'];
 
   /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
      (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
@@ -181,6 +182,158 @@ window.CAPSDB = (function () {
   var PHOTO_MAX_BYTES = 15 * 1024 * 1024; // 줄이기 전 원본 기준
   var PHOTO_LONG_EDGE = 1600;
   var PHOTO_QUALITY = 0.82;
+
+  /* =========================================================
+     중고 장터 (marketItems) · 게스트하우스 (guestHouses) ·
+     집회 티켓팅 (events · ticketOrders)
+
+     교역자를 돕는다는 뼈대는 그대로입니다. 다만 물건을 사고파는 일,
+     방을 내어 주는 일, 집회에 신청하는 일은 교역자만의 일이 아니라
+     성도가 함께 하는 일이라, 세 갈래는 로그인한 누구에게나 열려 있습니다.
+     ========================================================= */
+
+  /* ---------- 중고 장터 ---------- */
+
+  var MARKET_STATUS = {
+    pending: '확인 대기',
+    published: '판매중',
+    rejected: '반려',
+    hidden: '게시 중지',
+    done: '거래 완료',
+  };
+
+  /* '기타'를 고르면 직접 입력칸이 열립니다.
+     (build.js 의 장터 갈래 목록과 같은 값을 유지해야 합니다) */
+  var MARKET_CATEGORIES = {
+    sound: '음향 (스피커 · 믹서 · 앰프)',
+    mic: '마이크 · 무선',
+    instrument: '악기',
+    video: '영상 · 프로젝터',
+    light: '조명',
+    furniture: '집기 (강대상 · 의자 · 장의자)',
+    office: '사무 · 전산',
+    kitchen: '주방 · 식당',
+    education: '교육 · 유아부',
+    other: '기타',
+  };
+
+  /* 센터가 설치를 맡는 갈래 — 여기에 드는 물건은 등록 화면에서
+     "설치까지 맡기시겠어요?" 를 먼저 묻습니다. */
+  var MARKET_INSTALLABLE = ['sound', 'mic', 'video', 'light'];
+
+  var MARKET_CONDITION = {
+    new: '미개봉',
+    like_new: '거의 새것',
+    good: '상태 좋음',
+    used: '사용감 있음',
+    broken: '고장 · 부품용',
+  };
+
+  var MARKET_DELIVERY = {
+    pickup: '직접 가지러 오셔야 합니다',
+    deliver: '보내 드릴 수 있습니다',
+    both: '직접 오셔도, 보내 드려도 됩니다',
+  };
+
+  /* 설치 대행 — 센터가 실제로 돈을 받는 부분입니다.
+     (src/data/site.js 의 marketBoard.install 과 같은 값을 유지해야 합니다) */
+  var INSTALL_TIERS = {
+    pickup: { label: '운반만', price: 100000,
+      desc: '판매자 교회에서 싣고 와 사시는 교회 앞까지 내려 드립니다.' },
+    install: { label: '설치 · 배선', price: 150000,
+      desc: '거치 · 배선 · 전원 정리까지. 소리가 나는 상태로 넘겨 드립니다.' },
+    tuning: { label: '설치 + 음향 튜닝', price: 300000,
+      desc: '예배당에서 실제로 소리를 잡아 드립니다 (하울링 · 이퀄라이징 · 프리셋 저장).' },
+  };
+
+  var INSTALL_STATUS = {
+    received: '접수',
+    quoted: '견적 발송',
+    scheduled: '일정 확정',
+    done: '설치 완료',
+    canceled: '취소',
+  };
+
+  /* ---------- 교회 게스트하우스 ---------- */
+
+  var GUEST_STATUS = {
+    pending: '확인 대기',
+    published: '모집중',
+    rejected: '반려',
+    hidden: '게시 중지',
+    done: '마감',
+  };
+
+  var GUEST_ROOM_TYPE = {
+    private: '독립된 방 하나',
+    share: '방을 함께 씁니다',
+    whole: '집 전체',
+    dorm: '여러 명이 쓰는 방',
+  };
+
+  var GUEST_BATH = {
+    private: '방 안 화장실',
+    shared: '함께 쓰는 화장실',
+  };
+
+  /* 누가 머무를 수 있는지 — 여러 개 고를 수 있습니다. */
+  var GUEST_TYPES = {
+    missionary: '해외 선교사 · 사역자',
+    pastor: '방문 교역자',
+    student: '유학생 · 신학생',
+    family: '가족 단위',
+    team: '단기선교팀 · 청년팀',
+    anyone: '성도 누구나',
+  };
+
+  var GUEST_AMENITIES = {
+    wifi: '와이파이',
+    kitchen: '주방 사용',
+    laundry: '세탁기',
+    aircon: '에어컨',
+    heating: '난방',
+    desk: '책상',
+    parking: '주차',
+    bedding: '이불 · 침구 제공',
+    bath_item: '세면도구',
+    elevator: '엘리베이터',
+  };
+
+  var GUEST_LANGUAGES = ['한국어', 'English', '中文', '日本語', 'Español', 'Русский'];
+
+  /* ---------- 집회 · 찬양집회 티켓팅 ---------- */
+
+  var EVENT_STATUS = {
+    pending: '확인 대기',
+    published: '신청 받는 중',
+    closed: '마감',
+    rejected: '반려',
+    hidden: '게시 중지',
+    done: '종료',
+  };
+
+  var EVENT_CATEGORIES = {
+    praise: '찬양집회',
+    revival: '부흥회 · 사경회',
+    camp: '수련회 · 캠프',
+    seminar: '세미나 · 컨퍼런스',
+    concert: '음악회 · 공연',
+    prayer: '기도회',
+    youth: '청년 · 청소년',
+    other: '기타',
+  };
+
+  var TICKET_STATUS = {
+    confirmed: '신청 완료',
+    checked_in: '입장 확인',
+    canceled: '취소',
+  };
+
+  /** 집회 사진 최대 장수 — 포스터를 여러 장 올리는 집회가 많아 넉넉히 둡니다. */
+  var EVENT_PHOTO_MAX = 20;
+  /** 장터 · 게스트하우스 사진 최대 장수 */
+  var MARKET_PHOTO_MAX = 12;
+  var GUEST_PHOTO_MAX = 15;
 
   /* ---------------- 공통 유틸 ---------------- */
 
@@ -1137,6 +1290,11 @@ window.CAPSDB = (function () {
       settings: 'settings',
       editConsents: 'edit_consents',
       listings: 'listings',
+      marketItems: 'market_items',
+      installRequests: 'install_requests',
+      guestHouses: 'guest_houses',
+      events: 'events',
+      ticketOrders: 'ticket_orders',
     };
 
     /** 문서 통째로 jsonb 한 칸에 담는 표 (내용이 자유로워서) */
@@ -1146,7 +1304,7 @@ window.CAPSDB = (function () {
     var PK = { editConsents: 'customer_id' };
 
     /** 비어 있으면 '' 가 아니라 null 이어야 하는 열 (uuid) */
-    var UUID_KEYS = ['userId', 'customerId', 'assigneeId'];
+    var UUID_KEYS = ['userId', 'customerId', 'assigneeId', 'itemId', 'eventId'];
 
     function snake(k) {
       return k.replace(/[A-Z]/g, function (c) { return '_' + c.toLowerCase(); });
@@ -1631,6 +1789,21 @@ window.CAPSDB = (function () {
         };
       },
 
+      /**
+       * 데이터베이스 함수 호출 (Supabase 전용).
+       * 티켓 예약처럼 "확인하고 나서 올린다"를 한 번에 해야 하는 일은
+       * 브라우저에서 나눠 하면 동시에 눌린 신청이 정원을 넘길 수 있습니다.
+       * 그래서 서버 함수 하나로 묶어 부릅니다.
+       */
+      rpc: function (name, args) {
+        return guard().then(function () {
+          return sb.rpc(name, args || {}).then(function (res) {
+            if (res.error) throw new Error(say(res.error));
+            return res.data;
+          });
+        });
+      },
+
       files: {
         upload: function (path, file) {
           return guard().then(function () {
@@ -1714,6 +1887,28 @@ window.CAPSDB = (function () {
     PHOTO_MIN_HINT: PHOTO_MIN_HINT,
     PHOTO_REC_TOP: PHOTO_REC_TOP,
     PHOTO_MAX_BYTES: PHOTO_MAX_BYTES,
+
+    MARKET_STATUS: MARKET_STATUS,
+    MARKET_CATEGORIES: MARKET_CATEGORIES,
+    MARKET_INSTALLABLE: MARKET_INSTALLABLE,
+    MARKET_CONDITION: MARKET_CONDITION,
+    MARKET_DELIVERY: MARKET_DELIVERY,
+    MARKET_PHOTO_MAX: MARKET_PHOTO_MAX,
+    INSTALL_TIERS: INSTALL_TIERS,
+    INSTALL_STATUS: INSTALL_STATUS,
+
+    GUEST_STATUS: GUEST_STATUS,
+    GUEST_ROOM_TYPE: GUEST_ROOM_TYPE,
+    GUEST_BATH: GUEST_BATH,
+    GUEST_TYPES: GUEST_TYPES,
+    GUEST_AMENITIES: GUEST_AMENITIES,
+    GUEST_LANGUAGES: GUEST_LANGUAGES,
+    GUEST_PHOTO_MAX: GUEST_PHOTO_MAX,
+
+    EVENT_STATUS: EVENT_STATUS,
+    EVENT_CATEGORIES: EVENT_CATEGORIES,
+    EVENT_PHOTO_MAX: EVENT_PHOTO_MAX,
+    TICKET_STATUS: TICKET_STATUS,
 
     files: adapter.files,
 
@@ -2304,6 +2499,714 @@ window.CAPSDB = (function () {
     /** 관리자 화면 — 전체 목록 */
     allListings: function () {
       return adapter.list('listings');
+    },
+
+    /* =====================================================
+       중고 장터 (marketItems)
+
+       부동산 매물과 흐름은 같지만 두 가지가 다릅니다.
+         · 권리 증빙 서류가 없습니다 — 대신 등록비도 받지 않습니다.
+         · 센터의 몫은 등록비가 아니라 **설치 대행료** 입니다.
+           스피커 · 믹서를 중고로 싸게 사도, 예배당에 다는 일은 남습니다.
+           그 일을 센터 음향팀이 맡고 비용을 받습니다.
+       ===================================================== */
+
+    /** 지금 팔고 있는 글인지 */
+    marketLive: function (row) {
+      return !!row && row.status === 'published';
+    },
+
+    /** 화면 표시용 */
+    marketView: function (row) {
+      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, photos: [] };
+      var cat = row.category === 'other'
+        ? (String(row.categoryOther || '').trim() || '기타')
+        : (MARKET_CATEGORIES[row.category] || row.category || '');
+      var up = null;
+      if (row.publishedAt) {
+        up = Math.max(0, Math.floor((Date.now() - new Date(row.publishedAt).getTime()) / 864e5));
+      }
+      return {
+        status: row.status,
+        label: MARKET_STATUS[row.status] || row.status,
+        cls: row.status,
+        live: row.status === 'published',
+        up: up,
+        categoryLabel: cat,
+        conditionLabel: MARKET_CONDITION[row.condition] || row.condition || '',
+        deliveryLabel: MARKET_DELIVERY[row.delivery] || '',
+        // 센터가 달아 드릴 수 있는 물건인지 — 음향 · 영상 · 조명이 여기 듭니다.
+        installable: row.installOk !== false && MARKET_INSTALLABLE.indexOf(row.category) > -1,
+        photos: Array.isArray(row.photos) ? row.photos : [],
+      };
+    },
+
+    /** 값 한 줄 */
+    marketPrice: function (row) {
+      if (!row) return '-';
+      if (row.freeGiveaway) return '무료 나눔';
+      if (!Number(row.price)) return '가격 문의';
+      return api.money(row.price) + '원' + (row.negotiable ? ' (조정 가능)' : '');
+    },
+
+    /** 설치 대행 견적 — 실측 전 어림값입니다. */
+    installQuote: function (tier, qty) {
+      var t = INSTALL_TIERS[tier] || INSTALL_TIERS.install;
+      var n = Math.max(1, Number(qty) || 1);
+      // 대수가 늘어도 출장은 한 번이라, 두 번째부터는 절반만 더합니다.
+      var amount = t.price + Math.round(t.price * 0.5) * (n - 1);
+      return { tier: tier, label: t.label, desc: t.desc, unit: t.price, amount: amount };
+    },
+
+    /** 장터 등록 — 언제나 '확인 대기'로 시작합니다. */
+    submitMarketItem: function (data) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('물건을 올리려면 로그인해 주세요.'));
+      var record = Object.assign({
+        category: 'sound', categoryOther: '', title: '', brand: '', model: '',
+        condition: 'good', boughtYear: '', quantity: 1,
+        price: 0, negotiable: false, freeGiveaway: false,
+        region: '', addressRough: '', installOk: true, installNote: '',
+        delivery: 'pickup', desc: '',
+        contactName: '', contactPhone: '', contactHours: '', photos: [],
+      }, data, {
+        userId: me.id,
+        userEmail: me.email || '',
+        status: 'pending',
+        rejectNote: '', views: 0,
+        reviewedBy: '', reviewedAt: '', publishedAt: '', hiddenAt: '',
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
+      return adapter.add('marketItems', record);
+    },
+
+    /** 등록자가 고칩니다 — 고친 글은 다시 확인을 받습니다. */
+    saveMarketItem: function (id, data) {
+      return adapter.update('marketItems', id, Object.assign({}, data, {
+        status: 'pending', rejectNote: '',
+        reviewedBy: '', reviewedAt: '', publishedAt: '',
+        updatedAt: nowIso(),
+      }));
+    },
+
+    /** 관리자 → 게시 */
+    approveMarketItem: function (id) {
+      var me = adapter.auth.current();
+      return adapter.update('marketItems', id, {
+        status: 'published', publishedAt: nowIso(), rejectNote: '', hiddenAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 관리자 → 반려 (사유 필수 — 등록자에게 그대로 보입니다) */
+    rejectMarketItem: function (id, note) {
+      var me = adapter.auth.current();
+      var reason = String(note || '').trim();
+      if (!reason) return Promise.reject(new Error('반려 사유를 적어 주세요. 등록자에게 그대로 보입니다.'));
+      return adapter.update('marketItems', id, {
+        status: 'rejected', rejectNote: reason, publishedAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 관리자 → 내리기 */
+    hideMarketItem: function (id, note) {
+      var me = adapter.auth.current();
+      return adapter.update('marketItems', id, {
+        status: 'hidden', hiddenAt: nowIso(), rejectNote: String(note || '').trim(),
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 팔렸습니다 — 판 사람이 직접 내립니다 (센터는 알 방법이 없습니다). */
+    markMarketDone: function (id) {
+      return adapter.update('marketItems', id, { status: 'done', updatedAt: nowIso() });
+    },
+
+    deleteMarketItem: function (row) {
+      var id = typeof row === 'string' ? row : (row && row.id);
+      if (!id) return Promise.resolve();
+      var doc = typeof row === 'object' ? row : null;
+      var paths = (doc && Array.isArray(doc.photos) ? doc.photos : [])
+        .filter(function (ph) { return ph && ph.path; }).map(function (ph) { return ph.path; });
+      return adapter.remove('marketItems', id).then(function () {
+        return Promise.all(paths.map(function (p) {
+          return adapter.files.remove(p).catch(function () { return null; });
+        }));
+      });
+    },
+
+    publishedMarketItems: function () {
+      return adapter.list('marketItems', { where: { status: 'published' } })
+        .catch(function () { return []; });
+    },
+
+    myMarketItems: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('marketItems', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    allMarketItems: function () {
+      return adapter.list('marketItems');
+    },
+
+    /* -------- 설치 대행 문의 --------
+       물건을 산 교회가 "달아 주세요" 하고 부르는 창구입니다.
+       여기가 센터의 수익이 나는 자리라, 접수되면 관리자 화면에 바로 뜹니다. */
+
+    submitInstallRequest: function (data) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('설치를 신청하려면 로그인해 주세요.'));
+      var tier = INSTALL_TIERS[data && data.tier] ? data.tier : 'install';
+      var record = Object.assign({
+        itemId: '', itemTitle: '', churchName: '', region: '', address: '',
+        floor: '', elevator: '', wishDate: '',
+        contactName: '', contactPhone: '', contactHours: '', note: '',
+      }, data, {
+        tier: tier,
+        userId: me.id,
+        userEmail: me.email || '',
+        status: 'received',
+        quoteAmount: 0, quoteNote: '', assigneeId: '',
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
+      return adapter.add('installRequests', record);
+    },
+
+    /** 관리자 → 견적 · 일정 · 완료 처리 */
+    updateInstallRequest: function (id, patch) {
+      return adapter.update('installRequests', id, Object.assign({}, patch, { updatedAt: nowIso() }));
+    },
+
+    myInstallRequests: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('installRequests', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    allInstallRequests: function () {
+      return adapter.list('installRequests');
+    },
+
+    /* =====================================================
+       교회 게스트하우스 (guestHouses)
+
+       비어 있는 사택 · 선교관을 교회가 내어 놓고,
+       해외에서 들어와 한국에 머무르는 사역자 · 선교사 · 유학생이 빌려 씁니다.
+       센터는 게시판만 봅니다 — 요금과 기간은 두 분이 직접 정하십니다.
+       ===================================================== */
+
+    guestLive: function (row) {
+      return !!row && row.status === 'published';
+    },
+
+    guestView: function (row) {
+      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, photos: [] };
+      var types = (Array.isArray(row.guestTypes) ? row.guestTypes : [])
+        .map(function (k) { return GUEST_TYPES[k] || k; });
+      var amen = (Array.isArray(row.amenities) ? row.amenities : [])
+        .map(function (k) { return GUEST_AMENITIES[k] || k; });
+      return {
+        status: row.status,
+        label: GUEST_STATUS[row.status] || row.status,
+        cls: row.status,
+        live: row.status === 'published',
+        roomLabel: GUEST_ROOM_TYPE[row.roomType] || row.roomType || '',
+        bathLabel: GUEST_BATH[row.bath] || '',
+        typeLabels: types,
+        amenityLabels: amen,
+        languages: Array.isArray(row.languages) ? row.languages : [],
+        photos: Array.isArray(row.photos) ? row.photos : [],
+      };
+    },
+
+    /** 요금 한 줄 — 채워 넣은 단위만 보여 줍니다. */
+    guestPrice: function (row) {
+      if (!row) return '-';
+      if (row.freeStay) return '무료 (사례는 교회와 상의)';
+      var m = api.money;
+      var bits = [];
+      if (Number(row.priceNight)) bits.push('1박 ' + m(row.priceNight) + '원');
+      if (Number(row.priceWeek)) bits.push('주 ' + m(row.priceWeek) + '원');
+      if (Number(row.priceMonth)) bits.push('월 ' + m(row.priceMonth) + '원');
+      return bits.length ? bits.join(' · ') : '요금 문의';
+    },
+
+    submitGuestHouse: function (data) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('게스트하우스를 올리려면 로그인해 주세요.'));
+      var record = Object.assign({
+        churchName: '', denomination: '', title: '', roomType: 'private',
+        guestsMax: 2, rooms: 1, beds: '', bath: 'private',
+        region: '', addressRough: '', nearest: '',
+        priceNight: 0, priceWeek: 0, priceMonth: 0, deposit: 0, freeStay: false,
+        minNights: 1, maxNights: 0,
+        guestTypes: [], amenities: [], houseRules: '', languages: [],
+        availableFrom: '', availableTo: '', desc: '',
+        contactName: '', contactPhone: '', contactHours: '', photos: [],
+      }, data, {
+        userId: me.id,
+        userEmail: me.email || '',
+        status: 'pending',
+        rejectNote: '', views: 0,
+        reviewedBy: '', reviewedAt: '', publishedAt: '', hiddenAt: '',
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
+      return adapter.add('guestHouses', record);
+    },
+
+    saveGuestHouse: function (id, data) {
+      return adapter.update('guestHouses', id, Object.assign({}, data, {
+        status: 'pending', rejectNote: '',
+        reviewedBy: '', reviewedAt: '', publishedAt: '',
+        updatedAt: nowIso(),
+      }));
+    },
+
+    approveGuestHouse: function (id) {
+      var me = adapter.auth.current();
+      return adapter.update('guestHouses', id, {
+        status: 'published', publishedAt: nowIso(), rejectNote: '', hiddenAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    rejectGuestHouse: function (id, note) {
+      var me = adapter.auth.current();
+      var reason = String(note || '').trim();
+      if (!reason) return Promise.reject(new Error('반려 사유를 적어 주세요. 등록자에게 그대로 보입니다.'));
+      return adapter.update('guestHouses', id, {
+        status: 'rejected', rejectNote: reason, publishedAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    hideGuestHouse: function (id, note) {
+      var me = adapter.auth.current();
+      return adapter.update('guestHouses', id, {
+        status: 'hidden', hiddenAt: nowIso(), rejectNote: String(note || '').trim(),
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 방이 나갔습니다 — 내어 놓은 교회가 직접 내립니다. */
+    markGuestDone: function (id) {
+      return adapter.update('guestHouses', id, { status: 'done', updatedAt: nowIso() });
+    },
+
+    deleteGuestHouse: function (row) {
+      var id = typeof row === 'string' ? row : (row && row.id);
+      if (!id) return Promise.resolve();
+      var doc = typeof row === 'object' ? row : null;
+      var paths = (doc && Array.isArray(doc.photos) ? doc.photos : [])
+        .filter(function (ph) { return ph && ph.path; }).map(function (ph) { return ph.path; });
+      return adapter.remove('guestHouses', id).then(function () {
+        return Promise.all(paths.map(function (p) {
+          return adapter.files.remove(p).catch(function () { return null; });
+        }));
+      });
+    },
+
+    publishedGuestHouses: function () {
+      return adapter.list('guestHouses', { where: { status: 'published' } })
+        .catch(function () { return []; });
+    },
+
+    myGuestHouses: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('guestHouses', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    allGuestHouses: function () {
+      return adapter.list('guestHouses');
+    },
+
+    /* =====================================================
+       집회 · 찬양집회 티켓팅 (events · ticketOrders)
+
+       흐름
+         1. 주최 측이 집회를 올립니다                     → pending
+         2. 관리자가 주최 · 장소 · 일시를 확인해 게시      → published
+         3. 예매 시작 시각(openAt)이 되어야 버튼이 열립니다
+         4. 정원이 차면 자동으로                          → closed
+              "정원이 모두 찼습니다 — 마감되었습니다"
+
+       정원 확인과 자리 차지를 브라우저에서 나눠 하면,
+       오픈 직후 동시에 눌린 신청이 정원을 넘길 수 있습니다.
+       그래서 신청은 데이터베이스 함수 reserve_tickets() 한 번으로 처리합니다.
+       ===================================================== */
+
+    /** 예매가 열리는 시각이 지났는지 */
+    ticketOpen: function (row) {
+      if (!row || !row.openAt) return true;
+      return Date.now() >= new Date(row.openAt).getTime();
+    },
+
+    /** 남은 자리 — 정원이 0 이면 제한 없음(null) */
+    seatsLeft: function (row) {
+      if (!row || !Number(row.capacity)) return null;
+      return Math.max(0, Number(row.capacity) - Number(row.taken || 0));
+    },
+
+    /**
+     * 신청 버튼의 상태를 한 곳에서 정합니다.
+     * 화면 세 군데(목록 · 상세 · 내 신청)가 같은 답을 쓰게 하려는 것입니다.
+     */
+    eventView: function (row) {
+      if (!row) {
+        return { status: 'none', label: '-', cls: 'none', can: false, why: '', photos: [] };
+      }
+      var left = api.seatsLeft(row);
+      var opened = api.ticketOpen(row);
+      var closedByTime = !!row.closeAt && Date.now() > new Date(row.closeAt).getTime();
+      var over = !!row.startsAt && Date.now() > new Date(row.startsAt).getTime();
+      var full = left === 0;
+
+      var status = row.status;
+      if (status === 'published') {
+        if (full) status = 'closed';
+        else if (over) status = 'done';
+      }
+
+      var can = row.status === 'published' && !full && !closedByTime && !over && opened;
+      var why = '';
+      if (row.status === 'closed' || full) why = '정원이 모두 찼습니다 — 신청이 마감되었습니다.';
+      else if (row.status !== 'published') why = '지금은 신청을 받지 않습니다.';
+      else if (over) why = '이미 지난 집회입니다.';
+      else if (closedByTime) why = '신청 기간이 끝났습니다.';
+      else if (!opened) why = '아직 예매가 열리지 않았습니다.';
+
+      return {
+        status: status,
+        label: EVENT_STATUS[status] || status,
+        cls: status,
+        categoryLabel: EVENT_CATEGORIES[row.category] || row.category || '',
+        can: can,
+        why: why,
+        opened: opened,
+        full: full,
+        over: over,
+        left: left,
+        capacity: Number(row.capacity) || 0,
+        taken: Number(row.taken) || 0,
+        // 정원 대비 얼마나 찼는지 (막대 그래프용)
+        pct: Number(row.capacity) > 0
+          ? Math.min(100, Math.round((Number(row.taken) || 0) / Number(row.capacity) * 100))
+          : null,
+        seating: !!row.seatingOn,
+        perPersonMax: Number(row.perPersonMax) > 0 ? Number(row.perPersonMax) : 4,
+        photos: Array.isArray(row.photos) ? row.photos : [],
+        poster: row.poster || (Array.isArray(row.photos) && row.photos[0]) || null,
+      };
+    },
+
+    /** 참가비 한 줄 — 얼리버드가 살아 있으면 그 값을 앞세웁니다. */
+    eventPrice: function (row) {
+      if (!row) return '-';
+      if (row.freeEvent) return '무료';
+      var m = api.money;
+      var early = Number(row.earlyPrice) > 0
+        && (!row.earlyUntil || Date.now() <= new Date(row.earlyUntil).getTime());
+      if (early) return '얼리버드 ' + m(row.earlyPrice) + '원 (정가 ' + m(row.price) + '원)';
+      if (!Number(row.price)) return '무료';
+      return m(row.price) + '원';
+    },
+
+    /** 예매 시작까지 남은 시간 — 초 단위. 이미 열렸으면 0.
+     *  올림으로 셉니다 — 반올림하면 아직 열리지 않았는데 "0초"가 떠서
+     *  화면이 열린 것처럼 보이는 순간이 생깁니다. */
+    openInSeconds: function (row) {
+      if (!row || !row.openAt) return 0;
+      return Math.max(0, Math.ceil((new Date(row.openAt).getTime() - Date.now()) / 1000));
+    },
+
+    /* -------- 좌석도 --------
+       필수가 아닙니다. 쓰지 않으면 인원수로만 받습니다.
+       모양은 { rows: [{ name, seats: [{ id, no, off }] }], note } 입니다.
+       'off' 는 통로 · 기둥처럼 앉을 수 없는 자리입니다. */
+
+    /** 줄 수 · 줄당 좌석 수로 기본 좌석도를 만듭니다. */
+    makeSeatmap: function (rowCount, perRow, note) {
+      var rows = [];
+      var n = Math.max(1, Math.min(30, Number(rowCount) || 0));
+      var w = Math.max(1, Math.min(40, Number(perRow) || 0));
+      for (var i = 0; i < n; i++) {
+        var name = String.fromCharCode(65 + (i % 26)) + (i >= 26 ? String(Math.floor(i / 26) + 1) : '');
+        var seats = [];
+        for (var j = 1; j <= w; j++) {
+          seats.push({ id: name + '-' + j, no: String(j), off: false });
+        }
+        rows.push({ name: name, seats: seats });
+      }
+      return { rows: rows, note: String(note || '') };
+    },
+
+    /** 좌석도에서 실제로 앉을 수 있는 자리 수 */
+    seatmapCount: function (map) {
+      var rows = (map && Array.isArray(map.rows)) ? map.rows : [];
+      return rows.reduce(function (sum, r) {
+        return sum + (r.seats || []).filter(function (s) { return !s.off; }).length;
+      }, 0);
+    },
+
+    /** 이미 팔린 좌석 아이디 목록 */
+    takenSeats: function (orders) {
+      var out = {};
+      (orders || []).forEach(function (o) {
+        if (!o || o.status === 'canceled') return;
+        (Array.isArray(o.seats) ? o.seats : []).forEach(function (id) { out[id] = true; });
+      });
+      return out;
+    },
+
+    submitEvent: function (data) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('집회를 올리려면 로그인해 주세요.'));
+      var record = Object.assign({
+        category: 'praise', title: '', subtitle: '', host: '', speakers: '',
+        region: '', venue: '', address: '',
+        startsAt: '', endsAt: '', scheduleNote: '',
+        openAt: '', closeAt: '', capacity: 0, perPersonMax: 4,
+        price: 0, earlyPrice: 0, earlyUntil: '', freeEvent: false, ageNote: '',
+        seatingOn: false, seatmap: {}, poster: null, photos: [],
+        desc: '', notice: '',
+        contactName: '', contactPhone: '', contactHours: '',
+      }, data, {
+        userId: me.id,
+        userEmail: me.email || '',
+        status: 'pending',
+        taken: 0,
+        rejectNote: '', views: 0,
+        reviewedBy: '', reviewedAt: '', publishedAt: '', hiddenAt: '',
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
+      return adapter.add('events', record);
+    },
+
+    /**
+     * 주최자가 내용을 고칩니다.
+     * 이미 신청한 분이 있으면 정원 · 일시를 함부로 바꿀 수 없게 막습니다 —
+     * 신청해 둔 분들의 약속이 조용히 바뀌는 일을 막기 위한 것입니다.
+     */
+    saveEvent: function (id, data, current) {
+      var taken = Number(current && current.taken) || 0;
+      if (taken > 0) {
+        var cap = Number(data.capacity) || 0;
+        if (cap > 0 && cap < taken) {
+          return Promise.reject(new Error(
+            '이미 ' + taken + '명이 신청하셨습니다. 정원을 그보다 적게 줄이실 수 없습니다.'
+          ));
+        }
+      }
+      return adapter.update('events', id, Object.assign({}, data, {
+        status: 'pending', rejectNote: '',
+        reviewedBy: '', reviewedAt: '', publishedAt: '',
+        updatedAt: nowIso(),
+      }));
+    },
+
+    approveEvent: function (id) {
+      var me = adapter.auth.current();
+      return adapter.update('events', id, {
+        status: 'published', publishedAt: nowIso(), rejectNote: '', hiddenAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    rejectEvent: function (id, note) {
+      var me = adapter.auth.current();
+      var reason = String(note || '').trim();
+      if (!reason) return Promise.reject(new Error('반려 사유를 적어 주세요. 주최 측에 그대로 보입니다.'));
+      return adapter.update('events', id, {
+        status: 'rejected', rejectNote: reason, publishedAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    hideEvent: function (id, note) {
+      var me = adapter.auth.current();
+      return adapter.update('events', id, {
+        status: 'hidden', hiddenAt: nowIso(), rejectNote: String(note || '').trim(),
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 주최자 · 관리자가 손으로 마감합니다 (정원이 남아 있어도). */
+    closeEvent: function (id) {
+      return adapter.update('events', id, { status: 'closed', updatedAt: nowIso() });
+    },
+
+    /** 마감을 풀어 다시 신청을 받습니다. */
+    reopenEvent: function (id) {
+      return adapter.update('events', id, { status: 'published', updatedAt: nowIso() });
+    },
+
+    deleteEvent: function (row) {
+      var id = typeof row === 'string' ? row : (row && row.id);
+      if (!id) return Promise.resolve();
+      var doc = typeof row === 'object' ? row : null;
+      var paths = (doc && Array.isArray(doc.photos) ? doc.photos : [])
+        .filter(function (ph) { return ph && ph.path; }).map(function (ph) { return ph.path; });
+      return adapter.remove('events', id).then(function () {
+        return Promise.all(paths.map(function (p) {
+          return adapter.files.remove(p).catch(function () { return null; });
+        }));
+      });
+    },
+
+    /** 공개 목록 — 마감된 집회도 함께 보여 줍니다 ("마감" 을 읽어야 하니까요). */
+    publishedEvents: function () {
+      var wanted = { published: true, closed: true, done: true };
+      return adapter.list('events')
+        .then(function (rows) {
+          return rows.filter(function (r) { return wanted[r.status]; });
+        })
+        .catch(function () {
+          // 로그인 없이 보는 경우, 조회 범위를 좁혀 다시 시도합니다.
+          return adapter.list('events', { where: { status: 'published' } })
+            .catch(function () { return []; });
+        });
+    },
+
+    myEvents: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('events', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    allEvents: function () {
+      return adapter.list('events');
+    },
+
+    /* -------- 신청 (ticketOrders) -------- */
+
+    /**
+     * 신청합니다.
+     * Supabase 에서는 데이터베이스 함수 하나로 처리합니다 — 정원 확인과
+     * 자리 차지가 같은 잠금 안에서 일어나야 동시 신청에도 정원을 넘지 않습니다.
+     * 설정이 없는 데모(브라우저 저장소)에서는 같은 순서를 흉내 냅니다.
+     */
+    reserveTickets: function (eventId, opts) {
+      var o = opts || {};
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('신청하려면 로그인해 주세요.'));
+      var qty = Math.max(1, Number(o.qty) || 1);
+      var seats = Array.isArray(o.seats) ? o.seats : [];
+
+      if (adapter.rpc) {
+        return adapter.rpc('reserve_tickets', {
+          p_event: eventId,
+          p_qty: qty,
+          p_seats: seats,
+          p_name: o.name || '',
+          p_phone: o.phone || '',
+          p_church: o.churchName || '',
+          p_note: o.note || '',
+        });
+      }
+
+      // 데모 — 한 사람만 쓰는 브라우저 저장소라 경쟁이 없습니다.
+      return adapter.get('events', eventId).then(function (ev) {
+        if (!ev) throw new Error('집회를 찾을 수 없습니다.');
+        var v = api.eventView(ev);
+        if (!v.can) throw new Error(v.why || '지금은 신청을 받지 않습니다.');
+        if (qty > v.perPersonMax) {
+          throw new Error('한 번에 최대 ' + v.perPersonMax + '명까지 신청하실 수 있습니다.');
+        }
+        if (v.left != null && qty > v.left) {
+          throw new Error('정원이 모두 찼습니다. (남은 자리 ' + v.left + '석)');
+        }
+        return adapter.list('ticketOrders', { where: { eventId: eventId } }).then(function (orders) {
+          var mine = (orders || []).filter(function (r) {
+            return r.userId === me.id && r.status !== 'canceled';
+          });
+          if (mine.length) throw new Error('이미 신청하셨습니다. [내 신청 내역] 에서 확인해 주세요.');
+          if (v.seating) {
+            if (seats.length !== qty) throw new Error('좌석을 ' + qty + '개 골라 주세요.');
+            var taken = api.takenSeats(orders);
+            var clash = seats.filter(function (s) { return taken[s]; });
+            if (clash.length) {
+              throw new Error('방금 다른 분이 먼저 잡은 좌석이 있습니다. 좌석도를 새로 고쳐 주세요.');
+            }
+          }
+          return adapter.add('ticketOrders', {
+            eventId: eventId,
+            userId: me.id,
+            userEmail: me.email || '',
+            eventTitle: ev.title || '',
+            qty: qty,
+            seats: v.seating ? seats : [],
+            name: o.name || '',
+            phone: o.phone || '',
+            churchName: o.churchName || '',
+            note: o.note || '',
+            status: 'confirmed',
+            code: Math.random().toString(36).slice(2, 10).toUpperCase(),
+            canceledAt: '',
+            createdAt: nowIso(),
+            updatedAt: nowIso(),
+          }).then(function (saved) {
+            var next = Number(ev.taken || 0) + qty;
+            return adapter.update('events', eventId, {
+              taken: next,
+              status: (Number(ev.capacity) > 0 && next >= Number(ev.capacity)) ? 'closed' : ev.status,
+              updatedAt: nowIso(),
+            }).then(function () { return saved; });
+          });
+        });
+      });
+    },
+
+    /** 신청 취소 — 자리를 정원으로 되돌립니다. */
+    cancelTicket: function (orderId) {
+      if (adapter.rpc) {
+        return adapter.rpc('cancel_ticket', { p_order: orderId });
+      }
+      return adapter.get('ticketOrders', orderId).then(function (o) {
+        if (!o) throw new Error('신청 내역을 찾을 수 없습니다.');
+        if (o.status === 'canceled') return null;
+        return adapter.update('ticketOrders', orderId, {
+          status: 'canceled', canceledAt: nowIso(), updatedAt: nowIso(),
+        }).then(function () {
+          return adapter.get('events', o.eventId).then(function (ev) {
+            if (!ev) return null;
+            return adapter.update('events', o.eventId, {
+              taken: Math.max(0, Number(ev.taken || 0) - Number(o.qty || 0)),
+              status: ev.status === 'closed' ? 'published' : ev.status,
+              updatedAt: nowIso(),
+            });
+          });
+        });
+      });
+    },
+
+    /** 내 신청 내역 */
+    myTickets: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('ticketOrders', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    /** 한 집회의 신청자 명단 (주최자 · 직원만 읽힙니다) */
+    eventTickets: function (eventId) {
+      return adapter.list('ticketOrders', { where: { eventId: eventId } })
+        .catch(function () { return []; });
+    },
+
+    allTickets: function () {
+      return adapter.list('ticketOrders');
+    },
+
+    /** 관리자 · 주최자 → 입장 확인 */
+    checkInTicket: function (id) {
+      return adapter.update('ticketOrders', id, { status: 'checked_in', updatedAt: nowIso() });
     },
 
     /** 관리자 화면에 들어올 수 있는 계정인지 */
