@@ -2288,3 +2288,23 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
 body[data-mk-pane]:not([data-mk-pane="list"]) .page-hero,
 body[data-gh-pane]:not([data-gh-pane="list"]) .page-hero,
 body[data-tk-pane]:not([data-tk-pane="list"]) .page-hero { display: none; }
+
+/* 요금제 준비 중 안내 — 요금제를 다시 짜는 동안 내용을 내려 두고 이 상자만 보여 줍니다 */
+.renew-box {
+  padding: 40px 36px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-soft);
+  text-align: center;
+}
+.renew-box h2 { margin: 0 0 12px; font-size: 20px; }
+.renew-box p { margin: 0; color: var(--ink-2); line-height: 1.8; }
+.renew-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 26px 0 20px;
+}
+.renew-fine { font-size: 13.5px; color: var(--muted) !important; }
+.renew-fine a { color: var(--brand-700); }

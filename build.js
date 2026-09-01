@@ -981,70 +981,36 @@ function planCard(p) {
 }
 
 function buildPricing() {
+  /* 요금제를 다시 짜는 동안 내용을 내려 둡니다.
+     주소는 살려 두고(들어오시는 분이 404 를 만나지 않게) 안내만 보여 줍니다.
+     요금제 내용(plans · trial · invite)은 src/data/site.js 에 그대로 있으니,
+     다시 여실 때는 이 함수만 예전 모양으로 되돌리면 됩니다. */
   const body = `
 ${pageHero({
   eyebrow: '요금제',
-  title: '먼저 30일 써 보시고<br>정하십시오',
-  lead: '카드 등록 없이 시작합니다. 체험이 끝나면 자동으로 무료 회원으로 내려가니, '
-    + '모르는 사이에 결제되는 일이 없습니다.',
+  title: '요금제를 다시 짜고 있습니다',
+  lead: '더 알맞은 기준으로 고쳐 쓰는 중입니다. 준비되는 대로 이 자리에 올려 드리겠습니다.',
 })}
 
 <section class="section">
-  <div class="wrap">
-    <div class="plan-switch" id="planSwitch" role="group" aria-label="결제 주기">
-      <button type="button" class="is-on" data-cycle="month">월 납부</button>
-      <button type="button" data-cycle="year">연납 <span>2개월 무료</span></button>
-    </div>
-
-    <div class="plans">
-      ${plans.map(planCard).join('\n      ')}
-    </div>
-
-    <ul class="plan-rules">
-      <li>${icon('check', 'ico ico-xs')}<span>${esc(planRules.vat)}이며, ${esc(planRules.cancel)}</span></li>
-      <li>${icon('check', 'ico ico-xs')}<span><b>${esc(planRules.smallChurch.label)}</b> — ${esc(planRules.smallChurch.desc)}</span></li>
-      <li>${icon('check', 'ico ico-xs')}<span><b>${esc(planRules.yearlyLabel)}</b> — ${esc(planRules.yearlyNote)}</span></li>
-    </ul>
-  </div>
-</section>
-
-<section class="section section-alt">
-  <div class="wrap">
-    ${sectionHead('무료 체험', trial.headline, trial.lead)}
-    <div class="trial-grid">
-      <div class="trial-box">
-        <p class="trial-plan">체험 기간에는 <b>${esc(trial.planName)} 요금제</b>를 그대로 엽니다</p>
-        <dl class="trial-list">
-          ${trial.includes.map((t) => `<div><dt>${esc(t.k)}</dt><dd>${esc(t.v)}</dd></div>`).join('\n          ')}
-        </dl>
+  <div class="wrap narrow">
+    <div class="renew-box">
+      <h2>지금은 요금을 안내해 드리지 못합니다</h2>
+      <p>
+        비용이 궁금하시면 전화나 문의로 알려 주세요. 지금 필요하신 항목만 놓고
+        견적을 따로 내어 드립니다. 상담과 견적에는 비용이 들지 않습니다.
+      </p>
+      <div class="renew-actions">
+        <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+        <a class="btn btn-outline btn-lg" href="contact.html">문의하기</a>
       </div>
-      <div class="trial-side">
-        <h3>왜 30일인가</h3>
-        <p>${esc(trial.why)}</p>
-        <ul class="trial-rules">
-          ${trial.rules.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n          ')}
-        </ul>
-        <a class="btn btn-primary" href="apply.html?trial=1">30일 체험 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
-      </div>
+      <p class="renew-fine">
+        홈페이지 · 인투오피스처럼 이미 금액이 정해진 항목은
+        <a href="services/index.html">지원 항목</a> 에서 그대로 보실 수 있습니다.
+      </p>
     </div>
   </div>
 </section>
-
-<section class="section">
-  <div class="wrap">
-    ${sectionHead('초대 할인', invite.headline, invite.lead)}
-    <div class="inv-tiers">
-      ${invite.tiers.map((t, i) => `<div class="inv-tier${i === invite.tiers.length - 1 ? ' is-top' : ''}">
-        <strong>${t.pct}%</strong>
-        <span>${t.count}곳${i === invite.tiers.length - 1 ? ' 이상' : ''} 초대</span>
-      </div>`).join('\n      ')}
-    </div>
-    <ul class="inv-rules">
-      ${invite.rules.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n      ')}
-    </ul>
-  </div>
-</section>
-
 
 ${ctaBand('')}
 `;
@@ -1052,14 +1018,13 @@ ${ctaBand('')}
   write(
     'pricing.html',
     layout({
-      title: '요금제 | 우리교회지원센터',
+      title: '요금제 (준비 중) | 우리교회지원센터',
       description:
-        '커뮤니티(무료)부터 입문 14,900원, 기본 39,000원, 사역 89,000원, 전체 179,000원까지. '
-        + '30일 무료 체험은 카드 등록 없이 시작하고, 초대하면 최대 30% 할인됩니다.',
+        '요금제를 다시 짜고 있습니다. 준비되는 대로 안내해 드리며, '
+        + '그 사이에는 필요하신 항목만 놓고 견적을 따로 내어 드립니다.',
       base: '',
       active: 'pricing.html',
       body,
-      scripts: ['pricing.js'],
     })
   );
 }
