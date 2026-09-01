@@ -353,7 +353,7 @@ table { border-collapse: collapse; width: 100%; }
   background: var(--gold-400); color: var(--gold-ink-deep);
   font-size: 12.5px; font-weight: 800; letter-spacing: .02em;
 }
-.cat-free h3 { font-size: 23px; letter-spacing: -.045em; }
+.cat-free h3 { font-size: 23px; letter-spacing: -.045em; color: #fff; }
 .cat-free p { margin-top: 6px; font-size: 15px; line-height: 1.6; color: rgba(255, 255, 255, .72); }
 .cat-free-list {
   flex: 1; list-style: none; display: flex; flex-wrap: wrap; gap: 8px;
