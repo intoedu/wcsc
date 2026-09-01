@@ -1076,11 +1076,11 @@ revoke execute on function public.listings_guard() from public, anon, authentica
 
 
 -- ---------------------------------------------------------
--- 20260822120000_wcsc_membership_talent_invite.sql
+-- 20260822120000_wcsc_membership_invite.sql
 -- ---------------------------------------------------------
 
 -- =========================================================
--- 요금제 가입 · 달란트 · 초대 할인
+-- 요금제 가입 · 초대 할인
 --
 -- 결제는 계좌 입금입니다. 카드 자동결제가 없으므로
 -- "청구서를 만들고 → 입금을 확인하면 → 기간을 늘린다" 세 걸음으로 굴러갑니다.
@@ -1137,30 +1137,6 @@ create index memberships_plan_idx on public.memberships (plan);
 
 comment on table public.memberships is '교회 단위 요금제 가입. 결제는 계좌 입금이라 paid_until 을 입금 확인 때 늘립니다.';
 
-/* ---------- 달란트 ----------
-   잔액을 한 곳에 저장하지 않고 입출 기록을 더해서 냅니다.
-   숫자 하나만 고치면 "왜 줄었지" 를 나중에 설명할 수 없습니다. */
-create table public.talent_ledger (
-  id           uuid primary key default gen_random_uuid(),
-  user_id      uuid not null references auth.users(id) on delete cascade,
-
-  -- grant : 요금제에 딸린 월 지급    · topup : 낱개 구매(입금 확인 후)
-  -- spend : 사용 (음수)             · expire: 이월 기한이 지나 사라짐 (음수)
-  -- adjust: 관리자 손보정
-  kind         text not null check (kind in ('grant', 'topup', 'spend', 'expire', 'adjust')),
-  amount       integer not null,             -- 주는 것은 +, 쓰는 것은 −
-  reason       text not null default '',
-  request_id   uuid references public.requests(id) on delete set null,
-  invoice_id   uuid references public.invoices(id) on delete set null,
-  created_by   uuid references auth.users(id) on delete set null,
-  created_at   text not null default '',
-  inserted_at  timestamptz not null default now()
-);
-create index talent_ledger_user_id_idx on public.talent_ledger (user_id);
-create index talent_ledger_kind_idx on public.talent_ledger (kind);
-
-comment on table public.talent_ledger is '달란트 입출 기록. 잔액은 이 표를 더해서 냅니다.';
-
 /* ---------- 초대 ---------- */
 create table public.invites (
   id           uuid primary key default gen_random_uuid(),
@@ -1184,21 +1160,6 @@ create index invites_inviter_idx on public.invites (inviter_id);
 create index invites_code_idx on public.invites (code);
 
 comment on table public.invites is '초대 관계. 초대받은 교회가 3개월을 채워야(held) 할인이 이어집니다.';
-
-/* ---------- 달란트 잔액 ----------
-   화면마다 더하기를 되풀이하지 않도록 함수로 둡니다. */
-create or replace function public.talent_balance(uid uuid)
-returns integer
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select coalesce(sum(amount), 0)::integer
-  from public.talent_ledger
-  where user_id = uid;
-$$;
-comment on function public.talent_balance(uuid) is '달란트 잔액 = 입출 기록의 합';
 
 /* ---------- 요금제 열 잠그기 ----------
    교회가 스스로 요금제를 올리거나 할인을 넣을 수 있으면 안 됩니다.
@@ -1239,7 +1200,6 @@ create trigger memberships_guard_trg
 
 /* ---------- 권한 ---------- */
 alter table public.memberships    enable row level security;
-alter table public.talent_ledger  enable row level security;
 alter table public.invites        enable row level security;
 
 /* 요금제 — 교회는 자기 것만, 직원은 전부 */
@@ -1258,19 +1218,6 @@ create policy memberships_update on public.memberships for update to authenticat
   with check (user_id = auth.uid() or public.can('subscriptions'));
 
 create policy memberships_delete on public.memberships for delete to authenticated
-  using (public.can('subscriptions'));
-
-/* 달란트 — 교회는 자기 기록을 볼 수만 있습니다. 넣고 빼는 것은 센터가 합니다. */
-create policy talent_read on public.talent_ledger for select to authenticated
-  using (user_id = auth.uid() or public.can('subscriptions'));
-
-create policy talent_insert on public.talent_ledger for insert to authenticated
-  with check (public.can('subscriptions'));
-
-create policy talent_update on public.talent_ledger for update to authenticated
-  using (public.can('subscriptions')) with check (public.can('subscriptions'));
-
-create policy talent_delete on public.talent_ledger for delete to authenticated
   using (public.can('subscriptions'));
 
 /* 초대 — 초대한 쪽과 초대받은 쪽이 자기 관계를 봅니다 */
@@ -1307,8 +1254,6 @@ revoke all on function public.invite_owner(text) from public;
 grant execute on function public.invite_owner(text) to authenticated;
 comment on function public.invite_owner(text) is '초대 코드의 주인. 코드가 맞는지 확인하는 용도로만 씁니다.';
 
-revoke all on function public.talent_balance(uuid) from public;
-grant execute on function public.talent_balance(uuid) to authenticated;
 revoke all on function public.memberships_guard() from public;
 
 

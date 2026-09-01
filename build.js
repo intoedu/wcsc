@@ -14,7 +14,7 @@ const Boards = require('./src/boards');
 
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
   applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
-  plans, planRules, trial, invite, talents, boardTabs,
+  plans, planRules, trial, invite, boardTabs,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
@@ -49,7 +49,6 @@ function buildIndex() {
       </div>
       <ul class="hero-trust">
         <li>${icon('check', 'ico ico-sm')} 상담 · 견적 무료</li>
-        <li>${icon('check', 'ico ico-sm')} 담당자 1인 전담</li>
         <li>${icon('check', 'ico ico-sm')} 교단 · 규모 제한 없음</li>
       </ul>
     </div>
@@ -78,7 +77,7 @@ function buildIndex() {
 <section class="stats">
   <div class="wrap stats-in">
     <div class="stat"><strong>11</strong><span>지원 항목</span></div>
-    <div class="stat"><strong>1명</strong><span>담당자</span></div>
+    <div class="stat"><strong>0원</strong><span>홈페이지 제작비</span></div>
     <div class="stat"><strong>1~2일</strong><span>상담 연락</span></div>
     <div class="stat"><strong>전국</strong><span>지원 지역</span></div>
   </div>
@@ -95,22 +94,6 @@ function buildIndex() {
   </div>
 </section>
 
-<section class="section section-alt">
-  <div class="wrap">
-    ${sectionHead('우리교회지원센터가 일하는 방식', '업체가 아니라, 교회를 아는 담당자와 일합니다')}
-    <div class="why-grid">
-      ${site.principles
-        .map(
-          (p, i) => `<article class="why-card">
-        <span class="why-no">0${i + 1}</span>
-        <h3>${esc(p.title)}</h3>
-        <p>${esc(p.desc)}</p>
-      </article>`
-        )
-        .join('\n      ')}
-    </div>
-  </div>
-</section>
 
 <section class="section">
   <div class="wrap">
@@ -179,8 +162,8 @@ ${pageHero({
 
     <h2>어떻게 일하나</h2>
     <p>
-      우리교회지원센터는 항목별로 다른 담당자에게 넘기지 않습니다. 교회 한 곳에 담당자 한 명이 배정되어, 여러 항목을 진행하더라도
-      같은 사람과 이야기하게 됩니다. 교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 사람과 일한다는 뜻입니다.
+      우리교회지원센터는 항목별로 업체를 따로 찾게 하지 않습니다. 여러 항목을 진행하더라도 한곳에서 이어서 맡습니다.
+      교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 곳과 일한다는 뜻입니다.
     </p>
     <p>
       또한 모든 제안은 문서로 드립니다. 당회와 제직회에 그대로 올릴 수 있도록 항목별 범위와 일정, 비용을 정리해 드리며,
@@ -191,7 +174,7 @@ ${pageHero({
 
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('원칙', '이 네 가지는 지킵니다')}
+    ${sectionHead('원칙', '이 세 가지는 지킵니다')}
     <div class="why-grid">
       ${site.principles
         .map(
@@ -378,7 +361,7 @@ ${pageHero({
   eyebrow: '지원 항목',
   title: '네 갈래 11개 항목을<br>한곳에서 맡습니다',
   lead: '교회가 겪는 자리별로 묶었습니다 — 보이는 교회 · 사역하는 교회 · 세우는 교회, 그리고 가입이 무료인 커뮤니티 센터. '
-    + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
+    + '여러 항목을 한 번에 신청하실 수 있고, 전체 일정을 묶어 조율합니다.',
 })}
 
 <section class="section">
@@ -400,14 +383,14 @@ ${pageHero({
         <h3>홈페이지 제작 · 인투오피스</h3>
         <p class="bill-price">홈페이지 <strong>월 관리비 3만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
         <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 3만원은
-          서버 · 도메인 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
+          서버 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
           둘 다 월 단위로 중단하실 수 있습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">1회 결제</span>
         <h3>마케팅 지원 · 부동산</h3>
         <p class="bill-price">디자인 시안 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
-        <p>필요할 때 한 번만 결제하는 항목입니다. 요금제에 가입하시면 시안은 달란트로 신청하시게 되고,
+        <p>필요할 때 한 번만 결제하는 항목입니다.
           주보처럼 매주 반복되는 경우에는 사역 요금제에 매주 제작이 들어 있습니다.</p>
       </article>
       <article class="bill-card">
@@ -734,7 +717,7 @@ ${pageHero({
 
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
-        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 담당자 한 명이 묶어서 진행합니다.</p>
+        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 묶어서 진행합니다.</p>
         ${externalIds.length
           ? `<p class="fs-help fs-help-external">${externalIds
               .map((id) => esc(services.find((v) => v.id === id).name))
@@ -984,7 +967,6 @@ function planCard(p) {
       <dl class="plan-quota">
         <div><dt>나눔집</dt><dd>${esc(p.quota.sharing)}</dd></div>
         <div><dt>AI 숏츠</dt><dd>${esc(p.quota.shorts)}</dd></div>
-        <div><dt>달란트</dt><dd>${p.quota.talents ? `월 ${p.quota.talents}` : '—'}</dd></div>
       </dl>
 
       ${p.inherits ? `<p class="plan-inherit">${esc(p.inherits)} 요금제에 더해서</p>` : ''}
@@ -1063,36 +1045,6 @@ ${pageHero({
   </div>
 </section>
 
-<section class="section section-alt">
-  <div class="wrap">
-    ${sectionHead('달란트', talents.headline, talents.lead)}
-    <div class="tal-grid">
-      <div class="tal-table-wrap">
-        <table class="tal-table">
-          <thead>
-            <tr><th>자료</th><th>달란트</th><th>회원이 아니면</th></tr>
-          </thead>
-          <tbody>
-            ${talents.items.map((t) => `<tr>
-              <td>${esc(t.name)}${t.note ? ` <small>(${esc(t.note)})</small>` : ''}</td>
-              <td class="tal-n">${t.talents === 0 ? '0' : t.talents}</td>
-              <td class="tal-r">${won(t.retail)}원</td>
-            </tr>`).join('\n            ')}
-          </tbody>
-        </table>
-        <p class="tal-note">${esc(talents.note)}</p>
-      </div>
-      <div class="tal-side">
-        <h3>모자라면 더 쓰실 수 있습니다</h3>
-        <ul class="tal-packs">
-          ${talents.packs.map((k) => `<li><strong>${k.count} 달란트</strong><span>${won(k.price)}원</span></li>`).join('\n          ')}
-        </ul>
-        <p>낱개로 사셔도 회원이 아닐 때 정가의 절반 안팎입니다.
-          요금제에 들어 있는 달란트를 먼저 쓰고, 모자란 만큼만 채우시면 됩니다.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
 ${ctaBand('')}
 `;

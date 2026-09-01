@@ -1,6 +1,6 @@
 'use strict';
 
-const { site, categories, services, plans, planRules, trial, invite, talents } = require('./data/site');
+const { site, categories, services, plans, planRules, trial, invite } = require('./data/site');
 
 /** HTML 특수문자 이스케이프 */
 function esc(str) {
@@ -471,7 +471,6 @@ module.exports = {
   planRules,
   trial,
   invite,
-  talents,
   categoryOf,
   esc,
   icon,
