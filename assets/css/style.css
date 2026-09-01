@@ -875,6 +875,10 @@ table { border-collapse: collapse; width: 100%; }
   display: flex; flex-direction: column; align-items: flex-start; padding: 34px 28px;
   background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
   box-shadow: var(--shadow-sm); transition: transform .18s, box-shadow .18s, border-color .18s;
+  /* 격자 칸의 기본값(min-width:auto)은 안쪽 글자 폭 아래로 줄어들지 못합니다.
+     이메일 주소가 33자 한 덩어리라, 그대로 두면 칸이 화면보다 넓어져
+     좁은 화면에서 카드가 오른쪽으로 잘려 나갔습니다. */
+  min-width: 0;
 }
 .contact-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--brand-100); }
 .contact-ico {
@@ -882,13 +886,23 @@ table { border-collapse: collapse; width: 100%; }
   border-radius: 13px; background: var(--brand-50); color: var(--brand-600); margin-bottom: 18px;
 }
 .contact-card h2 { font-size: 17px; }
-.contact-card strong { margin-top: 8px; font-size: 21px; letter-spacing: -.02em; color: var(--brand-700); }
+.contact-card strong {
+  margin-top: 8px; font-size: 21px; letter-spacing: -.02em; color: var(--brand-700);
+  /* 긴 이메일 주소는 칸을 넓히지 말고 줄을 바꿔 주세요 */
+  max-width: 100%; overflow-wrap: anywhere;
+}
 .contact-card p { margin-top: 10px; font-size: 14.5px; color: var(--muted); line-height: 1.75; }
 .contact-card.is-accent { background: var(--brand-800); border-color: var(--brand-800); }
 .contact-card.is-accent h2 { color: #fff; }
 .contact-card.is-accent strong { color: var(--gold-400); }
 .contact-card.is-accent p { color: #AFCBB8; }
 .contact-card.is-accent .contact-ico { background: rgba(242, 200, 47,.18); color: var(--gold-400); }
+/* 이메일 주소는 33자가 끊기지 않는 한 덩어리라 폰에서는 한 줄에 못 들어갑니다.
+   (한 줄에 넣으려면 13px 까지 줄여야 해서 전화번호와 균형이 깨집니다)
+   전화번호 크기는 그대로 두고 이메일만 한 단계 낮춰 두 줄이 단정하게 떨어지도록 합니다. */
+@media (max-width: 560px) {
+  .contact-card strong.is-email { font-size: 17px; line-height: 1.5; }
+}
 
 /* ---------- floating CTA (mobile) ---------- */
 .float-cta {

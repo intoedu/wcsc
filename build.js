@@ -1049,7 +1049,7 @@ ${pageHero({
       <a class="contact-card" href="mailto:${esc(site.contact.email)}">
         <span class="contact-ico">${icon('mail')}</span>
         <h2>이메일</h2>
-        <strong>${emailText()}</strong>
+        <strong class="is-email">${emailText()}</strong>
         <p>영업일 기준 1일 이내 회신드립니다.</p>
       </a>
       <a class="contact-card is-accent" href="apply.html">
