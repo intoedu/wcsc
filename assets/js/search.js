@@ -52,28 +52,42 @@
 
   /* ---------- 점수 ---------- */
 
-  function scoreOne(q, title, body, cat) {
-    var t = title.toLowerCase();
-    var b = (body || '').toLowerCase();
+  /**
+   * 띄어쓰기는 견주기 전에 없앱니다.
+   *
+   *   "교역자구인" 으로 치셔도 [교역자 구인] 이 나와야 합니다.
+   *   어디를 띄어 쓰는지는 사람마다 다르고, 틀렸다고 못 찾게 하면
+   *   찾는 사람만 손해입니다.
+   */
+  function squash(s) {
+    return String(s == null ? '' : s).toLowerCase().replace(/\s+/g, '');
+  }
 
-    if (t === q) return 1000;
-    if (t.indexOf(q) === 0) return 800;
-    if (t.indexOf(q) > -1) return 600;
+  function scoreOne(q, title, body, cat) {
+    var qs = squash(q);
+    if (!qs) return 0;
+
+    var t = squash(title);
+    var b = squash(body);
+
+    if (t === qs) return 1000;
+    if (t.indexOf(qs) === 0) return 800;
+    if (t.indexOf(qs) > -1) return 600;
 
     // 초성으로 친 경우 — 제목에만 견줍니다 (본문까지 보면 아무거나 걸립니다)
-    if (isChosungOnly(q)) {
-      var ct = chosung(title);
-      if (ct.indexOf(q) === 0) return 500;
-      if (ct.indexOf(q) > -1) return 380;
+    if (isChosungOnly(qs)) {
+      var ct = chosung(t);
+      if (ct.indexOf(qs) === 0) return 500;
+      if (ct.indexOf(qs) > -1) return 380;
       return 0;
     }
 
-    if (b.indexOf(q) > -1) return cat === '질문' ? 300 : 240;
+    if (b.indexOf(qs) > -1) return cat === '질문' ? 300 : 240;
 
     // 띄어 친 낱말이 모두 어딘가에 있으면 (예: "음향 견적")
-    var words = q.split(/\s+/).filter(Boolean);
+    var words = String(q).toLowerCase().split(/\s+/).filter(Boolean);
     if (words.length > 1) {
-      var all = t + ' ' + b;
+      var all = t + b;
       for (var i = 0; i < words.length; i++) {
         if (all.indexOf(words[i]) === -1) return 0;
       }
@@ -159,13 +173,34 @@
     });
   }
 
-  /** 찾으신 글자에 밑줄을 칩니다 — 왜 걸렸는지 보이도록. */
+  /**
+   * 찾으신 글자에 표시를 합니다 — 왜 걸렸는지 보이도록.
+   *
+   * 견주기는 띄어쓰기를 없애고 하므로, 표시할 자리를 찾으려면
+   * 없앤 글자의 위치를 원래 글의 위치로 되돌려야 합니다.
+   * (예: "교역자구인" 으로 치셔도 [교역자 구인] 의 다섯 글자에
+   *  표시가 걸리도록)
+   */
   function mark(text, q) {
-    var t = String(text || '');
-    var i = t.toLowerCase().indexOf(q);
-    if (i === -1 || !q) return esc(t);
-    return esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>'
-      + esc(t.slice(i + q.length));
+    var raw = String(text == null ? '' : text);
+    var qs = squash(q);
+    if (!qs) return esc(raw);
+
+    var flat = '';
+    var at = [];                       // 없앤 글의 자리 → 원래 글의 자리
+    for (var i = 0; i < raw.length; i++) {
+      if (/\s/.test(raw[i])) continue;
+      flat += raw[i].toLowerCase();
+      at.push(i);
+    }
+
+    var hit = flat.indexOf(qs);
+    if (hit === -1) return esc(raw);
+
+    var from = at[hit];
+    var to = at[hit + qs.length - 1] + 1;
+    return esc(raw.slice(0, from)) + '<mark>' + esc(raw.slice(from, to)) + '</mark>'
+      + esc(raw.slice(to));
   }
 
   function trim(s, n) {
@@ -183,6 +218,9 @@
       '</a>';
   }
 
+  /* 아무것도 못 찾았을 때와 처음 열었을 때 함께 씁니다 */
+  var QUICK = ['음향', '홈페이지', '비용이 얼마', '사택', '교역자 구인', '중고'];
+
   var lastQ = '';
 
   function render(q, rows, posts, loading) {
@@ -191,10 +229,9 @@
         '<p class="ss-hint">무엇을 찾으시나요? <b>음향</b>, <b>홈페이지 얼마</b>, ' +
         '<b>사택</b> 처럼 적어 보세요. 초성(<b>ㅎㅍㅇㅈ</b>)으로도 찾습니다.</p>' +
         '<div class="ss-quick">' +
-        ['음향', '홈페이지', '비용이 얼마', '사택', '교역자 구인', '중고']
-          .map(function (t) {
-            return '<button type="button" class="ss-chip" data-q="' + esc(t) + '">' + esc(t) + '</button>';
-          }).join('') +
+        QUICK.map(function (t) {
+          return '<button type="button" class="ss-chip" data-q="' + esc(t) + '">' + esc(t) + '</button>';
+        }).join('') +
         '</div>';
       return;
     }
@@ -210,11 +247,17 @@
     }
     if (loading) html += '<p class="ss-loading">게시판을 찾아보는 중입니다…</p>';
 
+    // 못 찾았을 때 문의로 떠밀지 않습니다 — 찾던 것을 못 찾은 분께
+    // 전화를 걸라고 하는 것은 답이 아닙니다. 다른 말로 다시 찾아보시게
+    // 자주 찾는 것들만 다시 내어 놓습니다.
     if (!html) {
-      html = '<div class="ss-none"><p><strong>&ldquo;' + esc(q) + '&rdquo;</strong> 으로는 찾지 못했습니다.</p>' +
-        '<p class="ss-none-lead">다른 낱말로 적어 보시거나, 바로 여쭤봐 주세요. ' +
-        '없는 기능이면 그렇다고 말씀드리겠습니다.</p>' +
-        '<a class="btn btn-primary btn-sm" href="' + esc(BASE) + 'contact.html">문의하기</a></div>';
+      html = '<div class="ss-none">' +
+        '<p><strong>&ldquo;' + esc(q) + '&rdquo;</strong> 으로는 찾지 못했습니다.</p>' +
+        '<p class="ss-none-lead">다른 낱말로 적어 보세요. 띄어쓰기는 맞지 않아도 됩니다.</p>' +
+        '</div>' +
+        '<div class="ss-quick">' + QUICK.map(function (t) {
+          return '<button type="button" class="ss-chip" data-q="' + esc(t) + '">' + esc(t) + '</button>';
+        }).join('') + '</div>';
     }
     out.innerHTML = html;
   }

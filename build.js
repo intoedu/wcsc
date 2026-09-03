@@ -199,8 +199,9 @@ function buildIndex() {
         <strong>상담과 견적은 무료</strong>이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
       </p>
       <div class="qz-call">
-        <span>바로 통화를 원하시면</span>
-        <a href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-sm')} ${phoneText()}</a>
+        <span>바로 연락을 원하시면</span>
+        <a class="qz-phone" href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-sm')} ${phoneText()}</a>
+        <a class="qz-mail" href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a>
         <small>${esc(site.contact.hours)}</small>
       </div>
     </div>
@@ -1840,7 +1841,7 @@ function buildSearchIndex() {
   /* 값을 물으시는 분이 많은데 패키지 페이지는 지금 닫혀 있습니다.
      빈손으로 돌려보내지 말고 물어보실 곳으로 안내합니다. */
   add({
-    url: 'contact.html',
+    url: 'pricing.html',
     title: '비용이 얼마인가요',
     desc: '항목마다 다릅니다. 무엇이 필요하신지 알려 주시면 견적을 내어 드립니다 — 상담은 무료입니다.',
     cat: '자주 찾는 것',

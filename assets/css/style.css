@@ -2921,17 +2921,29 @@ body.is-search-open { overflow: hidden; }
 .qz-call { margin-top: 26px; }
 .qz-call > span { display: block; font-size: 13.5px; color: #9FBFAB; }
 .qz-call a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 5px;
+  gap: 9px;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+.qz-call a:hover { color: var(--gold-400); }
+.qz-call a svg { flex: none; color: var(--gold-400); }
+/* 전화는 크게 — 급하신 분이 가장 먼저 찾는 글자입니다.
+   이메일은 길어서 같은 크기로 두면 두 줄로 접힙니다. */
+.qz-phone {
+  margin-top: 6px;
   font-size: 25px;
   font-weight: 800;
   letter-spacing: -.02em;
-  color: #fff;
 }
-.qz-call a:hover { color: var(--gold-400); }
-.qz-call small { display: block; margin-top: 6px; font-size: 12.5px; color: #86A794; }
+.qz-mail {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.qz-call small { display: block; margin-top: 10px; font-size: 12.5px; color: #86A794; }
 
 .qz-form {
   padding: 26px 24px 22px;
