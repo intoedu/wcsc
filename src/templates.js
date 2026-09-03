@@ -34,6 +34,7 @@ const icons = {
     '<path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/>',
   mail: '<rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
   pin: '<path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/>',
   doc: '<path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/>',
   /* 세로 화면 안에 재생 표시 — 숏츠 */
@@ -172,9 +173,15 @@ function header(base, active) {
     </a>
     <nav class="nav" id="nav" aria-label="주 메뉴">
       ${links}
+      <button type="button" class="nav-search" data-search-open aria-label="찾아보기">
+        ${icon('search', 'ico ico-sm')}<span>찾기</span>
+      </button>
       <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="${base}apply.html">지원 신청</a>
     </nav>
+    <button type="button" class="head-search" data-search-open aria-label="찾아보기">
+      ${icon('search', 'ico')}
+    </button>
     <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
       <span></span><span></span><span></span>
     </button>
@@ -268,6 +275,23 @@ ${o.body}
   </main>
   ${footer(base)}
   <a class="float-cta" href="${base}apply.html">지원 신청</a>
+
+  <!-- 찾아보기 — assets/js/search.js 가 채웁니다 -->
+  <div class="ss" id="siteSearch" data-base="${base}" hidden role="dialog" aria-modal="true" aria-label="찾아보기">
+    <div class="ss-panel">
+      <div class="ss-bar">
+        ${icon('search', 'ico')}
+        <input type="search" id="ssInput" autocomplete="off"
+          placeholder="찾으시는 것을 적어 주세요 (예: 음향, 사택, 요금)" aria-label="찾아보기">
+        <button type="button" class="ss-close" data-search-close aria-label="닫기">닫기</button>
+      </div>
+      <div class="ss-results" id="ssResults"></div>
+      <p class="ss-foot">
+        <kbd>↑</kbd><kbd>↓</kbd> 로 고르고 <kbd>Enter</kbd> 로 엽니다 ·
+        어디서든 <kbd>/</kbd> 로 열립니다
+      </p>
+    </div>
+  </div>
   <script src="${base}assets/js/supabase-config.js" defer></script>
   <script src="${base}assets/js/firebase-config.js" defer></script>
   <script src="${base}assets/js/data.js" defer></script>
@@ -277,6 +301,8 @@ ${o.body}
   <script src="${base}assets/js/auth-ui.js" defer></script>
   <script src="${base}assets/js/consent-ui.js" defer></script>
   <script src="${base}assets/js/live-content.js" defer></script>
+  <script src="${base}assets/js/search-index.js" defer></script>
+  <script src="${base}assets/js/search.js" defer></script>
   <script src="${base}assets/js/app.js" defer></script>
   ${scripts}
 </body>

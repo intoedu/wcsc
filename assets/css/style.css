@@ -2337,3 +2337,236 @@ body[data-tk-pane]:not([data-tk-pane="list"]) .page-hero { display: none; }
   margin-top: 10px;
 }
 .ls-pay-hint { font-size: 13px; color: var(--muted); }
+
+/* =========================================================
+   찾아보기 (assets/js/search.js)
+
+   메뉴가 일곱 갈래에 게시판이 다섯이라, 처음 오신 분은
+   원하는 것이 어디 있는지 찾다가 지치십니다.
+   그래서 한 칸을 헤더에 두었습니다.
+   ========================================================= */
+
+.nav-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-soft);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.nav-search:hover {
+  background: #fff;
+  border-color: var(--brand-500);
+  color: var(--brand-700);
+}
+.nav-search .ico { flex: none; }
+
+.ss {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  justify-content: center;
+  padding: 8vh 16px 16px;
+  background: rgba(18, 48, 31, .48);
+  overscroll-behavior: contain;
+}
+.ss[hidden] { display: none; }
+body.is-search-open { overflow: hidden; }
+
+.ss-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(680px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(18, 48, 31, .28);
+}
+
+.ss-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.ss-bar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 4px 0;
+  font-size: 17px;
+  color: var(--ink);
+  background: none;
+}
+.ss-bar input:focus { outline: none; }
+.ss-bar input::-webkit-search-cancel-button { display: none; }
+.ss-close {
+  flex: none;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.ss-close:hover { background: var(--bg-soft); }
+
+.ss-results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.ss-group {
+  margin: 10px 8px 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--muted);
+}
+
+.ss-hit {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.ss-hit:hover,
+.ss-hit.is-on { background: var(--brand-50); }
+.ss-hit-cat {
+  flex: none;
+  margin-top: 1px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--brand-100);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--brand-800);
+  white-space: nowrap;
+}
+.ss-hit-body { min-width: 0; }
+.ss-hit-body strong {
+  display: block;
+  font-size: 15px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.ss-hit-body small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.ss-hit mark {
+  padding: 0 1px;
+  border-radius: 3px;
+  background: var(--gold-100);
+  color: inherit;
+  font-weight: 700;
+}
+
+.ss-hint {
+  margin: 14px 10px 10px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.ss-hint b { color: var(--brand-700); }
+
+.ss-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 10px 12px;
+}
+.ss-chip {
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.ss-chip:hover { border-color: var(--brand-500); color: var(--brand-700); background: var(--brand-50); }
+
+.ss-loading,
+.ss-none { margin: 14px 12px; font-size: 14px; color: var(--muted); }
+.ss-none p { margin: 0 0 6px; }
+.ss-none strong { color: var(--ink); }
+.ss-none-lead { line-height: 1.7; }
+.ss-none .btn { margin-top: 6px; }
+
+.ss-foot {
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-2);
+  background: var(--bg-soft);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.ss-foot kbd {
+  display: inline-block;
+  min-width: 20px;
+  margin: 0 2px;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 11.5px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+@media (max-width: 1080px) {
+  .nav-search span { display: none; }
+  .nav-search { padding: 9px 11px; }
+}
+
+/* 좁은 화면 — 메뉴 안에 넣으면 접혀서 보이지 않으므로,
+   접기 단추 옆에 돋보기를 따로 둡니다. */
+.head-search {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-left: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.head-search:hover { border-color: var(--brand-500); color: var(--brand-700); }
+
+@media (max-width: 900px) {
+  .nav-search { display: none; }
+  .head-search { display: inline-flex; }
+  .nav-toggle { margin-left: 8px; }
+  .ss { padding: 0; }
+  .ss-panel { border-radius: 0; height: 100%; width: 100%; }
+  .ss-foot { display: none; }
+}

@@ -1605,6 +1605,116 @@ window.CAPS_STORAGE_RULES_VERSION = ${JSON.stringify(stVersion)};
 /* =========================================================
    브라우저용 데이터 파일
    ========================================================= */
+/* =========================================================
+   찾아보기 목록 (assets/js/search-index.js)
+
+   사이트가 커지면서 "그 기능이 어디 있더라" 가 됩니다.
+   메뉴를 다 뒤지지 않고 한 칸에 적어 찾도록, 페이지 · 지원 항목 ·
+   게시판 · 자주 묻는 질문을 미리 한 벌로 만들어 둡니다.
+
+   게시판에 올라온 실제 글(매물 · 공고 등)은 여기 넣지 않습니다 —
+   수시로 바뀌므로 찾을 때 그 자리에서 읽어 옵니다.
+   ========================================================= */
+function buildSearchIndex() {
+  const rows = [];
+  const add = (o) => rows.push(o);
+
+  /* 주요 페이지 */
+  [
+    ['index.html', '홈', '우리교회지원센터가 하는 일을 한눈에', '페이지', '처음 메인 홈'],
+    ['about.html', '센터 소개', '어떤 사람들이 무엇을 위해 모였는지', '페이지', '소개 우리 누구'],
+    ['services/index.html', '지원 항목 전체', '센터가 해 드리는 일 전부', '페이지', '서비스 목록'],
+    ['process.html', '이용 절차', '신청부터 시작까지 어떻게 진행되는지', '페이지', '순서 진행 방법'],
+    ['faq.html', '자주 묻는 질문', '많이 물어보시는 것들을 모았습니다', '페이지', 'FAQ 질문'],
+    ['contact.html', '문의', '전화 · 카카오톡 · 이메일로 여쭤보기', '페이지', '연락처 상담 전화'],
+    ['apply.html', '지원 신청', '필요한 것을 적어 보내 주시면 연락드립니다', '페이지', '신청서 접수'],
+    ['status.html', '신청 현황', '내가 넣은 신청이 어디까지 갔는지', '페이지', '진행 상황 조회'],
+  ].forEach(([url, title, desc, cat, kw]) => add({ url, title, desc, cat, kw }));
+
+  /* 큰 갈래 */
+  categories.forEach((c) => add({
+    url: `services/index.html#${c.id}`,
+    title: c.name, desc: c.tagline, cat: '갈래', kw: c.desc,
+  }));
+
+  /* 지원 항목 하나하나 — 여기가 사람들이 가장 많이 찾는 곳입니다 */
+  services.forEach((s) => add({
+    url: `services/${s.slug}.html`,
+    title: s.name,
+    desc: s.tagline,
+    cat: '지원 항목',
+    kw: [s.short, s.summary,
+      (s.features || []).map((f) => f.title || f).join(' '),
+      (s.deliverables || []).join(' '),
+      (s.problems || []).map((x) => x.title).join(' ')].join(' '),
+  }));
+
+  /* 사람들이 실제로 치는 말 — 우리가 쓰는 이름과 다릅니다.
+     "사택" 을 치면 게스트하우스가, "얼마" 를 치면 비용이 나와야 합니다. */
+  const SYNONYM = {
+    'services/sound.html': '스피커 마이크 믹서 앰프 소리 하울링 음향장비 설치',
+    'services/homepage.html': '웹사이트 홈피 사이트 도메인 제작 만들기',
+    'services/smartchurch.html': '앱 어플 모바일 주보앱 출석',
+    'services/shorts.html': '영상 편집 유튜브 릴스 설교영상',
+    'services/design.html': '현수막 배너 포스터 명함 로고 인쇄 디자인',
+    'services/staffing.html': '전도사 목사 사역자 청빙 채용 구인 교역자',
+    'services/realestate.html': '교회 매매 임대 상가 건물 부동산 이전',
+    'services/sharing.html': '나눔집 소그룹 교재 순모임 성경공부',
+    'services/intooffice.html': '행정 서류 결재 문서 전자결재 사무',
+    'services/akc.html': '수련회 집회 컨퍼런스 대회',
+    'services/community.html': '커뮤니티 모임 기도요청 중보 광고',
+  };
+  rows.forEach((r) => { if (SYNONYM[r.url]) r.kw = (r.kw || '') + ' ' + SYNONYM[r.url]; });
+
+  /* 게시판 */
+  const BOARD_KW = {
+    'listings.html': '교회 매매 임대 상가 건물 부동산 매물 이전 예배당 자리',
+    'market.html': '중고 스피커 마이크 믹서 앰프 악기 피아노 의자 강대상 싸게 사기 팔기',
+    'guesthouse.html': '사택 선교관 숙소 숙박 방 머물 곳 선교사 유학생 게스트하우스 잠자리',
+    'tickets.html': '집회 수련회 세미나 예매 티켓 신청 참가 좌석',
+    'jobs.html': '전도사 목사 반주자 찬양인도자 간사 채용 구인 구직 사역지 청빙 사택 사례비',
+  };
+  T.BOARDS.forEach((b) => add({
+    url: b.href, title: b.label, desc: b.sub, cat: '게시판', kw: BOARD_KW[b.href] || '',
+  }));
+  add({ url: 'listings.html#new', title: '매물 올리기', desc: '교회 부동산을 게시판에 내놓기', cat: '게시판', kw: '등록 매매 임대' });
+  add({ url: 'market.html#new', title: '중고 물품 팔기', desc: '쓰던 음향 · 악기 · 집기를 내놓기', cat: '게시판', kw: '등록 판매 중고' });
+  add({ url: 'market.html#install', title: '설치 대행 신청', desc: '사 오신 장비를 예배당에 달아 드립니다', cat: '게시판', kw: '음향 설치 시공 견적' });
+  add({ url: 'guesthouse.html#new', title: '방 내어 놓기', desc: '비어 있는 사택 · 선교관을 나누기', cat: '게시판', kw: '등록 숙소' });
+  add({ url: 'tickets.html#new', title: '집회 등록하기', desc: '집회 · 수련회 신청을 받기', cat: '게시판', kw: '등록 예매 티켓' });
+  add({ url: 'jobs.html#new', title: '구인 공고 올리기', desc: '우리 교회에서 함께할 사역자를 찾기', cat: '게시판', kw: '등록 채용 모집 전도사' });
+  add({ url: 'jobs.html', title: '사역자 자리 찾기', desc: '교회들이 올린 구인 공고 보기', cat: '게시판', kw: '취업 지원 사역지 청빙' });
+
+  /* 값을 물으시는 분이 많은데 요금제 페이지는 지금 닫혀 있습니다.
+     빈손으로 돌려보내지 말고 물어보실 곳으로 안내합니다. */
+  add({
+    url: 'contact.html',
+    title: '비용이 얼마인가요',
+    desc: '항목마다 다릅니다. 무엇이 필요하신지 알려 주시면 견적을 내어 드립니다 — 상담은 무료입니다.',
+    cat: '자주 찾는 것',
+    kw: '요금 가격 비용 값 얼마 견적 금액 무료 돈 월 관리비',
+  });
+  add({
+    url: 'status.html',
+    title: '내 신청이 어디까지 갔나요',
+    desc: '넣으신 신청의 진행 상황을 확인하실 수 있습니다.',
+    cat: '자주 찾는 것',
+    kw: '조회 확인 진행 접수 신청현황',
+  });
+
+  /* 자주 묻는 질문 — 질문 자체로 찾는 분이 많습니다 */
+  site.faqs.forEach((f, i) => add({
+    url: `faq.html#faq-common-${i}`, title: f.q, desc: f.a, cat: '질문', kw: '',
+  }));
+  services.forEach((s) => (s.faqs || []).forEach((f, i) => add({
+    url: `faq.html#faq-${s.id}-${i}`, title: f.q, desc: f.a, cat: '질문', kw: s.name,
+  })));
+
+  write('assets/js/search-index.js',
+    '/* 자동 생성 파일입니다 — build.js 의 buildSearchIndex() 가 만듭니다. */\n'
+    + 'window.CAPS_SEARCH = ' + JSON.stringify(rows) + ';\n');
+}
+
 function buildDataScript() {
   // 관리자 화면의 항목 편집기와 신청서가 함께 사용합니다.
   const payload = services.map((s) => ({
@@ -1667,6 +1777,7 @@ function main() {
   Boards.buildGuesthouse(write);
   Boards.buildTickets(write);
   Boards.buildJobs(write);
+  buildSearchIndex();
   buildDataScript();
   buildRulesScript(buildSupabaseSql());
   console.log(`생성 완료 (${out.length}개)`);
