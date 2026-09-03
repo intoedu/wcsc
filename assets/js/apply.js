@@ -34,6 +34,32 @@
     });
   })();
 
+  /* ---------- 홈의 [빠른 상담] 에서 넘어온 경우 ----------
+     첫 화면에서 적으신 교회명과 연락처를 옮겨 담습니다.
+     주소창에 싣지 않고 같은 탭 안에만 두었던 것이라, 읽고 바로 지웁니다. */
+  (function carryOver() {
+    var raw;
+    try {
+      raw = window.sessionStorage.getItem('wcsc.quote');
+      window.sessionStorage.removeItem('wcsc.quote');
+    } catch (ignore) { return; }
+    if (!raw) return;
+
+    var seed;
+    try { seed = JSON.parse(raw); } catch (ignore) { return; }
+    if (!seed) return;
+
+    var put = function (name, value) {
+      var node = form.querySelector('[name="' + name + '"]');
+      if (node && !node.value && value) node.value = value;
+    };
+    put('church_name', seed.church);
+    put('phone', seed.phone);
+
+    var first = form.querySelector('[name="contact_name"]');
+    if (first) first.focus();
+  })();
+
   /* ---------- 선택 항목에 따른 추가 필드 ---------- */
   function buildExtraFields() {
     var ids = checkedServices();

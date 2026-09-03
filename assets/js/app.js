@@ -70,7 +70,8 @@
 
   /* 등장 애니메이션 */
   var targets = document.querySelectorAll(
-    '.svc-card, .why-card, .step, .prep-card, .prob-card, .feat-card, .contact-card, .tl-item'
+    '.svc-card, .why-card, .step, .prep-card, .prob-card, .feat-card, .contact-card, .tl-item, '
+    + '.item, .bd-tile'
   );
   if (targets.length && 'IntersectionObserver' in window) {
     var io = new IntersectionObserver(

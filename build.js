@@ -32,72 +32,220 @@ function write(rel, html) {
    홈
    ========================================================= */
 function buildIndex() {
+  /* 렌탈 회사 홈페이지의 배치를 따랐습니다 (렌트리 참고).
+       위에서부터 — 미는 배너 · 아이콘 바로가기 · 품목표 · 상담 · 게시판.
+     테두리를 두르는 대신 연회색 면과 넓은 여백으로 나눕니다.
+     화려하게 만들기보다, 눈이 걸리는 선을 줄이는 쪽으로 갑니다. */
+
+  /* 값을 앞에 내놓습니다 — 무엇을 얼마에 맡길 수 있는지가 먼저
+     보여야 다음을 눌러 보십니다. 다만 요금제 페이지가 지금 닫혀
+     있어 "요금제에 포함" 이라고만 적힌 항목은 그 말을 쓰지 않습니다. */
+  const priceTag = (s) => {
+    const p = String(s.price || '').trim();
+    if (!p || p === '상담 후 결정' || p === '상담 후 안내') return { text: '상담 후 견적', kind: 'ask' };
+    if (p === '무료') return { text: '무료', kind: 'free' };
+    if (p === '요금제에 포함') return { text: '상담 후 견적', kind: 'ask' };
+    if (p === '캠프마다 상이') return { text: '캠프별 안내', kind: 'ask' };
+    return { text: p, kind: 'won' };
+  };
+
+  /* 첫 화면의 미는 배너. 사진 대신 은은한 바탕색과 큰 글씨로 갑니다 —
+     교회 사진을 급조해 넣는 것보다 깔끔하고, 거짓이 없습니다. */
+  const BANNERS = [
+    {
+      tone: 'green',
+      eyebrow: '홈페이지 제작',
+      title: '제작비 0원으로<br>교회 홈페이지를',
+      lead: '만들어 드리고, 월 3만원으로 계속 돌봐 드립니다.',
+      href: 'services/homepage.html',
+      icon: 'monitor',
+    },
+    {
+      tone: 'gold',
+      eyebrow: '교역자 구인',
+      title: '멀어서 사람 못 구하던<br>교회를 위해',
+      lead: '사례비 · 사택 · 오가는 길을 미리 밝히고 공고를 올립니다.',
+      href: 'jobs.html',
+      icon: 'users',
+    },
+    {
+      tone: 'deep',
+      eyebrow: '중고 장터',
+      title: '쓰던 음향과 악기를<br>교회끼리',
+      lead: '사 오신 장비는 예배당에 달아 드리는 것까지 맡습니다.',
+      href: 'market.html',
+      icon: 'speaker',
+    },
+    {
+      tone: 'mint',
+      eyebrow: '게스트하우스',
+      title: '비어 있는 사택을<br>필요한 분께',
+      lead: '한국에 잠시 머무는 선교사와 사역자가 묵을 자리입니다.',
+      href: 'guesthouse.html',
+      icon: 'building',
+    },
+  ];
+
+  const banner = (b) => `<a class="bn is-${b.tone}" href="${b.href}">
+        <span class="bn-art" aria-hidden="true">${icon(b.icon)}</span>
+        <span class="bn-in">
+          <span class="bn-eyebrow">${esc(b.eyebrow)}</span>
+          <strong class="bn-title">${b.title}</strong>
+          <span class="bn-lead">${esc(b.lead)}</span>
+        </span>
+      </a>`;
+
+  /* 아이콘 바로가기 — 열한 항목에 [전체보기] 하나를 더해 열둘입니다. */
+  const shortcut = (s) => `<a class="sc" href="services/${s.slug}.html">
+        <span class="sc-ico">${icon(s.icon)}</span>
+        <span class="sc-name">${esc(s.short || s.name)}</span>
+      </a>`;
+
+  const itemTile = (s) => {
+    const tag = priceTag(s);
+    return `<a class="item" href="services/${s.slug}.html" data-cat="${s.category}">
+        <span class="item-ico">${icon(s.icon)}</span>
+        <span class="item-body">
+          <strong class="item-name">${esc(s.name)}</strong>
+          <span class="item-line">${esc(s.tagline)}</span>
+        </span>
+        <span class="item-foot">
+          <span class="item-price is-${tag.kind}">${esc(tag.text)}</span>
+          <span class="item-go">자세히 ${icon('arrow', 'ico ico-sm')}</span>
+        </span>
+      </a>`;
+  };
+
+  const boardTile = (b, i) => `<a class="bd-tile" href="${b.href}">
+        <span class="bd-no">0${i + 1}</span>
+        <strong>${esc(b.label)}</strong>
+        <span>${esc(b.sub)}</span>
+      </a>`;
+
+  /* 섹션 제목 오른쪽에 [전체보기] 를 붙이는 자리 */
+  const head = (title, lead, moreHref, moreLabel) => `<div class="hd-row">
+      <div>
+        <h2>${title}</h2>
+        ${lead ? `<p>${esc(lead)}</p>` : ''}
+      </div>
+      ${moreHref ? `<a class="hd-more" href="${moreHref}">${esc(moreLabel || '전체보기')} ${icon('arrow', 'ico ico-sm')}</a>` : ''}
+    </div>`;
+
   const body = `
-<section class="hero">
-  <div class="hero-bg" aria-hidden="true"></div>
-  <div class="wrap hero-in">
-    <div class="hero-copy">
-      <p class="hero-eyebrow">Wori Church Support Center</p>
-      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">전문가</span>가 맡습니다</h1>
-      <p class="hero-lead">
-        홈페이지와 주보 제작부터 교역자 청빙, 음향, 부동산, 앱, 행정까지.
-        한국 교회에 필요한 여러 항목을 한곳에서 이어서 맡습니다.
+<!-- ============ 1. 미는 배너 ============
+     가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
+     더 있다는 것이 손짓 없이도 보이게 했습니다. -->
+<section class="bn-wrap">
+  <div class="wrap">
+    <div class="bn-rail" id="bnRail" role="region" aria-label="주요 안내">
+      ${BANNERS.map(banner).join('\n      ')}
+    </div>
+    <div class="bn-dots" id="bnDots" aria-hidden="true">
+      ${BANNERS.map((b, i) => `<button type="button" class="bn-dot${i === 0 ? ' is-on' : ''}" data-go="${i}" tabindex="-1"></button>`).join('\n      ')}
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. 아이콘 바로가기 ============ -->
+<section class="sc-wrap">
+  <div class="wrap">
+    <div class="sc-grid">
+      ${services.map(shortcut).join('\n      ')}
+      <a class="sc is-all" href="services/index.html">
+        <span class="sc-ico">${icon('grid')}</span>
+        <span class="sc-name">전체보기</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. 지원 항목 카탈로그 ============ -->
+<section class="section" id="items">
+  <div class="wrap">
+    ${head('무엇이든 하나씩 맡기실 수 있습니다',
+    '전부 맡기지 않으셔도 됩니다. 지금 급한 것 하나만 고르셔도 됩니다.',
+    'services/index.html')}
+
+    <div class="cat-tabs" id="catTabs" role="tablist" aria-label="갈래로 걸러 보기">
+      <button type="button" class="cat-tab is-on" data-cat="">전체</button>
+      ${categories.map((c) => `<button type="button" class="cat-tab" data-cat="${c.id}">${esc(c.name)}</button>`).join('\n      ')}
+    </div>
+
+    <div class="items" id="itemGrid">
+      ${services.map(itemTile).join('\n      ')}
+    </div>
+
+    <p class="items-note">
+      값이 <strong>상담 후 견적</strong> 인 항목은 교회 규모와 상황에 따라 달라, 보고 정해 드립니다.
+      물어보시는 것은 무료이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
+    </p>
+  </div>
+</section>
+
+<!-- ============ 4. 빠른 상담 ============
+     여기서 보내지는 않고 신청서로 넘기며 적으신 것을 옮겨 담습니다 —
+     신청은 로그인이 필요한데, 첫 화면에서 로그인을 물으면 대개 나가십니다. -->
+<section class="qz">
+  <div class="wrap qz-in">
+    <div class="qz-copy">
+      <p class="qz-eyebrow">1분이면 됩니다</p>
+      <h2>연락처만 남겨 주시면<br>저희가 전화드리겠습니다</h2>
+      <p class="qz-lead">
+        무엇이 필요하신지 아직 정하지 않으셔도 됩니다.
+        형편을 여쭙고, 지금 급한 것부터 함께 정리해 드립니다.
+        <strong>상담과 견적은 무료</strong>이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
       </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
-        <a class="btn btn-outline btn-lg" href="services/index.html">지원 항목 살펴보기</a>
-      </div>
-      <ul class="hero-trust">
-        <li>${icon('check', 'ico ico-sm')} 상담 · 견적 무료</li>
-        <li>${icon('check', 'ico ico-sm')} 교단 · 규모 제한 없음</li>
-      </ul>
-    </div>
-    <div class="hero-panel">
-      <div class="hero-card">
-        <p class="hero-card-label">지원 항목</p>
-        <ul class="hero-card-list is-cats">
-          ${categories
-            .filter((c) => !c.free)
-            .map((c) => {
-              const list = services.filter((s) => s.category === c.id);
-              return `<li><a href="services/index.html#cat-${c.id}">
-              <span class="hc-cat">
-                <span class="hc-name">${esc(c.name)}</span>
-                <span class="hc-items">${list.map((s) => esc(s.name)).join(' · ')}</span>
-              </span>
-              ${icon('arrow', 'ico ico-sm')}</a></li>`;
-            })
-            .join('\n          ')}
-        </ul>
+      <div class="qz-call">
+        <span>바로 통화를 원하시면</span>
+        <a href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-sm')} ${phoneText()}</a>
+        <small>${esc(site.contact.hours)}</small>
       </div>
     </div>
+
+    <form class="qz-form" id="quoteForm" novalidate>
+      <div class="quote-field">
+        <label for="qChurch">교회명</label>
+        <input type="text" id="qChurch" name="church" maxlength="40" placeholder="예: 새길교회" autocomplete="organization">
+      </div>
+      <div class="quote-field">
+        <label for="qPhone">연락처 <em>*</em></label>
+        <input type="tel" id="qPhone" name="phone" placeholder="010-0000-0000" autocomplete="tel">
+      </div>
+      <div class="quote-field">
+        <label for="qItem">무엇이 필요하신가요?</label>
+        <select id="qItem" name="item">
+          <option value="">고르지 않으셔도 됩니다</option>
+          ${services.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('\n          ')}
+        </select>
+      </div>
+      <p class="quote-err" id="qErr" hidden></p>
+      <button type="submit" class="btn btn-primary btn-lg quote-btn">상담 신청하기 ${icon('arrow', 'ico ico-sm')}</button>
+      <p class="quote-fine">
+        누르시면 신청서로 넘어가며, 적으신 내용이 그대로 옮겨집니다.
+        거기서 한 번 더 확인하고 보내시면 됩니다.
+      </p>
+    </form>
   </div>
 </section>
 
-<section class="stats">
-  <div class="wrap stats-in">
-    <div class="stat"><strong>11</strong><span>지원 항목</span></div>
-    <div class="stat"><strong>0원</strong><span>홈페이지 제작비</span></div>
-    <div class="stat"><strong>1~2일</strong><span>상담 연락</span></div>
-    <div class="stat"><strong>전국</strong><span>지원 지역</span></div>
-  </div>
-</section>
-
+<!-- ============ 5. 게시판 ============ -->
 <section class="section">
   <div class="wrap">
-    ${sectionHead(
-      '지원 항목',
-      '교회에 필요한 일, 여기서 함께 정리합니다',
-      '항목을 하나씩 고르지 않으셔도 됩니다. 세 갈래 가운데 지금 급한 자리부터 보십시오.'
-    )}
-    ${categoryCards('')}
+    ${head('교회끼리 사고, 나누고, 만납니다',
+    '센터를 거치지 않고 교회와 교회가 직접 잇는 자리입니다. 보시는 것은 누구나 무료입니다.',
+    'listings.html')}
+    <div class="bd-tiles">
+      ${T.BOARDS.map(boardTile).join('\n      ')}
+    </div>
   </div>
 </section>
 
-
-<section class="section">
+<!-- ============ 6. 이용 절차 ============ -->
+<section class="section is-soft">
   <div class="wrap">
-    ${sectionHead('이용 절차', '신청부터 사후 지원까지 5단계')}
+    ${head('신청부터 사후 지원까지 5단계',
+    '어디까지 왔는지 신청 현황에서 언제든 보실 수 있습니다.',
+    'process.html', '자세히 보기')}
     <ol class="steps">
       ${site.steps
         .map(
@@ -109,15 +257,14 @@ function buildIndex() {
         )
         .join('\n      ')}
     </ol>
-    <p class="center"><a class="btn btn-outline" href="process.html">이용 절차 자세히 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
   </div>
 </section>
 
-<section class="section section-alt">
+<!-- ============ 7. 자주 묻는 질문 ============ -->
+<section class="section">
   <div class="wrap narrow">
-    ${sectionHead('자주 묻는 질문', '신청 전에 많이 묻는 것들')}
+    ${head('신청 전에 많이 묻는 것들', '', 'faq.html')}
     ${faqList(site.faqs.slice(0, 4), 'home-faq')}
-    <p class="center"><a class="btn btn-outline" href="faq.html">전체 질문 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
   </div>
 </section>
 
@@ -132,6 +279,8 @@ ${ctaBand('')}
       base: '',
       active: 'index.html',
       body,
+      bodyClass: 'is-home',
+      scripts: ['home.js'],
     })
   );
 }

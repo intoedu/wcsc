@@ -35,6 +35,7 @@ const icons = {
   mail: '<rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/>',
   search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
   pin: '<path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/>',
   doc: '<path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/>',
   /* 세로 화면 안에 재생 표시 — 숏츠 */
@@ -174,7 +175,7 @@ function header(base, active) {
     <nav class="nav" id="nav" aria-label="주 메뉴">
       ${links}
       <button type="button" class="nav-search" data-search-open aria-label="찾아보기">
-        ${icon('search', 'ico ico-sm')}<span>찾기</span>
+        ${icon('search', 'ico ico-sm')}<span>무엇을 찾으시나요?</span>
       </button>
       <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="${base}apply.html">지원 신청</a>
