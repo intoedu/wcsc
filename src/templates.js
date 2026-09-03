@@ -133,7 +133,7 @@ const NAV = [
   { href: 'index.html', label: '홈' },
   { href: 'about.html', label: '센터 소개' },
   { href: 'services/index.html', label: '지원 항목', key: 'services' },
-  { href: 'pricing.html', label: '요금제' },
+  { href: 'pricing.html', label: '패키지' },
   { href: 'listings.html', label: '게시판', key: 'boards' },
   { href: 'process.html', label: '이용 절차' },
   { href: 'faq.html', label: '자주 묻는 질문' },

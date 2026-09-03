@@ -41,13 +41,13 @@ function buildIndex() {
      화려하게 만들기보다, 눈이 걸리는 선을 줄이는 쪽으로 갑니다. */
 
   /* 값을 앞에 내놓습니다 — 무엇을 얼마에 맡길 수 있는지가 먼저
-     보여야 다음을 눌러 보십니다. 다만 요금제 페이지가 지금 닫혀
-     있어 "요금제에 포함" 이라고만 적힌 항목은 그 말을 쓰지 않습니다. */
+     보여야 다음을 눌러 보십니다. 다만 패키지 페이지가 지금 닫혀
+     있어 "패키지에 포함" 이라고만 적힌 항목은 그 말을 쓰지 않습니다. */
   const priceTag = (s) => {
     const p = String(s.price || '').trim();
     if (!p || p === '상담 후 결정' || p === '상담 후 안내') return { text: '상담 후 견적', kind: 'ask' };
     if (p === '무료') return { text: '무료', kind: 'free' };
-    if (p === '요금제에 포함') return { text: '상담 후 견적', kind: 'ask' };
+    if (p === '패키지에 포함') return { text: '상담 후 견적', kind: 'ask' };
     if (p === '캠프마다 상이') return { text: '캠프별 안내', kind: 'ask' };
     return { text: p, kind: 'won' };
   };
@@ -543,7 +543,7 @@ ${pageHero({
         <h3>마케팅 지원 · 부동산</h3>
         <p class="bill-price">디자인 시안 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
         <p>필요할 때 한 번만 결제하는 항목입니다.
-          주보처럼 매주 반복되는 경우에는 사역 요금제에 매주 제작이 들어 있습니다.</p>
+          주보처럼 매주 반복되는 경우에는 사역 패키지에 매주 제작이 들어 있습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">건별 견적</span>
@@ -1094,7 +1094,7 @@ ${pageHero({
    문의
    ========================================================= */
 /* =========================================================
-   요금제
+   패키지
    ========================================================= */
 const won = (n) => n.toLocaleString('ko-KR');
 
@@ -1121,7 +1121,7 @@ function planCard(p) {
         <div><dt>AI 숏츠</dt><dd>${esc(p.quota.shorts)}</dd></div>
       </dl>
 
-      ${p.inherits ? `<p class="plan-inherit">${esc(p.inherits)} 요금제에 더해서</p>` : ''}
+      ${p.inherits ? `<p class="plan-inherit">${esc(p.inherits)} 패키지에 더해서</p>` : ''}
       <ul class="plan-list">
         ${p.includes.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
@@ -1133,14 +1133,14 @@ function planCard(p) {
 }
 
 function buildPricing() {
-  /* 요금제를 다시 짜는 동안 내용을 내려 둡니다.
+  /* 패키지를 다시 짜는 동안 내용을 내려 둡니다.
      주소는 살려 두고(들어오시는 분이 404 를 만나지 않게) 안내만 보여 줍니다.
-     요금제 내용(plans · trial · invite)은 src/data/site.js 에 그대로 있으니,
+     패키지 내용(plans · trial · invite)은 src/data/site.js 에 그대로 있으니,
      다시 여실 때는 이 함수만 예전 모양으로 되돌리면 됩니다. */
   const body = `
 ${pageHero({
-  eyebrow: '요금제',
-  title: '요금제를 다시 짜고 있습니다',
+  eyebrow: '패키지',
+  title: '패키지를 다시 짜고 있습니다',
   lead: '더 알맞은 기준으로 고쳐 쓰는 중입니다. 준비되는 대로 이 자리에 올려 드리겠습니다.',
 })}
 
@@ -1170,9 +1170,9 @@ ${ctaBand('')}
   write(
     'pricing.html',
     layout({
-      title: '요금제 (준비 중) | 우리교회지원센터',
+      title: '패키지 (준비 중) | 우리교회지원센터',
       description:
-        '요금제를 다시 짜고 있습니다. 준비되는 대로 안내해 드리며, '
+        '패키지를 다시 짜고 있습니다. 준비되는 대로 안내해 드리며, '
         + '그 사이에는 필요하신 항목만 놓고 견적을 따로 내어 드립니다.',
       base: '',
       active: 'pricing.html',
@@ -1837,14 +1837,14 @@ function buildSearchIndex() {
   add({ url: 'jobs.html#new', title: '구인 공고 올리기', desc: '우리 교회에서 함께할 사역자를 찾기', cat: '게시판', kw: '등록 채용 모집 전도사' });
   add({ url: 'jobs.html', title: '사역자 자리 찾기', desc: '교회들이 올린 구인 공고 보기', cat: '게시판', kw: '취업 지원 사역지 청빙' });
 
-  /* 값을 물으시는 분이 많은데 요금제 페이지는 지금 닫혀 있습니다.
+  /* 값을 물으시는 분이 많은데 패키지 페이지는 지금 닫혀 있습니다.
      빈손으로 돌려보내지 말고 물어보실 곳으로 안내합니다. */
   add({
     url: 'contact.html',
     title: '비용이 얼마인가요',
     desc: '항목마다 다릅니다. 무엇이 필요하신지 알려 주시면 견적을 내어 드립니다 — 상담은 무료입니다.',
     cat: '자주 찾는 것',
-    kw: '요금 가격 비용 값 얼마 견적 금액 무료 돈 월 관리비',
+    kw: '요금 가격 비용 값 얼마 견적 금액 무료 돈 월 관리비 패키지 요금제',
   });
   add({
     url: 'status.html',

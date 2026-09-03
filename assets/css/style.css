@@ -3299,3 +3299,66 @@ a.tk-card:hover {
   .page-hero { padding: 40px 0 36px; }
   .sec-head { margin-bottom: 22px; }
 }
+
+/* ---------- 남은 자리 다듬기 ----------
+   앞의 규칙에서 빠졌던 상자들입니다. 같은 결로 맞춥니다. */
+
+/* 항목 페이지 머리 오른쪽의 요약 상자 */
+.svc-hero {
+  border-bottom: 0;
+  background: var(--bg-soft);
+}
+.svc-hero-side {
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: none;
+}
+
+/* 항목 페이지 아래의 이전 · 다음 */
+.svc-nav-all {
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-soft);
+}
+.svc-nav-all:hover { background: var(--brand-100); color: var(--brand-800); }
+
+/* 큰 갈래 사이의 칸막이 — 실선 대신 여백으로 나눕니다 */
+.svc-cat + .svc-cat {
+  margin-top: 64px;
+  padding-top: 0;
+  border-top: 0;
+}
+.svc-cat-count {
+  border: 0;
+  background: var(--brand-50);
+  color: var(--brand-800);
+}
+
+/* 숫자 띠 — 위아래 노란 줄 대신 연회색 면으로 */
+.stats {
+  border-top: 0;
+  border-bottom: 0;
+  background: var(--bg-soft);
+}
+.stat + .stat { border-left: 0; }
+
+/* 안쪽에 다시 상자를 두지 않습니다 — 카드 안의 카드는 시끄럽습니다 */
+.notice-card,
+.consent-box,
+.renew-box,
+.trial-box { border: 0; }
+
+/* 표는 선이 있어야 읽히지만, 바깥 테두리는 뺍니다 */
+.cmp-tag { border: 0; }
+
+/* 값을 크게 — 사람들이 가장 먼저 찾는 글자입니다 */
+.price-figure strong,
+.svc-meta-price { letter-spacing: -.03em; }
+
+/* 자주 묻는 질문 — 펼친 것만 살짝 도드라지게 */
+.faq-item[open] {
+  background: #fff;
+  box-shadow: var(--lift);
+}
+.section-alt .faq-item[open] { background: #fff; }
