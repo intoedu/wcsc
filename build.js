@@ -236,33 +236,33 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 6. 전화 상담 ============
-     연락하는 자리는 맨 아래 하나만 둡니다. 가운데에도 두었더니
-     같은 말이 두 번 나와, 둘 다 그냥 지나치게 되었습니다. -->
-<section class="qz">
-  <div class="wrap qz-in">
-    <div class="qz-copy">
-      <p class="qz-eyebrow">상담 · 견적 무료</p>
+<!-- ============ 6. 연락 ============
+     짙은 초록으로 두었더니 바로 아래 붙는 푸터와 뭉개졌습니다.
+     밝은 면으로 바꿔 푸터와 갈라 놓습니다. -->
+<section class="section is-soft">
+  <div class="wrap call-in">
+    <div class="call-copy">
+      <p class="call-eyebrow">상담 · 견적 무료</p>
       <h2>전화 한 통이면 됩니다</h2>
-      <p class="qz-lead">
+      <p class="call-lead">
         무엇이 필요하신지 아직 정하지 않으셔도 됩니다.
         형편을 여쭙고, 지금 급한 것부터 함께 정리해 드립니다.
-        <strong>견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.</strong>
+        견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
       </p>
-      <p class="qz-hours">${icon('clock', 'ico ico-sm')} ${hoursText()}</p>
     </div>
 
-    <div class="qz-card">
-      <p class="qz-card-label">바로 통화하기</p>
-      <a class="qz-dial" href="${site.contact.phoneHref}">
+    <div class="call-card">
+      <a class="call-dial" href="${site.contact.phoneHref}">
         ${icon('phoneCall', 'ico')}
         <span>${phoneText()}</span>
       </a>
-      <p class="qz-card-note">누르시면 바로 걸립니다. 통화가 어려우시면 아래로 남겨 주세요.</p>
-      <div class="qz-alt">
-        <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a>
-        <a href="apply.html">${icon('doc', 'ico ico-sm')} 글로 남기기 (지원 신청)</a>
-      </div>
+      <p class="call-hours">${icon('clock', 'ico ico-sm')} ${hoursText()}</p>
+
+      <p class="call-or">통화가 어려우시면</p>
+      <ul class="call-alt">
+        <li><a href="apply.html">${icon('doc', 'ico ico-sm')} 지원 신청서 남기기</a></li>
+        <li><a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a></li>
+      </ul>
     </div>
   </div>
 </section>
@@ -286,12 +286,54 @@ function buildIndex() {
    센터 소개
    ========================================================= */
 function buildAbout() {
-  /* 홈은 렌탈 회사 사이트처럼 짧게 두고, 설명은 전부 여기로 옮겼습니다.
-     처음 오신 교회가 "여기가 무엇을 하는 곳인가" 를 끝까지 읽는 자리는
-     홈이 아니라 [센터 소개] 입니다.
+  /* 애플의 제품 소개 방식은 물건을 파는 회사의 말투입니다.
+     여기는 목회자를 상대하는 기관이라 결이 맞지 않았습니다.
 
-     큰 이야기는 애플의 제품 소개 화면처럼 갑니다 —
-     한 화면에 한 가지, 아주 큰 글씨, 짧은 한 줄, 넓은 여백. */
+     이 페이지는 이렇게 갑니다 —
+       교회에서 실제로 벌어지는 일을 먼저 적고,
+       그 옆에 저희가 맡는 것을 나란히 둡니다.
+     자랑하는 문장보다 "이 일, 저희가 합니다" 가 분명합니다. */
+
+  /* 왼쪽은 교회에서 실제로 벌어지는 일, 오른쪽은 저희가 맡는 것.
+     추상적인 말을 쓰지 않습니다 — 목회자가 겪은 그 장면을 그대로 적습니다. */
+  const PAIRS = [
+    {
+      church: '주보를 매주 밤늦게 담당자가 편집합니다',
+      us: '원고만 주시면 만들어 드립니다. 절기 현수막과 포스터도 함께 합니다.',
+      href: 'services/design.html',
+      label: '마케팅 지원',
+    },
+    {
+      church: '검색해도 교회 정보가 나오지 않습니다',
+      us: '제작비 없이 홈페이지를 만들어 드리고, 월 3만원으로 계속 돌봐 드립니다.',
+      href: 'services/homepage.html',
+      label: '홈페이지 제작',
+    },
+    {
+      church: '부교역자를 청빙하려면 아는 분께 부탁하는 수밖에 없습니다',
+      us: '교회가 직접 공고를 올리고 사역자가 보고 연락합니다. 사례비 · 사택 · 오가는 길을 미리 밝힙니다.',
+      href: 'jobs.html',
+      label: '교역자 구인',
+    },
+    {
+      church: '음향이 안 좋은데 무엇이 문제인지 알 수 없습니다',
+      us: '예배당을 보고 진단합니다. 있는 장비 조정만으로 해결되는 경우도 많습니다.',
+      href: 'services/sound.html',
+      label: '음향 세팅',
+    },
+    {
+      church: '교회를 옮기려는데 계약 직전에야 용도 문제를 발견합니다',
+      us: '서류를 확인한 매물만 올라가는 게시판입니다. 조건만 보시면 됩니다.',
+      href: 'listings.html',
+      label: '부동산 매물',
+    },
+    {
+      church: '서류에 도장 받으러 여기저기 다녀야 합니다',
+      us: '휴대폰으로 주고받고 자동으로 보관합니다. 월 6,900원입니다.',
+      href: 'services/intooffice.html',
+      label: '인투오피스',
+    },
+  ];
 
   /* 우리가 하지 않는 일. 게시판마다 적어 둔 경계를 한자리에 모았습니다.
      할 수 있는 것만 적어 두면 나중에 서로 얼굴을 붉히게 됩니다. */
@@ -322,48 +364,54 @@ function buildAbout() {
 ${pageHero({
   eyebrow: '센터 소개',
   title: '한국 교회 곁에서<br>실무를 맡는 기관',
-  lead: '우리교회지원센터는 교회가 사역 외의 일로 소모하는 시간과 비용을 줄이기 위해 만들어졌습니다.',
+  lead: '사역이 아닌 일에 목회자의 시간이 갑니다. 하지 않으면 사역이 막히는 일인데, '
+    + '대부분의 교회에는 이 일을 맡을 사람이 없습니다. 그 자리를 대신 맡으려고 만들어졌습니다.',
 })}
 
-<!-- 무엇이 문제인가 -->
-<section class="story">
-  <div class="wrap story-in">
-    <p class="story-eyebrow">왜 만들어졌나</p>
-    <h2 class="story-title">사역이 아닌 일에<br>목회자의 시간이 갑니다</h2>
-    <p class="story-lead">
-      하지 않으면 사역이 막히는 일인데, 대부분의 교회에는 이 일을 맡을 사람이 없습니다.
-    </p>
+<!-- 교회에서 벌어지는 일 ↔ 저희가 맡는 것 -->
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('하는 일', '이런 일을 대신 맡습니다',
+    '자랑하는 말 대신, 교회에서 실제로 벌어지는 일과 저희가 맡는 것을 나란히 적었습니다.')}
+
+    <ul class="pairs">
+      ${PAIRS.map((p) => `<li class="pair">
+        <div class="pair-church">
+          <span class="pair-tag">교회에서는</span>
+          <p>${esc(p.church)}</p>
+        </div>
+        <span class="pair-arrow" aria-hidden="true">${icon('arrow')}</span>
+        <div class="pair-us">
+          <span class="pair-tag is-us">저희가</span>
+          <p>${esc(p.us)}</p>
+          <a class="pair-link" href="${p.href}">${esc(p.label)} 자세히 ${icon('arrow', 'ico ico-sm')}</a>
+        </div>
+      </li>`).join('\n      ')}
+    </ul>
+
+    <p class="center"><a class="btn btn-outline" href="services/index.html">지원 항목 전체 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
   </div>
 </section>
 
-<section class="section">
+<!-- 왜 만들어졌나 -->
+<section class="section section-alt">
   <div class="wrap narrow prose">
+    <h2>왜 만들어졌나</h2>
     <p>
       많은 교회가 비슷한 어려움을 겪습니다. 홈페이지를 만들려면 업체를 찾아야 하고,
       주보는 매주 담당자가 밤늦게 편집합니다. 부교역자를 청빙하려면 아는 분들께 부탁하는 것 외에
       방법이 마땅치 않고, 음향이 안 좋아도 무엇이 문제인지 알기 어렵습니다.
-      교회를 옮길 때는 계약 직전에야 용도 문제를 발견하기도 합니다.
     </p>
     <p>
       이 일들은 사역이 아닙니다. 그런데 하지 않으면 사역이 막힙니다.
       결국 목회자나 몇 안 되는 교역자가 밤에 붙들게 되고, 그만큼 사람을 만나고
-      말씀을 준비할 시간이 줄어듭니다. 우리교회지원센터는 그 자리를 대신 맡기 위해
-      만들어진 기관입니다.
+      말씀을 준비할 시간이 줄어듭니다.
     </p>
-  </div>
-</section>
-
-<!-- 그래서 무엇을 하는가 -->
-<section class="story is-dark">
-  <div class="wrap story-in">
-    <p class="story-eyebrow">그래서</p>
-    <p class="story-figure"><strong>${services.length}</strong><span>가지</span></p>
-    <h2 class="story-title">항목마다 업체를<br>찾아다니지 않으셔도 됩니다</h2>
-    <p class="story-lead">
-      홈페이지 · 주보 · 음향 · 앱 · 행정 · 부동산 · 교역자까지.
-      교회 사정을 아는 한곳이 이어서 맡습니다.
+    <p>
+      업체를 항목마다 찾아다니는 것도 일입니다. 견적을 받고 비교하고 설명을 반복하는 사이에
+      정작 급한 일이 미뤄집니다. 우리교회지원센터는 그 자리를 한곳에서 대신 맡기 위해
+      만들어진 기관입니다. 전국 어느 교회든 규모 · 지역 · 교단 제한이 없습니다.
     </p>
-    <p class="story-note">전국 어느 교회든 규모 · 지역 · 교단 제한이 없습니다.</p>
   </div>
 </section>
 
@@ -435,13 +483,19 @@ ${pageHero({
   </div>
 </section>
 
-<!-- 지원 범위 -->
+<!-- 센터 정보 -->
 <section class="section section-alt">
-  <div class="wrap">
-    ${sectionHead('지원 범위', `${NUM[categories.length]} 갈래, ${services.length}개 항목`,
-    '갈래를 눌러 그 안에 무엇이 있는지 보실 수 있습니다.')}
-    ${categoryCards('')}
-    <p class="center"><a class="btn btn-outline" href="services/index.html">지원 항목 전체 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
+  <div class="wrap narrow">
+    ${sectionHead('센터 정보', '어디에, 언제, 누구에게')}
+    <dl class="facts">
+      <div><dt>이름</dt><dd>${esc(site.fullName || site.name)}</dd></div>
+      <div><dt>하는 일</dt><dd>${NUM[categories.length]} 갈래, ${services.length}개 항목 · 게시판 ${T.BOARDS.length}개</dd></div>
+      <div><dt>지원 지역</dt><dd>전국 (규모 · 교단 제한 없음)</dd></div>
+      <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
+      <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
+      <div><dt>업무 시간</dt><dd>${hoursText()}</dd></div>
+      <div><dt>주소</dt><dd>${addressText()}</dd></div>
+    </dl>
   </div>
 </section>
 
@@ -455,8 +509,8 @@ ${ctaBand('', {
     'about.html',
     layout({
       title: '센터 소개 | 우리교회지원센터',
-      description: '우리교회지원센터가 만들어진 이유와 일하는 방식, 지키는 원칙, '
-        + '그리고 저희가 하지 않는 일까지 적어 두었습니다.',
+      description: '교회에서 실제로 벌어지는 일과 우리교회지원센터가 맡는 일을 나란히 적었습니다. '
+        + '일하는 방식과 원칙, 그리고 하지 않는 일까지 적어 두었습니다.',
       base: '',
       active: 'about.html',
       body,
