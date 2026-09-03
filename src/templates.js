@@ -1,3 +1,32 @@
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+/**
+ * 파일 주소 뒤에 내용 요약 번호를 붙입니다 (assets/css/style.css?v=1a2b3c4d).
+ *
+ * 왜 필요한가
+ *   브라우저는 한 번 받은 css · js 를 한동안 다시 받지 않습니다.
+ *   그래서 새 화면(html)에 옛 모양(css)이 붙어, 칸이 어긋나거나
+ *   색이 빠진 채로 보입니다. 실제로 두 번 그런 일이 있었습니다.
+ *
+ *   내용이 바뀌면 번호도 바뀌므로 브라우저가 새로 받아 갑니다.
+ *   내용이 그대로면 번호도 그대로라 쓸데없이 다시 받지 않습니다.
+ */
+const VER = new Map();
+function ver(rel) {
+  if (VER.has(rel)) return VER.get(rel);
+  let tag = '';
+  try {
+    const buf = fs.readFileSync(path.join(__dirname, '..', rel));
+    tag = '?v=' + crypto.createHash('md5').update(buf).digest('hex').slice(0, 8);
+  } catch (e) {
+    // 아직 만들어지지 않은 파일 — 번호 없이 둡니다.
+  }
+  VER.set(rel, tag);
+  return tag;
+}
+
 'use strict';
 
 const { site, categories, services, plans, planRules, trial, invite } = require('./data/site');
@@ -267,7 +296,8 @@ function footer(base) {
  */
 function layout(o) {
   const base = o.base || '';
-  const scripts = (o.scripts || []).map((s) => `<script src="${base}assets/js/${s}" defer></script>`).join('\n  ');
+  const scripts = (o.scripts || []).map((s) =>
+    `<script src="${base}assets/js/${s}${ver('assets/js/' + s)}" defer></script>`).join('\n  ');
   return `<!doctype html>
 <html lang="ko">
 <head>
@@ -283,8 +313,8 @@ function layout(o) {
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="${base}assets/css/style.css">
-  <link rel="stylesheet" href="${base}assets/css/auth.css">
+  <link rel="stylesheet" href="${base}assets/css/style.css${ver('assets/css/style.css')}">
+  <link rel="stylesheet" href="${base}assets/css/auth.css${ver('assets/css/auth.css')}">
 </head>
 <body${o.bodyClass ? ` class="${o.bodyClass}"` : ''}${o.serviceId ? ` data-service="${o.serviceId}"` : ''}>
   ${header(base, o.active)}
@@ -310,18 +340,18 @@ ${o.body}
       </p>
     </div>
   </div>
-  <script src="${base}assets/js/supabase-config.js" defer></script>
-  <script src="${base}assets/js/firebase-config.js" defer></script>
-  <script src="${base}assets/js/data.js" defer></script>
-  <script src="${base}assets/js/db.js" defer></script>
-  <script src="${base}assets/js/profile.js" defer></script>
-  <script src="${base}assets/js/account.js" defer></script>
-  <script src="${base}assets/js/auth-ui.js" defer></script>
-  <script src="${base}assets/js/consent-ui.js" defer></script>
-  <script src="${base}assets/js/live-content.js" defer></script>
-  <script src="${base}assets/js/search-index.js" defer></script>
-  <script src="${base}assets/js/search.js" defer></script>
-  <script src="${base}assets/js/app.js" defer></script>
+  <script src="${base}assets/js/supabase-config.js${ver('assets/js/supabase-config.js')}" defer></script>
+  <script src="${base}assets/js/firebase-config.js${ver('assets/js/firebase-config.js')}" defer></script>
+  <script src="${base}assets/js/data.js${ver('assets/js/data.js')}" defer></script>
+  <script src="${base}assets/js/db.js${ver('assets/js/db.js')}" defer></script>
+  <script src="${base}assets/js/profile.js${ver('assets/js/profile.js')}" defer></script>
+  <script src="${base}assets/js/account.js${ver('assets/js/account.js')}" defer></script>
+  <script src="${base}assets/js/auth-ui.js${ver('assets/js/auth-ui.js')}" defer></script>
+  <script src="${base}assets/js/consent-ui.js${ver('assets/js/consent-ui.js')}" defer></script>
+  <script src="${base}assets/js/live-content.js${ver('assets/js/live-content.js')}" defer></script>
+  <script src="${base}assets/js/search-index.js${ver('assets/js/search-index.js')}" defer></script>
+  <script src="${base}assets/js/search.js${ver('assets/js/search.js')}" defer></script>
+  <script src="${base}assets/js/app.js${ver('assets/js/app.js')}" defer></script>
   ${scripts}
 </body>
 </html>
@@ -508,6 +538,7 @@ function ctaBand(base, opts) {
 }
 
 module.exports = {
+  ver,
   BOARDS,
   boardTabs,
   categories,

@@ -1908,7 +1908,43 @@ window.CAPS_PAYMENT = ${JSON.stringify(site.payment, null, 2)};
 }
 
 /* ========================================================= */
+/* =========================================================
+   손으로 쓴 화면(admin.html · staff.html)의 자산 주소에도
+   내용 요약 번호를 붙입니다.
+
+   이 둘은 build.js 가 만드는 파일이 아니라 직접 쓴 파일입니다.
+   그래도 옛 css 가 붙는 문제는 똑같이 생기고, 오히려 직원이
+   매일 여는 화면이라 더 성가십니다. 그래서 빌드할 때 주소만
+   덧칠합니다 — 내용이 그대로면 번호도 그대로라, 쓸데없이
+   파일이 바뀌지는 않습니다.
+   ========================================================= */
+function stampAssets() {
+  ['admin.html', 'staff.html'].forEach((file) => {
+    const full = path.join(__dirname, file);
+    if (!fs.existsSync(full)) return;
+
+    const before = fs.readFileSync(full, 'utf8');
+    const after = before.replace(
+      /(href|src)="(assets\/[^"?]+\.(?:css|js))(?:\?v=[a-f0-9]+)?"/g,
+      (m, attr, rel) => `${attr}="${rel}${T.ver(rel)}"`
+    );
+
+    if (after !== before) {
+      fs.writeFileSync(full, after);
+      console.log('  ' + file + ' (자산 번호 갱신)');
+    }
+  });
+}
+
 function main() {
+  /* 자동 생성되는 스크립트를 먼저 만듭니다.
+     페이지에 붙는 주소에 파일 내용을 요약한 번호(?v=)를 다는데,
+     그러려면 파일이 이미 있어야 합니다. */
+  buildSearchIndex();
+  buildDataScript();
+  buildRulesScript(buildSupabaseSql());
+  stampAssets();
+
   buildIndex();
   buildAbout();
   buildProcess();
@@ -1924,9 +1960,6 @@ function main() {
   Boards.buildGuesthouse(write);
   Boards.buildTickets(write);
   Boards.buildJobs(write);
-  buildSearchIndex();
-  buildDataScript();
-  buildRulesScript(buildSupabaseSql());
   console.log(`생성 완료 (${out.length}개)`);
   out.forEach((f) => console.log('  ' + f));
 }
