@@ -265,6 +265,7 @@ function footer(base) {
         <li><a href="${base}faq.html">자주 묻는 질문</a></li>
         <li><a href="${base}contact.html">문의하기</a></li>
         <li><a href="${base}status.html">신청 조회</a></li>
+        <li><a href="${base}privacy.html">개인정보 처리방침</a></li>
         <li><a href="${base}listings.html">부동산 매물</a></li>
         <li><a href="${base}market.html">중고 장터</a></li>
         <li><a href="${base}guesthouse.html">게스트하우스</a></li>

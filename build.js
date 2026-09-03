@@ -519,6 +519,172 @@ ${ctaBand('', {
 }
 
 /* =========================================================
+   개인정보 처리방침
+
+   이 페이지는 실제로 저장되는 것에서 뽑아 적었습니다 — 표와
+   저장소를 하나씩 따라가며 무엇이 남는지 확인해 옮겼습니다.
+   그래야 방침과 실제가 어긋나지 않습니다.
+
+   ⚠ 사업자 정보와 개인정보 보호책임자는 대표님만 채우실 수
+     있습니다. src/data/site.js 의 privacy 에 적어 주시면 여기에
+     그대로 나옵니다. 비어 있으면 [확인 필요] 로 보입니다.
+   ========================================================= */
+function buildPrivacy() {
+  const P = site.privacy || {};
+  const todo = (v, what) => (String(v || '').trim()
+    ? esc(v)
+    : `<span class="todo">확인 필요 — ${esc(what)}</span>`);
+
+  /* 어디에 무엇이 남는지. 표를 하나씩 따라가며 적었습니다. */
+  const ITEMS = [
+    {
+      when: '회원가입',
+      what: '이메일, 이름, 연락처, 교회명, 직분, 생년월일',
+      why: '로그인, 내가 올린 글과 신청 내역 확인, 본인 확인',
+      keep: '탈퇴할 때까지',
+    },
+    {
+      when: '지원 신청',
+      what: '교회명, 담당자 성함 · 직분, 연락처, 이메일, 소재지, 교회 규모, 예산 · 일정, 신청 내용',
+      why: '상담, 견적 산출, 진행 안내',
+      keep: '상담 종료 후 1년',
+    },
+    {
+      when: '게시판에 글을 올릴 때',
+      what: '연락처, 연락 가능 시간, 올리신 사진, 대략의 위치 — 게시판에 따라 증빙 서류(등기부등본 · 임대차계약서)',
+      why: '게시글 확인과 게시, 보시는 분이 등록자에게 직접 연락',
+      keep: '글을 지우실 때까지 (증빙 서류는 확인 후 지웁니다)',
+    },
+    {
+      when: '집회 신청',
+      what: '신청자 성함, 연락처, 인원, 좌석',
+      why: '참가자 명단 확인, 집회 주최 교회에 전달',
+      keep: '집회가 끝난 후 6개월',
+    },
+    {
+      when: '결제 (준비 중)',
+      what: '주문번호, 결제 금액, 결제 수단, 결제사 응답 기록',
+      why: '결제 확인, 환불 · 분쟁 대응',
+      keep: '전자상거래법에 따라 5년',
+      note: '카드번호와 계좌번호는 저희 쪽에 저장되지 않습니다 — 결제사가 직접 처리합니다.',
+    },
+    {
+      when: '사이트 안에서 찾을 때 (로그인하신 분만)',
+      what: '찾으신 낱말',
+      why: '다음에 다시 찾으실 때 [최근에 찾으신 것] 으로 보여 드리기',
+      keep: '가장 최근 20건 (넘으면 오래된 것부터 자동 삭제)',
+      note: '로그인하지 않으신 분은 저장하지 않습니다. 본인만 보실 수 있고 직원도 볼 수 없으며, '
+        + '찾기 창의 [지우기] 로 언제든 한 번에 지우실 수 있습니다.',
+    },
+  ];
+
+  const body = `
+${pageHero({
+  eyebrow: '개인정보 처리방침',
+  title: '무엇을 받아 두고,<br>언제 지우는지',
+  lead: '실제로 저장되는 것만 적었습니다. 적혀 있지 않은 것은 받지 않습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    ${sectionHead('무엇을', '받아 두는 것과 지우는 때')}
+    <div class="pv-list">
+      ${ITEMS.map((it) => `<article class="pv-item">
+        <h3>${esc(it.when)}</h3>
+        <dl>
+          <div><dt>받는 것</dt><dd>${esc(it.what)}</dd></div>
+          <div><dt>쓰는 데</dt><dd>${esc(it.why)}</dd></div>
+          <div><dt>가지고 있는 기간</dt><dd>${esc(it.keep)}</dd></div>
+        </dl>
+        ${it.note ? `<p class="pv-note">${esc(it.note)}</p>` : ''}
+      </article>`).join('\n      ')}
+    </div>
+    <p class="pv-fine">
+      기간이 지나면 지웁니다. 다만 법에서 보관하라고 정한 것(전자상거래법의 계약 · 결제 기록 등)은
+      그 기간 동안 따로 보관한 뒤 지웁니다.
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('어디에', '맡겨 둔 곳과 보관 위치')}
+    <div class="pv-list">
+      <article class="pv-item">
+        <h3>Supabase</h3>
+        <dl>
+          <div><dt>맡기는 일</dt><dd>데이터베이스, 로그인 처리, 사진 · 서류 보관</dd></div>
+          <div><dt>보관 국가</dt><dd><strong>일본 (도쿄)</strong></dd></div>
+          <div><dt>받는 이</dt><dd>Supabase, Inc.</dd></div>
+        </dl>
+        <p class="pv-note">
+          이 사이트의 자료는 일본에 있는 서버에 저장됩니다. 국외로 옮겨 보관하는 것이므로
+          미리 알려 드립니다. 동의하지 않으실 수 있으나, 그 경우 회원가입과 게시판 이용이 어렵습니다.
+        </p>
+      </article>
+      <article class="pv-item">
+        <h3>GitHub Pages</h3>
+        <dl>
+          <div><dt>맡기는 일</dt><dd>웹 페이지 전송</dd></div>
+          <div><dt>받는 이</dt><dd>GitHub, Inc. (미국)</dd></div>
+        </dl>
+        <p class="pv-note">화면을 보내 주는 역할만 합니다. 개인정보를 따로 저장하지 않습니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow">
+    ${sectionHead('권리', '언제든 하실 수 있는 것')}
+    <ul class="pv-rights">
+      <li><strong>보기</strong> — 내 계정 화면과 [신청 조회] 에서 남아 있는 내용을 보실 수 있습니다.</li>
+      <li><strong>고치기</strong> — 계정 정보와 올리신 글은 직접 고치실 수 있습니다.</li>
+      <li><strong>지우기</strong> — 올리신 글은 직접 지우실 수 있고, 찾은 낱말은 찾기 창의 [지우기] 로 한 번에 지웁니다.</li>
+      <li><strong>탈퇴</strong> — 탈퇴하시면 계정과 함께 저장된 것이 지워집니다. 법에서 보관하라고 정한 것만 남습니다.</li>
+      <li><strong>동의 철회</strong> — 아래 연락처로 말씀해 주시면 처리해 드립니다.</li>
+    </ul>
+    <p class="pv-fine">
+      만 14세 미만은 가입하실 수 없습니다. 광고성 안내는 따로 동의하신 분께만 보내며,
+      언제든 그만 받으실 수 있습니다.
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('누구에게', '물어보실 곳')}
+    <dl class="facts">
+      <div><dt>기관명</dt><dd>${esc(site.fullName || site.name)}</dd></div>
+      <div><dt>개인정보 보호책임자</dt><dd>${todo(P.officer, '보호책임자 성함과 직책')}</dd></div>
+      <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
+      <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
+      <div><dt>주소</dt><dd>${addressText()}</dd></div>
+      <div><dt>사업자등록번호</dt><dd>${todo(P.bizNo, '사업자등록번호')}</dd></div>
+      <div><dt>통신판매업 신고번호</dt><dd>${todo(P.mailOrderNo, '통신판매업 신고번호')}</dd></div>
+      <div><dt>시행일</dt><dd>${todo(P.effectiveDate, '이 방침을 처음 적용하는 날짜')}</dd></div>
+    </dl>
+    <p class="pv-fine">
+      침해를 당하셨다고 생각되시면 개인정보침해신고센터(국번 없이 118)나
+      개인정보 분쟁조정위원회(1833-6972)에 도움을 요청하실 수 있습니다.
+    </p>
+  </div>
+</section>
+`;
+
+  write(
+    'privacy.html',
+    layout({
+      title: '개인정보 처리방침 | 우리교회지원센터',
+      description: '우리교회지원센터가 무엇을 받아 두고 언제 지우는지, 어디에 보관하는지 적어 두었습니다.',
+      base: '',
+      active: 'privacy.html',
+      body,
+    })
+  );
+}
+
+/* =========================================================
    이용 절차
    ========================================================= */
 function buildProcess() {
@@ -663,14 +829,32 @@ function buildServicesIndex() {
   const body = `
 ${pageHero({
   eyebrow: '지원 항목',
-  title: '네 갈래 11개 항목을<br>한곳에서 맡습니다',
-  lead: '교회가 겪는 자리별로 묶었습니다 — 보이는 교회 · 사역하는 교회 · 세우는 교회, 그리고 가입이 무료인 커뮤니티 센터. '
-    + '여러 항목을 한 번에 신청하실 수 있고, 전체 일정을 묶어 조율합니다.',
+  title: `${NUM[categories.length]} 갈래 ${services.length}개 항목과<br>게시판 ${T.BOARDS.length}개`,
+  lead: '교회가 겪는 자리별로 묶었습니다. 여러 항목을 한 번에 신청하실 수 있고, 전체 일정을 묶어 조율합니다. '
+    + '아래쪽에는 센터를 거치지 않고 교회끼리 직접 잇는 게시판도 함께 두었습니다.',
 })}
 
 <section class="section">
   <div class="wrap">
     ${serviceGroups('../')}
+  </div>
+</section>
+
+<!-- 게시판도 여기에 함께 둡니다.
+     성격은 다르지만 [지원 항목] 을 눌러 들어온 분이 "여기 있는 게
+     전부인가" 하고 나가시면 게시판 다섯을 아예 못 보십니다. -->
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('게시판', '교회끼리 직접 잇는 자리',
+      '위 항목은 센터가 맡아 해 드리는 일이고, 아래는 교회와 교회가 센터를 거치지 않고 '
+      + '직접 만나는 곳입니다. 보시는 것은 누구나 무료입니다.')}
+    <div class="bd-tiles">
+      ${T.BOARDS.map((b, i) => `<a class="bd-tile" href="../${b.href}">
+        <span class="bd-no">0${i + 1}</span>
+        <strong>${esc(b.label)}</strong>
+        <span>${esc(b.sub)}</span>
+      </a>`).join('\n      ')}
+    </div>
   </div>
 </section>
 
@@ -1933,6 +2117,7 @@ function buildSearchIndex() {
     ['contact.html', '문의', '전화 · 카카오톡 · 이메일로 여쭤보기', '페이지', '연락처 상담 전화'],
     ['apply.html', '지원 신청', '필요한 것을 적어 보내 주시면 연락드립니다', '페이지', '신청서 접수'],
     ['status.html', '신청 현황', '내가 넣은 신청이 어디까지 갔는지', '페이지', '진행 상황 조회'],
+    ['privacy.html', '개인정보 처리방침', '무엇을 받아 두고 언제 지우는지', '페이지', '개인정보 방침 약관 수집 보관 삭제 탈퇴'],
   ].forEach(([url, title, desc, cat, kw]) => add({ url, title, desc, cat, kw }));
 
   /* 큰 갈래 */
@@ -2112,6 +2297,7 @@ function main() {
   buildApply();
   buildStatus();
   buildContact();
+  buildPrivacy();
   buildListings();
   Boards.buildMarket(write);
   Boards.buildGuesthouse(write);
