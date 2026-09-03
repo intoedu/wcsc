@@ -36,9 +36,15 @@ function write(rel, html) {
    ========================================================= */
 function buildIndex() {
   /* 렌탈 회사 홈페이지의 배치를 따랐습니다 (렌트리 참고).
-       위에서부터 — 미는 배너 · 아이콘 바로가기 · 품목표 · 상담 · 게시판.
-     테두리를 두르는 대신 연회색 면과 넓은 여백으로 나눕니다.
-     화려하게 만들기보다, 눈이 걸리는 선을 줄이는 쪽으로 갑니다. */
+
+     한 번 잘못 놓았다가 고친 것 셋 — 적어 둡니다.
+       1. 제목 없이 배너부터 나왔습니다. 처음 오신 교회는 이곳이
+          무엇을 하는 곳인지 한 줄도 못 읽고 지나갔습니다.
+       2. 아이콘 열둘 바로 밑에 같은 항목 카드 열하나를 또 놓았습니다.
+          같은 것을 두 번 보여 주면 둘 다 대충 보게 됩니다.
+          아이콘 줄은 성격이 다른 [게시판] 로 바꿨습니다.
+       3. 짙은 초록 연락 블록이 가운데와 맨 밑에 하나씩 있었습니다.
+          맨 밑 하나로 합쳤습니다. */
 
   /* 값을 앞에 내놓습니다 — 무엇을 얼마에 맡길 수 있는지가 먼저
      보여야 다음을 눌러 보십니다. 다만 패키지 페이지가 지금 닫혀
@@ -75,7 +81,7 @@ function buildIndex() {
       tone: 'deep',
       eyebrow: '중고 장터',
       title: '쓰던 음향과 악기를<br>교회끼리',
-      lead: '사 오신 장비는 예배당에 달아 드리는 것까지 맡습니다.',
+      lead: '사 오신 장비는 예배당에 다는 것까지 맡습니다.',
       href: 'market.html',
       icon: 'speaker',
     },
@@ -98,10 +104,20 @@ function buildIndex() {
         </span>
       </a>`;
 
-  /* 아이콘 바로가기 — 열한 항목에 [전체보기] 하나를 더해 열둘입니다. */
-  const shortcut = (s) => `<a class="sc" href="services/${s.slug}.html">
-        <span class="sc-ico">${icon(s.icon)}</span>
-        <span class="sc-name">${esc(s.short || s.name)}</span>
+  /* 아이콘 줄은 게시판입니다 — 아래 항목 카드와 성격이 다릅니다.
+     항목은 센터가 해 드리는 일이고, 게시판은 교회끼리 오가는 자리입니다. */
+  const BOARD_ICON = {
+    'listings.html': 'building',
+    'market.html': 'speaker',
+    'guesthouse.html': 'home',
+    'tickets.html': 'ticket',
+    'jobs.html': 'users',
+  };
+
+  const boardShortcut = (b) => `<a class="sc" href="${b.href}">
+        <span class="sc-ico">${icon(BOARD_ICON[b.href] || 'doc')}</span>
+        <span class="sc-name">${esc(b.label)}</span>
+        <span class="sc-sub">${esc(b.sub)}</span>
       </a>`;
 
   const itemTile = (s) => {
@@ -119,13 +135,7 @@ function buildIndex() {
       </a>`;
   };
 
-  const boardTile = (b, i) => `<a class="bd-tile" href="${b.href}">
-        <span class="bd-no">0${i + 1}</span>
-        <strong>${esc(b.label)}</strong>
-        <span>${esc(b.sub)}</span>
-      </a>`;
-
-  /* 섹션 제목 오른쪽에 [전체보기] 를 붙이는 자리 */
+  /* 구역 제목 오른쪽에 [전체보기] 를 붙이는 자리 */
   const head = (title, lead, moreHref, moreLabel) => `<div class="hd-row">
       <div>
         <h2>${title}</h2>
@@ -135,7 +145,22 @@ function buildIndex() {
     </div>`;
 
   const body = `
-<!-- ============ 1. 미는 배너 ============
+<!-- ============ 1. 한 줄 소개 ============
+     처음 오신 교회가 이곳이 무엇을 하는 곳인지 알고 넘어가도록
+     한 줄만 둡니다. 배너가 바로 아래 붙으므로 크게 만들지 않습니다. -->
+<section class="lede">
+  <div class="wrap">
+    <p class="lede-eyebrow">한국 교회를 위한 통합 지원 기관</p>
+    <h1>교회는 사역에 집중하고,<br><span class="hl">나머지는 맡기십시오</span></h1>
+    <p class="lede-lead">
+      홈페이지 · 주보 · 음향 · 앱 · 행정 · 부동산 · 교역자까지.
+      업체를 따로 찾아다니지 않으셔도 됩니다 — 한곳에서 이어서 맡습니다.
+      상담과 견적은 무료이고, 전국 어느 교회든 규모 · 교단 제한이 없습니다.
+    </p>
+  </div>
+</section>
+
+<!-- ============ 2. 미는 배너 ============
      가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
      더 있다는 것이 손짓 없이도 보이게 했습니다. -->
 <section class="bn-wrap">
@@ -149,20 +174,19 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 2. 아이콘 바로가기 ============ -->
+<!-- ============ 3. 게시판 바로가기 ============
+     센터를 거치지 않고 교회끼리 오가는 자리입니다.
+     아래 [지원 항목] 과 성격이 달라 따로 둡니다. -->
 <section class="sc-wrap">
   <div class="wrap">
-    <div class="sc-grid">
-      ${services.map(shortcut).join('\n      ')}
-      <a class="sc is-all" href="services/index.html">
-        <span class="sc-ico">${icon('grid')}</span>
-        <span class="sc-name">전체보기</span>
-      </a>
+    <p class="sc-label">교회끼리 사고, 나누고, 만나는 곳 <small>보시는 것은 누구나 무료</small></p>
+    <div class="sc-grid is-boards">
+      ${T.BOARDS.map(boardShortcut).join('\n      ')}
     </div>
   </div>
 </section>
 
-<!-- ============ 3. 지원 항목 카탈로그 ============ -->
+<!-- ============ 4. 지원 항목 카탈로그 ============ -->
 <section class="section" id="items">
   <div class="wrap">
     ${head('무엇이든 하나씩 맡기실 수 있습니다',
@@ -185,10 +209,37 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 4. 전화 상담 ============
-     신청서를 채우는 것보다 한 번 통화하는 편이 빠른 분이 많습니다.
-     휴대폰에서는 눌러서 바로 걸리고, 컴퓨터에서는 번호가 크게 보여
-     받아 적으실 수 있습니다. -->
+<!-- ============ 5. 이용 절차 ============ -->
+<section class="section is-soft">
+  <div class="wrap">
+    ${head('신청부터 사후 지원까지 5단계',
+    '어디까지 왔는지 신청 현황에서 언제든 보실 수 있습니다.',
+    'process.html', '자세히 보기')}
+    <ol class="steps">
+      ${site.steps
+        .map(
+          (s, i) => `<li class="step">
+        <span class="step-no">${i + 1}</span>
+        <h3>${esc(s.title)}</h3>
+        <p>${esc(s.desc)}</p>
+      </li>`
+        )
+        .join('\n      ')}
+    </ol>
+  </div>
+</section>
+
+<!-- ============ 6. 자주 묻는 질문 ============ -->
+<section class="section">
+  <div class="wrap narrow">
+    ${head('신청 전에 많이 묻는 것들', '', 'faq.html')}
+    ${faqList(site.faqs.slice(0, 4), 'home-faq')}
+  </div>
+</section>
+
+<!-- ============ 7. 전화 상담 ============
+     연락하는 자리는 맨 아래 하나만 둡니다. 가운데에도 두었더니
+     같은 말이 두 번 나와, 둘 다 그냥 지나치게 되었습니다. -->
 <section class="qz">
   <div class="wrap qz-in">
     <div class="qz-copy">
@@ -211,52 +262,11 @@ function buildIndex() {
       <p class="qz-card-note">누르시면 바로 걸립니다. 통화가 어려우시면 아래로 남겨 주세요.</p>
       <div class="qz-alt">
         <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a>
+        <a href="apply.html">${icon('doc', 'ico ico-sm')} 글로 남기기 (지원 신청)</a>
       </div>
     </div>
   </div>
 </section>
-
-<!-- ============ 5. 게시판 ============ -->
-<section class="section">
-  <div class="wrap">
-    ${head('교회끼리 사고, 나누고, 만납니다',
-    '센터를 거치지 않고 교회와 교회가 직접 잇는 자리입니다. 보시는 것은 누구나 무료입니다.',
-    'listings.html')}
-    <div class="bd-tiles">
-      ${T.BOARDS.map(boardTile).join('\n      ')}
-    </div>
-  </div>
-</section>
-
-<!-- ============ 6. 이용 절차 ============ -->
-<section class="section is-soft">
-  <div class="wrap">
-    ${head('신청부터 사후 지원까지 5단계',
-    '어디까지 왔는지 신청 현황에서 언제든 보실 수 있습니다.',
-    'process.html', '자세히 보기')}
-    <ol class="steps">
-      ${site.steps
-        .map(
-          (s, i) => `<li class="step">
-        <span class="step-no">${i + 1}</span>
-        <h3>${esc(s.title)}</h3>
-        <p>${esc(s.desc)}</p>
-      </li>`
-        )
-        .join('\n      ')}
-    </ol>
-  </div>
-</section>
-
-<!-- ============ 7. 자주 묻는 질문 ============ -->
-<section class="section">
-  <div class="wrap narrow">
-    ${head('신청 전에 많이 묻는 것들', '', 'faq.html')}
-    ${faqList(site.faqs.slice(0, 4), 'home-faq')}
-  </div>
-</section>
-
-${ctaBand('')}
 `;
 
   write(
