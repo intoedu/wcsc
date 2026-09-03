@@ -325,13 +325,26 @@
         '</p>';
     }
     if (v.status === 'awaiting_payment') {
+      /* 카드 결제가 연결되어 있으면 그 자리에서 내실 수 있게 버튼을 답니다.
+         연결 전(기본값)에는 아래 계좌 안내만 나가 지금과 똑같습니다. */
+      var canCard = db.paymentEnabled();
       lines += '<p class="ls-mine-note is-pay">' +
-        '<strong>서류 확인이 끝났습니다. 입금해 주세요.</strong><br>' +
+        '<strong>서류 확인이 끝났습니다. ' + (canCard ? '등록비를 내주세요.' : '입금해 주세요.') + '</strong><br>' +
         '등록비 ' + db.money(fee.amount || db.LISTING_FEE) + '원 · ' +
-        '계좌는 <strong>카카오톡으로 보내드렸습니다</strong>' +
-        (fee.noticeSentAt ? ' (' + esc(db.formatDate(fee.noticeSentAt)) + ')' : '') + '.<br>' +
-        '입금이 확인되면 바로 게시됩니다. 카카오톡을 못 받으셨으면 센터로 알려 주세요.' +
+        (canCard
+          ? '카드로 내시면 <strong>바로 게시됩니다</strong>. 계좌 이체도 그대로 됩니다 — ' +
+            '계좌는 카카오톡으로 보내드렸습니다.'
+          : '계좌는 <strong>카카오톡으로 보내드렸습니다</strong>' +
+            (fee.noticeSentAt ? ' (' + esc(db.formatDate(fee.noticeSentAt)) + ')' : '') + '.<br>' +
+            '입금이 확인되면 바로 게시됩니다. 카카오톡을 못 받으셨으면 센터로 알려 주세요.') +
         '</p>';
+      if (canCard) {
+        lines += '<div class="ls-pay-act">' +
+          '<button type="button" class="btn btn-primary btn-sm" data-pay="' + esc(r.id) + '">' +
+            '카드로 ' + db.money(fee.amount || db.LISTING_FEE) + '원 결제하기</button>' +
+          '<span class="ls-pay-hint">결제가 끝나면 바로 게시됩니다.</span>' +
+          '</div>';
+      }
     }
     if (v.status === 'rejected') {
       lines += '<p class="ls-mine-note is-no"><strong>반려 사유</strong> ' +
@@ -429,6 +442,36 @@
         btn.disabled = false;
         window.alert(err.message || '처리하지 못했습니다.');
       });
+    });
+
+    /* 카드 결제 — 스위치가 꺼져 있으면 버튼 자체가 없어 여기까지 오지 않습니다. */
+    el.mineBody.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-pay]');
+      if (!btn) return;
+      var id = btn.getAttribute('data-pay');
+      var original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '결제창을 여는 중…';
+
+      db.openPayment('listing_fee', id)
+        .then(function (pay) {
+          return payWithPg(pay).then(function (providerPaymentId) {
+            btn.textContent = '결제를 확인하는 중…';
+            return db.confirmPayment(pay.orderId || pay.order_id, providerPaymentId);
+          });
+        })
+        .then(function () {
+          window.alert('결제가 끝났습니다. 매물이 게시되었습니다.');
+          renderMine();
+          load();
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = original;
+          // 이용자가 결제창을 닫은 것은 오류가 아닙니다.
+          if (err && err.canceled) return;
+          window.alert(err.message || '결제하지 못했습니다.');
+        });
     });
 
     el.mineBody.addEventListener('click', function (e) {
@@ -996,6 +1039,58 @@
         el.submit.textContent = editId ? '수정 신청하기' : '등록 신청하기';
       });
     });
+  }
+
+
+  /**
+   * PG 결제창을 띄우고, 끝나면 PG 가 준 결제 번호를 돌려줍니다.
+   *
+   * 계약 전에는 이 자리에 올 일이 없습니다 (버튼이 안 그려집니다).
+   * 계약 후에는 site.payment.sdk 에 적어 둔 SDK 를 한 번 읽어 씁니다.
+   * PG 를 바꾸시면 이 함수와 Edge Function 의 verifyWithPg 두 곳만 고치면 됩니다.
+   */
+  function payWithPg(pay) {
+    var cfg = db.paymentConfig();
+    var orderId = pay.orderId || pay.order_id;
+    var amount = pay.amount;
+    var title = pay.targetTitle || pay.target_title || '매물 등록비';
+
+    return loadSdk(cfg.sdk).then(function () {
+      if (cfg.provider === 'portone' && window.PortOne) {
+        return window.PortOne.requestPayment({
+          storeId: cfg.storeId,
+          channelKey: cfg.channelKey,
+          paymentId: orderId,
+          orderName: title,
+          totalAmount: amount,
+          currency: 'CURRENCY_KRW',
+          payMethod: 'CARD',
+        }).then(function (res) {
+          if (res && res.code) {
+            var e = new Error(res.message || '결제가 취소되었습니다.');
+            e.canceled = true;
+            throw e;
+          }
+          return (res && res.paymentId) || orderId;
+        });
+      }
+      throw new Error('결제 수단이 설정되지 않았습니다. 센터로 알려 주세요.');
+    });
+  }
+
+  /** SDK 를 한 번만 읽습니다. */
+  var sdkLoaded = null;
+  function loadSdk(src) {
+    if (!src) return Promise.reject(new Error('결제 SDK 주소가 설정되지 않았습니다.'));
+    if (sdkLoaded) return sdkLoaded;
+    sdkLoaded = new Promise(function (resolve, reject) {
+      var el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = function () { reject(new Error('결제 모듈을 불러오지 못했습니다.')); };
+      document.head.appendChild(el);
+    });
+    return sdkLoaded;
   }
 
   /* =========================================================

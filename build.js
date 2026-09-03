@@ -1639,6 +1639,10 @@ window.CAPS_GUEST_BOARD = ${JSON.stringify(site.guestHouseBoard, null, 2)};
 
 /* 집회 티켓팅 운영 기준 */
 window.CAPS_TICKET_BOARD = ${JSON.stringify(site.ticketBoard, null, 2)};
+
+/* 카드 결제 설정. enabled 가 false 면 결제 버튼이 아예 그려지지 않습니다.
+   공개해도 되는 값만 들어갑니다 — 비밀키는 Edge Function 환경변수에 있습니다. */
+window.CAPS_PAYMENT = ${JSON.stringify(site.payment, null, 2)};
 `;
   write('assets/js/data.js', js);
 }

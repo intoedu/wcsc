@@ -1039,3 +1039,14 @@ window.CAPS_TICKET_BOARD = {
   ],
   "fineprint": "센터는 신청 창구를 운영합니다 — 집회의 주최자가 아닙니다. 참가비 수납 · 환불 · 일정 변경은 주최 측이 정하고 안내합니다."
 };
+
+/* 카드 결제 설정. enabled 가 false 면 결제 버튼이 아예 그려지지 않습니다.
+   공개해도 되는 값만 들어갑니다 — 비밀키는 Edge Function 환경변수에 있습니다. */
+window.CAPS_PAYMENT = {
+  "enabled": false,
+  "provider": "",
+  "storeId": "",
+  "channelKey": "",
+  "sdk": "",
+  "offNote": "카드 결제는 준비 중입니다. 계좌 이체로 진행해 주세요."
+};

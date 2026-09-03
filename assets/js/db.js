@@ -32,7 +32,8 @@ window.CAPSDB = (function () {
 
   var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
     'serviceContent', 'settings', 'editConsents', 'listings',
-    'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders'];
+    'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders',
+    'payments'];
 
   /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
      (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
@@ -1295,6 +1296,7 @@ window.CAPSDB = (function () {
       guestHouses: 'guest_houses',
       events: 'events',
       ticketOrders: 'ticket_orders',
+      payments: 'payments',
     };
 
     /** 문서 통째로 jsonb 한 칸에 담는 표 (내용이 자유로워서) */
@@ -1304,7 +1306,7 @@ window.CAPSDB = (function () {
     var PK = { editConsents: 'customer_id' };
 
     /** 비어 있으면 '' 가 아니라 null 이어야 하는 열 (uuid) */
-    var UUID_KEYS = ['userId', 'customerId', 'assigneeId', 'itemId', 'eventId'];
+    var UUID_KEYS = ['userId', 'customerId', 'assigneeId', 'itemId', 'eventId', 'targetId'];
 
     function snake(k) {
       return k.replace(/[A-Z]/g, function (c) { return '_' + c.toLowerCase(); });
@@ -1799,6 +1801,26 @@ window.CAPSDB = (function () {
         return guard().then(function () {
           return sb.rpc(name, args || {}).then(function (res) {
             if (res.error) throw new Error(say(res.error));
+            return res.data;
+          });
+        });
+      },
+
+      /**
+       * Edge Function 호출 (Supabase 전용).
+       * 결제 승인처럼 비밀키가 필요한 일은 브라우저에서 할 수 없어
+       * 서버 쪽 함수에 맡깁니다.
+       */
+      fn: function (name, body) {
+        return guard().then(function () {
+          return sb.functions.invoke(name, { body: body || {} }).then(function (res) {
+            if (res.error) {
+              // 함수가 스스로 거절한 경우(아직 연결 안 됨 등)의 안내를 살려 냅니다.
+              var msg = (res.data && res.data.message) || say(res.error);
+              var err = new Error(msg);
+              err.code = (res.data && res.data.error) || '';
+              throw err;
+            }
             return res.data;
           });
         });
@@ -3207,6 +3229,63 @@ window.CAPSDB = (function () {
     /** 관리자 · 주최자 → 입장 확인 */
     checkInTicket: function (id) {
       return adapter.update('ticketOrders', id, { status: 'checked_in', updatedAt: nowIso() });
+    },
+
+    /* =====================================================
+       카드 결제 (payments) — 아직 켜지 않았습니다
+
+       site.payment.enabled 가 false 인 동안에는 paymentEnabled() 가
+       거짓이라 화면에 결제 버튼이 아예 그려지지 않습니다.
+       PG 계약이 끝나 그 값을 true 로 바꾸면 아래 흐름이 그대로 돕니다.
+
+         1. openPayment()   서버가 결제 건을 열고 금액을 정합니다
+                            (브라우저가 보낸 금액은 쓰지 않습니다)
+         2. PG 결제창        브라우저가 띄웁니다 (공개 값만 씁니다)
+         3. confirmPayment() Edge Function 이 PG 에 다시 물어 확인하고,
+                            금액이 맞으면 매물을 바로 게시합니다
+       ===================================================== */
+
+    /** 카드 결제를 쓸 수 있는 상태인지 */
+    paymentEnabled: function () {
+      var p = window.CAPS_PAYMENT || {};
+      return !!(p.enabled && p.provider && p.storeId);
+    },
+
+    /** 결제 설정 (화면이 안내 문구를 꺼내 쓸 때) */
+    paymentConfig: function () {
+      return window.CAPS_PAYMENT || {};
+    },
+
+    /** 결제 건을 엽니다 — 금액은 서버가 정합니다. */
+    openPayment: function (kind, targetId) {
+      if (!adapter.rpc) {
+        return Promise.reject(new Error('카드 결제는 실제 서버에 연결된 뒤에 쓸 수 있습니다.'));
+      }
+      return adapter.rpc('open_payment', { p_kind: kind, p_target: targetId });
+    },
+
+    /** 결제창이 끝난 뒤 서버에 확인을 맡깁니다. */
+    confirmPayment: function (orderId, providerPaymentId) {
+      if (!adapter.fn) {
+        return Promise.reject(new Error('카드 결제는 실제 서버에 연결된 뒤에 쓸 수 있습니다.'));
+      }
+      return adapter.fn('payment-confirm', {
+        orderId: orderId,
+        paymentId: providerPaymentId,
+      });
+    },
+
+    /** 내 결제 내역 */
+    myPayments: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('payments', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    /** 관리자 화면 — 전체 결제 내역 */
+    allPayments: function () {
+      return adapter.list('payments').catch(function () { return []; });
     },
 
     /** 관리자 화면에 들어올 수 있는 계정인지 */

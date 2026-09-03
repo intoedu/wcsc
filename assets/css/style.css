@@ -2327,3 +2327,13 @@ body[data-tk-pane]:not([data-tk-pane="list"]) .page-hero { display: none; }
 }
 .renew-fine { font-size: 13.5px; color: var(--muted) !important; }
 .renew-fine a { color: var(--brand-700); }
+
+/* 카드 결제 버튼 — site.payment.enabled 가 true 일 때만 그려집니다 */
+.ls-pay-act {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ls-pay-hint { font-size: 13px; color: var(--muted); }
