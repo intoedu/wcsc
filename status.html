@@ -28,26 +28,40 @@
       </span>
     </div>
   </div>
+
+  <!-- 윗줄 — 로고 · 찾기 · 내 계정
+       찾기 칸을 머리 안에 두면 어느 페이지에서나 같은 자리에 있습니다.
+       메뉴와 자리를 다투지 않으므로 넓게 쓸 수 있습니다. -->
   <div class="wrap header-in">
     <a class="brand" href="index.html" aria-label="우리교회지원센터 홈으로">
       <img class="logo-img is-row" src="assets/img/logo-row.png"
     width="1780" height="307" alt="우리교회지원센터" decoding="async">
     </a>
-    <nav class="nav" id="nav" aria-label="주 메뉴">
-      <a class="nav-link" href="index.html">홈</a><a class="nav-link" href="about.html">센터 소개</a><a class="nav-link" href="services/index.html">지원 항목</a><a class="nav-link" href="pricing.html">패키지</a><a class="nav-link" href="listings.html">게시판</a><a class="nav-link" href="process.html">이용 절차</a><a class="nav-link" href="faq.html">자주 묻는 질문</a><a class="nav-link" href="contact.html">문의</a>
-      <button type="button" class="nav-search" data-search-open aria-label="찾아보기">
-        <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span>무엇을 찾으시나요?</span>
-      </button>
+
+    <button type="button" class="hsearch" data-search-open aria-label="사이트 안에서 찾기">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+      <span class="hsearch-text">무엇을 찾으시나요?</span>
+      <span class="hsearch-key" aria-hidden="true">/</span>
+    </button>
+
+    <div class="header-side">
       <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="apply.html">지원 신청</a>
-    </nav>
-    <button type="button" class="head-search" data-search-open aria-label="찾아보기">
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-    </button>
-    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
+
+  <!-- 아랫줄 — 메뉴 -->
+  <div class="navbar">
+    <div class="wrap">
+      <nav class="nav" id="nav" aria-label="주 메뉴">
+        <a class="nav-link" href="index.html">홈</a><a class="nav-link" href="about.html">센터 소개</a><a class="nav-link" href="services/index.html">지원 항목</a><a class="nav-link" href="pricing.html">패키지</a><a class="nav-link" href="listings.html">게시판</a><a class="nav-link" href="process.html">이용 절차</a><a class="nav-link" href="faq.html">자주 묻는 질문</a><a class="nav-link" href="contact.html">문의</a>
+      </nav>
+    </div>
+  </div>
+
   <div class="mega" id="mega" hidden>
     <div class="wrap mega-in"><a class="mega-item" href="services/homepage.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>

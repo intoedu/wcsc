@@ -347,14 +347,36 @@
     if (e.key === '/' && !typing && box.hidden) { e.preventDefault(); open(''); }
   });
 
-  /* 자주 묻는 질문으로 건너뛰면 그 답이 접혀 있습니다 — 펴 줍니다. */
-  function openTargetDetails() {
+  /* ---------- 닻(#앵커)으로 건너뛰기 ----------
+
+     머리가 두 줄이라, 브라우저가 알아서 맞춰 주는 자리로는
+     제목이 머리 밑에 숨습니다. CSS 의 scroll-padding 은 글꼴과
+     그림이 늦게 실릴 때 어긋나기도 해서, 여기서 직접 잡습니다.
+
+     자주 묻는 질문은 답이 접혀 있으므로 먼저 펴고, 펴면서 아래
+     글이 밀리니 그 뒤에 자리를 잡습니다. */
+
+  function settleAnchor() {
     var id = window.location.hash.slice(1);
     if (!id) return;
-    var node = document.getElementById(id);
-    var d = node && node.closest('details');
-    if (d) { d.open = true; node.scrollIntoView({ block: 'center' }); }
+
+    var node;
+    try { node = document.getElementById(id); } catch (ignore) { return; }
+    if (!node) return;
+
+    var d = node.closest('details');
+    if (d) d.open = true;
+
+    window.setTimeout(function () {
+      var head = document.querySelector('.site-header');
+      var gap = (head ? head.getBoundingClientRect().height : 0) + 20;
+      var y = node.getBoundingClientRect().top + window.pageYOffset - gap;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 60);
   }
-  window.addEventListener('hashchange', openTargetDetails);
-  openTargetDetails();
+
+  window.addEventListener('hashchange', settleAnchor);
+  settleAnchor();
+  // 글꼴과 그림이 늦게 실리면 자리가 밀립니다 — 다 실린 뒤 한 번 더.
+  window.addEventListener('load', settleAnchor);
 }());

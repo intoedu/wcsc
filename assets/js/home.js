@@ -1,9 +1,10 @@
 /* =========================================================
    홈 화면 (index.html)
 
-     1) 첫 화면의 넓은 찾기 칸 → 찾기 창으로 넘기기
+     1) 미는 배너의 점
      2) 지원 항목을 갈래로 걸러 보기
-     3) 미는 배너의 점
+
+   찾기는 머리(header)에 있고 assets/js/search.js 가 맡습니다.
    ========================================================= */
 (function () {
   'use strict';
@@ -64,48 +65,6 @@
       Array.prototype.forEach.call(grid.querySelectorAll('.item'), function (card) {
         card.hidden = !!want && card.getAttribute('data-cat') !== want;
       });
-    });
-  }
-
-  /* ---------- 첫 화면의 찾기 칸 ----------
-     머리의 작은 돋보기만으로는 찾을 수 있다는 것을 모르십니다.
-     그래서 넓은 칸을 하나 더 두었습니다.
-
-     칸에 손이 닿는 순간(focus) 찾기 창을 열고 그리로 넘깁니다.
-     글자를 치기 전에 focus 가 먼저 오므로, 치신 글자가 사라지지
-     않습니다. */
-
-  var hs = document.getElementById('hsInput');
-
-  function openSearch(seed) {
-    var box = document.getElementById('siteSearch');
-    var input = document.getElementById('ssInput');
-    if (!box || !input) return false;
-
-    box.hidden = false;
-    document.body.classList.add('is-search-open');
-    input.value = seed || '';
-    input.dispatchEvent(new Event('input'));
-    input.focus();
-    return true;
-  }
-
-  if (hs) {
-    var handOver = function () {
-      var seed = hs.value;
-      hs.value = '';
-      hs.blur();
-      if (!openSearch(seed)) window.location.href = 'contact.html';
-    };
-    hs.addEventListener('focus', handOver);
-    hs.addEventListener('click', handOver);
-  }
-
-  var tags = document.querySelector('.hs-tags');
-  if (tags) {
-    tags.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-hs]');
-      if (b) openSearch(b.getAttribute('data-hs'));
     });
   }
 

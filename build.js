@@ -135,29 +135,6 @@ function buildIndex() {
     </div>`;
 
   const body = `
-<!-- ============ 0. 찾기 ============
-     머리의 작은 돋보기만으로는 찾을 수 있다는 것을 모르십니다.
-     첫 화면에 넓은 칸을 두어, 여기에 적으면 된다는 것이 보이게 합니다.
-     누르면 찾기 창이 열리고 적으신 글자가 그대로 넘어갑니다. -->
-<section class="hs">
-  <div class="wrap hs-in">
-    <label class="hs-bar" for="hsInput">
-      ${icon('search', 'ico')}
-      <input type="search" id="hsInput" autocomplete="off"
-        placeholder="무엇을 찾으시나요? (예: 음향, 사택, 비용이 얼마)" aria-label="사이트 안에서 찾기">
-      <span class="hs-go">찾기</span>
-    </label>
-    <div class="hs-tags">
-      <span class="hs-tags-label">많이 찾으시는 것</span>
-      <button type="button" class="hs-tag" data-hs="홈페이지">홈페이지</button>
-      <button type="button" class="hs-tag" data-hs="음향">음향</button>
-      <button type="button" class="hs-tag" data-hs="교역자 구인">교역자 구인</button>
-      <button type="button" class="hs-tag" data-hs="사택">사택</button>
-      <button type="button" class="hs-tag" data-hs="비용이 얼마">비용이 얼마</button>
-    </div>
-  </div>
-</section>
-
 <!-- ============ 1. 미는 배너 ============
      가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
      더 있다는 것이 손짓 없이도 보이게 했습니다. -->

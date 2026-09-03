@@ -169,25 +169,39 @@ function header(base, active) {
       </span>
     </div>
   </div>
+
+  <!-- 윗줄 — 로고 · 찾기 · 내 계정
+       찾기 칸을 머리 안에 두면 어느 페이지에서나 같은 자리에 있습니다.
+       메뉴와 자리를 다투지 않으므로 넓게 쓸 수 있습니다. -->
   <div class="wrap header-in">
     <a class="brand" href="${base}index.html" aria-label="우리교회지원센터 홈으로">
       ${logoMark(base, { row: true })}
     </a>
-    <nav class="nav" id="nav" aria-label="주 메뉴">
-      ${links}
-      <button type="button" class="nav-search" data-search-open aria-label="찾아보기">
-        ${icon('search', 'ico ico-sm')}<span>무엇을 찾으시나요?</span>
-      </button>
+
+    <button type="button" class="hsearch" data-search-open aria-label="사이트 안에서 찾기">
+      ${icon('search', 'ico')}
+      <span class="hsearch-text">무엇을 찾으시나요?</span>
+      <span class="hsearch-key" aria-hidden="true">/</span>
+    </button>
+
+    <div class="header-side">
       <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="${base}apply.html">지원 신청</a>
-    </nav>
-    <button type="button" class="head-search" data-search-open aria-label="찾아보기">
-      ${icon('search', 'ico')}
-    </button>
-    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
+
+  <!-- 아랫줄 — 메뉴 -->
+  <div class="navbar">
+    <div class="wrap">
+      <nav class="nav" id="nav" aria-label="주 메뉴">
+        ${links}
+      </nav>
+    </div>
+  </div>
+
   <div class="mega" id="mega" hidden>
     <div class="wrap mega-in">${serviceMenu}</div>
   </div>
