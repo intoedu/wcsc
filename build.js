@@ -114,6 +114,11 @@ function buildIndex() {
     'jobs.html': 'users',
   };
 
+  const shortcut = (s) => `<a class="sc" href="services/${s.slug}.html">
+        <span class="sc-ico">${icon(s.icon)}</span>
+        <span class="sc-name">${esc(s.short || s.name)}</span>
+      </a>`;
+
   const boardShortcut = (b) => `<a class="sc" href="${b.href}">
         <span class="sc-ico">${icon(BOARD_ICON[b.href] || 'doc')}</span>
         <span class="sc-name">${esc(b.label)}</span>
@@ -145,21 +150,6 @@ function buildIndex() {
     </div>`;
 
   const body = `
-<!-- ============ 1. 한 줄 소개 ============
-     처음 오신 교회가 이곳이 무엇을 하는 곳인지 알고 넘어가도록
-     한 줄만 둡니다. 배너가 바로 아래 붙으므로 크게 만들지 않습니다. -->
-<section class="lede">
-  <div class="wrap">
-    <p class="lede-eyebrow">한국 교회를 위한 통합 지원 기관</p>
-    <h1>교회는 사역에 집중하고,<br><span class="hl">나머지는 맡기십시오</span></h1>
-    <p class="lede-lead">
-      홈페이지 · 주보 · 음향 · 앱 · 행정 · 부동산 · 교역자까지.
-      업체를 따로 찾아다니지 않으셔도 됩니다 — 한곳에서 이어서 맡습니다.
-      상담과 견적은 무료이고, 전국 어느 교회든 규모 · 교단 제한이 없습니다.
-    </p>
-  </div>
-</section>
-
 <!-- ============ 2. 미는 배너 ============
      가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
      더 있다는 것이 손짓 없이도 보이게 했습니다. -->
@@ -174,12 +164,55 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 3. 게시판 바로가기 ============
-     센터를 거치지 않고 교회끼리 오가는 자리입니다.
-     아래 [지원 항목] 과 성격이 달라 따로 둡니다. -->
+<!-- ============ 2-1. 소개 ============
+     애플의 제품 소개 화면처럼 갑니다 — 한 화면에 한 가지 이야기,
+     아주 큰 글씨, 짧은 한 줄, 넓은 여백.
+
+     앞서 제목과 설명을 작게 얹어 두었더니 어느 쪽도 아닌 것이
+     되어 그냥 지나치게 되었습니다. 말할 것이라면 크게 말하고,
+     아니면 빼는 편이 낫습니다. 그래서 두 대목만 남겼습니다 —
+     무엇이 문제인가, 그래서 무엇을 하는가. -->
+
+<section class="story">
+  <div class="wrap story-in">
+    <p class="story-eyebrow">우리교회지원센터</p>
+    <h2 class="story-title">사역이 아닌 일에<br>목회자의 시간이 갑니다</h2>
+    <p class="story-lead">
+      홈페이지를 만들려면 업체를 찾아야 하고, 주보는 매주 밤늦게 편집합니다.
+      하지 않으면 사역이 막히는 일인데, 대부분의 교회에는 이 일을 맡을 사람이 없습니다.
+    </p>
+  </div>
+</section>
+
+<section class="story is-dark">
+  <div class="wrap story-in">
+    <p class="story-eyebrow">그래서</p>
+    <p class="story-figure"><strong>${services.length}</strong><span>가지</span></p>
+    <h2 class="story-title">항목마다 업체를<br>찾아다니지 않으셔도 됩니다</h2>
+    <p class="story-lead">
+      홈페이지 · 주보 · 음향 · 앱 · 행정 · 부동산 · 교역자까지.
+      교회 사정을 아는 한곳이 이어서 맡습니다.
+      전국 어느 교회든 규모 · 교단 제한이 없습니다.
+    </p>
+    <p class="story-note">상담과 견적은 무료이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.</p>
+  </div>
+</section>
+
+<!-- ============ 3. 바로가기 ============
+     두 줄입니다. 성격이 다르기 때문입니다 —
+     위는 센터가 해 드리는 일, 아래는 교회끼리 오가는 자리. -->
 <section class="sc-wrap">
   <div class="wrap">
-    <p class="sc-label">교회끼리 사고, 나누고, 만나는 곳 <small>보시는 것은 누구나 무료</small></p>
+    <p class="sc-label">지원 항목 <small>센터가 해 드리는 일</small></p>
+    <div class="sc-grid">
+      ${services.map(shortcut).join('\n      ')}
+      <a class="sc is-all" href="services/index.html">
+        <span class="sc-ico">${icon('grid')}</span>
+        <span class="sc-name">전체보기</span>
+      </a>
+    </div>
+
+    <p class="sc-label is-second">게시판 <small>교회끼리 사고, 나누고, 만나는 곳 — 보시는 것은 누구나 무료</small></p>
     <div class="sc-grid is-boards">
       ${T.BOARDS.map(boardShortcut).join('\n      ')}
     </div>

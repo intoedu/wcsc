@@ -2761,35 +2761,77 @@ body.is-search-open { overflow: hidden; }
 
 /* ---------- 2. 아이콘 바로가기 ---------- */
 
-/* ---------- 1. 한 줄 소개 ----------
-   처음 오신 교회가 이곳이 무엇을 하는 곳인지 알고 넘어가도록
-   한 줄만 둡니다. 배너가 바로 아래 붙으므로 크게 만들지 않습니다. */
+/* ---------- 소개 ----------
 
-.lede { padding: 44px 0 30px; background: #fff; }
-.lede-eyebrow {
-  display: inline-block;
-  margin-bottom: 14px;
-  padding: 5px 13px;
-  border-radius: 999px;
-  background: var(--brand-50);
-  font-size: 12.5px;
+   애플의 제품 소개 화면처럼 갑니다 — 한 화면에 한 가지 이야기,
+   아주 큰 글씨, 짧은 한 줄, 넓은 여백.
+
+   앞서 제목과 설명을 작게 얹어 두었더니 어느 쪽도 아닌 것이 되어
+   그냥 지나치게 되었습니다. 말할 것이라면 크게 말하고, 아니면
+   빼는 편이 낫습니다. */
+
+.story { padding: 120px 0; background: #fff; text-align: center; }
+.story.is-dark { background: var(--brand-900); }
+
+.story-in { max-width: 900px; }
+
+.story-eyebrow {
+  margin-bottom: 22px;
+  font-size: 14.5px;
   font-weight: 700;
-  color: var(--brand-700);
+  letter-spacing: -.01em;
+  color: var(--brand-600);
 }
-.lede h1 {
-  font-size: clamp(28px, 3.6vw, 42px);
+.story.is-dark .story-eyebrow { color: var(--gold-400); }
+
+.story-title {
+  font-size: clamp(30px, 5.2vw, 60px);
   font-weight: 800;
-  line-height: 1.34;
-  letter-spacing: -.045em;
+  line-height: 1.24;
+  letter-spacing: -.05em;
   color: var(--brand-900);
 }
-.lede h1 .hl { color: var(--brand-600); }
-.lede-lead {
-  margin-top: 16px;
-  max-width: 46em;
-  font-size: 16.5px;
-  line-height: 1.85;
+.story.is-dark .story-title { color: #fff; }
+
+.story-lead {
+  margin: 26px auto 0;
+  max-width: 30em;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.8;
   color: var(--muted);
+}
+.story.is-dark .story-lead { color: #C3DACC; }
+
+/* 숫자는 글보다 먼저 눈에 들어옵니다 — 크게 하나만 둡니다. */
+.story-figure {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+.story-figure strong {
+  font-size: clamp(76px, 13vw, 152px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.06em;
+}
+.story-figure span {
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  color: var(--gold-400);
+}
+
+.story-note {
+  margin: 30px auto 0;
+  padding-top: 24px;
+  max-width: 34em;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #9FBFAB;
 }
 
 /* ---------- 3. 게시판 바로가기 ---------- */
@@ -2804,6 +2846,7 @@ body.is-search-open { overflow: hidden; }
   color: var(--brand-900);
 }
 .sc-label small { margin-left: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.sc-label.is-second { margin-top: 34px; }
 
 .sc-grid {
   display: grid;
@@ -3126,7 +3169,8 @@ body.is-search-open { overflow: hidden; }
   .qz { padding: 48px 0; }
   .qz-in { grid-template-columns: 1fr; gap: 28px; }
   .qz-card { padding: 24px 20px 22px; }
-  .lede { padding: 32px 0 22px; }
+  .story { padding: 72px 0; }
+  .story-lead { margin-top: 20px; }
   .sc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .sc-grid.is-boards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   /* 한 장씩 꽉 채우되 다음 장이 조금 보이게 둡니다 */
