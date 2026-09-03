@@ -33,7 +33,7 @@ window.CAPSDB = (function () {
   var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
     'serviceContent', 'settings', 'editConsents', 'listings',
     'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders',
-    'payments'];
+    'payments', 'jobPosts'];
 
   /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
      (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
@@ -329,6 +329,58 @@ window.CAPSDB = (function () {
     checked_in: '입장 확인',
     canceled: '취소',
   };
+
+  /* ---------- 교역자 구인 공고 ---------- */
+
+  var JOB_STATUS = {
+    pending: '확인 대기',
+    published: '모집중',
+    rejected: '반려',
+    hidden: '게시 중지',
+    done: '모집 완료',
+  };
+
+  /* '기타'를 고르면 직접 입력칸이 열립니다. */
+  var JOB_POSITIONS = {
+    senior: '담임목사',
+    associate: '부목사',
+    assistant: '전도사',
+    education: '교육전도사',
+    worship: '찬양인도자',
+    pianist: '반주자',
+    staff: '행정 간사',
+    other: '기타',
+  };
+
+  var JOB_EMPLOYMENT = {
+    full: '전임',
+    part: '파트',
+    weekend: '주말 사역',
+    short: '단기 · 대체',
+  };
+
+  var JOB_PAY_TYPE = {
+    monthly: '월 사례비',
+    weekly: '주 단위',
+    per_service: '집회 · 예배 건별',
+    negotiable: '면접 후 협의',
+  };
+
+  /* 멀리 있는 사역자에게는 사택이 갈지 말지를 가르는 조건입니다. */
+  var JOB_HOUSING = {
+    provided: '사택 제공',
+    support: '주거비 지원',
+    negotiable: '협의',
+    none: '없음',
+  };
+
+  var JOB_DEPARTMENTS = ['영아 · 유아부', '유치부', '유년 · 초등부', '중고등부',
+    '청년부', '장년 · 남녀전도회', '찬양팀', '전체 · 협력', '기타'];
+
+  var JOB_SIZES = ['50명 미만', '50~150명', '150~500명', '500~1,000명', '1,000명 이상'];
+
+  /** 구인 공고 사진 최대 장수 */
+  var JOB_PHOTO_MAX = 10;
 
   /** 집회 사진 최대 장수 — 포스터를 여러 장 올리는 집회가 많아 넉넉히 둡니다. */
   var EVENT_PHOTO_MAX = 20;
@@ -1297,6 +1349,7 @@ window.CAPSDB = (function () {
       events: 'events',
       ticketOrders: 'ticket_orders',
       payments: 'payments',
+      jobPosts: 'job_posts',
     };
 
     /** 문서 통째로 jsonb 한 칸에 담는 표 (내용이 자유로워서) */
@@ -1926,6 +1979,15 @@ window.CAPSDB = (function () {
     GUEST_AMENITIES: GUEST_AMENITIES,
     GUEST_LANGUAGES: GUEST_LANGUAGES,
     GUEST_PHOTO_MAX: GUEST_PHOTO_MAX,
+
+    JOB_STATUS: JOB_STATUS,
+    JOB_POSITIONS: JOB_POSITIONS,
+    JOB_EMPLOYMENT: JOB_EMPLOYMENT,
+    JOB_PAY_TYPE: JOB_PAY_TYPE,
+    JOB_HOUSING: JOB_HOUSING,
+    JOB_DEPARTMENTS: JOB_DEPARTMENTS,
+    JOB_SIZES: JOB_SIZES,
+    JOB_PHOTO_MAX: JOB_PHOTO_MAX,
 
     EVENT_STATUS: EVENT_STATUS,
     EVENT_CATEGORIES: EVENT_CATEGORIES,
@@ -3229,6 +3291,150 @@ window.CAPSDB = (function () {
     /** 관리자 · 주최자 → 입장 확인 */
     checkInTicket: function (id) {
       return adapter.update('ticketOrders', id, { status: 'checked_in', updatedAt: nowIso() });
+    },
+
+    /* =====================================================
+       교역자 구인 공고 (jobPosts)
+
+       교회가 사진과 글로 공고를 올리고, 사역자가 직접 보고 연락합니다.
+       지원은 아직 사이트 안에서 받지 않습니다 — 공고의 연락처로 갑니다.
+       ===================================================== */
+
+    jobLive: function (row) {
+      return !!row && row.status === 'published';
+    },
+
+    jobView: function (row) {
+      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, photos: [] };
+      var pos = row.position === 'other'
+        ? (String(row.positionOther || '').trim() || '기타')
+        : (JOB_POSITIONS[row.position] || row.position || '');
+      // 마감일이 지났으면 목록에서 조용히 내려갑니다.
+      var closed = !!row.closesAt && Date.now() > new Date(row.closesAt).getTime();
+      var status = (row.status === 'published' && closed) ? 'done' : row.status;
+      return {
+        status: status,
+        label: JOB_STATUS[status] || status,
+        cls: status,
+        live: status === 'published',
+        closed: closed,
+        positionLabel: pos,
+        employmentLabel: JOB_EMPLOYMENT[row.employment] || '',
+        housingLabel: JOB_HOUSING[row.housing] || '',
+        photos: Array.isArray(row.photos) ? row.photos : [],
+      };
+    },
+
+    /**
+     * 사례비 한 줄.
+     * "협의" 만 적힌 공고는 멀리 계신 분이 갈지 말지를 정할 수 없어,
+     * 범위가 있으면 반드시 숫자로 보여 줍니다.
+     */
+    jobPay: function (row) {
+      if (!row) return '-';
+      if (row.payType === 'negotiable') return '면접 후 협의';
+      var unit = row.payType === 'weekly' ? '주'
+        : row.payType === 'per_service' ? '건당' : '월';
+      var lo = Number(row.payMin) || 0;
+      var hi = Number(row.payMax) || 0;
+      if (!lo && !hi) return '면접 후 협의';
+      if (lo && hi && hi > lo) return unit + ' ' + api.money(lo) + '~' + api.money(hi) + '원';
+      return unit + ' ' + api.money(lo || hi) + '원';
+    },
+
+    submitJobPost: function (data) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('공고를 올리려면 로그인해 주세요.'));
+      var record = Object.assign({
+        churchName: '', denomination: '', churchSize: '', region: '', addressRough: '',
+        title: '', position: 'assistant', positionOther: '', department: '',
+        employment: 'full', headcount: 1,
+        payType: 'monthly', payMin: 0, payMax: 0, payNote: '',
+        housing: 'none', insurance: false,
+        commuteNote: '', workDays: '', startDate: '', closesAt: '',
+        qualification: '', desc: '', photos: [],
+        contactName: '', contactPhone: '', contactEmail: '', contactHours: '',
+      }, data, {
+        userId: me.id,
+        userEmail: me.email || '',
+        status: 'pending',
+        applyMode: 'contact',
+        rejectNote: '', views: 0,
+        reviewedBy: '', reviewedAt: '', publishedAt: '', hiddenAt: '',
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
+      return adapter.add('jobPosts', record);
+    },
+
+    saveJobPost: function (id, data) {
+      return adapter.update('jobPosts', id, Object.assign({}, data, {
+        status: 'pending', rejectNote: '',
+        reviewedBy: '', reviewedAt: '', publishedAt: '',
+        updatedAt: nowIso(),
+      }));
+    },
+
+    approveJobPost: function (id) {
+      var me = adapter.auth.current();
+      return adapter.update('jobPosts', id, {
+        status: 'published', publishedAt: nowIso(), rejectNote: '', hiddenAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    rejectJobPost: function (id, note) {
+      var me = adapter.auth.current();
+      var reason = String(note || '').trim();
+      if (!reason) return Promise.reject(new Error('반려 사유를 적어 주세요. 교회에 그대로 보입니다.'));
+      return adapter.update('jobPosts', id, {
+        status: 'rejected', rejectNote: reason, publishedAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    hideJobPost: function (id, note) {
+      var me = adapter.auth.current();
+      return adapter.update('jobPosts', id, {
+        status: 'hidden', hiddenAt: nowIso(), rejectNote: String(note || '').trim(),
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 사람을 구했습니다 — 교회가 직접 내립니다. */
+    markJobDone: function (id) {
+      return adapter.update('jobPosts', id, { status: 'done', updatedAt: nowIso() });
+    },
+
+    deleteJobPost: function (row) {
+      var id = typeof row === 'string' ? row : (row && row.id);
+      if (!id) return Promise.resolve();
+      var doc = typeof row === 'object' ? row : null;
+      var paths = (doc && Array.isArray(doc.photos) ? doc.photos : [])
+        .filter(function (ph) { return ph && ph.path; }).map(function (ph) { return ph.path; });
+      return adapter.remove('jobPosts', id).then(function () {
+        return Promise.all(paths.map(function (p) {
+          return adapter.files.remove(p).catch(function () { return null; });
+        }));
+      });
+    },
+
+    publishedJobPosts: function () {
+      return adapter.list('jobPosts', { where: { status: 'published' } })
+        .then(function (rows) {
+          return rows.filter(function (r) { return !api.jobView(r).closed; });
+        })
+        .catch(function () { return []; });
+    },
+
+    myJobPosts: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('jobPosts', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    allJobPosts: function () {
+      return adapter.list('jobPosts');
     },
 
     /* =====================================================

@@ -107,6 +107,7 @@ const BOARDS = [
   { href: 'market.html', label: '중고 장터', sub: '음향 · 악기 · 집기 (설치까지)' },
   { href: 'guesthouse.html', label: '게스트하우스', sub: '교회가 내어 주는 방' },
   { href: 'tickets.html', label: '집회 티켓팅', sub: '찬양집회 · 수련회 신청' },
+  { href: 'jobs.html', label: '교역자 구인', sub: '교회가 올리고, 직접 지원' },
 ];
 
 /** 게시판 네 갈래를 오가는 탭. 모든 게시판 페이지 맨 위에 같은 모양으로 붙습니다. */
@@ -214,6 +215,7 @@ function footer(base) {
         <li><a href="${base}market.html">중고 장터</a></li>
         <li><a href="${base}guesthouse.html">게스트하우스</a></li>
         <li><a href="${base}tickets.html">집회 티켓팅</a></li>
+        <li><a href="${base}jobs.html">교역자 구인</a></li>
         <li><a href="${base}staff.html" class="footer-staff">직원 로그인</a></li>
       </ul>
     </div>

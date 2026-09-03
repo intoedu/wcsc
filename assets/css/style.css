@@ -1752,7 +1752,7 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
 }
 .board-tabs-in {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   padding: 12px 0;
 }

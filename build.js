@@ -1637,6 +1637,9 @@ window.CAPS_MARKET_BOARD = ${JSON.stringify(site.marketBoard, null, 2)};
 /* 교회 게스트하우스 운영 기준 */
 window.CAPS_GUEST_BOARD = ${JSON.stringify(site.guestHouseBoard, null, 2)};
 
+/* 교역자 구인 공고 운영 기준 */
+window.CAPS_JOB_BOARD = ${JSON.stringify(site.jobBoard, null, 2)};
+
 /* 집회 티켓팅 운영 기준 */
 window.CAPS_TICKET_BOARD = ${JSON.stringify(site.ticketBoard, null, 2)};
 
@@ -1663,6 +1666,7 @@ function main() {
   Boards.buildMarket(write);
   Boards.buildGuesthouse(write);
   Boards.buildTickets(write);
+  Boards.buildJobs(write);
   buildDataScript();
   buildRulesScript(buildSupabaseSql());
   console.log(`생성 완료 (${out.length}개)`);

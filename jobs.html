@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>집회 티켓팅 | 우리교회지원센터</title>
-  <meta name="description" content="찬양집회 · 부흥회 · 수련회 신청 창구. 예매 시작 시각을 정하고, 정원이 차면 자동으로 마감됩니다. 좌석 지정도 원하는 집회만 쓸 수 있습니다.">
+  <title>교역자 구인 | 우리교회지원센터</title>
+  <meta name="description" content="교회가 직접 올리는 교역자 구인 공고. 사례비 · 사택 · 오가는 길을 미리 밝혀, 멀리 있는 교회도 사역자를 만날 수 있게 합니다.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="집회 티켓팅 | 우리교회지원센터">
-  <meta property="og:description" content="찬양집회 · 부흥회 · 수련회 신청 창구. 예매 시작 시각을 정하고, 정원이 차면 자동으로 마감됩니다. 좌석 지정도 원하는 집회만 쓸 수 있습니다.">
+  <meta property="og:title" content="교역자 구인 | 우리교회지원센터">
+  <meta property="og:description" content="교회가 직접 올리는 교역자 구인 공고. 사례비 · 사택 · 오가는 길을 미리 밝혀, 멀리 있는 교회도 사역자를 만날 수 있게 합니다.">
   <meta property="og:site_name" content="우리교회지원센터">
   <meta name="theme-color" content="#1F7A44">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
@@ -95,11 +95,11 @@
         <strong>게스트하우스</strong>
         <small>교회가 내어 주는 방</small>
       </a>
-      <a class="board-tab is-on" href="tickets.html" aria-current="page">
+      <a class="board-tab" href="tickets.html">
         <strong>집회 티켓팅</strong>
         <small>찬양집회 · 수련회 신청</small>
       </a>
-      <a class="board-tab" href="jobs.html">
+      <a class="board-tab is-on" href="jobs.html" aria-current="page">
         <strong>교역자 구인</strong>
         <small>교회가 올리고, 직접 지원</small>
       </a>
@@ -108,315 +108,309 @@
 
 <section class="page-hero">
   <div class="wrap">
-    <p class="eyebrow">집회 티켓팅 · 찬양집회 · 수련회</p>
-    <h1>포스터를 보고,<br>읽고, 신청합니다</h1>
-    <p class="lead">찬양집회와 수련회 신청을 한곳에서 받습니다. 예매 시작 시각을 정해 두면 그 시각 정각에 열리고, 정원이 차면 자동으로 마감됩니다. 좌석 지정은 원하는 집회만 쓰시면 됩니다.</p>
+    <p class="eyebrow">교역자 구인 · 사역자를 찾습니다</p>
+    <h1>교회가 직접 올리고,<br>사역자가 직접 봅니다</h1>
+    <p class="lead">아는 사람 안에서만 이어지면 멀리 있는 교회는 끝내 사람을 못 구합니다. 공고를 열어 두고, 사례비와 사택과 오가는 길을 미리 밝힙니다.</p>
     <div class="ls-hero-meta">
       <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
-      <span class="ls-hero-pill">사진 <strong>최대 20장</strong></span>
-      <span class="ls-hero-pill">예매 시작 시각 <strong>지정</strong></span>
-      <span class="ls-hero-pill is-key">정원 차면 <strong>자동 마감</strong></span>
+      <span class="ls-hero-pill">사진 <strong>최대 10장</strong></span>
+      <span class="ls-hero-pill">게시 <strong>구하실 때까지</strong></span>
+      <span class="ls-hero-pill is-key">사례비 · 사택 <strong>필수 표기</strong></span>
     </div>
     <div class="ls-hero-actions">
-      <a class="btn btn-gold btn-lg" href="#new" id="tkNewBtn">집회 올리기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
-      <a class="btn btn-outline btn-lg" href="#tickets">내 신청 내역</a>
+      <a class="btn btn-gold btn-lg" href="#new" id="jbNewBtn">공고 올리기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn-outline btn-lg" href="#mine">내가 올린 공고</a>
     </div>
   </div>
 </section>
 
 
 <!-- ============ 목록 ============ -->
-<section class="section" id="tkBoard">
+<section class="section" id="jbBoard">
   <div class="wrap">
     <div class="ls-bar">
       <div class="ls-search">
         <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7.4A1.4 1.4 0 0 0 6 4.4v15.2A1.4 1.4 0 0 0 7.4 21h9.2a1.4 1.4 0 0 0 1.4-1.4V7l-4-4Z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16h5.6"/></svg>
-        <input type="search" id="tkQ" placeholder="집회 이름 · 주최로 검색 (예: 청년, 부흥회)" aria-label="검색">
+        <input type="search" id="jbQ" placeholder="교회명 · 지역 · 부서로 검색 (예: 중고등부, 홍천)" aria-label="검색">
       </div>
-      <select id="tkCategory" aria-label="갈래"><option value="">전체 갈래</option><option value="praise">찬양집회</option><option value="revival">부흥회 · 사경회</option><option value="camp">수련회 · 캠프</option><option value="seminar">세미나 · 컨퍼런스</option><option value="concert">음악회 · 공연</option><option value="prayer">기도회</option><option value="youth">청년 · 청소년</option><option value="other">기타</option></select>
-      <select id="tkRegion" aria-label="지역"><option value="">전체 지역</option><option>서울</option><option>경기</option><option>인천</option><option>강원</option><option>대전</option><option>세종</option><option>충남</option><option>충북</option><option>광주</option><option>전남</option><option>전북</option><option>대구</option><option>경북</option><option>부산</option><option>울산</option><option>경남</option><option>제주</option></select>
-      <select id="tkWhen" aria-label="시기">
-        <option value="upcoming">신청 받는 집회</option>
-        <option value="soon">이번 달</option>
-        <option value="all">지난 집회까지</option>
-      </select>
-      <span class="ls-count" id="tkCount"></span>
+      <select id="jbPosition" aria-label="직분"><option value="">전체 직분</option><option value="senior">담임목사</option><option value="associate">부목사</option><option value="assistant">전도사</option><option value="education">교육전도사</option><option value="worship">찬양인도자</option><option value="pianist">반주자</option><option value="staff">행정 간사</option><option value="other">기타</option></select>
+      <select id="jbEmployment" aria-label="근무 형태"><option value="">전체 형태</option><option value="full">전임</option><option value="part">파트</option><option value="weekend">주말 사역</option><option value="short">단기 · 대체</option></select>
+      <select id="jbRegion" aria-label="지역"><option value="">전체 지역</option><option>서울</option><option>경기</option><option>인천</option><option>강원</option><option>대전</option><option>세종</option><option>충남</option><option>충북</option><option>광주</option><option>전남</option><option>전북</option><option>대구</option><option>경북</option><option>부산</option><option>울산</option><option>경남</option><option>제주</option></select>
+      <label class="ls-toggle"><input type="checkbox" id="jbHousingOnly"><span>사택 있는 곳만</span></label>
+      <span class="ls-count" id="jbCount"></span>
     </div>
 
-    <div class="ls-grid is-poster" id="tkList" aria-live="polite">
-      <p class="ls-loading">집회를 불러오는 중입니다…</p>
+    <div class="ls-grid" id="jbList" aria-live="polite">
+      <p class="ls-loading">공고를 불러오는 중입니다…</p>
     </div>
 
-    <div class="ls-empty" id="tkEmpty" hidden>
-      <h2>아직 올라온 집회가 없습니다</h2>
-      <p>조건을 바꿔 다시 찾아보시거나, 여시는 집회를 먼저 올려 주세요.</p>
-      <a class="btn btn-primary" href="#new">집회 올리기</a>
+    <div class="ls-empty" id="jbEmpty" hidden>
+      <h2>아직 올라온 공고가 없습니다</h2>
+      <p>조건을 바꿔 다시 찾아보시거나, 우리 교회의 자리를 먼저 올려 주세요.</p>
+      <a class="btn btn-primary" href="#new">공고 올리기</a>
     </div>
 
     <div class="ls-scope">
       <div class="ls-scope-card is-do">
         <h2><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg> 센터가 해 드리는 일</h2>
         <ul>
-        <li>올라온 집회의 주최 · 장소 · 일시가 실제와 맞는지 확인하고 게시합니다.</li>
-        <li>예매 시작 시각을 정확히 지켜 그 전에는 신청 버튼이 열리지 않게 합니다.</li>
-        <li>정원이 차면 자동으로 마감하고, 마감 안내를 띄웁니다.</li>
-        <li>좌석을 지정해 받고 싶은 집회에는 좌석도를 만들어 드립니다 (선택).</li>
-        <li>신청자 명단을 주최 측이 내려받을 수 있게 해 드립니다.</li>
+        <li>교회와 공고 내용이 실제와 맞는지 확인하고 게시합니다.</li>
+        <li>사례비 · 사택 · 교통을 반드시 적게 합니다 — 멀리 계신 분이 판단할 수 있어야 합니다.</li>
+        <li>허위 · 중복 · 교역자 구인과 무관한 글을 내립니다.</li>
+        <li>사람을 구하시면 교회가 직접 [모집 완료] 로 내립니다.</li>
         </ul>
       </div>
       <div class="ls-scope-card is-tip">
-        <h2>신청하시기 전에</h2>
-        <p class="ls-scope-note"><strong>참가비를 언제까지 어디로 보내는지</strong>, <strong>환불이 언제까지 되는지</strong>는 집회마다 다릅니다 — 각 집회의 [신청 전 안내]를 꼭 읽어 주세요. 신청은 <strong>한 집회에 한 번</strong>만 되고, 취소하시면 자리가 바로 다른 분께 돌아갑니다.</p>
-        <p class="ls-scope-fine">센터는 신청 창구를 운영합니다 — 집회의 주최자가 아닙니다. 참가비 수납 · 환불 · 일정 변경은 주최 측이 정하고 안내합니다.</p>
+        <h2>지원하시기 전에</h2>
+        <p class="ls-scope-note"><strong>사례비 · 사택 · 근무 요일</strong>은 공고에 적힌 그대로가 맞는지 전화로 한 번 더 확인해 주세요. 특히 <strong>오가는 길</strong>은 직접 한 번 가 보시는 편이 좋습니다 — 지도에서 가까워 보여도 대중교통이 끊기는 곳이 있습니다. 지원은 공고에 적힌 연락처로 직접 하시면 되고, 센터를 거치지 않습니다.</p>
+        <p class="ls-scope-fine">센터는 공고 게시판을 운영합니다 — 채용의 당사자가 아니며, 면접과 청빙 결정은 교회와 사역자가 직접 하십니다. 공고 내용은 올린 교회가 적은 것입니다.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ============ 상세 ============ -->
-<section class="section" id="tkDetail" hidden>
+<section class="section" id="jbDetail" hidden>
   <div class="wrap narrow">
     <a class="ls-back" href="#list">← 목록으로</a>
-    <div id="tkDetailBody"></div>
+    <div id="jbDetailBody"></div>
   </div>
 </section>
 
 <!-- ============ 내가 올린 것 ============ -->
-<section class="section" id="tkMine" hidden>
+<section class="section" id="jbMine" hidden>
   <div class="wrap narrow">
     <a class="ls-back" href="#list">← 목록으로</a>
     <div class="sec-head is-left">
-    <p class="eyebrow">내 집회</p>
-    <h2>내가 올린 집회</h2>
-    <p class="sec-lead">신청 현황과 관리자 확인 결과를 여기에서 보실 수 있습니다.</p>
+    <p class="eyebrow">내 공고</p>
+    <h2>내가 올린 공고</h2>
+    <p class="sec-lead">상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.</p>
   </div>
-    <div id="tkMineBody"></div>
+    <div id="jbMineBody"></div>
   </div>
 </section>
 
 <!-- ============ 등록 ============ -->
-<section class="section is-tint" id="tkNew" hidden>
+<section class="section is-tint" id="jbNew" hidden>
   <div class="wrap narrow">
     <a class="ls-back" href="#list">← 목록으로</a>
     <div class="sec-head is-left">
-    <p class="eyebrow">집회 올리기</p>
-    <h2>집회 신청을 받습니다</h2>
-    <p class="sec-lead">등록비는 없습니다. 관리자가 주최 · 장소 · 일시를 확인한 뒤 게시됩니다.</p>
+    <p class="eyebrow">공고 올리기</p>
+    <h2>우리 교회의 자리를 올립니다</h2>
+    <p class="sec-lead">등록비는 없습니다. 관리자가 교회와 내용을 확인한 뒤 게시됩니다.</p>
   </div>
 
-    <div class="ls-gate" id="tkGate" hidden>
-      <p>집회 등록은 로그인 후 이용하실 수 있습니다.</p>
-      <button type="button" class="btn btn-primary" id="tkGateLogin">로그인 / 회원가입</button>
+    <div class="ls-gate" id="jbGate" hidden>
+      <p>공고 등록은 로그인 후 이용하실 수 있습니다.</p>
+      <button type="button" class="btn btn-primary" id="jbGateLogin">로그인 / 회원가입</button>
     </div>
 
-    <form class="ls-form" id="tkForm" novalidate hidden>
-      <input type="hidden" id="tkEditId" value="">
+    <form class="ls-form" id="jbForm" novalidate hidden>
+      <input type="hidden" id="jbEditId" value="">
       
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">1</span> 어떤 집회인가요?</legend>
+        <legend><span class="ls-step">1</span> 어느 교회인가요?</legend>
         <div class="grid-2">
           <div class="field">
-            <label for="tkFCategory">갈래 <em>*</em></label>
-            <select id="tkFCategory"><option value="praise">찬양집회</option><option value="revival">부흥회 · 사경회</option><option value="camp">수련회 · 캠프</option><option value="seminar">세미나 · 컨퍼런스</option><option value="concert">음악회 · 공연</option><option value="prayer">기도회</option><option value="youth">청년 · 청소년</option><option value="other">기타</option></select>
+            <label for="jbFChurch">교회명 <em>*</em></label>
+            <input type="text" id="jbFChurch" maxlength="40" placeholder="예: 새길교회">
           </div>
           <div class="field">
-            <label for="tkFHost">주최 <em>*</em></label>
-            <input type="text" id="tkFHost" maxlength="40" placeholder="예: 우리교회 청년부">
+            <label for="jbFDenom">교단</label>
+            <input type="text" id="jbFDenom" maxlength="30" placeholder="예: 예장 통합">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFRegion">지역 <em>*</em></label>
+            <select id="jbFRegion"><option value="">선택해 주세요</option><option>서울</option><option>경기</option><option>인천</option><option>강원</option><option>대전</option><option>세종</option><option>충남</option><option>충북</option><option>광주</option><option>전남</option><option>전북</option><option>대구</option><option>경북</option><option>부산</option><option>울산</option><option>경남</option><option>제주</option></select>
+          </div>
+          <div class="field">
+            <label for="jbFSize">출석 교인 수</label>
+            <select id="jbFSize">
+              <option value="">선택해 주세요</option>
+              <option>50명 미만</option>
+              <option>50~150명</option>
+              <option>150~500명</option>
+              <option>500~1,000명</option>
+              <option>1,000명 이상</option>
+            </select>
           </div>
         </div>
         <div class="field">
-          <label for="tkFTitle">집회 이름 <em>*</em> <span class="ls-counter" id="tkTitleCount"></span></label>
-          <input type="text" id="tkFTitle" maxlength="60" placeholder="예: 2026 여름 청년 찬양집회 「돌이키라」">
-          <div class="ls-eg" data-eg="tkFTitle">
+          <label for="jbFAddress">대략의 위치</label>
+          <input type="text" id="jbFAddress" maxlength="60" placeholder="예: 강원 홍천군 서면">
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">2</span> 어떤 자리인가요?</legend>
+        <div class="field">
+          <label for="jbFTitle">공고 제목 <em>*</em> <span class="ls-counter" id="jbTitleCount"></span></label>
+          <input type="text" id="jbFTitle" maxlength="60"
+            placeholder="예: 중고등부 교육전도사님을 모십니다 (사택 제공)">
+          <div class="ls-eg" data-eg="jbFTitle">
             <span class="ls-eg-label">예시</span>
-            <button type="button" class="ls-eg-chip">2026 여름 청년 찬양집회 「돌이키라」</button>
-            <button type="button" class="ls-eg-chip">전교인 수련회 — 다시, 처음처럼</button>
-            <button type="button" class="ls-eg-chip">가을 부흥성회 (3일 연속)</button>
-            <button type="button" class="ls-eg-chip">중고등부 겨울캠프 「이 산지를 내게 주소서」</button>
-            <button type="button" class="ls-eg-chip">찬양과 경배의 밤 — 초청 음악회</button>
+            <button type="button" class="ls-eg-chip">중고등부 교육전도사님을 모십니다 (사택 제공)</button>
+            <button type="button" class="ls-eg-chip">주일 오전 반주자 — 주말 사역, 교통비 별도</button>
+            <button type="button" class="ls-eg-chip">청년부 담당 전도사 (전임) — 사택과 4대보험</button>
+            <button type="button" class="ls-eg-chip">유년부 교육전도사 — 신학생 환영, 주 2회</button>
+            <button type="button" class="ls-eg-chip">찬양인도자 모집 — 주일 1부 · 3부</button>
           </div>
         </div>
-        <div class="field">
-          <label for="tkFSubtitle">한 줄 소개</label>
-          <input type="text" id="tkFSubtitle" maxlength="80" placeholder="예: 사흘 동안 함께 기도하며 다시 시작합니다">
+        <div class="grid-3">
+          <div class="field">
+            <label for="jbFPosition">직분 <em>*</em></label>
+            <select id="jbFPosition"><option value="senior">담임목사</option><option value="associate">부목사</option><option value="assistant">전도사</option><option value="education">교육전도사</option><option value="worship">찬양인도자</option><option value="pianist">반주자</option><option value="staff">행정 간사</option><option value="other">기타</option></select>
+          </div>
+          <div class="field" id="jbPosOtherBox" hidden>
+            <label for="jbFPositionOther">직분 직접 입력 <em>*</em></label>
+            <input type="text" id="jbFPositionOther" maxlength="20">
+          </div>
+          <div class="field">
+            <label for="jbFEmployment">근무 형태 <em>*</em></label>
+            <select id="jbFEmployment"><option value="full">전임</option><option value="part">파트</option><option value="weekend">주말 사역</option><option value="short">단기 · 대체</option></select>
+          </div>
         </div>
-        <div class="field">
-          <label for="tkFSpeakers">강사 · 찬양팀</label>
-          <input type="text" id="tkFSpeakers" maxlength="120" placeholder="예: ○○○ 목사 · 마커스워십">
+        <div class="grid-3">
+          <div class="field">
+            <label for="jbFDept">맡을 부서</label>
+            <select id="jbFDept">
+              <option value="">선택해 주세요</option>
+              <option>영아 · 유아부</option>
+              <option>유치부</option>
+              <option>유년 · 초등부</option>
+              <option>중고등부</option>
+              <option>청년부</option>
+              <option>장년 · 남녀전도회</option>
+              <option>찬양팀</option>
+              <option>전체 · 협력</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="jbFHeadcount">모집 인원</label>
+            <input type="number" id="jbFHeadcount" min="1" max="20" value="1">
+          </div>
+          <div class="field">
+            <label for="jbFWorkDays">근무 요일 · 시간</label>
+            <input type="text" id="jbFWorkDays" maxlength="60" placeholder="예: 주일 종일 · 수요 저녁">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFStart">부임 희망 시기</label>
+            <input type="text" id="jbFStart" maxlength="30" placeholder="예: 2026년 3월 · 협의 가능">
+          </div>
+          <div class="field">
+            <label for="jbFCloses">모집 마감</label>
+            <input type="date" id="jbFCloses">
+            <small class="hint">비워 두시면 구하실 때까지 올라가 있습니다.</small>
+          </div>
         </div>
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">2</span> 언제, 어디서 하나요?</legend>
-        <div class="grid-2">
-          <div class="field">
-            <label for="tkFStarts">시작 <em>*</em></label>
-            <input type="datetime-local" id="tkFStarts">
-          </div>
-          <div class="field">
-            <label for="tkFEnds">끝</label>
-            <input type="datetime-local" id="tkFEnds">
-          </div>
-        </div>
-        <div class="field">
-          <label for="tkFScheduleNote">일정 안내</label>
-          <textarea id="tkFScheduleNote" rows="3" maxlength="500"
-            placeholder="예: 첫날 19:00 개회 · 둘째날 10:00/19:00 · 마지막날 10:00 파송예배"></textarea>
-        </div>
-        <div class="grid-2">
-          <div class="field">
-            <label for="tkFRegion">지역 <em>*</em></label>
-            <select id="tkFRegion"><option value="">선택해 주세요</option><option>서울</option><option>경기</option><option>인천</option><option>강원</option><option>대전</option><option>세종</option><option>충남</option><option>충북</option><option>광주</option><option>전남</option><option>전북</option><option>대구</option><option>경북</option><option>부산</option><option>울산</option><option>경남</option><option>제주</option></select>
-          </div>
-          <div class="field">
-            <label for="tkFVenue">장소 <em>*</em></label>
-            <input type="text" id="tkFVenue" maxlength="60" placeholder="예: 우리교회 본당">
-          </div>
-        </div>
-        <div class="field">
-          <label for="tkFAddress">주소</label>
-          <input type="text" id="tkFAddress" maxlength="80">
-        </div>
-      </fieldset>
-
-      <fieldset class="ls-fs">
-        <legend><span class="ls-step">3</span> 신청을 언제부터 받나요?</legend>
+        <legend><span class="ls-step">3</span> 사례비와 사택</legend>
         <p class="ls-fs-lead">
-          사람이 몰리는 집회는 <strong>예매 시작 시각</strong>을 정해 두시면 좋습니다.
-          그 시각 전에는 신청 버튼이 열리지 않고, 남은 시간이 화면에 뜹니다.
-          비워 두시면 게시되는 즉시 신청을 받습니다.
+          멀리 계신 사역자가 <strong>갈지 말지를 정하는 건 결국 이 두 가지</strong>입니다.
+          &ldquo;협의&rdquo; 한 줄만 적힌 공고에는 연락이 잘 오지 않습니다.
+          범위라도 적어 주시면 지원이 확실히 늘어납니다.
         </p>
-        <div class="grid-2">
-          <div class="field">
-            <label for="tkFOpenAt">예매 시작</label>
-            <input type="datetime-local" id="tkFOpenAt">
-            <small class="hint">예: 2026-05-01 20:00 — 이 시각 정각에 버튼이 열립니다.</small>
-          </div>
-          <div class="field">
-            <label for="tkFCloseAt">신청 마감</label>
-            <input type="datetime-local" id="tkFCloseAt">
-            <small class="hint">비워 두시면 집회 시작 때까지 받습니다.</small>
-          </div>
+        <div class="field">
+          <label for="jbFPayType">사례비 방식 <em>*</em></label>
+          <select id="jbFPayType"><option value="monthly">월 사례비</option><option value="weekly">주 단위</option><option value="per_service">집회 · 예배 건별</option><option value="negotiable">면접 후 협의</option></select>
         </div>
-        <div class="grid-2">
-          <div class="field">
-            <label for="tkFCapacity">정원 <em>*</em></label>
-            <input type="number" id="tkFCapacity" min="0" max="100000" placeholder="0 이면 제한 없음">
-            <small class="hint">정원이 차면 <strong>자동으로 마감</strong>되고 안내 문구가 뜹니다.</small>
+        <div class="grid-2" id="jbPayBox">
+          <div class="field ls-money">
+            <label for="jbFPayMin">얼마부터</label>
+            <div class="ls-won"><input type="text" id="jbFPayMin" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div>
+            <small class="hint">아래 칸을 비우시면 이 금액으로만 보입니다.</small>
           </div>
-          <div class="field">
-            <label for="tkFPerPerson">한 사람당 최대 매수</label>
-            <input type="number" id="tkFPerPerson" min="1" max="20" value="4">
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset class="ls-fs">
-        <legend><span class="ls-step">4</span> 참가비</legend>
-        <label class="ls-chk is-wide"><input type="checkbox" id="tkFFree"><span>
-          <strong>무료 집회입니다</strong></span></label>
-        <div id="tkPriceBox">
-          <div class="grid-2">
-            <div class="field ls-money">
-            <label for="tkFPrice">참가비</label>
-            <div class="ls-won"><input type="text" id="tkFPrice" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div>
-            <small class="hint">한 사람당 금액입니다.</small>
-          </div>
-            <div class="field ls-money">
-            <label for="tkFEarlyPrice">얼리버드 참가비</label>
-            <div class="ls-won"><input type="text" id="tkFEarlyPrice" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div>
-            <small class="hint">일찍 신청하는 분께 받을 금액. 안 쓰시면 비워 두세요.</small>
-          </div>
-          </div>
-          <div class="field">
-            <label for="tkFEarlyUntil">얼리버드 마감</label>
-            <input type="datetime-local" id="tkFEarlyUntil">
+          <div class="field ls-money">
+            <label for="jbFPayMax">얼마까지</label>
+            <div class="ls-won"><input type="text" id="jbFPayMax" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div>
+            <small class="hint">범위가 없으면 비워 두세요.</small>
           </div>
         </div>
         <div class="field">
-          <label for="tkFAgeNote">참가 대상</label>
-          <input type="text" id="tkFAgeNote" maxlength="80" placeholder="예: 중학생 이상 · 초등부는 보호자 동반">
+          <label for="jbFPayNote">사례비에 관해 덧붙일 말</label>
+          <input type="text" id="jbFPayNote" maxlength="80" placeholder="예: 교통비 별도 · 명절 상여 있음">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFHousing">사택 <em>*</em></label>
+            <select id="jbFHousing"><option value="provided">사택 제공</option><option value="support">주거비 지원</option><option value="negotiable">협의</option><option value="none">없음</option></select>
+          </div>
+          <div class="field">
+            <span class="label-txt">4대보험</span>
+            <label class="ls-chk"><input type="checkbox" id="jbFInsurance"><span>가입해 드립니다</span></label>
+          </div>
         </div>
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">5</span> 좌석 <small>(선택입니다)</small></legend>
+        <legend><span class="ls-step">4</span> 오가는 길</legend>
         <p class="ls-fs-lead">
-          좌석을 지정해 받고 싶을 때만 켜 주세요. 켜지 않으면 <strong>인원수로만</strong> 받습니다.
-          대부분의 집회는 좌석 없이 받는 편이 신청도 빠르고 관리도 쉽습니다.
+          멀거나 대중교통이 어려운 곳이라면 <strong>숨기지 말고 적어 주세요.</strong>
+          알고 오신 분은 오래 계시지만, 모르고 오신 분은 곧 그만두십니다.
         </p>
-        <label class="ls-chk is-wide"><input type="checkbox" id="tkFSeating"><span>
-          <strong>좌석을 지정해 받겠습니다</strong></span></label>
-
-        <div id="tkSeatBox" hidden>
-          <div class="grid-3">
-            <div class="field">
-              <label for="tkFSeatRows">줄 수</label>
-              <input type="number" id="tkFSeatRows" min="1" max="30" value="10">
-            </div>
-            <div class="field">
-              <label for="tkFSeatPer">한 줄에 몇 석</label>
-              <input type="number" id="tkFSeatPer" min="1" max="40" value="12">
-            </div>
-            <div class="field">
-              <span class="label-txt">&nbsp;</span>
-              <button type="button" class="btn btn-outline" id="tkSeatMake">좌석도 만들기</button>
-            </div>
-          </div>
-          <p class="hint">
-            만든 뒤 <strong>자리를 눌러</strong> 통로 · 기둥처럼 앉을 수 없는 자리를 꺼 주세요.
-            꺼진 자리는 신청 화면에 나오지 않습니다.
-          </p>
-          <div class="tk-seatmap is-edit" id="tkSeatEdit"></div>
-          <p class="tk-seat-sum" id="tkSeatSum"></p>
-          <div class="field">
-            <label for="tkFSeatNote">좌석 안내</label>
-            <input type="text" id="tkFSeatNote" maxlength="80" placeholder="예: A열은 찬양팀 자리입니다">
-          </div>
+        <div class="field">
+          <label for="jbFCommute">교통 안내</label>
+          <textarea id="jbFCommute" rows="3" maxlength="300"
+            placeholder="예: 시외버스터미널에서 차로 20분, 대중교통이 드물어 자차가 있으시면 좋습니다. 주일에는 교회 차량으로 모시러 갑니다."></textarea>
         </div>
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">6</span> 포스터와 소개</legend>
+        <legend><span class="ls-step">5</span> 교회 사진과 소개</legend>
         <div class="field">
-            <span class="label-txt">사진 <em>*</em> <small>(최대 20장)</small></span>
-            <p class="hint">첫 장이 목록에 보이는 대표 포스터가 됩니다. 포스터 · 장소 사진 · 지난 집회 사진까지 최대 20장 올리실 수 있습니다.</p>
+            <span class="label-txt">사진 <em>*</em> <small>(최대 10장)</small></span>
+            <p class="hint">예배당과 교회 바깥, 그리고 함께 일하실 공간을 보여 주세요. 사택을 제공하신다면 그 방도 한 장 넣어 주시면 좋습니다.</p>
             <div class="ls-photo-pick">
-              <input type="file" id="tkFPhotos" accept="image/*" multiple hidden>
-              <button type="button" class="btn btn-outline" id="tkPhotoBtn">사진 고르기</button>
-              <span class="ls-photo-count" id="tkPhotoStatus">아직 올린 사진이 없습니다 (1장 이상 권합니다)</span>
+              <input type="file" id="jbFPhotos" accept="image/*" multiple hidden>
+              <button type="button" class="btn btn-outline" id="jbPhotoBtn">사진 고르기</button>
+              <span class="ls-photo-count" id="jbPhotoStatus">아직 올린 사진이 없습니다 (3장 이상 권합니다)</span>
             </div>
-            <div class="ls-photo-grid" id="tkPhotoGrid"></div>
+            <div class="ls-photo-grid" id="jbPhotoGrid"></div>
           </div>
 
         <div class="field">
-          <label for="tkFDesc">집회 소개 <em>*</em></label>
-          <textarea id="tkFDesc" rows="8" maxlength="4000"
-            placeholder="어떤 마음으로 여는 집회인지, 누구를 초대하는지, 무엇을 함께 하는지를 적어 주세요. 신청하는 분이 읽고 결정합니다."></textarea>
+          <label for="jbFDesc">교회 소개와 하실 일 <em>*</em></label>
+          <textarea id="jbFDesc" rows="8" maxlength="3000"
+            placeholder="어떤 교회인지, 어떤 사역을 맡게 되는지, 함께 일할 분들은 어떤 분들인지 적어 주세요. 지원하시는 분이 읽고 결정합니다."></textarea>
         </div>
         <div class="field">
-          <label for="tkFNotice">신청 전 안내</label>
-          <textarea id="tkFNotice" rows="4" maxlength="1000"
-            placeholder="예: 참가비는 신청 후 3일 안에 입금해 주세요 · 환불은 집회 7일 전까지 가능합니다 · 주차 공간이 좁습니다."></textarea>
+          <label for="jbFQual">바라는 자격 · 경험</label>
+          <textarea id="jbFQual" rows="3" maxlength="500"
+            placeholder="예: 신학대학원 재학 이상 · 중고등부 사역 경험이 있으시면 좋습니다 · 운전 가능하신 분"></textarea>
         </div>
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">7</span> 문의처</legend>
+        <legend><span class="ls-step">6</span> 연락처</legend>
+        <p class="ls-fs-lead">
+          <strong>지원은 여기로 직접 옵니다.</strong> 사이트 안에서 지원서를 받는 기능은
+          아직 열지 않았습니다.
+        </p>
         <div class="grid-2">
           <div class="field">
-            <label for="tkFContactName">담당자 <em>*</em></label>
-            <input type="text" id="tkFContactName" maxlength="20" autocomplete="name">
+            <label for="jbFContactName">담당자 <em>*</em></label>
+            <input type="text" id="jbFContactName" maxlength="20" autocomplete="name">
           </div>
           <div class="field">
-            <label for="tkFContactPhone">연락처 <em>*</em></label>
-            <input type="tel" id="tkFContactPhone" placeholder="010-0000-0000" autocomplete="tel">
+            <label for="jbFContactPhone">연락처 <em>*</em></label>
+            <input type="tel" id="jbFContactPhone" placeholder="010-0000-0000" autocomplete="tel">
           </div>
         </div>
         <div class="field">
-          <label for="tkFHours">연락 가능 시간 <em>*</em></label>
-          <input type="text" id="tkFHours" maxlength="120" placeholder="예: 평일 낮 10–18시 · 주일 오전 제외">
-          <div class="ls-eg is-pick" data-eg="tkFHours">
+          <label for="jbFContactEmail">이메일 <small>(이력서를 받으실 주소)</small></label>
+          <input type="email" id="jbFContactEmail" maxlength="60" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="jbFHours">연락 가능 시간 <em>*</em></label>
+          <input type="text" id="jbFHours" maxlength="120" placeholder="예: 평일 낮 10–18시 · 주일 오전 제외">
+          <div class="ls-eg is-pick" data-eg="jbFHours">
             <div class="ls-eg-row">
               <span class="ls-eg-label">연락 되는 때</span>
               <button type="button" class="ls-eg-chip" data-add="ok">평일 낮 10–18시</button>
@@ -442,22 +436,22 @@
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">8</span> 확인</legend>
+        <legend><span class="ls-step">7</span> 확인</legend>
         <div class="ls-vows">
-          <label class="ls-chk is-wide"><input type="checkbox" id="tkVow1"><span>
-            제가 <strong>이 집회의 주최 측이거나 위임받은 사람</strong>입니다.</span></label>
-          <label class="ls-chk is-wide"><input type="checkbox" id="tkVow2"><span>
-            일시 · 장소 · 정원은 <strong>실제로 정해진 것</strong>이며,
-            신청하신 분들께 그대로 지키겠습니다.</span></label>
-          <label class="ls-chk is-wide"><input type="checkbox" id="tkVow3"><span>
-            참가비 수납 · 환불 · 일정 변경은 <strong>주최 측이 안내</strong>하며,
-            센터는 신청 창구만 운영한다는 것을 압니다.</span></label>
+          <label class="ls-chk is-wide"><input type="checkbox" id="jbVow1"><span>
+            제가 <strong>이 교회를 대신해 공고를 올릴 수 있는 사람</strong>입니다.</span></label>
+          <label class="ls-chk is-wide"><input type="checkbox" id="jbVow2"><span>
+            적은 <strong>사례비 · 사택 · 근무 조건은 실제와 같으며</strong>,
+            오시는 분께 그대로 지키겠습니다.</span></label>
+          <label class="ls-chk is-wide"><input type="checkbox" id="jbVow3"><span>
+            면접과 청빙 결정은 <strong>교회와 사역자가 직접</strong> 하며,
+            센터는 공고 게시판만 운영한다는 것을 압니다.</span></label>
         </div>
       </fieldset>
-      <p class="form-msg is-err" id="tkFormErr" hidden></p>
-      <p class="form-msg is-ok" id="tkFormOk" hidden></p>
+      <p class="form-msg is-err" id="jbFormErr" hidden></p>
+      <p class="form-msg is-ok" id="jbFormOk" hidden></p>
       <div class="ls-form-actions">
-        <button type="submit" class="btn btn-primary btn-lg" id="tkSubmit">등록 신청하기</button>
+        <button type="submit" class="btn btn-primary btn-lg" id="jbSubmit">등록 신청하기</button>
         <a class="btn btn-outline btn-lg" href="#list">취소</a>
       </div>
     </form>
@@ -465,32 +459,11 @@
 </section>
 
 
-<!-- ============ 내 신청 내역 ============ -->
-<section class="section" id="tkTickets" hidden>
-  <div class="wrap narrow">
-    <a class="ls-back" href="#list">← 목록으로</a>
-    <div class="sec-head is-left">
-    <p class="eyebrow">내 신청</p>
-    <h2>내가 신청한 집회</h2>
-    <p class="sec-lead">신청 번호와 좌석을 여기에서 확인하실 수 있습니다. 못 가시게 되면 꼭 취소해 주세요 — 자리가 바로 다음 분께 돌아갑니다.</p>
-  </div>
-    <div id="tkTicketsBody"></div>
-  </div>
-</section>
-
-<!-- ============ 신청하기 ============ -->
-<section class="section is-tint" id="tkApply" hidden>
-  <div class="wrap narrow">
-    <a class="ls-back" href="#list">← 목록으로</a>
-    <div id="tkApplyBody"></div>
-  </div>
-</section>
-
 <section class="cta-band">
   <div class="wrap cta-in">
     <div>
-      <h2>집회 포스터나 홍보물이 필요하신가요?</h2>
-      <p>집회 포스터 · 현수막 · 영상까지 디자인 지원 항목에서 함께 만들어 드립니다. 상담과 견적은 무료입니다.</p>
+      <h2>사람을 구하는 일이 처음이신가요?</h2>
+      <p>어떤 조건으로 올려야 연락이 오는지, 공고 문구부터 함께 정리해 드립니다. 상담과 견적은 무료입니다.</p>
     </div>
     <div class="cta-actions">
       <a class="btn btn-gold btn-lg" href="apply.html">지원 신청하기</a>
@@ -557,6 +530,6 @@
   <script src="assets/js/live-content.js" defer></script>
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/board-core.js" defer></script>
-  <script src="assets/js/tickets.js" defer></script>
+  <script src="assets/js/jobs.js" defer></script>
 </body>
 </html>
