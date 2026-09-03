@@ -128,7 +128,7 @@ table { border-collapse: collapse; width: 100%; }
 
 .nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .nav-link {
-  padding: 10px 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--ink-2);
+  padding: 10px 10px; border-radius: 8px; font-size: 14.5px; font-weight: 600; color: var(--ink-2);
   white-space: nowrap;
   transition: background .15s, color .15s;
 }
@@ -2546,8 +2546,8 @@ body.is-search-open { overflow: hidden; }
   color: var(--ink-2);
 }
 
-/* 1151~1320px — 자리가 모자라 돋보기만 남깁니다 */
-@media (max-width: 1320px) and (min-width: 1151px) {
+/* 1151~1400px — 자리가 모자라 돋보기만 남깁니다 */
+@media (max-width: 1400px) and (min-width: 1151px) {
   .nav-search { width: auto; padding: 10px 12px; margin-left: 4px; }
   .nav-search span { display: none; }
 }
@@ -3066,4 +3066,236 @@ body.is-search-open { overflow: hidden; }
   .sc-ico svg { width: 24px; height: 24px; }
   .sc-name { font-size: 12.5px; }
   .qz-call a { font-size: 22px; }
+}
+
+/* =========================================================
+   전 페이지 공통 다듬기
+
+   홈만 새 모양이 되어 다른 페이지와 따로 놀았습니다.
+   여기서 공통 부품의 결을 한 번에 맞춥니다 — 페이지마다
+   따로 손대지 않고, 카드 · 제목 · 입력칸의 규칙만 바꿉니다.
+
+   규칙은 셋입니다.
+     1. 테두리를 걷어내고 면으로 나눕니다.
+        흰 바탕에서는 연회색 카드, 연회색 바탕에서는 흰 카드.
+     2. 모서리를 키웁니다 (18px). 작은 것은 14px.
+     3. 강조는 위쪽 노란 줄이 아니라 글자와 여백으로 합니다.
+        줄이 줄어들면 화면이 조용해지고, 그래야 내용이 보입니다.
+
+   관리자 화면(.admin-*)은 건드리지 않습니다 — 표가 많아
+   선이 있어야 읽힙니다.
+   ========================================================= */
+
+:root {
+  --radius:    18px;
+  --radius-sm: 14px;
+  --radius-lg: 22px;
+  /* 카드가 떠오를 때 쓰는 그림자 — 홈과 같은 값입니다 */
+  --lift: 0 6px 24px rgba(18, 48, 31, .10);
+}
+
+/* ---------- 카드 ---------- */
+
+.cat-card,
+.svc-card,
+.why-card,
+.prep-card,
+.feat-card,
+.price-card,
+.contact-card,
+.camp-card,
+.use-card,
+.track-card,
+.trial-box,
+.ls-card,
+.tk-card,
+.notice-card,
+.result-card {
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  box-shadow: none;
+}
+
+/* 연회색 구역 안에서는 반대로 흰 면이 카드가 됩니다 */
+.section-alt .cat-card,
+.section-alt .svc-card,
+.section-alt .why-card,
+.section-alt .prep-card,
+.section-alt .feat-card,
+.section-alt .price-card,
+.section-alt .contact-card,
+.section-alt .camp-card,
+.section-alt .use-card,
+.section-alt .track-card,
+.section-alt .trial-box,
+.section-alt .ls-card,
+.section-alt .tk-card,
+.is-tint .ls-card,
+.is-tint .tk-card {
+  background: #fff;
+}
+
+/* 누를 수 있는 카드만 떠오릅니다 */
+a.cat-card:hover,
+a.svc-card:hover,
+a.contact-card:hover,
+a.ls-card:hover,
+a.tk-card:hover {
+  background: #fff;
+  border-color: transparent;
+  box-shadow: var(--lift);
+  transform: translateY(-2px);
+}
+.section-alt a.cat-card:hover,
+.section-alt a.svc-card:hover,
+.section-alt a.contact-card:hover,
+.section-alt a.ls-card:hover,
+.section-alt a.tk-card:hover,
+.is-tint a.ls-card:hover,
+.is-tint a.tk-card:hover { background: #fff; }
+
+/* 위쪽 노란 줄은 걷어냅니다 — 카드마다 붙어 있으면 화면이 시끄럽습니다 */
+.why-card,
+.camp-card { border-top: 0; }
+
+/* 문제 카드는 왼쪽 줄 대신 연한 초록 면으로 */
+.prob-card {
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--brand-50);
+}
+
+/* 매물 · 물건 사진이 붙는 카드는 사진이 모서리에 맞게 잘려야 합니다 */
+.ls-card,
+.tk-card { overflow: hidden; }
+
+/* ---------- 구역 제목 ---------- */
+
+/* 가운데 정렬과 노란 막대를 걷고, 홈과 같은 왼쪽 정렬로 맞춥니다.
+   제목이 왼쪽에 서면 그 아래 내용과 눈이 한 줄에서 시작합니다. */
+.sec-head {
+  max-width: none;
+  margin: 0 0 30px;
+  text-align: left;
+}
+.sec-head::before { display: none; }
+.sec-head h2 {
+  font-size: clamp(21px, 2.6vw, 28px);
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -.04em;
+  color: var(--brand-900);
+}
+.sec-lead {
+  margin-top: 10px;
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 48em;
+}
+
+/* ---------- 페이지 머리 ---------- */
+
+.page-hero {
+  padding: 56px 0 50px;
+  border-bottom: 0;
+  background: var(--bg-soft);
+}
+.page-hero .lead {
+  margin-top: 14px;
+  font-size: 16.5px;
+  color: var(--muted);
+}
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--brand-100);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: none;
+  color: var(--brand-800);
+}
+
+/* ---------- 입력칸 · 단추 ---------- */
+
+.field input,
+.field select,
+.field textarea,
+.ls-search input,
+.ls-bar select {
+  border-radius: 12px;
+}
+.btn { border-radius: 12px; }
+.btn-sm { border-radius: 10px; }
+.btn-lg { border-radius: 14px; }
+
+/* ---------- 자주 묻는 질문 ---------- */
+
+.faq { display: flex; flex-direction: column; gap: 8px; }
+.faq-item {
+  border-bottom: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+.section-alt .faq-item { background: #fff; }
+
+/* ---------- 절차 · 요금 · 게시판 안내 ---------- */
+
+.step {
+  border: 0;
+  border-radius: var(--radius);
+  background: #fff;
+}
+.section-alt .step,
+.is-home .section.is-soft .step { background: #fff; }
+.section:not(.section-alt):not(.is-soft) .step { background: var(--bg-soft); }
+
+/* 게시판 안내 두 칸 — 위쪽 노란 줄과 테두리를 걷습니다 */
+.ls-scope-card {
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+.ls-scope-card.is-do { border-top: 0; }
+.section-alt .ls-scope-card,
+.is-tint .ls-scope-card { background: #fff; }
+
+/* 게시판 탭 — 홈의 갈래 탭과 같은 결로 */
+.board-tabs { border-bottom: 0; background: #fff; }
+.board-tab {
+  border: 0;
+  border-radius: 14px;
+  background: var(--bg-soft);
+}
+.board-tab:hover { background: var(--brand-100); border-color: transparent; }
+.board-tab.is-on {
+  background: var(--brand-800);
+  border-color: transparent;
+  box-shadow: none;
+}
+.board-tab.is-on strong { color: #fff; }
+.board-tab.is-on small { color: #B9D6C4; }
+
+/* 매물 · 물건 · 방 카드 안의 안내 상자들 */
+.ls-empty,
+.ls-gate,
+.ls-mine {
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+.section-alt .ls-gate,
+.is-tint .ls-gate,
+.is-tint .ls-empty { background: #fff; }
+
+/* ---------- 좁은 화면 ---------- */
+
+@media (max-width: 900px) {
+  .page-hero { padding: 40px 0 36px; }
+  .sec-head { margin-bottom: 22px; }
 }

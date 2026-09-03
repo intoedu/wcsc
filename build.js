@@ -12,6 +12,9 @@ const path = require('path');
 const T = require('./src/templates');
 const Boards = require('./src/boards');
 
+/* 갈래 수를 우리말로. 손으로 적어 두면 항목이 늘 때마다 어긋납니다. */
+const NUM = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
   applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
   plans, planRules, trial, invite, boardTabs,
@@ -340,7 +343,7 @@ ${pageHero({
 
 <section class="section">
   <div class="wrap">
-    ${sectionHead('지원 범위', '세 갈래, 8개 항목')}
+    ${sectionHead('지원 범위', `${NUM[categories.length]} 갈래, ${services.length}개 항목`)}
     ${serviceGroups('')}
   </div>
 </section>
