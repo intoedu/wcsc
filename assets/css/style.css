@@ -2417,12 +2417,37 @@ body.is-search-open { overflow: hidden; }
 }
 
 .ss-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 10px 8px 4px;
   font-size: 12.5px;
   font-weight: 700;
   letter-spacing: .02em;
   color: var(--muted);
 }
+
+/* 최근에 찾으신 말 — 로그인하신 분에게만 보입니다 */
+.ss-recent { margin-bottom: 6px; }
+.ss-wipe {
+  padding: 3px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.ss-wipe:hover { background: var(--bg-soft); color: var(--ink-2); }
+.ss-wipe:disabled { opacity: .5; cursor: default; }
+.ss-chip.is-recent {
+  background: var(--brand-50);
+  color: var(--brand-800);
+}
+.ss-chip.is-recent:hover { background: var(--brand-100); }
 
 .ss-hit {
   display: flex;
@@ -2824,6 +2849,12 @@ body.is-search-open { overflow: hidden; }
   color: var(--gold-400);
 }
 
+/* 밝은 바탕에서도 쓰이므로 색을 나눠 둡니다 */
+.story:not(.is-dark) .story-note {
+  border-top-color: var(--line);
+  color: var(--muted);
+}
+
 .story-note {
   margin: 30px auto 0;
   padding-top: 24px;
@@ -3001,6 +3032,10 @@ body.is-search-open { overflow: hidden; }
   color: var(--muted);
 }
 .item:hover .item-go { color: var(--brand-700); }
+
+/* 아이콘 없이 글만 있는 카드 */
+.feat-card.is-plain h3 { color: var(--brand-900); }
+.feat-card.is-plain p { margin-top: 10px; }
 
 .items-note {
   margin-top: 20px;
@@ -3373,14 +3408,21 @@ a.tk-card:hover {
 
 /* ---------- 자주 묻는 질문 ---------- */
 
-.faq { display: flex; flex-direction: column; gap: 8px; }
+/* 카드 모양이 되었으니 글이 모서리에 붙지 않게 안쪽 여백을 줍니다.
+   줄 목록이던 시절의 여백(좌우 4px)이 그대로 남아 어색했습니다. */
+.faq { display: flex; flex-direction: column; gap: 8px; border-top: 0; }
 .faq-item {
   border-bottom: 0;
   border-radius: var(--radius-sm);
   background: var(--bg-soft);
   overflow: hidden;
+  transition: background .15s;
 }
+.faq-item summary { padding: 20px 22px; font-size: 16.5px; }
+.faq-item .faq-body { padding: 0 22px 22px; }
+.faq-item:hover { background: var(--brand-50); }
 .section-alt .faq-item { background: #fff; }
+.section-alt .faq-item:hover { background: #fff; }
 
 /* ---------- 절차 · 요금 · 게시판 안내 ---------- */
 
@@ -3494,9 +3536,13 @@ a.tk-card:hover {
 .price-figure strong,
 .svc-meta-price { letter-spacing: -.03em; }
 
-/* 자주 묻는 질문 — 펼친 것만 살짝 도드라지게 */
+/* 펼친 것은 면 색으로만 구분합니다. 그림자로 띄우면 그 하나만
+   붙여 놓은 것처럼 보입니다. */
 .faq-item[open] {
   background: #fff;
-  box-shadow: var(--lift);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
-.section-alt .faq-item[open] { background: #fff; }
+.section-alt .faq-item[open] {
+  background: var(--brand-50);
+  box-shadow: none;
+}

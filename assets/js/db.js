@@ -33,7 +33,7 @@ window.CAPSDB = (function () {
   var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
     'serviceContent', 'settings', 'editConsents', 'listings',
     'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders',
-    'payments', 'jobPosts'];
+    'payments', 'jobPosts', 'searchLogs'];
 
   /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
      (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
@@ -1350,6 +1350,7 @@ window.CAPSDB = (function () {
       ticketOrders: 'ticket_orders',
       payments: 'payments',
       jobPosts: 'job_posts',
+      searchLogs: 'search_logs',
     };
 
     /** 문서 통째로 jsonb 한 칸에 담는 표 (내용이 자유로워서) */
@@ -3291,6 +3292,62 @@ window.CAPSDB = (function () {
     /** 관리자 · 주최자 → 입장 확인 */
     checkInTicket: function (id) {
       return adapter.update('ticketOrders', id, { status: 'checked_in', updatedAt: nowIso() });
+    },
+
+    /* =====================================================
+       찾은 말 기록 (searchLogs)
+
+       로그인하신 분만 남습니다. 로그인하지 않은 분은 아무것도
+       저장하지 않습니다 — 남길 자리(계정)가 없기 때문입니다.
+
+       무엇을 찾으셨는지는 개인정보라, 본인만 읽고 본인만 지울 수
+       있게 해 두었습니다. 직원도 볼 수 없습니다.
+       ===================================================== */
+
+    /**
+     * 찾은 말을 남깁니다.
+     *
+     * 글자를 칠 때마다 남기지 않습니다 — "교", "교역", "교역자" 가
+     * 다 쌓이면 목록이 쓸모없어집니다. 실제로 결과를 눌러 들어가신
+     * 말만 남깁니다.
+     *
+     * 실패해도 조용히 넘어갑니다. 기록을 남기지 못한 것 때문에
+     * 찾기가 멈추면 안 됩니다.
+     */
+    logSearch: function (q) {
+      var me = adapter.auth.current();
+      var word = String(q || '').trim();
+      if (!me || !word || word.length > 100) return Promise.resolve();
+      if (!adapter.rpc) return Promise.resolve();
+      return adapter.rpc('log_search', { p_q: word }).catch(function () { return null; });
+    },
+
+    /** 최근에 찾으신 말 (새것부터) */
+    recentSearches: function (limit) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('searchLogs', { where: { userId: me.id } })
+        .then(function (rows) {
+          return (rows || [])
+            .sort(function (a, b) {
+              return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+            })
+            .slice(0, Math.max(1, Number(limit) || 8))
+            .map(function (r) { return r.q; });
+        })
+        .catch(function () { return []; });
+    },
+
+    /** 기록을 한 번에 지웁니다 */
+    clearSearches: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve();
+      return adapter.list('searchLogs', { where: { userId: me.id } })
+        .then(function (rows) {
+          return Promise.all((rows || []).map(function (r) {
+            return adapter.remove('searchLogs', r.id);
+          }));
+        });
     },
 
     /* =====================================================

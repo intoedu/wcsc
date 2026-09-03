@@ -218,6 +218,17 @@
       '</a>';
   }
 
+  /* 최근에 찾으신 말 — 로그인하신 분만 남습니다.
+     로그인하지 않은 분은 남길 자리(계정)가 없어 비어 있습니다. */
+  var recent = [];
+
+  function loadRecent() {
+    if (!db || !db.recentSearches) { recent = []; return Promise.resolve(); }
+    return db.recentSearches(8).then(function (list) {
+      recent = list || [];
+    }).catch(function () { recent = []; });
+  }
+
   /* 아무것도 못 찾았을 때와 처음 열었을 때 함께 씁니다 */
   var QUICK = ['음향', '홈페이지', '비용이 얼마', '사택', '교역자 구인', '중고'];
 
@@ -226,8 +237,18 @@
   function render(q, rows, posts, loading) {
     if (!q) {
       out.innerHTML =
+        (recent.length
+          ? '<div class="ss-recent">' +
+            '<p class="ss-group">최근에 찾으신 것' +
+              '<button type="button" class="ss-wipe" data-wipe>지우기</button></p>' +
+            '<div class="ss-quick">' + recent.map(function (t) {
+              return '<button type="button" class="ss-chip is-recent" data-q="' + esc(t) + '">'
+                + esc(t) + '</button>';
+            }).join('') + '</div></div>'
+          : '') +
         '<p class="ss-hint">무엇을 찾으시나요? <b>음향</b>, <b>홈페이지 얼마</b>, ' +
-        '<b>사택</b> 처럼 적어 보세요. 초성(<b>ㅎㅍㅇㅈ</b>)으로도 찾습니다.</p>' +
+        '<b>사택</b> 처럼 적어 보세요. 띄어쓰기는 맞지 않아도 되고, ' +
+        '초성(<b>ㅎㅍㅇㅈ</b>)으로도 찾습니다.</p>' +
         '<div class="ss-quick">' +
         QUICK.map(function (t) {
           return '<button type="button" class="ss-chip" data-q="' + esc(t) + '">' + esc(t) + '</button>';
@@ -290,6 +311,11 @@
     input.value = seed || '';
     run();
     window.setTimeout(function () { input.focus(); }, 20);
+
+    // 최근 목록은 늦게 와도 됩니다 — 오면 그때 다시 그립니다.
+    loadRecent().then(function () {
+      if (!box.hidden && !input.value.trim()) render('', [], []);
+    });
   }
 
   function close() {
@@ -304,9 +330,35 @@
 
   box.addEventListener('click', function (e) {
     if (e.target === box || e.target.closest('[data-search-close]')) { close(); return; }
+
+    var wipe = e.target.closest('[data-wipe]');
+    if (wipe) {
+      e.preventDefault();
+      if (!window.confirm('최근에 찾으신 말을 모두 지울까요?')) return;
+      wipe.disabled = true;
+      db.clearSearches().then(function () {
+        recent = [];
+        render('', [], []);
+      }).catch(function () { wipe.disabled = false; });
+      return;
+    }
+
     var chip = e.target.closest('[data-q]');
-    if (chip) { input.value = chip.getAttribute('data-q'); run(); input.focus(); }
+    if (chip) { input.value = chip.getAttribute('data-q'); run(); input.focus(); return; }
+
+    /* 결과를 눌러 들어가신 말만 남깁니다.
+       글자를 칠 때마다 남기면 "교", "교역", "교역자" 가 다 쌓여
+       목록이 쓸모없어집니다. */
+    if (e.target.closest('.ss-hit')) remember();
   });
+
+  function remember() {
+    var q = input.value.trim();
+    if (!q || !db || !db.logSearch) return;
+    db.logSearch(q);
+    // 다음에 열 때 바로 보이도록 손에 든 목록도 맞춰 둡니다.
+    recent = [q].concat(recent.filter(function (t) { return t !== q; })).slice(0, 8);
+  }
 
   input.addEventListener('input', run);
 
@@ -333,7 +385,12 @@
     if (e.key === 'Enter') {
       var list = hits();
       var go = cursor > -1 ? list[cursor] : list[0];
-      if (go) { e.preventDefault(); window.location.href = go.getAttribute('href'); close(); }
+      if (go) {
+        e.preventDefault();
+        remember();
+        window.location.href = go.getAttribute('href');
+        close();
+      }
     }
   });
 
@@ -346,6 +403,15 @@
     }
     if (e.key === '/' && !typing && box.hidden) { e.preventDefault(); open(''); }
   });
+
+  /* 로그인하거나 로그아웃하시면 최근 목록도 달라집니다 */
+  if (db && db.auth && db.auth.onChange) {
+    db.auth.onChange(function () {
+      loadRecent().then(function () {
+        if (!box.hidden && !input.value.trim()) render('', [], []);
+      });
+    });
+  }
 
   /* ---------- 닻(#앵커)으로 건너뛰기 ----------
 

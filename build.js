@@ -150,7 +150,7 @@ function buildIndex() {
     </div>`;
 
   const body = `
-<!-- ============ 2. 미는 배너 ============
+<!-- ============ 1. 미는 배너 ============
      가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
      더 있다는 것이 손짓 없이도 보이게 했습니다. -->
 <section class="bn-wrap">
@@ -164,41 +164,7 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 2-1. 소개 ============
-     애플의 제품 소개 화면처럼 갑니다 — 한 화면에 한 가지 이야기,
-     아주 큰 글씨, 짧은 한 줄, 넓은 여백.
-
-     앞서 제목과 설명을 작게 얹어 두었더니 어느 쪽도 아닌 것이
-     되어 그냥 지나치게 되었습니다. 말할 것이라면 크게 말하고,
-     아니면 빼는 편이 낫습니다. 그래서 두 대목만 남겼습니다 —
-     무엇이 문제인가, 그래서 무엇을 하는가. -->
-
-<section class="story">
-  <div class="wrap story-in">
-    <p class="story-eyebrow">우리교회지원센터</p>
-    <h2 class="story-title">사역이 아닌 일에<br>목회자의 시간이 갑니다</h2>
-    <p class="story-lead">
-      홈페이지를 만들려면 업체를 찾아야 하고, 주보는 매주 밤늦게 편집합니다.
-      하지 않으면 사역이 막히는 일인데, 대부분의 교회에는 이 일을 맡을 사람이 없습니다.
-    </p>
-  </div>
-</section>
-
-<section class="story is-dark">
-  <div class="wrap story-in">
-    <p class="story-eyebrow">그래서</p>
-    <p class="story-figure"><strong>${services.length}</strong><span>가지</span></p>
-    <h2 class="story-title">항목마다 업체를<br>찾아다니지 않으셔도 됩니다</h2>
-    <p class="story-lead">
-      홈페이지 · 주보 · 음향 · 앱 · 행정 · 부동산 · 교역자까지.
-      교회 사정을 아는 한곳이 이어서 맡습니다.
-      전국 어느 교회든 규모 · 교단 제한이 없습니다.
-    </p>
-    <p class="story-note">상담과 견적은 무료이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.</p>
-  </div>
-</section>
-
-<!-- ============ 3. 바로가기 ============
+<!-- ============ 2. 바로가기 ============
      두 줄입니다. 성격이 다르기 때문입니다 —
      위는 센터가 해 드리는 일, 아래는 교회끼리 오가는 자리. -->
 <section class="sc-wrap">
@@ -219,7 +185,7 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 4. 지원 항목 카탈로그 ============ -->
+<!-- ============ 3. 지원 항목 카탈로그 ============ -->
 <section class="section" id="items">
   <div class="wrap">
     ${head('무엇이든 하나씩 맡기실 수 있습니다',
@@ -242,7 +208,7 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 5. 이용 절차 ============ -->
+<!-- ============ 4. 이용 절차 ============ -->
 <section class="section is-soft">
   <div class="wrap">
     ${head('신청부터 사후 지원까지 5단계',
@@ -262,7 +228,7 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 6. 자주 묻는 질문 ============ -->
+<!-- ============ 5. 자주 묻는 질문 ============ -->
 <section class="section">
   <div class="wrap narrow">
     ${head('신청 전에 많이 묻는 것들', '', 'faq.html')}
@@ -270,7 +236,7 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 7. 전화 상담 ============
+<!-- ============ 6. 전화 상담 ============
      연락하는 자리는 맨 아래 하나만 둡니다. 가운데에도 두었더니
      같은 말이 두 번 나와, 둘 다 그냥 지나치게 되었습니다. -->
 <section class="qz">
@@ -320,6 +286,38 @@ function buildIndex() {
    센터 소개
    ========================================================= */
 function buildAbout() {
+  /* 홈은 렌탈 회사 사이트처럼 짧게 두고, 설명은 전부 여기로 옮겼습니다.
+     처음 오신 교회가 "여기가 무엇을 하는 곳인가" 를 끝까지 읽는 자리는
+     홈이 아니라 [센터 소개] 입니다.
+
+     큰 이야기는 애플의 제품 소개 화면처럼 갑니다 —
+     한 화면에 한 가지, 아주 큰 글씨, 짧은 한 줄, 넓은 여백. */
+
+  /* 우리가 하지 않는 일. 게시판마다 적어 둔 경계를 한자리에 모았습니다.
+     할 수 있는 것만 적어 두면 나중에 서로 얼굴을 붉히게 됩니다. */
+  const NOT_OURS = [
+    {
+      title: '부동산 중개는 하지 않습니다',
+      desc: '매물 게시판을 운영합니다. 공인중개사법상의 중개 행위는 하지 않으며, '
+        + '가격 · 조건 협상과 계약에는 관여하지 않습니다. 매물 내용은 올린 교회가 적은 것입니다.',
+    },
+    {
+      title: '채용의 당사자가 아닙니다',
+      desc: '교역자 구인은 공고 게시판입니다. 면접과 청빙 결정은 교회와 사역자가 직접 하십니다. '
+        + '공고 내용도 올린 교회가 적은 것입니다.',
+    },
+    {
+      title: '중고 거래에 끼지 않습니다',
+      desc: '중고 장터에서 값과 인도 방법은 파는 교회와 사는 교회가 직접 정하십니다. '
+        + '센터가 맡는 것은 사 오신 장비를 예배당에 다는 일입니다.',
+    },
+    {
+      title: '인쇄와 배송은 맡지 않습니다',
+      desc: '현수막 · 포스터 · 주보는 인쇄용 파일까지 만들어 드립니다. '
+        + '인쇄는 교회에서 편한 곳에 맡기시는 편이 값도 싸고 빠릅니다.',
+    },
+  ];
+
   const body = `
 ${pageHero({
   eyebrow: '센터 소개',
@@ -327,31 +325,85 @@ ${pageHero({
   lead: '우리교회지원센터는 교회가 사역 외의 일로 소모하는 시간과 비용을 줄이기 위해 만들어졌습니다.',
 })}
 
-<section class="section">
-  <div class="wrap narrow prose">
-    <h2>왜 만들어졌나</h2>
-    <p>
-      많은 교회가 비슷한 어려움을 겪습니다. 홈페이지를 만들려면 업체를 찾아야 하고, 주보는 매주 담당자가 밤늦게 편집합니다.
-      부교역자를 청빙하려면 아는 분들께 부탁하는 것 외에 방법이 마땅치 않고, 음향이 안 좋아도 무엇이 문제인지 알기 어렵습니다.
-      교회를 옮길 때는 계약 직전에야 용도 문제를 발견하기도 합니다.
-    </p>
-    <p>
-      이 일들은 모두 사역이 아니지만, 하지 않으면 사역이 막힙니다. 그리고 대부분의 교회에는 이 일을 전담할 사람이 없습니다.
-      우리교회지원센터는 그 자리를 대신 맡기 위해 만들어진 기관입니다.
-    </p>
-
-    <h2>어떻게 일하나</h2>
-    <p>
-      우리교회지원센터는 항목별로 업체를 따로 찾게 하지 않습니다. 여러 항목을 진행하더라도 한곳에서 이어서 맡습니다.
-      교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 곳과 일한다는 뜻입니다.
-    </p>
-    <p>
-      또한 모든 제안은 문서로 드립니다. 당회와 제직회에 그대로 올릴 수 있도록 항목별 범위와 일정, 비용을 정리해 드리며,
-      구두로만 진행되는 부분을 남기지 않습니다.
+<!-- 무엇이 문제인가 -->
+<section class="story">
+  <div class="wrap story-in">
+    <p class="story-eyebrow">왜 만들어졌나</p>
+    <h2 class="story-title">사역이 아닌 일에<br>목회자의 시간이 갑니다</h2>
+    <p class="story-lead">
+      하지 않으면 사역이 막히는 일인데, 대부분의 교회에는 이 일을 맡을 사람이 없습니다.
     </p>
   </div>
 </section>
 
+<section class="section">
+  <div class="wrap narrow prose">
+    <p>
+      많은 교회가 비슷한 어려움을 겪습니다. 홈페이지를 만들려면 업체를 찾아야 하고,
+      주보는 매주 담당자가 밤늦게 편집합니다. 부교역자를 청빙하려면 아는 분들께 부탁하는 것 외에
+      방법이 마땅치 않고, 음향이 안 좋아도 무엇이 문제인지 알기 어렵습니다.
+      교회를 옮길 때는 계약 직전에야 용도 문제를 발견하기도 합니다.
+    </p>
+    <p>
+      이 일들은 사역이 아닙니다. 그런데 하지 않으면 사역이 막힙니다.
+      결국 목회자나 몇 안 되는 교역자가 밤에 붙들게 되고, 그만큼 사람을 만나고
+      말씀을 준비할 시간이 줄어듭니다. 우리교회지원센터는 그 자리를 대신 맡기 위해
+      만들어진 기관입니다.
+    </p>
+  </div>
+</section>
+
+<!-- 그래서 무엇을 하는가 -->
+<section class="story is-dark">
+  <div class="wrap story-in">
+    <p class="story-eyebrow">그래서</p>
+    <p class="story-figure"><strong>${services.length}</strong><span>가지</span></p>
+    <h2 class="story-title">항목마다 업체를<br>찾아다니지 않으셔도 됩니다</h2>
+    <p class="story-lead">
+      홈페이지 · 주보 · 음향 · 앱 · 행정 · 부동산 · 교역자까지.
+      교회 사정을 아는 한곳이 이어서 맡습니다.
+    </p>
+    <p class="story-note">전국 어느 교회든 규모 · 지역 · 교단 제한이 없습니다.</p>
+  </div>
+</section>
+
+<!-- 일하는 방식 -->
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('일하는 방식', '이렇게 일합니다')}
+    <div class="feat-grid">
+      <article class="feat-card">
+        <span class="feat-ico">${icon('users')}</span>
+        <h3>한곳에서 이어서</h3>
+        <p>
+          여러 항목을 진행하셔도 업체를 따로 찾게 하지 않습니다.
+          교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 곳과 일한다는 뜻입니다.
+          매번 처음부터 설명하지 않으셔도 됩니다.
+        </p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico">${icon('doc')}</span>
+        <h3>말이 아니라 문서로</h3>
+        <p>
+          모든 제안은 문서로 드립니다. 항목별 범위와 일정, 비용을 정리해
+          당회와 제직회에 그대로 올리실 수 있게 합니다.
+          구두로만 진행되는 부분을 남기지 않습니다.
+        </p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico">${icon('check')}</span>
+        <h3>납품하고 끝이 아니라</h3>
+        <p>
+          만들어 드린 뒤에 생기는 수정과 장애는 정해진 창구로 받습니다.
+          항목마다 지원 기간을 미리 적어 드리고, 신청 현황에서 지금 어디까지
+          왔는지 언제든 보실 수 있습니다.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 원칙 -->
 <section class="section section-alt">
   <div class="wrap">
     ${sectionHead('원칙', '이 세 가지는 지킵니다')}
@@ -369,10 +421,27 @@ ${pageHero({
   </div>
 </section>
 
+<!-- 하지 않는 일 -->
 <section class="section">
   <div class="wrap">
-    ${sectionHead('지원 범위', `${NUM[categories.length]} 갈래, ${services.length}개 항목`)}
-    ${serviceGroups('')}
+    ${sectionHead('경계', '이건 저희 몫이 아닙니다',
+    '할 수 있는 것만 적어 두면 나중에 서로 얼굴을 붉히게 됩니다. 하지 않는 일도 미리 적어 둡니다.')}
+    <div class="feat-grid">
+      ${NOT_OURS.map((n) => `<article class="feat-card is-plain">
+        <h3>${esc(n.title)}</h3>
+        <p>${esc(n.desc)}</p>
+      </article>`).join('\n      ')}
+    </div>
+  </div>
+</section>
+
+<!-- 지원 범위 -->
+<section class="section section-alt">
+  <div class="wrap">
+    ${sectionHead('지원 범위', `${NUM[categories.length]} 갈래, ${services.length}개 항목`,
+    '갈래를 눌러 그 안에 무엇이 있는지 보실 수 있습니다.')}
+    ${categoryCards('')}
+    <p class="center"><a class="btn btn-outline" href="services/index.html">지원 항목 전체 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
   </div>
 </section>
 
@@ -386,7 +455,8 @@ ${ctaBand('', {
     'about.html',
     layout({
       title: '센터 소개 | 우리교회지원센터',
-      description: '우리교회지원센터가 만들어진 이유와 일하는 방식, 그리고 지키는 원칙을 소개합니다.',
+      description: '우리교회지원센터가 만들어진 이유와 일하는 방식, 지키는 원칙, '
+        + '그리고 저희가 하지 않는 일까지 적어 두었습니다.',
       base: '',
       active: 'about.html',
       body,
