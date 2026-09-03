@@ -135,6 +135,29 @@ function buildIndex() {
     </div>`;
 
   const body = `
+<!-- ============ 0. 찾기 ============
+     머리의 작은 돋보기만으로는 찾을 수 있다는 것을 모르십니다.
+     첫 화면에 넓은 칸을 두어, 여기에 적으면 된다는 것이 보이게 합니다.
+     누르면 찾기 창이 열리고 적으신 글자가 그대로 넘어갑니다. -->
+<section class="hs">
+  <div class="wrap hs-in">
+    <label class="hs-bar" for="hsInput">
+      ${icon('search', 'ico')}
+      <input type="search" id="hsInput" autocomplete="off"
+        placeholder="무엇을 찾으시나요? (예: 음향, 사택, 비용이 얼마)" aria-label="사이트 안에서 찾기">
+      <span class="hs-go">찾기</span>
+    </label>
+    <div class="hs-tags">
+      <span class="hs-tags-label">많이 찾으시는 것</span>
+      <button type="button" class="hs-tag" data-hs="홈페이지">홈페이지</button>
+      <button type="button" class="hs-tag" data-hs="음향">음향</button>
+      <button type="button" class="hs-tag" data-hs="교역자 구인">교역자 구인</button>
+      <button type="button" class="hs-tag" data-hs="사택">사택</button>
+      <button type="button" class="hs-tag" data-hs="비용이 얼마">비용이 얼마</button>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 1. 미는 배너 ============
      가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
      더 있다는 것이 손짓 없이도 보이게 했습니다. -->
@@ -185,50 +208,34 @@ function buildIndex() {
   </div>
 </section>
 
-<!-- ============ 4. 빠른 상담 ============
-     여기서 보내지는 않고 신청서로 넘기며 적으신 것을 옮겨 담습니다 —
-     신청은 로그인이 필요한데, 첫 화면에서 로그인을 물으면 대개 나가십니다. -->
+<!-- ============ 4. 전화 상담 ============
+     신청서를 채우는 것보다 한 번 통화하는 편이 빠른 분이 많습니다.
+     휴대폰에서는 눌러서 바로 걸리고, 컴퓨터에서는 번호가 크게 보여
+     받아 적으실 수 있습니다. -->
 <section class="qz">
   <div class="wrap qz-in">
     <div class="qz-copy">
-      <p class="qz-eyebrow">1분이면 됩니다</p>
-      <h2>연락처만 남겨 주시면<br>저희가 전화드리겠습니다</h2>
+      <p class="qz-eyebrow">상담 · 견적 무료</p>
+      <h2>전화 한 통이면 됩니다</h2>
       <p class="qz-lead">
         무엇이 필요하신지 아직 정하지 않으셔도 됩니다.
         형편을 여쭙고, 지금 급한 것부터 함께 정리해 드립니다.
-        <strong>상담과 견적은 무료</strong>이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
+        <strong>견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.</strong>
       </p>
-      <div class="qz-call">
-        <span>바로 연락을 원하시면</span>
-        <a class="qz-phone" href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-sm')} ${phoneText()}</a>
-        <a class="qz-mail" href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a>
-        <small>${esc(site.contact.hours)}</small>
-      </div>
+      <p class="qz-hours">${icon('clock', 'ico ico-sm')} ${hoursText()}</p>
     </div>
 
-    <form class="qz-form" id="quoteForm" novalidate>
-      <div class="quote-field">
-        <label for="qChurch">교회명</label>
-        <input type="text" id="qChurch" name="church" maxlength="40" placeholder="예: 새길교회" autocomplete="organization">
+    <div class="qz-card">
+      <p class="qz-card-label">바로 통화하기</p>
+      <a class="qz-dial" href="${site.contact.phoneHref}">
+        ${icon('phoneCall', 'ico')}
+        <span>${phoneText()}</span>
+      </a>
+      <p class="qz-card-note">누르시면 바로 걸립니다. 통화가 어려우시면 아래로 남겨 주세요.</p>
+      <div class="qz-alt">
+        <a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a>
       </div>
-      <div class="quote-field">
-        <label for="qPhone">연락처 <em>*</em></label>
-        <input type="tel" id="qPhone" name="phone" placeholder="010-0000-0000" autocomplete="tel">
-      </div>
-      <div class="quote-field">
-        <label for="qItem">무엇이 필요하신가요?</label>
-        <select id="qItem" name="item">
-          <option value="">고르지 않으셔도 됩니다</option>
-          ${services.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('\n          ')}
-        </select>
-      </div>
-      <p class="quote-err" id="qErr" hidden></p>
-      <button type="submit" class="btn btn-primary btn-lg quote-btn">상담 신청하기 ${icon('arrow', 'ico ico-sm')}</button>
-      <p class="quote-fine">
-        누르시면 신청서로 넘어가며, 적으신 내용이 그대로 옮겨집니다.
-        거기서 한 번 더 확인하고 보내시면 됩니다.
-      </p>
-    </form>
+    </div>
   </div>
 </section>
 

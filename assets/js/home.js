@@ -1,18 +1,9 @@
 /* =========================================================
    홈 화면 (index.html)
 
-     1) 지원 항목을 갈래로 걸러 보기
-     2) 첫 화면의 [빠른 상담] → 신청서로 넘기며 적으신 것을 옮겨 담기
-
-   왜 여기서 바로 보내지 않는가
-     신청은 로그인이 필요합니다. 첫 화면에서 로그인부터 물으면
-     대개 그냥 나가십니다. 그래서 연락처만 받아 두고, 신청서에서
-     한 번 더 확인하고 보내시게 합니다.
-
-   왜 주소창이 아니라 sessionStorage 인가
-     연락처를 주소창에 실으면 브라우저 기록과 남의 사이트로 넘어가는
-     referrer 에 전화번호가 남습니다. 같은 탭 안에서만 살아 있고
-     쓰는 즉시 지워지는 자리에 잠깐 둡니다.
+     1) 첫 화면의 넓은 찾기 칸 → 찾기 창으로 넘기기
+     2) 지원 항목을 갈래로 걸러 보기
+     3) 미는 배너의 점
    ========================================================= */
 (function () {
   'use strict';
@@ -76,45 +67,46 @@
     });
   }
 
-  /* ---------- 빠른 상담 ---------- */
+  /* ---------- 첫 화면의 찾기 칸 ----------
+     머리의 작은 돋보기만으로는 찾을 수 있다는 것을 모르십니다.
+     그래서 넓은 칸을 하나 더 두었습니다.
 
-  var form = document.getElementById('quoteForm');
-  if (!form) return;
+     칸에 손이 닿는 순간(focus) 찾기 창을 열고 그리로 넘깁니다.
+     글자를 치기 전에 focus 가 먼저 오므로, 치신 글자가 사라지지
+     않습니다. */
 
-  var church = document.getElementById('qChurch');
-  var phone = document.getElementById('qPhone');
-  var item = document.getElementById('qItem');
-  var err = document.getElementById('qErr');
+  var hs = document.getElementById('hsInput');
 
-  /* 010-0000-0000 모양으로 맞춰 줍니다 (db.js 에 이미 있는 것을 씁니다) */
-  if (window.CAPSDB && window.CAPSDB.bindPhoneInput) window.CAPSDB.bindPhoneInput(phone);
+  function openSearch(seed) {
+    var box = document.getElementById('siteSearch');
+    var input = document.getElementById('ssInput');
+    if (!box || !input) return false;
 
-  function say(msg) {
-    err.textContent = msg || '';
-    err.hidden = !msg;
+    box.hidden = false;
+    document.body.classList.add('is-search-open');
+    input.value = seed || '';
+    input.dispatchEvent(new Event('input'));
+    input.focus();
+    return true;
   }
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    say('');
+  if (hs) {
+    var handOver = function () {
+      var seed = hs.value;
+      hs.value = '';
+      hs.blur();
+      if (!openSearch(seed)) window.location.href = 'contact.html';
+    };
+    hs.addEventListener('focus', handOver);
+    hs.addEventListener('click', handOver);
+  }
 
-    var digits = String(phone.value || '').replace(/\D/g, '');
-    if (digits.length < 9) {
-      say('연락처를 확인해 주세요. 이것만 있으면 저희가 전화드립니다.');
-      phone.focus();
-      return;
-    }
+  var tags = document.querySelector('.hs-tags');
+  if (tags) {
+    tags.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-hs]');
+      if (b) openSearch(b.getAttribute('data-hs'));
+    });
+  }
 
-    try {
-      window.sessionStorage.setItem('wcsc.quote', JSON.stringify({
-        church: church.value.trim(),
-        phone: phone.value.trim(),
-      }));
-    } catch (ignore) {
-      // 저장이 막힌 브라우저 — 넘어가서 다시 적으시면 됩니다.
-    }
-
-    var id = item.value;
-    window.location.href = 'apply.html' + (id ? '?service=' + encodeURIComponent(id) : '');
-  });
 }());

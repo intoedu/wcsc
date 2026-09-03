@@ -2883,12 +2883,80 @@ body.is-search-open { overflow: hidden; }
 }
 .items-note strong { color: var(--brand-700); }
 
-/* ---------- 4. 빠른 상담 ---------- */
+/* ---------- 0. 첫 화면의 찾기 칸 ----------
+   머리의 작은 돋보기만으로는 찾을 수 있다는 것을 모르십니다.
+   여기에 적으면 된다는 것이 한눈에 보이도록 넓게 둡니다. */
+
+.hs { padding: 26px 0 4px; background: #fff; }
+.hs-in { display: block; }
+
+.hs-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 6px 20px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  box-shadow: inset 0 0 0 1px transparent;
+  cursor: text;
+  transition: background .15s, box-shadow .15s;
+}
+.hs-bar:hover { background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+.hs-bar:focus-within { background: #fff; box-shadow: inset 0 0 0 2px var(--brand-500); }
+.hs-bar > .ico { flex: none; color: var(--muted); }
+.hs-bar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 14px 0;
+  background: none;
+  font-size: 16.5px;
+  font-family: inherit;
+  color: var(--ink);
+}
+.hs-bar input:focus { outline: none; }
+.hs-bar input::-webkit-search-cancel-button { display: none; }
+.hs-go {
+  flex: none;
+  padding: 12px 26px;
+  border-radius: 999px;
+  background: var(--brand-700);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.hs-bar:hover .hs-go { background: var(--brand-800); }
+
+.hs-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 0 4px;
+}
+.hs-tags-label { font-size: 13px; color: var(--muted); margin-right: 2px; }
+.hs-tag {
+  padding: 6px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.hs-tag:hover { background: var(--brand-100); color: var(--brand-800); }
+
+/* ---------- 4. 전화 상담 ----------
+   신청서를 채우는 것보다 한 번 통화하는 편이 빠른 분이 많습니다.
+   그래서 번호를 가장 크게 둡니다. */
 
 .qz { padding: 64px 0; background: var(--brand-900); color: #fff; }
 .qz-in {
   display: grid;
-  grid-template-columns: 1.1fr .9fr;
+  grid-template-columns: 1.05fr .95fr;
   gap: 44px;
   align-items: center;
 }
@@ -2903,7 +2971,7 @@ body.is-search-open { overflow: hidden; }
   color: var(--gold-ink-deep);
 }
 .qz-copy h2 {
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(25px, 3.1vw, 34px);
   font-weight: 800;
   line-height: 1.42;
   letter-spacing: -.04em;
@@ -2917,82 +2985,75 @@ body.is-search-open { overflow: hidden; }
   max-width: 34em;
 }
 .qz-lead strong { color: var(--gold-400); }
-
-.qz-call { margin-top: 26px; }
-.qz-call > span { display: block; font-size: 13.5px; color: #9FBFAB; }
-.qz-call a {
+.qz-hours {
   display: flex;
   align-items: center;
-  gap: 9px;
-  color: #fff;
-  overflow-wrap: anywhere;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 13.5px;
+  color: #9FBFAB;
 }
-.qz-call a:hover { color: var(--gold-400); }
-.qz-call a svg { flex: none; color: var(--gold-400); }
-/* 전화는 크게 — 급하신 분이 가장 먼저 찾는 글자입니다.
-   이메일은 길어서 같은 크기로 두면 두 줄로 접힙니다. */
-.qz-phone {
-  margin-top: 6px;
-  font-size: 25px;
-  font-weight: 800;
-  letter-spacing: -.02em;
-}
-.qz-mail {
-  margin-top: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -.01em;
-}
-.qz-call small { display: block; margin-top: 10px; font-size: 12.5px; color: #86A794; }
+.qz-hours svg { flex: none; }
 
-.qz-form {
-  padding: 26px 24px 22px;
-  border-radius: 20px;
+.qz-card {
+  padding: 30px 28px 26px;
+  border-radius: 22px;
   background: #fff;
+  text-align: center;
   box-shadow: 0 18px 44px rgba(0, 0, 0, .22);
 }
-.quote-field + .quote-field { margin-top: 13px; }
-.quote-field label {
-  display: block;
-  margin-bottom: 6px;
+.qz-card-label {
   font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ink-2);
+  font-weight: 700;
+  color: var(--muted);
 }
-.quote-field label em { color: #B4231F; font-style: normal; }
-.quote-field input,
-.quote-field select {
-  width: 100%;
-  padding: 13px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  font-size: 15.5px;
-  font-family: inherit;
-  color: var(--ink);
-  background: #fff;
+
+/* 번호 자체가 단추입니다 — 휴대폰에서는 눌러서 바로 걸리고,
+   컴퓨터에서는 크게 보여 받아 적으실 수 있습니다. */
+.qz-dial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--brand-700);
+  color: #fff;
+  transition: background .15s, transform .12s;
 }
-.quote-field input:focus,
-.quote-field select:focus {
-  outline: none;
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px rgba(52, 168, 99, .16);
+.qz-dial:hover { background: var(--brand-800); }
+.qz-dial:active { transform: translateY(1px); }
+.qz-dial svg { flex: none; width: 26px; height: 26px; }
+.qz-dial span {
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  white-space: nowrap;
 }
-.quote-btn { width: 100%; margin-top: 18px; justify-content: center; }
-.quote-err {
-  margin-top: 13px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #FDF1F0;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: #8A241F;
-}
-.quote-fine {
-  margin-top: 13px;
-  font-size: 12.5px;
+
+.qz-card-note {
+  margin-top: 14px;
+  font-size: 13px;
   line-height: 1.7;
   color: var(--muted);
 }
+.qz-alt {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-2);
+}
+.qz-alt a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--brand-700);
+  overflow-wrap: anywhere;
+}
+.qz-alt a:hover { color: var(--brand-800); text-decoration: underline; }
+.qz-alt svg { flex: none; }
 
 /* ---------- 5. 게시판 타일 ---------- */
 
@@ -3045,7 +3106,13 @@ body.is-search-open { overflow: hidden; }
   .is-home .section { padding: 48px 0; }
   .hd-row { align-items: flex-start; }
   .qz { padding: 48px 0; }
-  .qz-in { grid-template-columns: 1fr; gap: 30px; }
+  .qz-in { grid-template-columns: 1fr; gap: 28px; }
+  .qz-card { padding: 24px 20px 22px; }
+  /* 좁은 화면에서는 [찾기] 글자를 빼고 칸을 넓게 씁니다 */
+  .hs-go { display: none; }
+  .hs-bar { padding: 2px 18px; }
+  .hs-bar input { padding: 15px 0; font-size: 16px; }
+  .hs-tags-label { display: none; }
   .sc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   /* 한 장씩 꽉 채우되 다음 장이 조금 보이게 둡니다 */
   .bn-rail { gap: 12px; }
