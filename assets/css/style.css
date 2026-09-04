@@ -3761,3 +3761,6 @@ a.tk-card:hover {
 }
 .pay-where strong,
 .bill-where strong { color: var(--gold-ink-deep); }
+
+/* 값을 정하지 않은 설치 갈래 */
+.ls-tier-price .is-ask { font-size: 20px; font-weight: 800; color: var(--muted); letter-spacing: -.03em; }

@@ -207,7 +207,7 @@ function buildMarket(write) {
             <input type="radio" name="mkTier" value="${t.key}"${t.key === 'install' ? ' checked' : ''}>
             <span class="ls-tier-in">
               <strong>${esc(t.label)}</strong>
-              <b>${t.price.toLocaleString('ko-KR')}원~</b>
+              <b>${t.price ? t.price.toLocaleString('ko-KR') + '원~' : '상담 후 견적'}</b>
               <small>${esc(t.desc)}</small>
             </span>
           </label>`).join('\n          ');
@@ -373,7 +373,7 @@ ${pageHero({
       + '사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
     extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill is-key">설치 대행 <strong>${board.install.baseFee.toLocaleString('ko-KR')}원~</strong></span>
+      <span class="ls-hero-pill is-key">설치 대행 <strong>상담 후 견적</strong></span>
     </div>
     <div class="ls-hero-actions">
       <a class="btn btn-gold btn-lg" href="#new" id="mkNewBtn">물건 올리기 ${icon('arrow', 'ico ico-sm')}</a>
@@ -390,7 +390,9 @@ ${pageHero({
     <div class="ls-tiers">
       ${tiers.map((t) => `<div class="ls-tier-card">
         <h3>${esc(t.label)}</h3>
-        <p class="ls-tier-price">${t.price.toLocaleString('ko-KR')}<span>원~</span></p>
+        <p class="ls-tier-price">${t.price
+          ? t.price.toLocaleString('ko-KR') + '<span>원~</span>'
+          : '<span class="is-ask">상담 후 견적</span>'}</p>
         <p>${esc(t.desc)}</p>
       </div>`).join('\n      ')}
     </div>
