@@ -863,7 +863,7 @@ const services = [
       '캠프 사진 및 정리 자료',
       '찾아가는 캠프의 경우 강사 · 찬양팀 · 진행 인력',
     ],
-    duration: '4박 5일 (캠프에 따라 다를 수 있습니다)',
+    duration: '캠프마다 상이',
     price: '캠프마다 상이',
     billing: '캠프별',
     priceNote:
@@ -1094,6 +1094,15 @@ const services = [
       '서명 이력(시각 · 기기 정보)이 포함된 완료 문서',
       '문서 검색 · 분류 · 내려받기',
     ],
+    /* 문서를 만들고 서명하는 일은 인투오피스에서 바로 하십니다.
+       여기서 신청을 한 번 더 받으면 걸음만 늘어납니다 — 주 단추가
+       바로 그리로 갑니다. */
+    externalApply: 'https://intoedu.github.io/into-office/',
+    externalApplyLabel: '인투오피스',
+    externalApplyVerb: ' 바로가기',
+    externalApplyShort: '인투오피스에서 바로 가입하고 쓰십니다',
+    externalApplyNote: '가입과 문서 작성은 <strong>인투오피스</strong>에서 바로 하십니다.',
+
     duration: '신청 후 바로 사용 (월 단위, 언제든 중단)',
     price: '월 6,900원',
     billing: '월 구독',

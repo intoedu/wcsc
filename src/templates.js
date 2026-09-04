@@ -406,8 +406,11 @@ function applyLink(s, base, o) {
 
   if (s.externalApply) {
     const who = s.externalApplyLabel || '외부 사이트';
+    /* 접수 페이지로 보내는 항목은 "…에서 신청하기", 서비스 자체로
+       바로 보내는 항목은 "… 바로가기" 가 맞습니다. */
+    const verb = s.externalApplyVerb || '에서 신청하기';
     return `<a class="${cls}" href="${s.externalApply}" target="_blank" rel="noopener"
-      data-apply="${s.id}">${esc(who)}에서 신청하기${arrow}</a>`;
+      data-apply="${s.id}">${esc(who)}${esc(verb)}${arrow}</a>`;
   }
   return `<a class="${cls}" href="${base}apply.html?service=${s.id}"
       data-apply="${s.id}">${esc(opt.label || '이 항목 신청하기')}${arrow}</a>`;
@@ -417,9 +420,10 @@ function applyLink(s, base, o) {
 function externalNote(s) {
   if (!s.externalApply) return '';
   const who = s.externalApplyLabel || '외부 사이트';
+  const note = s.externalApplyNote
+    || `이 항목의 신청은 <strong>${esc(who)}</strong> 접수 페이지에서 진행됩니다.`;
   return `<p class="apply-external-note" data-apply-note="${s.id}">
-    이 항목의 신청은 <strong>${esc(who)}</strong> 접수 페이지에서 진행됩니다.
-    버튼을 누르면 새 창으로 열립니다.
+    ${note} 버튼을 누르면 새 창으로 열립니다.
   </p>`;
 }
 

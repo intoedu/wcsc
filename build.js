@@ -1224,7 +1224,7 @@ function buildApply() {
           href="${s.externalApply}" target="_blank" rel="noopener">
           <span class="pick-in">
             <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
-            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(who)} 접수 페이지에서 신청합니다</small></span>
+            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(s.externalApplyShort || (who + ' 접수 페이지에서 신청합니다'))}</small></span>
             <span class="pick-out">${esc(who)} ${icon('arrow', 'ico ico-xs')}</span>
           </span>
         </a>`;
