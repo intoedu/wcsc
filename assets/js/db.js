@@ -236,14 +236,15 @@ window.CAPSDB = (function () {
     both: '직접 오셔도, 보내 드려도 됩니다',
   };
 
-  /* 설치 대행 — 센터가 실제로 돈을 받는 부분입니다.
+  /* 설치 대행 — 센터가 따로 비용을 받고 맡는 일입니다.
+     값은 대표님이 정하십니다. price 를 비워 두면 화면에 [상담 후 견적] 으로 나옵니다.
      (src/data/site.js 의 marketBoard.install 과 같은 값을 유지해야 합니다) */
   var INSTALL_TIERS = {
-    pickup: { label: '운반만', price: 100000,
+    pickup: { label: '운반만', price: 0,
       desc: '판매자 교회에서 싣고 와 사시는 교회 앞까지 내려 드립니다.' },
-    install: { label: '설치 · 배선', price: 150000,
+    install: { label: '설치 · 배선', price: 0,
       desc: '거치 · 배선 · 전원 정리까지. 소리가 나는 상태로 넘겨 드립니다.' },
-    tuning: { label: '설치 + 음향 튜닝', price: 300000,
+    tuning: { label: '설치 + 음향 튜닝', price: 0,
       desc: '예배당에서 실제로 소리를 잡아 드립니다 (하울링 · 이퀄라이징 · 프리셋 저장).' },
   };
 

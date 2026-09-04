@@ -577,7 +577,6 @@
         if (!r) return;
 
         var tier = db.INSTALL_TIERS[r.tier] || {};
-        var quote = db.installQuote(r.tier, 1);
 
         A.openDrawer({
           title: r.churchName || '(교회명 없음)',
@@ -586,7 +585,6 @@
             '<div class="adm-card"><dl class="adm-dl">' +
               '<div><dt>설치할 물건</dt><dd>' + h(r.itemTitle || '-') + '</dd></div>' +
               '<div><dt>맡기시는 범위</dt><dd>' + h(tier.label || r.tier) + '</dd></div>' +
-              '<div><dt>기본 견적</dt><dd>' + A.money(quote.amount) + '원 (실측 전 어림값)</dd></div>' +
               '<div><dt>주소</dt><dd>' + h([r.region, r.address].filter(Boolean).join(' ')) + '</dd></div>' +
               '<div><dt>층 · 엘리베이터</dt><dd>' +
                 h([r.floor, r.elevator].filter(Boolean).join(' · ') || '-') + '</dd></div>' +

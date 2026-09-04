@@ -299,7 +299,8 @@ function buildMarket(write) {
       <fieldset class="ls-fs" id="mkInstallFs">
         <legend><span class="ls-step">3</span> 설치는 센터가 맡아도 될까요?</legend>
         <p class="ls-fs-lead">
-          음향 · 영상 · 조명은 사고 나서 <strong>다는 일</strong>이 진짜 일입니다.
+          음향 · 영상 · 조명은 사고 나서 <strong>다는 일</strong>이 남습니다.
+          그 일은 센터가 <strong>따로 비용을 받고</strong> 맡습니다.
           사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다.
           설치는 물건값과 <strong>별개로 비용이 드는 서비스</strong>이며,
           그 비용은 사시는 교회가 냅니다 — 파시는 분께 드는 비용은 없습니다.

@@ -115,7 +115,6 @@
     }
 
     var v = db.marketView(r);
-    var tier = db.installQuote('install', r.quantity);
 
     body.innerHTML =
       '<div class="ls-view">' +
@@ -134,9 +133,9 @@
         (v.installable
           ? '<div class="ls-install-band">' +
               '<div>' +
-                '<h2>사고 나서 다는 일은 저희가 맡습니다</h2>' +
+                '<h2>설치를 맡기실 수 있습니다 (별도 비용)</h2>' +
                 '<p>철거 · 운반 · 설치 · 배선까지. 예배당에서 소리가 나는 상태로 넘겨 드립니다. ' +
-                  '어림 견적 <strong>' + B.comma(tier.amount) + '원</strong>부터이며, 실측 후 확정합니다.</p>' +
+                  '<strong>물건값과 별개로 비용이 드는 유상 서비스</strong>이며, 예배당을 보고 견적을 드립니다.</p>' +
                 (r.installNote
                   ? '<p class="ls-install-note">파시는 분 메모 — ' + B.nl2br(r.installNote) + '</p>' : '') +
               '</div>' +
@@ -511,17 +510,14 @@
     return on ? on.value : 'install';
   }
 
-  /** 고른 갈래와 수량으로 어림 견적을 보여 줍니다. */
+  /** 고른 갈래에 맞춰 안내 문구를 보여 줍니다 (금액은 실측 후 확정). */
   function syncQuote() {
-    var itemId = iv.itemId.value;
-    var row = rows.concat(mineRows).filter(function (r) { return r.id === itemId; })[0];
-    var qty = row ? Number(row.quantity) || 1 : 1;
-    var q = db.installQuote(tierValue(), qty);
+    var q = db.installQuote(tierValue(), 1);
 
     iv.quote.innerHTML =
-      '<strong>어림 견적 ' + B.comma(q.amount) + '원</strong>' +
-      (qty > 1 ? ' <small>(' + qty + '개 기준 — 출장은 한 번이라 두 번째부터는 절반만 더합니다)</small>' : '') +
-      '<br><small>' + esc(q.desc) + ' 실측 후 확정해 드리며, 신청만으로 비용이 생기지 않습니다.</small>';
+      '<strong>상담 후 견적</strong>' +
+      '<br><small>' + esc(q.desc) + ' 예배당을 보고 비용을 확정해 드리며, ' +
+      '신청만으로 비용이 생기지 않습니다.</small>';
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('input[name="mkTier"]'), function (r) {
