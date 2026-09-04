@@ -2226,7 +2226,6 @@ function buildSearchIndex() {
   }));
   add({ url: 'listings.html#new', title: '매물 올리기', desc: '교회 부동산을 게시판에 내놓기', cat: '게시판', kw: '등록 매매 임대' });
   add({ url: 'market.html#new', title: '중고 물품 팔기', desc: '쓰던 음향 · 악기 · 집기를 내놓기', cat: '게시판', kw: '등록 판매 중고' });
-  add({ url: 'market.html#install', title: '설치 대행 신청', desc: '사 오신 장비를 예배당에 달아 드립니다 (별도 비용)', cat: '게시판', kw: '음향 설치 시공 견적' });
   add({ url: 'guesthouse.html#new', title: '방 내어 놓기', desc: '비어 있는 사택 · 선교관을 나누기', cat: '게시판', kw: '등록 숙소' });
   add({ url: 'tickets.html#new', title: '집회 등록하기', desc: '집회 · 수련회 신청을 받기', cat: '게시판', kw: '등록 예매 티켓' });
   add({ url: 'jobs.html#new', title: '구인 공고 올리기', desc: '우리 교회에서 함께할 사역자를 찾기', cat: '게시판', kw: '등록 채용 모집 전도사' });

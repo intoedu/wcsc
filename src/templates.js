@@ -137,7 +137,7 @@ function addressText() {
  */
 const BOARDS = [
   { href: 'listings.html', label: '부동산 매물', sub: '예배 공간 매매 · 임대' },
-  { href: 'market.html', label: '중고 장터', sub: '음향 · 악기 · 집기 (설치는 별도)' },
+  { href: 'market.html', label: '중고 장터', sub: '음향 · 악기 · 집기' },
   { href: 'guesthouse.html', label: '게스트하우스', sub: '교회가 내어 주는 방' },
   { href: 'tickets.html', label: '집회 티켓팅', sub: '찬양집회 · 수련회 신청' },
   { href: 'jobs.html', label: '교역자 구인', sub: '교회가 올리고, 직접 지원' },

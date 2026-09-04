@@ -5,10 +5,9 @@
      #view/<id>     상세
      #new           등록 (#edit/<id> 로 열면 내가 올린 글 수정)
      #mine          내가 올린 물건
-     #install       설치 대행 신청 (#install/<물건 id> 로 열면 그 물건이 채워집니다)
 
-   센터는 물건을 팔지 않습니다. 게시판을 관리하고, 사시는 교회가 원하면
-   철거 · 운반 · 설치 · 튜닝을 맡습니다 — 그것이 센터의 몫입니다.
+   센터는 물건을 팔지 않습니다. 게시판을 관리할 뿐이며,
+   값 · 대금 · 운반 · 설치는 파는 교회와 사는 교회가 직접 정합니다.
    ========================================================= */
 (function () {
   'use strict';
@@ -51,7 +50,6 @@
         '<span class="ls-card-top">' +
           '<span class="ls-tag ls-tag-' + esc(r.category) + '">' + esc(v.categoryLabel) + '</span>' +
           (r.freeGiveaway ? '<span class="ls-tag is-gold">무료 나눔</span>' : '') +
-          (v.installable ? '<span class="ls-tag is-soft">설치 가능</span>' : '') +
         '</span>' +
         '<h3>' + esc(r.title || '(제목 없음)') + '</h3>' +
         '<p class="ls-card-meta">' + bits + '</p>' +
@@ -67,13 +65,11 @@
     var cat = el('mkCategory').value;
     var cond = el('mkCondition').value;
     var region = el('mkRegion').value;
-    var installOnly = el('mkInstallOnly').checked;
 
     return rows.filter(function (r) {
       if (cat && r.category !== cat) return false;
       if (cond && r.condition !== cond) return false;
       if (region && r.region !== region) return false;
-      if (installOnly && !db.marketView(r).installable) return false;
       if (!q) return true;
       var hay = [r.title, r.brand, r.model, r.region, r.addressRough, r.desc, r.categoryOther]
         .join(' ').toLowerCase();
@@ -115,7 +111,6 @@
     }
 
     var v = db.marketView(r);
-    var tier = db.installQuote('install', r.quantity);
 
     body.innerHTML =
       '<div class="ls-view">' +
@@ -130,19 +125,6 @@
         '</div>' +
 
         B.gallery(v.photos, 'mkGal') +
-
-        (v.installable
-          ? '<div class="ls-install-band">' +
-              '<div>' +
-                '<h2>사고 나서 다는 일은 저희가 맡습니다</h2>' +
-                '<p>철거 · 운반 · 설치 · 배선까지. 예배당에서 소리가 나는 상태로 넘겨 드립니다. ' +
-                  '어림 견적 <strong>' + B.comma(tier.amount) + '원</strong>부터이며, 실측 후 확정합니다.</p>' +
-                (r.installNote
-                  ? '<p class="ls-install-note">파시는 분 메모 — ' + B.nl2br(r.installNote) + '</p>' : '') +
-              '</div>' +
-              '<a class="btn btn-gold btn-lg" href="#install/' + esc(r.id) + '">설치 맡기기</a>' +
-            '</div>'
-          : '') +
 
         '<dl class="ls-dls">' +
           B.dl('갈래', esc(v.categoryLabel)) +
@@ -164,14 +146,12 @@
           (r.contactHours
             ? '<p class="ls-contact-hours">연락 가능 시간 — ' + esc(r.contactHours) + '</p>' : '') +
           '<p class="ls-contact-fine">' +
-            '값 · 대금 · 인수인계는 파시는 분과 사시는 분이 직접 하십니다. ' +
-            '센터는 게시판 관리와 설치 대행만 합니다.</p>' +
+            '값 · 대금 · 운반 · 설치는 파시는 분과 사시는 분이 직접 하십니다. ' +
+            '센터는 게시판만 관리합니다.</p>' +
         '</div>' +
 
         '<div class="ls-view-foot">' +
           '<a class="btn btn-outline" href="#list">← 목록으로</a>' +
-          (v.installable
-            ? '<a class="btn btn-primary" href="#install/' + esc(r.id) + '">설치 맡기기</a>' : '') +
         '</div>' +
       '</div>';
 
@@ -293,8 +273,6 @@
     region: el('mkFRegion'),
     address: el('mkFAddress'),
     delivery: el('mkFDelivery'),
-    installOk: el('mkFInstallOk'),
-    installNote: el('mkFInstallNote'),
     desc: el('mkFDesc'),
     name: el('mkFContactName'),
     phone: el('mkFContactPhone'),
@@ -321,10 +299,6 @@
     el('mkCatOtherBox').hidden = !other;
     f.categoryOther.disabled = !other;
     if (!other) f.categoryOther.value = '';
-
-    // 음향 · 영상 · 조명일 때만 설치 대행을 묻습니다.
-    var canInstall = db.MARKET_INSTALLABLE.indexOf(f.category.value) > -1;
-    el('mkInstallFs').hidden = !canInstall;
   }
   f.category.addEventListener('change', syncCategory);
 
@@ -354,8 +328,6 @@
       region: f.region.value,
       addressRough: f.address.value.trim(),
       delivery: f.delivery.value,
-      installOk: db.MARKET_INSTALLABLE.indexOf(f.category.value) > -1 ? f.installOk.checked : false,
-      installNote: f.installNote.value.trim(),
       desc: f.desc.value.trim(),
       contactName: f.name.value.trim(),
       contactPhone: f.phone.value.trim(),
@@ -399,8 +371,6 @@
     f.region.value = r.region || '';
     f.address.value = r.addressRough || '';
     f.delivery.value = r.delivery || 'pickup';
-    f.installOk.checked = r.installOk !== false;
-    f.installNote.value = r.installNote || '';
     f.desc.value = r.desc || '';
     f.name.value = r.contactName || '';
     f.phone.value = db.formatPhone(r.contactPhone || '');
@@ -481,141 +451,6 @@
   });
 
   /* =========================================================
-     설치 대행 신청
-
-     장터에 올라온 물건에서 들어오면 그 물건이 채워지고,
-     그냥 #install 로 들어오면 빈 칸으로 열립니다
-     (장터 밖에서 사신 장비도 달아 드립니다).
-     ========================================================= */
-
-  var iv = {
-    itemId: el('mkIvItemId'),
-    item: el('mkIvItem'),
-    church: el('mkIvChurch'),
-    region: el('mkIvRegion'),
-    address: el('mkIvAddress'),
-    floor: el('mkIvFloor'),
-    elevator: el('mkIvElevator'),
-    wish: el('mkIvWish'),
-    name: el('mkIvName'),
-    phone: el('mkIvPhone'),
-    hours: el('mkIvHours'),
-    note: el('mkIvNote'),
-    quote: el('mkIvQuote'),
-  };
-
-  if (iv.phone) db.bindPhoneInput(iv.phone);
-
-  function tierValue() {
-    var on = document.querySelector('input[name="mkTier"]:checked');
-    return on ? on.value : 'install';
-  }
-
-  /** 고른 갈래와 수량으로 어림 견적을 보여 줍니다. */
-  function syncQuote() {
-    var itemId = iv.itemId.value;
-    var row = rows.concat(mineRows).filter(function (r) { return r.id === itemId; })[0];
-    var qty = row ? Number(row.quantity) || 1 : 1;
-    var q = db.installQuote(tierValue(), qty);
-
-    iv.quote.innerHTML =
-      '<strong>어림 견적 ' + B.comma(q.amount) + '원</strong>' +
-      (qty > 1 ? ' <small>(' + qty + '개 기준 — 출장은 한 번이라 두 번째부터는 절반만 더합니다)</small>' : '') +
-      '<br><small>' + esc(q.desc) + ' 실측 후 확정해 드리며, 신청만으로 비용이 생기지 않습니다.</small>';
-  }
-
-  Array.prototype.forEach.call(document.querySelectorAll('input[name="mkTier"]'), function (r) {
-    r.addEventListener('change', syncQuote);
-  });
-
-  function openInstall(itemId) {
-    B.say(el('mkIvErr'), '');
-    B.say(el('mkIvOk'), '');
-
-    var box = el('mkIvGate');
-    var form = el('mkIvForm');
-    var me = db.auth.current();
-    box.hidden = !!me;
-    form.hidden = !me;
-
-    iv.itemId.value = itemId || '';
-    var row = rows.concat(mineRows).filter(function (r) { return r.id === itemId; })[0];
-
-    if (row) {
-      var v = db.marketView(row);
-      iv.item.hidden = false;
-      iv.item.innerHTML =
-        '<p class="ls-iv-label">설치할 물건</p>' +
-        '<p class="ls-iv-title">' + esc(row.title) + '</p>' +
-        '<p class="ls-iv-meta">' + esc(v.categoryLabel) +
-          (Number(row.quantity) > 1 ? ' · ' + Number(row.quantity) + '개' : '') +
-          ' · ' + esc(db.marketPrice(row)) + '</p>' +
-        (row.installNote
-          ? '<p class="ls-iv-note">파시는 분 메모 — ' + B.nl2br(row.installNote) + '</p>' : '');
-    } else {
-      iv.item.hidden = false;
-      iv.item.innerHTML =
-        '<p class="ls-iv-label">설치할 물건</p>' +
-        '<p class="ls-iv-title">장터 밖에서 구하신 장비</p>' +
-        '<p class="ls-iv-meta">아래 [남기실 말씀] 에 어떤 장비인지 적어 주시면 견적이 정확해집니다.</p>';
-    }
-
-    syncQuote();
-  }
-
-  el('mkIvGateLogin').addEventListener('click', function () {
-    if (!window.CAPSAuthUI) return;
-    window.CAPSAuthUI.require().then(function (user) {
-      if (user) openInstall(iv.itemId.value);
-    });
-  });
-
-  el('mkIvForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    B.say(el('mkIvErr'), '');
-    B.say(el('mkIvOk'), '');
-
-    if (!iv.church.value.trim()) { B.say(el('mkIvErr'), '교회명을 적어 주세요.'); return; }
-    if (!iv.region.value) { B.say(el('mkIvErr'), '지역을 골라 주세요.'); return; }
-    if (!iv.address.value.trim()) { B.say(el('mkIvErr'), '설치할 주소를 적어 주세요.'); return; }
-    if (!iv.name.value.trim()) { B.say(el('mkIvErr'), '연락받으실 성함을 적어 주세요.'); return; }
-    if (B.digits(iv.phone.value).length < 9) { B.say(el('mkIvErr'), '연락처를 확인해 주세요.'); return; }
-
-    var itemId = iv.itemId.value;
-    var row = rows.concat(mineRows).filter(function (r) { return r.id === itemId; })[0];
-    var btn = el('mkIvSubmit');
-    btn.disabled = true;
-    btn.textContent = '보내는 중…';
-
-    db.submitInstallRequest({
-      itemId: itemId || '',
-      itemTitle: row ? row.title : '(장터 밖 장비)',
-      tier: tierValue(),
-      churchName: iv.church.value.trim(),
-      region: iv.region.value,
-      address: iv.address.value.trim(),
-      floor: iv.floor.value.trim(),
-      elevator: iv.elevator.value,
-      wishDate: iv.wish.value,
-      contactName: iv.name.value.trim(),
-      contactPhone: iv.phone.value.trim(),
-      contactHours: iv.hours.value.trim(),
-      note: iv.note.value.trim(),
-    }).then(function () {
-      B.say(el('mkIvOk'),
-        '설치 신청이 접수되었습니다. 담당자가 1~2일 안에 연락드려 실측 일정을 잡습니다. ' +
-        '신청만으로 비용이 생기지 않습니다.');
-      el('mkIvForm').reset();
-      syncQuote();
-    }).catch(function (err) {
-      B.say(el('mkIvErr'), err.message || '신청하지 못했습니다.');
-    }).then(function () {
-      btn.disabled = false;
-      btn.textContent = '설치 신청하기';
-    });
-  });
-
-  /* =========================================================
      화면 전환
      ========================================================= */
 
@@ -625,7 +460,6 @@
       view: 'mkDetail',
       mine: 'mkMine',
       new: 'mkNew',
-      install: 'mkInstallForm',
     },
     {
       list: function () { if (!loaded) load(); },
@@ -648,15 +482,11 @@
       mine: renderMine,
       new: function () { openForm(''); },
       edit: function (id) { openForm(id); },
-      install: function (id) {
-        (loaded ? Promise.resolve() : load()).then(function () { openInstall(id); });
-      },
     },
-    // 설치 대행 안내는 목록 화면에서만 보입니다.
-    { bodyAttr: 'data-mk-pane', listOnly: ['mkInstall'] }
+    { bodyAttr: 'data-mk-pane' }
   );
 
-  ['mkQ', 'mkCategory', 'mkCondition', 'mkRegion', 'mkInstallOnly'].forEach(function (id) {
+  ['mkQ', 'mkCategory', 'mkCondition', 'mkRegion'].forEach(function (id) {
     var node = el(id);
     if (!node) return;
     node.addEventListener('input', renderList);
@@ -667,7 +497,6 @@
     var parts = nav.current();
     if (parts[0] === 'mine') renderMine();
     if (parts[0] === 'new' || parts[0] === 'edit') openForm(parts[1] || '');
-    if (parts[0] === 'install') openInstall(parts[1] || '');
   });
 
   syncCategory();
