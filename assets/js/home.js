@@ -33,15 +33,21 @@
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (still) return;
 
-    var VEIL = 700;   // 가림막이 걷히기 시작하는 때
+    var VEIL = 550;    // 가림막이 걷히기 시작하는 때
+    var OPEN = 900;    // 가림막이 완전히 사라지는 때 (VEIL + 걷는 시간)
 
-    /* [무엇을, 언제부터, 몇 ms 씩 늦춰] */
+    /* [무엇을, 언제부터, 몇 ms 씩 늦춰]
+
+       가림막이 사라진 뒤부터 움직입니다. 앞서는 0.64초부터
+       움직이게 해 두었는데, 그때는 아직 가림막이 덮고 있어
+       가림막 뒤에서 다 끝나 버렸습니다 — 보이지 않는 움직임은
+       없는 것과 같습니다. */
     var plan = [
-      ['.bn', VEIL - 60, 90],          // 배너 카드
-      ['.sc-label', VEIL + 60, 0],     // 줄 이름
-      ['.sc', VEIL + 100, 35],         // 아이콘 하나씩
-      ['.hd-row', VEIL + 180, 0],      // 항목 제목
-      ['.cat-tab', VEIL + 220, 30],    // 갈래 탭
+      ['.bn', OPEN - 50, 130],        // 배너 카드
+      ['.sc-label', OPEN + 120, 0],   // 줄 이름
+      ['.sc', OPEN + 170, 55],        // 아이콘 하나씩
+      ['.hd-row', OPEN + 320, 0],     // 항목 제목
+      ['.cat-tab', OPEN + 380, 45],   // 갈래 탭
     ];
 
     var moved = [];
@@ -97,7 +103,7 @@
       document.body.classList.remove('is-intro');
       window.setTimeout(function () {
         if (veil.parentNode) veil.parentNode.removeChild(veil);
-      }, 420);
+      }, 370);
 
       ['click', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
         window.removeEventListener(ev, skip);
@@ -117,7 +123,7 @@
     window.setTimeout(function () { lift(false); }, VEIL);
     window.setTimeout(clean, CLEAN);
     // 무슨 일이 있어도 여기서는 걷히고 정리됩니다.
-    window.setTimeout(function () { lift(true); }, 1800);
+    window.setTimeout(function () { lift(true); }, 1600);
   }());
 
   /* ---------- 미는 배너 ----------

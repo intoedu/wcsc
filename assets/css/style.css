@@ -3726,13 +3726,13 @@ a.tk-card:hover {
   animation: intro-in .25s ease both;
 }
 .intro.is-gone {
-  animation: intro-out .4s cubic-bezier(.4, 0, .2, 1) both;
+  animation: intro-out .35s cubic-bezier(.4, 0, .2, 1) both;
   pointer-events: none;
 }
 .intro-logo {
   width: min(260px, 56vw);
   height: auto;
-  animation: intro-logo .6s cubic-bezier(.2, .7, .3, 1) both;
+  animation: intro-logo .5s cubic-bezier(.2, .7, .3, 1) both;
 }
 
 /* 가림막이 떠 있는 동안에는 뒤가 밀리지 않게 스크롤을 멈춥니다 */
@@ -3756,17 +3756,17 @@ body.is-intro { overflow: hidden; }
    덩어리째 띄우면 그냥 늦게 그려진 것처럼 보입니다 — 낱개로
    조금씩 늦춰야 [차례로 놓인다] 로 읽힙니다. */
 @keyframes wcsc-rise {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: none; }
 }
 
 .rise {
-  animation: wcsc-rise .45s cubic-bezier(.2, .7, .3, 1) both;
+  animation: wcsc-rise .55s cubic-bezier(.2, .7, .3, 1) both;
   /* 움직이는 동안 글자가 흐려지지 않게 */
   will-change: opacity, transform;
 }
 .rise.sc,
-.rise.cat-tab { animation-duration: .38s; }
+.rise.cat-tab { animation-duration: .45s; }
 
 /* 움직임을 줄여 달라고 설정하신 분께는 아무것도 움직이지 않습니다.
    어지러움을 느끼시는 분이 실제로 계십니다. */
