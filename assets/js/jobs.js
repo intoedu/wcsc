@@ -385,7 +385,7 @@
     if (d.position === 'other' && !d.positionOther) return '직분을 직접 적어 주세요.';
     if (d.payType !== 'negotiable' && !d.payMin && !d.payMax) {
       return '사례비를 적어 주세요. 정하지 못하셨다면 [면접 후 협의] 를 골라 주세요 — '
-        + '다만 금액이 없는 공고에는 멀리 계신 분이 잘 연락하지 않으십니다.';
+        + '다만 금액이 없는 공고에는 잘 연락하지 않으십니다.';
     }
     if (d.payMax && d.payMin && d.payMax < d.payMin) {
       return '사례비 범위의 끝이 시작보다 적습니다. 다시 확인해 주세요.';
@@ -394,7 +394,7 @@
       return '모집 마감일이 오늘보다 앞섭니다. 다시 확인해 주세요.';
     }
     if (!d.photos.length) {
-      return '교회 사진을 한 장 이상 올려 주세요. 멀리 계신 분은 사진 말고 교회를 볼 방법이 없습니다.';
+      return '교회 사진을 한 장 이상 올려 주세요. 보시는 분은 사진 말고 교회를 볼 방법이 없습니다.';
     }
     if (d.desc.length < 30) return '교회 소개와 하실 일을 조금 더 적어 주세요 (30자 이상).';
     if (!d.contactName) return '연락받으실 담당자 성함을 적어 주세요.';

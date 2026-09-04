@@ -72,8 +72,8 @@ function buildIndex() {
     {
       tone: 'gold',
       eyebrow: '교역자 구인',
-      title: '멀어서 사람 못 구하던<br>교회를 위해',
-      lead: '사례비 · 사택 · 오가는 길을 미리 밝히고 공고를 올립니다.',
+      title: '아는 분께 부탁하는 것<br>말고는 없었습니다',
+      lead: '이제 교회가 직접 공고를 올리고, 사역자가 보고 연락합니다.',
       href: 'jobs.html',
       icon: 'users',
     },
@@ -311,7 +311,7 @@ function buildAbout() {
     },
     {
       church: '부교역자를 청빙하려면 아는 분께 부탁하는 수밖에 없습니다',
-      us: '교회가 직접 공고를 올리고 사역자가 보고 연락합니다. 사례비 · 사택 · 오가는 길을 미리 밝힙니다.',
+      us: '교회가 직접 공고를 올리고, 사역자가 보고 연락합니다. 아는 분께 부탁하지 않아도 됩니다.',
       href: 'jobs.html',
       label: '교역자 구인',
     },
@@ -543,9 +543,9 @@ ${pageHero({
   <div class="wrap narrow">
     <div class="moved">
       <p>
-        아는 사람 안에서만 이어 주면 멀리 있는 교회는 끝내 사람을 못 구합니다.
-        그래서 공고를 열어 두고, <strong>사례비 · 사택 · 오가는 길</strong>을 미리 밝히도록
-        바꿨습니다.
+        아는 사람 안에서만 이어 주면, 그 연결망 밖에 있는 교회는 후보를 아예
+        만나지 못합니다. 그래서 공고를 열어 두어 <strong>교회와 사역자가 서로를 볼 수
+        있게</strong> 바꿨습니다.
       </p>
       <div class="moved-act">
         <a class="btn btn-primary btn-lg" href="../jobs.html">교역자 구인 게시판으로 ${icon('arrow', 'ico ico-sm')}</a>
