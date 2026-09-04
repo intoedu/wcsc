@@ -928,6 +928,7 @@ ${pageHero({
         <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 3만원은
           서버 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
           둘 다 월 단위로 중단하실 수 있습니다.</p>
+        <p class="bill-where">인투오피스는 <strong>인투오피스에서 직접 결제</strong>하십니다 — 센터를 거치지 않습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">1회 결제</span>
@@ -1162,6 +1163,9 @@ ${s.scope ? `
         <div class="price-card">
           <p class="price-figure">${esc(s.price || '상담 후 결정')}<small>${esc(s.billing || '건별 견적')}</small></p>
           <p data-live="svc.${s.id}.priceNote">${esc(s.priceNote)}</p>
+          ${s.payElsewhere ? `<p class="pay-where">
+            결제는 <strong>${esc(s.payElsewhere)}</strong>에서 직접 하십니다 — 센터를 거치지 않습니다.
+          </p>` : ''}
           <dl class="price-meta">
             <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
@@ -1745,9 +1749,10 @@ ${boardTabs('', 'listings.html')}
 
 ${pageHero({
   eyebrow: '부동산 · 매물 게시판',
-  title: '교회 매물을<br>직접 올리고, 직접 찾습니다',
-  lead: '예배 공간을 내놓는 교회와 구하는 교회가 서로 만나는 게시판입니다. '
-    + '서류를 확인한 글만 올라갑니다 — 허위 매물 걱정 없이 조건만 보세요.',
+  title: '예배 공간을 내놓는 교회와<br>구하는 교회가 만납니다',
+  lead: '중개업소를 거치지 않고 교회와 교회가 직접 만나는 자리입니다. '
+    + '올리실 때 권리 증빙 서류를 확인해 게시하며, 조건과 서류는 계약 전에 '
+    + '직접 한 번 더 확인해 주세요.',
   extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
       <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>

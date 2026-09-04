@@ -3755,3 +3755,17 @@ a.tk-card:hover {
 /* 곁 상자를 감춘 항목은 글이 한 줄로 넓게 갑니다 */
 .svc-hero-in.is-wide { grid-template-columns: 1fr; }
 .svc-hero-in.is-wide .lead { max-width: 46em; }
+
+/* 결제를 그 서비스에서 직접 하는 항목 안내 */
+.pay-where,
+.bill-where {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--gold-100);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--gold-ink);
+}
+.pay-where strong,
+.bill-where strong { color: var(--gold-ink-deep); }
