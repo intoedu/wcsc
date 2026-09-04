@@ -64,8 +64,8 @@ function buildIndex() {
     {
       tone: 'green',
       eyebrow: '홈페이지 제작',
-      title: '제작비 0원으로<br>교회 홈페이지를',
-      lead: '만들어 드리고, 월 3만원으로 계속 돌봐 드립니다.',
+      title: '관리비 월 3만원으로<br>교회 홈페이지를 만들어 드립니다',
+      lead: '제작비는 따로 받지 않습니다.',
       href: 'services/homepage.html',
       icon: 'monitor',
     },
@@ -305,7 +305,7 @@ function buildAbout() {
     },
     {
       church: '검색해도 교회 정보가 나오지 않습니다',
-      us: '제작비 없이 홈페이지를 만들어 드리고, 월 3만원으로 계속 돌봐 드립니다.',
+      us: '관리비 월 3만원으로 홈페이지를 만들어 드립니다. 제작비는 따로 받지 않습니다.',
       href: 'services/homepage.html',
       label: '홈페이지 제작',
     },
