@@ -33,8 +33,17 @@
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (still) return;
 
+    /* 메뉴의 [홈] 을 눌러 오신 경우에는 가림막을 띄우지 않습니다.
+       페이지 사이를 오가는 일이라 그때마다 화면이 덮이면 성가십니다.
+       처음 들어오실 때와 로고를 누르실 때는 그대로 뜹니다. */
+    var skipVeil = false;
+    try {
+      skipVeil = window.sessionStorage.getItem('wcsc.veil') === 'skip';
+      window.sessionStorage.removeItem('wcsc.veil');
+    } catch (ignore) { skipVeil = false; }
+
     var VEIL = 550;    // 가림막이 걷히기 시작하는 때
-    var OPEN = 900;    // 가림막이 완전히 사라지는 때 (VEIL + 걷는 시간)
+    var OPEN = skipVeil ? 60 : 900;   // 내용이 움직이기 시작하는 때
 
     /* [무엇을, 언제부터, 몇 ms 씩 늦춰]
 
@@ -61,12 +70,15 @@
     });
 
     /* 가림막 — 로고가 잠깐 떴다가 걷힙니다. */
-    var veil = document.createElement('div');
-    veil.className = 'intro';
-    veil.setAttribute('aria-hidden', 'true');
-    veil.innerHTML = '<img class="intro-logo" src="assets/img/logo-light.png" alt="">';
-    document.body.appendChild(veil);
-    document.body.classList.add('is-intro');
+    var veil = null;
+    if (!skipVeil) {
+      veil = document.createElement('div');
+      veil.className = 'intro';
+      veil.setAttribute('aria-hidden', 'true');
+      veil.innerHTML = '<img class="intro-logo" src="assets/img/logo-light.png" alt="">';
+      document.body.appendChild(veil);
+      document.body.classList.add('is-intro');
+    }
 
     /* 표시를 떼면 그 자리에서 다 보입니다 (.rise 가 없으면 그냥 화면).
        그래서 두 가지를 나눠 둡니다 —
@@ -99,11 +111,13 @@
       if (lifted) return;
       lifted = true;
 
-      veil.classList.add('is-gone');
-      document.body.classList.remove('is-intro');
-      window.setTimeout(function () {
-        if (veil.parentNode) veil.parentNode.removeChild(veil);
-      }, 370);
+      if (veil) {
+        veil.classList.add('is-gone');
+        document.body.classList.remove('is-intro');
+        window.setTimeout(function () {
+          if (veil.parentNode) veil.parentNode.removeChild(veil);
+        }, 370);
+      }
 
       ['click', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
         window.removeEventListener(ev, skip);
@@ -120,7 +134,7 @@
       window.addEventListener(ev, skip, { passive: true });
     });
 
-    window.setTimeout(function () { lift(false); }, VEIL);
+    window.setTimeout(function () { lift(false); }, skipVeil ? 0 : VEIL);
     window.setTimeout(clean, CLEAN);
     // 무슨 일이 있어도 여기서는 걷히고 정리됩니다.
     window.setTimeout(function () { lift(true); }, 1600);

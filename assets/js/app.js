@@ -68,6 +68,22 @@
     onScroll();
   }
 
+  /* 메뉴의 [홈] 으로 갈 때는 가림막을 띄우지 않습니다.
+
+     처음 들어오실 때와 로고를 누르실 때는 가림막이 뜨는 편이
+     좋습니다 — 사이트가 열리는 느낌이 있습니다. 그런데 메뉴에서
+     [홈] 을 누르는 것은 페이지 사이를 오가는 일이라, 그때마다
+     화면이 덮이면 성가십니다.
+
+     둘 다 index.html 로 가므로 주소만으로는 가릴 수 없습니다.
+     그래서 [홈] 을 누르셨다는 것만 같은 탭 안에 잠깐 적어 두고,
+     홈에서 읽는 즉시 지웁니다. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a.nav-link[href$="index.html"]');
+    if (!a) return;
+    try { window.sessionStorage.setItem('wcsc.veil', 'skip'); } catch (ignore) { /* 못 적어도 그만 */ }
+  });
+
   /* 등장 애니메이션 */
   var targets = document.querySelectorAll(
     '.svc-card, .why-card, .step, .prep-card, .prob-card, .feat-card, .contact-card, .tl-item, '
