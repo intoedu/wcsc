@@ -178,7 +178,7 @@ function buildIndex() {
       </a>
     </div>
 
-    <p class="sc-label is-second">게시판 <small>교회끼리 사고, 나누고, 만나는 곳 — 보시는 것은 누구나 무료</small></p>
+    <p class="sc-label is-second">게시판 <small>교회끼리 사고, 나누고, 만나는 곳</small></p>
     <div class="sc-grid is-boards">
       ${T.BOARDS.map(boardShortcut).join('\n      ')}
     </div>
@@ -545,7 +545,7 @@ ${pageHero({
       <p>
         아는 사람 안에서만 이어 주면 멀리 있는 교회는 끝내 사람을 못 구합니다.
         그래서 공고를 열어 두고, <strong>사례비 · 사택 · 오가는 길</strong>을 미리 밝히도록
-        바꿨습니다. 등록비는 없습니다.
+        바꿨습니다.
       </p>
       <div class="moved-act">
         <a class="btn btn-primary btn-lg" href="../jobs.html">교역자 구인 게시판으로 ${icon('arrow', 'ico ico-sm')}</a>
@@ -902,7 +902,7 @@ ${pageHero({
   <div class="wrap">
     ${sectionHead('게시판', '교회끼리 직접 잇는 자리',
       '위 항목은 센터가 맡아 해 드리는 일이고, 아래는 교회와 교회가 센터를 거치지 않고 '
-      + '직접 만나는 곳입니다. 보시는 것은 누구나 무료입니다.')}
+      + '직접 만나는 곳입니다.')}
     <div class="bd-tiles">
       ${T.BOARDS.map((b, i) => `<a class="bd-tile" href="../${b.href}">
         <span class="bd-no">0${i + 1}</span>
@@ -2288,7 +2288,7 @@ window.CAPS_SERVICES = ${JSON.stringify(payload, null, 2)};
    계좌는 게시판에 노출하지 않고, 관리자가 승인할 때 카카오톡으로 보냅니다. */
 window.CAPS_LISTING_BOARD = ${JSON.stringify(site.listingBoard, null, 2)};
 
-/* 중고 장터 — 센터의 몫은 등록비가 아니라 설치 대행료입니다. */
+/* 중고 장터 운영 기준 */
 window.CAPS_MARKET_BOARD = ${JSON.stringify(site.marketBoard, null, 2)};
 
 /* 교회 게스트하우스 운영 기준 */

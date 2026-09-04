@@ -370,10 +370,8 @@ ${pageHero({
     eyebrow: '중고 장터 · 교회 물품',
     title: '교회에서 쓰던 것을<br>필요한 교회로',
     lead: '스피커와 믹서, 악기, 장의자까지 — 교회에서 나온 물건이 다른 교회로 갑니다. '
-      + '등록비는 없습니다. 사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
+      + '사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
-      <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
       <span class="ls-hero-pill is-key">설치 대행 <strong>${board.install.baseFee.toLocaleString('ko-KR')}원~</strong></span>
     </div>
@@ -424,7 +422,7 @@ ${boardShell({
     mineLead: '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '물건 올리기',
     formTitle: '쓰지 않는 물건을 올립니다',
-    formLead: '등록비는 없습니다. 관리자가 사진과 설명을 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 사진과 설명을 확인한 뒤 게시됩니다.',
     gateText: '물건 등록은 로그인 후 이용하실 수 있습니다. 등록 후 진행 상태를 알려드리기 위해 계정이 필요합니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -528,13 +526,13 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '장비를 새로 들이실 계획이신가요?',
-    lead: '중고로 채울 것과 새로 사야 할 것을 함께 정리해 드립니다. 상담과 견적은 무료입니다.',
+    lead: '중고로 채울 것과 새로 사야 할 것을 함께 정리해 드립니다.',
   })}
 `;
 
   write('market.html', layout({
     title: '교회 중고 장터 | 우리교회지원센터',
-    description: '교회 음향 · 악기 · 집기 중고 장터. 등록비 없이 올리고, 사시는 교회가 원하면 '
+    description: '교회 음향 · 악기 · 집기 중고 장터. 사시는 교회가 원하면 '
       + '센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
     base: '',
     active: 'market.html',
@@ -773,9 +771,7 @@ ${pageHero({
     lead: '비어 있는 사택과 선교관을 교회가 내어 놓습니다. 안식년으로 들어오신 선교사님, '
       + '방문 교역자, 유학생이 머물 곳을 찾습니다. 요금과 기간은 교회와 직접 정하십니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill">무료로 내어 주는 방 <strong>있습니다</strong></span>
       <span class="ls-hero-pill is-key">교회 확인 <strong>후 게시</strong></span>
     </div>
     <div class="ls-hero-actions">
@@ -804,7 +800,7 @@ ${boardShell({
     mineLead: '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '방 내어 놓기',
     formTitle: '우리 교회의 방을 올립니다',
-    formLead: '등록비는 없습니다. 관리자가 교회와 방을 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 교회와 방을 확인한 뒤 게시됩니다.',
     gateText: '게스트하우스 등록은 로그인 후 이용하실 수 있습니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -812,7 +808,7 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '사택이나 선교관을 어떻게 쓸지 고민이신가요?',
-    lead: '비어 있는 공간을 어떻게 쓸 수 있을지 함께 정리해 드립니다. 상담과 견적은 무료입니다.',
+    lead: '비어 있는 공간을 어떻게 쓸 수 있을지 함께 정리해 드립니다.',
   })}
 `;
 
@@ -1073,7 +1069,6 @@ ${pageHero({
     lead: '찬양집회와 수련회 신청을 한곳에서 받습니다. 예매 시작 시각을 정해 두면 그 시각 정각에 열리고, '
       + '정원이 차면 자동으로 마감됩니다. 좌석 지정은 원하는 집회만 쓰시면 됩니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
       <span class="ls-hero-pill">예매 시작 시각 <strong>지정</strong></span>
       <span class="ls-hero-pill is-key">정원 차면 <strong>자동 마감</strong></span>
@@ -1105,7 +1100,7 @@ ${boardShell({
     mineLead: '신청 현황과 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '집회 올리기',
     formTitle: '집회 신청을 받습니다',
-    formLead: '등록비는 없습니다. 관리자가 주최 · 장소 · 일시를 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 주최 · 장소 · 일시를 확인한 뒤 게시됩니다.',
     gateText: '집회 등록은 로그인 후 이용하실 수 있습니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -1132,7 +1127,7 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '집회 포스터나 홍보물이 필요하신가요?',
-    lead: '집회 포스터 · 현수막 · 영상까지 디자인 지원 항목에서 함께 만들어 드립니다. 상담과 견적은 무료입니다.',
+    lead: '집회 포스터 · 현수막 · 영상까지 디자인 지원 항목에서 함께 만들어 드립니다.',
   })}
 `;
 
@@ -1282,7 +1277,7 @@ function buildJobs(write) {
           <div class="field">
             <label for="jbFCloses">모집 마감</label>
             <input type="date" id="jbFCloses">
-            <small class="hint">비워 두시면 구하실 때까지 올라가 있습니다.</small>
+            <small class="hint">비워 두시면 마감일 없이 올라갑니다.</small>
           </div>
         </div>
       </fieldset>
@@ -1404,9 +1399,7 @@ ${pageHero({
     lead: '아는 사람 안에서만 이어지면 멀리 있는 교회는 끝내 사람을 못 구합니다. '
       + '공고를 열어 두고, 사례비와 사택과 오가는 길을 미리 밝힙니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill">게시 <strong>구하실 때까지</strong></span>
       <span class="ls-hero-pill is-key">사례비 · 사택 <strong>필수 표기</strong></span>
     </div>
     <div class="ls-hero-actions">
@@ -1435,7 +1428,7 @@ ${boardShell({
     mineLead: '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '공고 올리기',
     formTitle: '우리 교회의 자리를 올립니다',
-    formLead: '등록비는 없습니다. 관리자가 교회와 내용을 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 교회와 내용을 확인한 뒤 게시됩니다.',
     gateText: '공고 등록은 로그인 후 이용하실 수 있습니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -1443,7 +1436,7 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '사람을 구하는 일이 처음이신가요?',
-    lead: '어떤 조건으로 올려야 연락이 오는지, 공고 문구부터 함께 정리해 드립니다. 상담과 견적은 무료입니다.',
+    lead: '어떤 조건으로 올려야 연락이 오는지, 공고 문구부터 함께 정리해 드립니다.',
   })}
 `;
 

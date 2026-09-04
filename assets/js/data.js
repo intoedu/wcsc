@@ -863,9 +863,8 @@ window.CAPS_LISTING_BOARD = {
   "fineprint": "센터는 게시판을 운영합니다 — 공인중개사법상의 중개 행위는 하지 않으며, 가격 · 조건 협상과 계약에는 관여하지 않습니다. 매물 내용은 등록자가 적은 것입니다."
 };
 
-/* 중고 장터 — 센터의 몫은 등록비가 아니라 설치 대행료입니다. */
+/* 중고 장터 운영 기준 */
 window.CAPS_MARKET_BOARD = {
-  "fee": 0,
   "photoMax": 12,
   "photoMin": 3,
   "install": {
@@ -896,15 +895,13 @@ window.CAPS_MARKET_BOARD = {
     "올라온 물건의 사진과 설명이 실제와 맞는지 확인합니다.",
     "광고성 · 중복 · 교회와 무관한 물건을 내립니다.",
     "사시는 교회가 원하면 철거 · 운반 · 설치 · 음향 튜닝을 맡아 드립니다.",
-    "설치 대행 견적은 실측 후 확정해 드립니다.",
-    "팔릴 때까지 올려 둡니다 — 기한이 없습니다."
+    "설치 대행 견적은 실측 후 확정해 드립니다."
   ],
   "fineprint": "센터는 장터를 운영하고 설치를 대행합니다 — 물건의 매매 당사자는 아닙니다. 가격 협상과 대금 거래는 파는 분과 사는 분이 직접 하시며, 물건의 상태는 등록자가 적은 것입니다."
 };
 
 /* 교회 게스트하우스 운영 기준 */
 window.CAPS_GUEST_BOARD = {
-  "fee": 0,
   "photoMax": 15,
   "photoMin": 4,
   "does": [
@@ -918,7 +915,6 @@ window.CAPS_GUEST_BOARD = {
 
 /* 교역자 구인 공고 운영 기준 */
 window.CAPS_JOB_BOARD = {
-  "fee": 0,
   "photoMax": 10,
   "photoMin": 3,
   "does": [
@@ -932,7 +928,6 @@ window.CAPS_JOB_BOARD = {
 
 /* 집회 티켓팅 운영 기준 */
 window.CAPS_TICKET_BOARD = {
-  "fee": 0,
   "photoMax": 20,
   "photoMin": 1,
   "perPersonMax": 4,

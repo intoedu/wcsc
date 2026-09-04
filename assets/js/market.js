@@ -247,7 +247,7 @@
       box.innerHTML = mineRows.length
         ? mineRows.map(mineCard).join('')
         : '<div class="ls-empty is-inline"><h3>아직 올리신 물건이 없습니다</h3>' +
-          '<p>쓰지 않는 장비나 집기가 있으시면 올려 주세요. 등록비는 없습니다.</p>' +
+          '<p>쓰지 않는 장비나 집기가 있으시면 올려 주세요.</p>' +
           '<a class="btn btn-primary" href="#new">물건 올리기</a></div>';
     });
   }
@@ -469,7 +469,7 @@
       B.say(el('mkFormOk'),
         editId
           ? '고친 내용을 보냈습니다. 관리자가 다시 확인한 뒤 게시됩니다.'
-          : '등록 신청이 접수되었습니다. 관리자가 확인한 뒤 게시됩니다 — 등록비는 없습니다.');
+          : '등록 신청이 접수되었습니다. 관리자가 확인한 뒤 게시됩니다.');
       resetForm();
       window.setTimeout(function () { window.location.hash = '#mine'; }, 1200);
     }).catch(function (err) {
