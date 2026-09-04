@@ -1757,7 +1757,6 @@ ${pageHero({
       <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
       <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill is-key">권리 증빙 서류 <strong>필수</strong></span>
     </div>
     <div class="ls-hero-actions">
       <a class="btn btn-gold btn-lg" href="#new" id="lsNewBtn">매물 등록하기 ${icon('arrow', 'ico ico-sm')}</a>
