@@ -11,8 +11,12 @@
 
   /* ---------- 첫 화면 인트로 ----------
 
-     홈에 들어오시면 로고가 잠깐 떴다가 걷히고, 그 뒤로 배너 ·
-     바로가기 · 항목이 차례로 떠오릅니다. 전부 1.4초입니다.
+     홈에 들어오시면 로고가 잠깐 떴다가 걷히고, 그 뒤로 배너와
+     아이콘이 하나씩 차례로 떠오릅니다. 전부 1.2초입니다.
+
+     덩어리째 띄우지 않고 낱개로 세우는 이유
+       칸 전체가 한꺼번에 나타나면 그냥 늦게 그려진 것처럼 보입니다.
+       하나씩 조금씩 늦춰야 "차례로 놓인다" 로 읽힙니다.
 
      지키는 것 넷
        1. 기다리게 하지 않습니다. 어디를 누르거나 스크롤하거나
@@ -21,7 +25,7 @@
           않습니다. 어지러움을 느끼시는 분이 실제로 계십니다.
        3. 자바스크립트가 늦거나 막혀도 화면은 그대로 다 보입니다 —
           가림막은 자바스크립트가 직접 붙였다 뗍니다.
-       4. 어떤 일이 있어도 2초 뒤에는 반드시 걷힙니다.
+       4. 어떤 일이 있어도 1.8초 뒤에는 반드시 걷힙니다.
   */
 
   (function intro() {
@@ -29,9 +33,26 @@
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (still) return;
 
-    var steps = ['.bn-wrap', '.sc-wrap', '#items'];
-    var nodes = steps.map(function (sel) { return document.querySelector(sel); })
-      .filter(Boolean);
+    var VEIL = 700;   // 가림막이 걷히기 시작하는 때
+
+    /* [무엇을, 언제부터, 몇 ms 씩 늦춰] */
+    var plan = [
+      ['.bn', VEIL - 60, 90],          // 배너 카드
+      ['.sc-label', VEIL + 60, 0],     // 줄 이름
+      ['.sc', VEIL + 100, 35],         // 아이콘 하나씩
+      ['.hd-row', VEIL + 180, 0],      // 항목 제목
+      ['.cat-tab', VEIL + 220, 30],    // 갈래 탭
+    ];
+
+    var moved = [];
+    plan.forEach(function (row) {
+      var list = document.querySelectorAll(row[0]);
+      Array.prototype.forEach.call(list, function (el, i) {
+        el.classList.add('rise');
+        el.style.animationDelay = (row[1] + i * row[2]) + 'ms';
+        moved.push(el);
+      });
+    });
 
     /* 가림막 — 로고가 잠깐 떴다가 걷힙니다. */
     var veil = document.createElement('div');
@@ -41,43 +62,62 @@
     document.body.appendChild(veil);
     document.body.classList.add('is-intro');
 
-    nodes.forEach(function (el, i) {
-      el.classList.add('rise');
-      el.style.animationDelay = (600 + i * 120) + 'ms';
-    });
+    /* 표시를 떼면 그 자리에서 다 보입니다 (.rise 가 없으면 그냥 화면).
+       그래서 두 가지를 나눠 둡니다 —
+         걷기(veil)   가림막을 올립니다
+         정리(clean)  움직임 표시를 뗍니다
+       늦게 시작하는 아이콘까지 다 지나간 뒤에 정리해야 중간에
+       잘리지 않습니다. 다만 누르셔서 건너뛰실 때는 곧바로
+       정리해 그 자리에서 다 보이게 합니다. */
 
-    var done = false;
-    function finish() {
-      if (done) return;
-      done = true;
+    var last = 0;
+    plan.forEach(function (row) {
+      var n = document.querySelectorAll(row[0]).length;
+      if (n) last = Math.max(last, row[1] + (n - 1) * row[2]);
+    });
+    var CLEAN = last + 500;
+
+    var lifted = false;
+    var cleaned = false;
+
+    function clean() {
+      if (cleaned) return;
+      cleaned = true;
+      moved.forEach(function (el) {
+        el.classList.remove('rise');
+        el.style.animationDelay = '';
+      });
+    }
+
+    function lift(now) {
+      if (lifted) return;
+      lifted = true;
 
       veil.classList.add('is-gone');
       document.body.classList.remove('is-intro');
       window.setTimeout(function () {
         if (veil.parentNode) veil.parentNode.removeChild(veil);
-      }, 500);
-
-      nodes.forEach(function (el) {
-        el.classList.remove('rise');
-        el.style.animationDelay = '';
-      });
+      }, 420);
 
       ['click', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
-        window.removeEventListener(ev, finish);
+        window.removeEventListener(ev, skip);
       });
+
+      // 건너뛰신 경우에는 바로 정리해 곧장 다 보이게 합니다.
+      if (now) clean();
     }
+
+    function skip() { lift(true); }
 
     /* 누르거나 스크롤하시면 바로 걷습니다 */
     ['click', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
-      window.addEventListener(ev, finish, { passive: true });
+      window.addEventListener(ev, skip, { passive: true });
     });
 
-    window.setTimeout(finish, 1400);
-    // 무슨 일이 있어도 여기서는 걷힙니다.
-    window.setTimeout(function () {
-      done = false;
-      finish();
-    }, 2000);
+    window.setTimeout(function () { lift(false); }, VEIL);
+    window.setTimeout(clean, CLEAN);
+    // 무슨 일이 있어도 여기서는 걷히고 정리됩니다.
+    window.setTimeout(function () { lift(true); }, 1800);
   }());
 
   /* ---------- 미는 배너 ----------
