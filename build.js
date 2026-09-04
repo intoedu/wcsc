@@ -1003,7 +1003,7 @@ function buildServicePage(s, i) {
       <a href="../services/index.html">지원 항목</a> ${icon('arrow', 'ico ico-xs')}
       <span>${esc(s.name)}</span>
     </nav>
-    <div class="svc-hero-in">
+    <div class="svc-hero-in${s.hideMeta ? ' is-wide' : ''}">
       <div class="svc-hero-copy">
         <p class="eyebrow"><span class="svc-hero-no">${s.no}</span> 지원 항목</p>
         <h1 data-live="svc.${s.id}.name">${esc(s.name)}</h1>
@@ -1015,7 +1015,7 @@ function buildServicePage(s, i) {
         </div>
         ${externalNote(s)}
       </div>
-      <div class="svc-hero-side">
+      ${s.hideMeta ? '' : `<div class="svc-hero-side">
         <span class="svc-hero-ico">${icon(s.icon)}</span>
         ${s.siteLink ? `<a class="btn btn-gold svc-site-btn" href="${s.siteLink.url}" target="_blank" rel="noopener">
           ${esc(s.siteLink.label)} 바로가기 ↗
@@ -1027,7 +1027,7 @@ function buildServicePage(s, i) {
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           <div><dt>지원 지역</dt><dd>전국</dd></div>
         </dl>
-      </div>
+      </div>`}
     </div>
   </div>
 </section>

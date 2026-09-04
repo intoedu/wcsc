@@ -3751,3 +3751,7 @@ a.tk-card:hover {
 .moved strong { color: var(--brand-700); }
 .moved-act { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
 .moved-fine { margin-top: 20px; font-size: 13.5px; color: var(--muted); }
+
+/* 곁 상자를 감춘 항목은 글이 한 줄로 넓게 갑니다 */
+.svc-hero-in.is-wide { grid-template-columns: 1fr; }
+.svc-hero-in.is-wide .lead { max-width: 46em; }
