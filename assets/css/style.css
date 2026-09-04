@@ -3706,30 +3706,70 @@ a.tk-card:hover {
 }
 
 /* =========================================================
-   홈을 처음 열 때의 움직임
+   홈에 들어올 때의 인트로
 
-   위에서부터 차례로 살짝 떠오릅니다. 0.5초면 끝납니다 —
-   기다리게 만드는 움직임은 두 번째부터 성가십니다.
+   로고가 잠깐 떴다가 걷히고, 그 뒤로 배너 · 바로가기 · 항목이
+   차례로 떠오릅니다. 전부 1.4초입니다.
 
-   자바스크립트가 이 표시를 붙여 줄 때만 움직입니다. 붙지 않으면
-   화면은 처음부터 그대로 다 보입니다.
+   가림막은 자바스크립트가 직접 붙였다 뗍니다. 그래서 자바스크립트가
+   늦거나 막혀도 화면이 가려진 채로 남는 일이 없습니다.
    ========================================================= */
 
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-900);
+  animation: intro-in .35s ease both;
+}
+.intro.is-gone {
+  animation: intro-out .45s cubic-bezier(.4, 0, .2, 1) both;
+  pointer-events: none;
+}
+.intro-logo {
+  width: min(260px, 56vw);
+  height: auto;
+  animation: intro-logo .8s cubic-bezier(.2, .7, .3, 1) both;
+}
+
+/* 가림막이 떠 있는 동안에는 뒤가 밀리지 않게 스크롤을 멈춥니다 */
+body.is-intro { overflow: hidden; }
+
+@keyframes intro-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes intro-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(-12px); }
+}
+@keyframes intro-logo {
+  0%   { opacity: 0; transform: scale(.94); }
+  55%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 가림막이 걷힌 뒤 차례로 떠오릅니다 */
 @keyframes wcsc-rise {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: none; }
 }
 
 .rise {
-  animation: wcsc-rise .5s cubic-bezier(.2, .7, .3, 1) both;
+  animation: wcsc-rise .55s cubic-bezier(.2, .7, .3, 1) both;
 }
 
 /* 움직임을 줄여 달라고 설정하신 분께는 아무것도 움직이지 않습니다.
    어지러움을 느끼시는 분이 실제로 계십니다. */
 @media (prefers-reduced-motion: reduce) {
+  .intro { display: none; }
   .rise { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
+  body.is-intro { overflow: auto; }
 }
 
 /* 옮겨진 페이지 안내 */
