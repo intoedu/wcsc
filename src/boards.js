@@ -167,11 +167,14 @@ function boardShell(o) {
 /* =========================================================
    1. 중고 장터
 
-   중고나라처럼 물건이 오가는 곳입니다. 센터는 게시판만 운영합니다 —
-   값 · 대금 · 운반 · 설치는 파는 교회와 사는 교회가 직접 정합니다.
+   중고나라처럼 물건이 오가는 곳입니다. 다만 센터가 돈을 버는 자리는
+   물건이 아니라 **설치** 입니다 — 스피커와 믹서를 싸게 사도
+   예배당에 다는 일은 그대로 남기 때문입니다.
+   그래서 목록 · 상세 · 등록 어디에서나 설치 대행이 함께 붙어 있습니다.
    ========================================================= */
 function buildMarket(write) {
   const board = site.marketBoard;
+  const tiers = board.install.tiers;
 
   const cats = [
     ['sound', '음향 (스피커 · 믹서 · 앰프)'],
@@ -199,6 +202,15 @@ function buildMarket(write) {
     ['deliver', '보내 드릴 수 있습니다'],
     ['both', '직접 오셔도, 보내 드려도 됩니다'],
   ];
+
+  const tierCards = tiers.map((t) => `<label class="ls-tier">
+            <input type="radio" name="mkTier" value="${t.key}"${t.key === 'install' ? ' checked' : ''}>
+            <span class="ls-tier-in">
+              <strong>${esc(t.label)}</strong>
+              <b>${t.price ? t.price.toLocaleString('ko-KR') + '원~' : '상담 후 견적'}</b>
+              <small>${esc(t.desc)}</small>
+            </span>
+          </label>`).join('\n          ');
 
   const formBody = `
       <fieldset class="ls-fs">
@@ -284,8 +296,25 @@ function buildMarket(write) {
         </div>
       </fieldset>
 
+      <fieldset class="ls-fs" id="mkInstallFs">
+        <legend><span class="ls-step">3</span> 설치는 센터가 맡아도 될까요?</legend>
+        <p class="ls-fs-lead">
+          음향 · 영상 · 조명은 사고 나서 <strong>다는 일</strong>이 진짜 일입니다.
+          사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다.
+          설치는 물건값과 <strong>별개로 비용이 드는 서비스</strong>이며,
+          그 비용은 사시는 교회가 냅니다 — 파시는 분께 드는 비용은 없습니다.
+        </p>
+        <label class="ls-chk is-wide"><input type="checkbox" id="mkFInstallOk" checked><span>
+          <strong>설치 대행을 안내해도 좋습니다</strong> — 글에 [설치 맡기기] 버튼이 붙습니다.</span></label>
+        <div class="field">
+          <label for="mkFInstallNote">설치할 때 알아둘 점</label>
+          <textarea id="mkFInstallNote" rows="2" maxlength="200"
+            placeholder="예: 2층이고 엘리베이터가 없습니다. 브라켓은 벽에 박혀 있어 떼어 가셔야 합니다."></textarea>
+        </div>
+      </fieldset>
+
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">3</span> 사진과 설명</legend>
+        <legend><span class="ls-step">4</span> 사진과 설명</legend>
         ${photoField('mk', board.photoMax, board.photoMin,
     '실제 물건을 찍은 사진을 올려 주세요. 상표 · 모델명이 보이는 사진과, '
     + '흠집이 있으면 흠집 사진도 함께 올리시면 헛걸음이 줄어듭니다.')}
@@ -298,7 +327,7 @@ function buildMarket(write) {
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">4</span> 연락처</legend>
+        <legend><span class="ls-step">5</span> 연락처</legend>
         <p class="ls-fs-lead">사시려는 분이 직접 연락합니다. 센터는 중간에 서지 않습니다.</p>
         <div class="grid-2">
           <div class="field">
@@ -318,21 +347,22 @@ function buildMarket(write) {
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">5</span> 확인</legend>
+        <legend><span class="ls-step">6</span> 확인</legend>
         <div class="ls-vows">
           <label class="ls-chk is-wide"><input type="checkbox" id="mkVow1"><span>
             제가 이 물건을 <strong>실제로 가지고 있고, 넘길 권한이 있습니다.</strong></span></label>
           <label class="ls-chk is-wide"><input type="checkbox" id="mkVow2"><span>
             사진과 설명은 <strong>이 물건을 실제로 찍고 적은 것</strong>입니다.</span></label>
           <label class="ls-chk is-wide"><input type="checkbox" id="mkVow3"><span>
-            값 · 대금 · 운반 · 설치는 <strong>사시는 분과 제가 직접</strong> 하며,
-            센터는 게시판만 관리한다는 것을 압니다.</span></label>
+            값 · 대금 · 인수인계는 <strong>사시는 분과 제가 직접</strong> 하며,
+            센터는 게시판 관리와 설치 대행만 한다는 것을 압니다.</span></label>
         </div>
       </fieldset>`;
 
   const filters = `<select id="mkCategory" aria-label="갈래">${opts(cats, '전체 갈래')}</select>
       <select id="mkCondition" aria-label="상태">${opts(conditions, '전체 상태')}</select>
-      <select id="mkRegion" aria-label="지역">${regionFilter('전체 지역')}</select>`;
+      <select id="mkRegion" aria-label="지역">${regionFilter('전체 지역')}</select>
+      <label class="ls-toggle"><input type="checkbox" id="mkInstallOnly"><span>설치 가능한 것만</span></label>`;
 
   const body = `
 ${boardTabs('', 'market.html')}
@@ -341,15 +371,40 @@ ${pageHero({
     eyebrow: '중고 장터 · 교회 물품',
     title: '교회에서 쓰던 것을<br>필요한 교회로',
     lead: '스피커와 믹서, 악기, 장의자까지 — 교회에서 나온 물건이 다른 교회로 갑니다. '
-      + '값과 인수인계는 두 교회가 직접 정합니다. 센터는 올라온 글을 살피고 게시판을 관리합니다.',
+      + '설치까지 필요하시면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다 — 물건값과 별개로 비용이 듭니다.',
     extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
+      <span class="ls-hero-pill is-key">설치 대행 <strong>별도 비용 · 상담 후 견적</strong></span>
     </div>
     <div class="ls-hero-actions">
       <a class="btn btn-gold btn-lg" href="#new" id="mkNewBtn">물건 올리기 ${icon('arrow', 'ico ico-sm')}</a>
       <a class="btn btn-outline btn-lg" href="#mine">내가 올린 물건</a>
     </div>`,
   })}
+
+<!-- ============ 설치 대행 안내 ============ -->
+<section class="section is-tint" id="mkInstall">
+  <div class="wrap">
+    ${sectionHead('설치 대행', '사는 것까지는 쉽습니다 — 다는 것이 일입니다',
+    '중고로 싸게 산 스피커도, 예배당 천장에 달고 배선을 정리하고 소리를 잡는 일은 남습니다. '
+    + '그 일을 센터 음향팀이 맡습니다 — 물건값에 포함되지 않는 별도 유상 서비스입니다. '
+    + '장터에 올라온 물건이 아니어도 부르실 수 있습니다.')}
+    <div class="ls-tiers">
+      ${tiers.map((t) => `<div class="ls-tier-card">
+        <h3>${esc(t.label)}</h3>
+        <p class="ls-tier-price">${t.price
+          ? t.price.toLocaleString('ko-KR') + '<span>원~</span>'
+          : '<span class="is-ask">상담 후 견적</span>'}</p>
+        <p>${esc(t.desc)}</p>
+      </div>`).join('\n      ')}
+    </div>
+    <p class="ls-tier-note">${esc(board.install.note)}</p>
+    <div class="ls-tier-cta">
+      <a class="btn btn-primary btn-lg" href="#install">설치 대행 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+      <a class="btn btn-outline btn-lg" href="services/sound.html">음향 지원 항목 보기</a>
+    </div>
+  </div>
+</section>
 
 ${boardShell({
     prefix: 'mk',
@@ -363,7 +418,8 @@ ${boardShell({
     tipTitle: '사시기 전에 확인하세요',
     tipBody: '중고 음향 장비는 <strong>소리를 직접 들어 보는 것</strong>이 가장 확실합니다. '
       + '스피커는 유닛 찢어짐, 믹서는 페이더 잡음, 무선 마이크는 <strong>국내에서 쓸 수 있는 주파수</strong>인지 '
-      + '(전파법상 허용 대역인지) 꼭 확인해 주세요. 가능하면 예배당에 가셔서 소리를 들어 보시는 편이 가장 확실합니다.',
+      + '(전파법상 허용 대역인지) 꼭 확인해 주세요. 판단이 어려우시면 설치 대행을 부르실 때 '
+      + '점검을 함께 요청하시면 됩니다.',
     fineprint: board.fineprint,
     mineEyebrow: '내 물건',
     mineTitle: '내가 올린 물건',
@@ -376,6 +432,102 @@ ${boardShell({
     submitLabel: '등록 신청하기',
   })}
 
+<!-- ============ 설치 대행 신청 ============ -->
+<section class="section" id="mkInstallForm" hidden>
+  <div class="wrap narrow">
+    <a class="ls-back" href="#list">← 목록으로</a>
+    ${sectionHead('설치 대행', '설치를 맡기시겠어요?',
+    '실측 후 견적을 확정해 드립니다. 신청만으로 비용이 생기지 않습니다.', 'left')}
+
+    <div class="ls-gate" id="mkIvGate" hidden>
+      <p>설치 신청은 로그인 후 이용하실 수 있습니다.</p>
+      <button type="button" class="btn btn-primary" id="mkIvGateLogin">로그인 / 회원가입</button>
+    </div>
+
+    <form class="ls-form" id="mkIvForm" novalidate hidden>
+      <input type="hidden" id="mkIvItemId" value="">
+      <div class="ls-iv-item" id="mkIvItem" hidden></div>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">1</span> 어디까지 맡기시겠어요?</legend>
+        <div class="ls-tier-pick">
+          ${tierCards}
+        </div>
+        <p class="ls-quote" id="mkIvQuote"></p>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">2</span> 어디에 설치하나요?</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="mkIvChurch">교회명 <em>*</em></label>
+            <input type="text" id="mkIvChurch" maxlength="40">
+          </div>
+          <div class="field">
+            <label for="mkIvRegion">지역 <em>*</em></label>
+            <select id="mkIvRegion">${regionForm()}</select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="mkIvAddress">주소 <em>*</em></label>
+          <input type="text" id="mkIvAddress" maxlength="80" placeholder="설치할 예배당 주소">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="mkIvFloor">층</label>
+            <input type="text" id="mkIvFloor" maxlength="20" placeholder="예: 3층">
+          </div>
+          <div class="field">
+            <label for="mkIvElevator">엘리베이터</label>
+            <select id="mkIvElevator">
+              <option value="">선택해 주세요</option>
+              <option>있습니다</option>
+              <option>없습니다</option>
+              <option>있지만 장비가 안 들어갑니다</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="mkIvWish">원하시는 날짜</label>
+          <input type="date" id="mkIvWish">
+          <small class="hint">주일과 수요일은 예배가 있어 피하는 편이 좋습니다.</small>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">3</span> 연락처</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="mkIvName">성함 <em>*</em></label>
+            <input type="text" id="mkIvName" maxlength="20" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="mkIvPhone">연락처 <em>*</em></label>
+            <input type="tel" id="mkIvPhone" placeholder="010-0000-0000" autocomplete="tel">
+          </div>
+        </div>
+        <div class="field">
+          <label for="mkIvHours">연락 가능 시간</label>
+          <input type="text" id="mkIvHours" maxlength="120" placeholder="예: 평일 낮 10–18시 · 주일 오전 제외">
+          ${hoursPicker('mkIvHours')}
+        </div>
+        <div class="field">
+          <label for="mkIvNote">남기실 말씀</label>
+          <textarea id="mkIvNote" rows="4" maxlength="1000"
+            placeholder="지금 쓰고 계신 장비, 예배당 크기(평), 언제까지 필요하신지 등을 적어 주시면 견적이 정확해집니다."></textarea>
+        </div>
+      </fieldset>
+
+      <p class="form-msg is-err" id="mkIvErr" hidden></p>
+      <p class="form-msg is-ok" id="mkIvOk" hidden></p>
+      <div class="ls-form-actions">
+        <button type="submit" class="btn btn-primary btn-lg" id="mkIvSubmit">설치 신청하기</button>
+        <a class="btn btn-outline btn-lg" href="#list">취소</a>
+      </div>
+    </form>
+  </div>
+</section>
+
 ${ctaBand('', {
     title: '장비를 새로 들이실 계획이신가요?',
     lead: '중고로 채울 것과 새로 사야 할 것을 함께 정리해 드립니다.',
@@ -385,7 +537,7 @@ ${ctaBand('', {
   write('market.html', layout({
     title: '교회 중고 장터 | 우리교회지원센터',
     description: '교회 음향 · 악기 · 집기 중고 장터. 사시는 교회가 원하면 '
-      + '값과 인수인계는 두 교회가 직접 정합니다.',
+      + '센터 음향팀이 설치를 맡습니다 (별도 비용).',
     base: '',
     active: 'market.html',
     body,
@@ -576,7 +728,7 @@ function buildGuesthouse(write) {
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">4</span> 연락처</legend>
+        <legend><span class="ls-step">5</span> 연락처</legend>
         <p class="ls-fs-lead">머무실 분이 직접 연락합니다. 센터는 중간에 서지 않습니다.</p>
         <div class="grid-2">
           <div class="field">
@@ -596,7 +748,7 @@ function buildGuesthouse(write) {
       </fieldset>
 
       <fieldset class="ls-fs">
-        <legend><span class="ls-step">5</span> 확인</legend>
+        <legend><span class="ls-step">6</span> 확인</legend>
         <div class="ls-vows">
           <label class="ls-chk is-wide"><input type="checkbox" id="ghVow1"><span>
             이 방은 <strong>실제로 우리 교회가 내어 줄 수 있는 공간</strong>이며,
