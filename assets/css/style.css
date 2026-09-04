@@ -3739,3 +3739,15 @@ a.tk-card:hover {
   .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
+
+/* 옮겨진 페이지 안내 */
+.moved {
+  padding: 34px 32px;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  text-align: center;
+}
+.moved p { font-size: 16px; line-height: 1.9; color: var(--ink-2); }
+.moved strong { color: var(--brand-700); }
+.moved-act { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
+.moved-fine { margin-top: 20px; font-size: 13.5px; color: var(--muted); }

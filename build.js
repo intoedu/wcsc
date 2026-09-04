@@ -519,6 +519,61 @@ ${ctaBand('', {
 }
 
 /* =========================================================
+   옮겨진 페이지
+
+   [교역자 구인] 은 지원 항목에서 게시판으로 옮겼습니다.
+   센터가 사람을 찾아 이어 주던 방식에서, 교회가 직접 공고를
+   올리고 사역자가 보고 연락하는 방식으로 바뀌었기 때문입니다.
+
+   옛 주소를 그냥 지우면 링크가 끊깁니다. 그렇다고 옛 내용을
+   그대로 두면 "저희가 연결해 드립니다" 라는 지금과 다른 말이
+   남습니다. 둘 다 나쁘므로, 옮겨 갔다는 안내만 두고 새 자리로
+   보냅니다.
+   ========================================================= */
+function buildMoved() {
+  const body = `
+${pageHero({
+  eyebrow: '자리를 옮겼습니다',
+  title: '교역자 구인은<br>게시판으로 옮겼습니다',
+  lead: '센터가 사람을 찾아 이어 드리던 것을, 교회가 직접 공고를 올리고 '
+    + '사역자가 보고 연락하는 방식으로 바꿨습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="moved">
+      <p>
+        아는 사람 안에서만 이어 주면 멀리 있는 교회는 끝내 사람을 못 구합니다.
+        그래서 공고를 열어 두고, <strong>사례비 · 사택 · 오가는 길</strong>을 미리 밝히도록
+        바꿨습니다. 등록비는 없습니다.
+      </p>
+      <div class="moved-act">
+        <a class="btn btn-primary btn-lg" href="../jobs.html">교역자 구인 게시판으로 ${icon('arrow', 'ico ico-sm')}</a>
+        <a class="btn btn-outline btn-lg" href="index.html">지원 항목 전체 보기</a>
+      </div>
+      <p class="moved-fine">잠시 뒤 게시판으로 자동으로 넘어갑니다.</p>
+    </div>
+  </div>
+</section>
+`;
+
+  write(
+    'services/staffing.html',
+    layout({
+      title: '교역자 구인은 게시판으로 옮겼습니다 | 우리교회지원센터',
+      description: '교역자 구인은 지원 항목에서 게시판으로 옮겼습니다. '
+        + '교회가 직접 공고를 올리고 사역자가 보고 연락합니다.',
+      base: '../',
+      active: '',
+      body,
+      /* 화면을 먼저 보여 드린 뒤 넘깁니다. 바로 튕기면 무슨 일인지
+         모른 채 넘어가고, 뒤로 가기도 눌리지 않습니다. */
+      head: '<meta http-equiv="refresh" content="6; url=../jobs.html">',
+    })
+  );
+}
+
+/* =========================================================
    개인정보 처리방침
 
    이 페이지는 실제로 저장되는 것에서 뽑아 적었습니다 — 표와
@@ -2146,7 +2201,6 @@ function buildSearchIndex() {
     'services/smartchurch.html': '앱 어플 모바일 주보앱 출석',
     'services/shorts.html': '영상 편집 유튜브 릴스 설교영상',
     'services/design.html': '현수막 배너 포스터 명함 로고 인쇄 디자인',
-    'services/staffing.html': '전도사 목사 사역자 청빙 채용 구인 교역자',
     'services/realestate.html': '교회 매매 임대 상가 건물 부동산 이전',
     'services/sharing.html': '나눔집 소그룹 교재 순모임 성경공부',
     'services/intooffice.html': '행정 서류 결재 문서 전자결재 사무',
@@ -2161,7 +2215,7 @@ function buildSearchIndex() {
     'market.html': '중고 스피커 마이크 믹서 앰프 악기 피아노 의자 강대상 싸게 사기 팔기',
     'guesthouse.html': '사택 선교관 숙소 숙박 방 머물 곳 선교사 유학생 게스트하우스 잠자리',
     'tickets.html': '집회 수련회 세미나 예매 티켓 신청 참가 좌석',
-    'jobs.html': '전도사 목사 반주자 찬양인도자 간사 채용 구인 구직 사역지 청빙 사택 사례비',
+    'jobs.html': '전도사 목사 반주자 찬양인도자 간사 채용 구인 구직 사역지 청빙 사택 사례비 교역자 부교역자 교육전도사',
   };
   T.BOARDS.forEach((b) => add({
     url: b.href, title: b.label, desc: b.sub, cat: '게시판', kw: BOARD_KW[b.href] || '',
@@ -2298,6 +2352,7 @@ function main() {
   buildStatus();
   buildContact();
   buildPrivacy();
+  buildMoved();
   buildListings();
   Boards.buildMarket(write);
   Boards.buildGuesthouse(write);

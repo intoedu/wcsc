@@ -316,6 +316,7 @@ function layout(o) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="${base}assets/css/style.css${ver('assets/css/style.css')}">
   <link rel="stylesheet" href="${base}assets/css/auth.css${ver('assets/css/auth.css')}">
+  ${o.head || ''}
 </head>
 <body${o.bodyClass ? ` class="${o.bodyClass}"` : ''}${o.serviceId ? ` data-service="${o.serviceId}"` : ''}>
   ${header(base, o.active)}
