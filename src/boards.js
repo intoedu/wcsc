@@ -300,8 +300,9 @@ function buildMarket(write) {
         <legend><span class="ls-step">3</span> 설치는 센터가 맡아도 될까요?</legend>
         <p class="ls-fs-lead">
           음향 · 영상 · 조명은 사고 나서 <strong>다는 일</strong>이 진짜 일입니다.
-          사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다
-          (설치비는 사시는 교회가 냅니다 — 파시는 분께 드는 비용은 없습니다).
+          사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다.
+          설치는 물건값과 <strong>별개로 비용이 드는 서비스</strong>이며,
+          그 비용은 사시는 교회가 냅니다 — 파시는 분께 드는 비용은 없습니다.
         </p>
         <label class="ls-chk is-wide"><input type="checkbox" id="mkFInstallOk" checked><span>
           <strong>설치 대행을 안내해도 좋습니다</strong> — 글에 [설치 맡기기] 버튼이 붙습니다.</span></label>
@@ -370,10 +371,10 @@ ${pageHero({
     eyebrow: '중고 장터 · 교회 물품',
     title: '교회에서 쓰던 것을<br>필요한 교회로',
     lead: '스피커와 믹서, 악기, 장의자까지 — 교회에서 나온 물건이 다른 교회로 갑니다. '
-      + '사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
+      + '설치까지 필요하시면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다 — 물건값과 별개로 비용이 듭니다.',
     extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill is-key">설치 대행 <strong>상담 후 견적</strong></span>
+      <span class="ls-hero-pill is-key">설치 대행 <strong>별도 비용 · 상담 후 견적</strong></span>
     </div>
     <div class="ls-hero-actions">
       <a class="btn btn-gold btn-lg" href="#new" id="mkNewBtn">물건 올리기 ${icon('arrow', 'ico ico-sm')}</a>
@@ -386,7 +387,8 @@ ${pageHero({
   <div class="wrap">
     ${sectionHead('설치 대행', '사는 것까지는 쉽습니다 — 다는 것이 일입니다',
     '중고로 싸게 산 스피커도, 예배당 천장에 달고 배선을 정리하고 소리를 잡는 일은 남습니다. '
-    + '그 일을 센터 음향팀이 맡습니다. 장터에 올라온 물건이 아니어도 부르실 수 있습니다.')}
+    + '그 일을 센터 음향팀이 맡습니다 — 물건값에 포함되지 않는 별도 유상 서비스입니다. '
+    + '장터에 올라온 물건이 아니어도 부르실 수 있습니다.')}
     <div class="ls-tiers">
       ${tiers.map((t) => `<div class="ls-tier-card">
         <h3>${esc(t.label)}</h3>
@@ -535,7 +537,7 @@ ${ctaBand('', {
   write('market.html', layout({
     title: '교회 중고 장터 | 우리교회지원센터',
     description: '교회 음향 · 악기 · 집기 중고 장터. 사시는 교회가 원하면 '
-      + '센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
+      + '센터 음향팀이 설치를 맡습니다 (별도 비용).',
     base: '',
     active: 'market.html',
     body,
