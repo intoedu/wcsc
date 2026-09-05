@@ -32,7 +32,8 @@ window.CAPSDB = (function () {
 
   var COLLECTIONS = ['users', 'requests', 'customers', 'subscriptions', 'invoices',
     'serviceContent', 'settings', 'editConsents', 'listings',
-    'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders'];
+    'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders',
+    'payments', 'jobPosts', 'searchLogs'];
 
   /* 교회가 알려준 정보 — 고치려면 그 교회의 승인이 필요합니다.
      (firestore.rules 의 churchInfoFields() 와 같은 목록을 유지해야 합니다) */
@@ -88,6 +89,9 @@ window.CAPSDB = (function () {
 
   var LISTING_STATUS = {
     pending: '승인 대기',
+    // 저장되는 값은 아니고, 화면에서만 쓰는 이름입니다.
+    // pending 이면서 전에 승인받은 적이 있는 글 = 수정 재검토입니다.
+    edit_pending: '수정 승인 요청',
     awaiting_payment: '입금 대기',
     published: '게시중',
     rejected: '반려',
@@ -232,14 +236,15 @@ window.CAPSDB = (function () {
     both: '직접 오셔도, 보내 드려도 됩니다',
   };
 
-  /* 설치 대행 — 센터가 실제로 돈을 받는 부분입니다.
+  /* 설치 대행 — 센터가 따로 비용을 받고 맡는 일입니다.
+     값은 대표님이 정하십니다. price 를 비워 두면 화면에 [상담 후 견적] 으로 나옵니다.
      (src/data/site.js 의 marketBoard.install 과 같은 값을 유지해야 합니다) */
   var INSTALL_TIERS = {
-    pickup: { label: '운반만', price: 100000,
+    pickup: { label: '운반만', price: 0,
       desc: '판매자 교회에서 싣고 와 사시는 교회 앞까지 내려 드립니다.' },
-    install: { label: '설치 · 배선', price: 150000,
+    install: { label: '설치 · 배선', price: 0,
       desc: '거치 · 배선 · 전원 정리까지. 소리가 나는 상태로 넘겨 드립니다.' },
-    tuning: { label: '설치 + 음향 튜닝', price: 300000,
+    tuning: { label: '설치 + 음향 튜닝', price: 0,
       desc: '예배당에서 실제로 소리를 잡아 드립니다 (하울링 · 이퀄라이징 · 프리셋 저장).' },
   };
 
@@ -325,6 +330,58 @@ window.CAPSDB = (function () {
     checked_in: '입장 확인',
     canceled: '취소',
   };
+
+  /* ---------- 교역자 구인 공고 ---------- */
+
+  var JOB_STATUS = {
+    pending: '확인 대기',
+    published: '모집중',
+    rejected: '반려',
+    hidden: '게시 중지',
+    done: '모집 완료',
+  };
+
+  /* '기타'를 고르면 직접 입력칸이 열립니다. */
+  var JOB_POSITIONS = {
+    senior: '담임목사',
+    associate: '부목사',
+    assistant: '전도사',
+    education: '교육전도사',
+    worship: '찬양인도자',
+    pianist: '반주자',
+    staff: '행정 간사',
+    other: '기타',
+  };
+
+  var JOB_EMPLOYMENT = {
+    full: '전임',
+    part: '파트',
+    weekend: '주말 사역',
+    short: '단기 · 대체',
+  };
+
+  var JOB_PAY_TYPE = {
+    monthly: '월 사례비',
+    weekly: '주 단위',
+    per_service: '집회 · 예배 건별',
+    negotiable: '면접 후 협의',
+  };
+
+  /* 사택은 갈지 말지를 가르는 조건이라 따로 받습니다. */
+  var JOB_HOUSING = {
+    provided: '사택 제공',
+    support: '주거비 지원',
+    negotiable: '협의',
+    none: '없음',
+  };
+
+  var JOB_DEPARTMENTS = ['영아 · 유아부', '유치부', '유년 · 초등부', '중고등부',
+    '청년부', '장년 · 남녀전도회', '찬양팀', '전체 · 협력', '기타'];
+
+  var JOB_SIZES = ['50명 미만', '50~150명', '150~500명', '500~1,000명', '1,000명 이상'];
+
+  /** 구인 공고 사진 최대 장수 */
+  var JOB_PHOTO_MAX = 10;
 
   /** 집회 사진 최대 장수 — 포스터를 여러 장 올리는 집회가 많아 넉넉히 둡니다. */
   var EVENT_PHOTO_MAX = 20;
@@ -503,11 +560,11 @@ window.CAPSDB = (function () {
           assignee: 'demo-owner', memo: '현장 방문 일정 조율 중 (다음 주 화요일 예정).',
           tasks: [{ text: '현장 방문 진단', done: true }, { text: '진단 보고서 작성', done: false }] },
         { id: 'req-3', code: 'CAPS-260728-8820', createdAt: d(16), status: 'progress',
-          services: ['staffing'], church_name: '한빛교회', denomination: '기장',
+          services: ['sound'], church_name: '한빛교회', denomination: '기장',
           contact_name: '박한빛', contact_role: '행정 간사', phone: '010-4444-5555', email: 'hanbit@example.com',
           location: '서울 은평구', size: '50~150명', budget: '', timeline: '1개월 이내',
           message: '교육 전도사 청빙 공고를 부탁드립니다.', prefer: '이메일', marketing: false,
-          extra: { staffing__position: '교육 전도사', staffing__employment_type: '파트타임' },
+          extra: {},
           assignee: 'demo-owner', memo: '공고 배포 완료. 지원자 3명 정리 중.',
           tasks: [{ text: '공고문 작성', done: true }, { text: '공고 배포', done: true }, { text: '지원자 비교표 전달', done: false }],
           customerId: 'cust-2' },
@@ -1292,6 +1349,9 @@ window.CAPSDB = (function () {
       guestHouses: 'guest_houses',
       events: 'events',
       ticketOrders: 'ticket_orders',
+      payments: 'payments',
+      jobPosts: 'job_posts',
+      searchLogs: 'search_logs',
     };
 
     /** 문서 통째로 jsonb 한 칸에 담는 표 (내용이 자유로워서) */
@@ -1301,7 +1361,7 @@ window.CAPSDB = (function () {
     var PK = { editConsents: 'customer_id' };
 
     /** 비어 있으면 '' 가 아니라 null 이어야 하는 열 (uuid) */
-    var UUID_KEYS = ['userId', 'customerId', 'assigneeId', 'itemId', 'eventId'];
+    var UUID_KEYS = ['userId', 'customerId', 'assigneeId', 'itemId', 'eventId', 'targetId'];
 
     function snake(k) {
       return k.replace(/[A-Z]/g, function (c) { return '_' + c.toLowerCase(); });
@@ -1801,6 +1861,26 @@ window.CAPSDB = (function () {
         });
       },
 
+      /**
+       * Edge Function 호출 (Supabase 전용).
+       * 결제 승인처럼 비밀키가 필요한 일은 브라우저에서 할 수 없어
+       * 서버 쪽 함수에 맡깁니다.
+       */
+      fn: function (name, body) {
+        return guard().then(function () {
+          return sb.functions.invoke(name, { body: body || {} }).then(function (res) {
+            if (res.error) {
+              // 함수가 스스로 거절한 경우(아직 연결 안 됨 등)의 안내를 살려 냅니다.
+              var msg = (res.data && res.data.message) || say(res.error);
+              var err = new Error(msg);
+              err.code = (res.data && res.data.error) || '';
+              throw err;
+            }
+            return res.data;
+          });
+        });
+      },
+
       files: {
         upload: function (path, file) {
           return guard().then(function () {
@@ -1901,6 +1981,15 @@ window.CAPSDB = (function () {
     GUEST_AMENITIES: GUEST_AMENITIES,
     GUEST_LANGUAGES: GUEST_LANGUAGES,
     GUEST_PHOTO_MAX: GUEST_PHOTO_MAX,
+
+    JOB_STATUS: JOB_STATUS,
+    JOB_POSITIONS: JOB_POSITIONS,
+    JOB_EMPLOYMENT: JOB_EMPLOYMENT,
+    JOB_PAY_TYPE: JOB_PAY_TYPE,
+    JOB_HOUSING: JOB_HOUSING,
+    JOB_DEPARTMENTS: JOB_DEPARTMENTS,
+    JOB_SIZES: JOB_SIZES,
+    JOB_PHOTO_MAX: JOB_PHOTO_MAX,
 
     EVENT_STATUS: EVENT_STATUS,
     EVENT_CATEGORIES: EVENT_CATEGORIES,
@@ -2098,6 +2187,13 @@ window.CAPSDB = (function () {
       if (!row) return { status: 'none', label: '-', cls: 'none', live: false, days: null, up: null };
       var status = row.status;
       if (status === 'published' && !api.listingLive(row)) status = 'expired';
+
+      /* 새 등록과 수정 재검토는 봐야 할 것이 다릅니다.
+         새 등록  : 서류부터 처음 확인 (등록비도 아직)
+         수정 재검토: 이미 확인한 글 · 등록비도 받았음 → 바뀐 내용만 봅니다
+         전에 승인받은 적이 있으면(firstPublishedAt) 수정 재검토로 봅니다. */
+      var isEdit = row.status === 'pending' && !!(row.firstPublishedAt || row.editRequestedAt);
+      if (isEdit) status = 'edit_pending';
       // 남은 날수(days)는 기한이 있던 옛 글에만 있습니다.
       var days = null;
       if (status === 'published' && row.expiresAt) {
@@ -2116,6 +2212,11 @@ window.CAPSDB = (function () {
         label: LISTING_STATUS[status] || status,
         cls: status,
         live: status === 'published',
+        // 저장된 값 그대로 (pending 등). 위 status 는 화면용 이름입니다.
+        rawStatus: row.status,
+        isEdit: isEdit,
+        editRequestedAt: row.editRequestedAt || '',
+        firstPublishedAt: row.firstPublishedAt || '',
         days: days,
         up: up,
         kindLabel: LISTING_KIND[row.kind] || row.kind || '-',
@@ -2307,6 +2408,8 @@ window.CAPSDB = (function () {
         reviewedBy: '',
         reviewedAt: '',
         publishedAt: '',
+        firstPublishedAt: '',
+        editRequestedAt: '',
         expiresAt: '',
         hiddenAt: '',
         createdAt: nowIso(),
@@ -2320,7 +2423,11 @@ window.CAPSDB = (function () {
      * 고친 글은 다시 확인해야 하므로 '승인 대기'로 돌아갑니다.
      * (보안 규칙도 같은 조건을 요구합니다.)
      */
-    saveListing: function (id, data) {
+    saveListing: function (id, data, prev) {
+      /* 전에 승인받은 적이 있는 글이면 "수정 승인 요청" 으로 남깁니다.
+         관리자 화면에서 새 등록과 갈라 보여 주기 위한 표시입니다.
+         (firstPublishedAt 은 센터만 다루므로 여기서 건드리지 않습니다) */
+      var wasLive = !!(prev && (prev.firstPublishedAt || prev.publishedAt));
       var patch = Object.assign({}, data, {
         status: 'pending',
         rejectNote: '',
@@ -2330,6 +2437,7 @@ window.CAPSDB = (function () {
         expiresAt: '',
         updatedAt: nowIso(),
       });
+      if (wasLive) patch.editRequestedAt = nowIso();
       return adapter.update('listings', id, patch);
     },
 
@@ -2366,6 +2474,9 @@ window.CAPSDB = (function () {
       var patch = {
         status: 'published',
         publishedAt: nowIso(),
+        // 처음 게시한 시각은 한 번만 채우고 그대로 둡니다.
+        firstPublishedAt: (o.row && o.row.firstPublishedAt) || nowIso(),
+        editRequestedAt: '',
         expiresAt: days > 0 ? new Date(Date.now() + days * 864e5).toISOString() : '',
         rejectNote: '',
         hiddenAt: '',
@@ -3182,6 +3293,263 @@ window.CAPSDB = (function () {
     /** 관리자 · 주최자 → 입장 확인 */
     checkInTicket: function (id) {
       return adapter.update('ticketOrders', id, { status: 'checked_in', updatedAt: nowIso() });
+    },
+
+    /* =====================================================
+       찾은 말 기록 (searchLogs)
+
+       로그인하신 분만 남습니다. 로그인하지 않은 분은 아무것도
+       저장하지 않습니다 — 남길 자리(계정)가 없기 때문입니다.
+
+       무엇을 찾으셨는지는 개인정보라, 본인만 읽고 본인만 지울 수
+       있게 해 두었습니다. 직원도 볼 수 없습니다.
+       ===================================================== */
+
+    /**
+     * 찾은 말을 남깁니다.
+     *
+     * 글자를 칠 때마다 남기지 않습니다 — "교", "교역", "교역자" 가
+     * 다 쌓이면 목록이 쓸모없어집니다. 실제로 결과를 눌러 들어가신
+     * 말만 남깁니다.
+     *
+     * 실패해도 조용히 넘어갑니다. 기록을 남기지 못한 것 때문에
+     * 찾기가 멈추면 안 됩니다.
+     */
+    logSearch: function (q) {
+      var me = adapter.auth.current();
+      var word = String(q || '').trim();
+      if (!me || !word || word.length > 100) return Promise.resolve();
+      if (!adapter.rpc) return Promise.resolve();
+      return adapter.rpc('log_search', { p_q: word }).catch(function () { return null; });
+    },
+
+    /** 최근에 찾으신 말 (새것부터) */
+    recentSearches: function (limit) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('searchLogs', { where: { userId: me.id } })
+        .then(function (rows) {
+          return (rows || [])
+            .sort(function (a, b) {
+              return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+            })
+            .slice(0, Math.max(1, Number(limit) || 8))
+            .map(function (r) { return r.q; });
+        })
+        .catch(function () { return []; });
+    },
+
+    /** 기록을 한 번에 지웁니다 */
+    clearSearches: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve();
+      return adapter.list('searchLogs', { where: { userId: me.id } })
+        .then(function (rows) {
+          return Promise.all((rows || []).map(function (r) {
+            return adapter.remove('searchLogs', r.id);
+          }));
+        });
+    },
+
+    /* =====================================================
+       교역자 구인 공고 (jobPosts)
+
+       교회가 사진과 글로 공고를 올리고, 사역자가 직접 보고 연락합니다.
+       지원은 아직 사이트 안에서 받지 않습니다 — 공고의 연락처로 갑니다.
+       ===================================================== */
+
+    jobLive: function (row) {
+      return !!row && row.status === 'published';
+    },
+
+    jobView: function (row) {
+      if (!row) return { status: 'none', label: '-', cls: 'none', live: false, photos: [] };
+      var pos = row.position === 'other'
+        ? (String(row.positionOther || '').trim() || '기타')
+        : (JOB_POSITIONS[row.position] || row.position || '');
+      // 마감일이 지났으면 목록에서 조용히 내려갑니다.
+      var closed = !!row.closesAt && Date.now() > new Date(row.closesAt).getTime();
+      var status = (row.status === 'published' && closed) ? 'done' : row.status;
+      return {
+        status: status,
+        label: JOB_STATUS[status] || status,
+        cls: status,
+        live: status === 'published',
+        closed: closed,
+        positionLabel: pos,
+        employmentLabel: JOB_EMPLOYMENT[row.employment] || '',
+        housingLabel: JOB_HOUSING[row.housing] || '',
+        photos: Array.isArray(row.photos) ? row.photos : [],
+      };
+    },
+
+    /**
+     * 사례비 한 줄.
+     * "협의" 만 적힌 공고는 보시는 분이 갈지 말지를 정할 수 없어,
+     * 범위가 있으면 반드시 숫자로 보여 줍니다.
+     */
+    jobPay: function (row) {
+      if (!row) return '-';
+      if (row.payType === 'negotiable') return '면접 후 협의';
+      var unit = row.payType === 'weekly' ? '주'
+        : row.payType === 'per_service' ? '건당' : '월';
+      var lo = Number(row.payMin) || 0;
+      var hi = Number(row.payMax) || 0;
+      if (!lo && !hi) return '면접 후 협의';
+      if (lo && hi && hi > lo) return unit + ' ' + api.money(lo) + '~' + api.money(hi) + '원';
+      return unit + ' ' + api.money(lo || hi) + '원';
+    },
+
+    submitJobPost: function (data) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('공고를 올리려면 로그인해 주세요.'));
+      var record = Object.assign({
+        churchName: '', denomination: '', churchSize: '', region: '', addressRough: '',
+        title: '', position: 'assistant', positionOther: '', department: '',
+        employment: 'full', headcount: 1,
+        payType: 'monthly', payMin: 0, payMax: 0, payNote: '',
+        housing: 'none', insurance: false,
+        commuteNote: '', workDays: '', startDate: '', closesAt: '',
+        qualification: '', desc: '', photos: [],
+        contactName: '', contactPhone: '', contactEmail: '', contactHours: '',
+      }, data, {
+        userId: me.id,
+        userEmail: me.email || '',
+        status: 'pending',
+        applyMode: 'contact',
+        rejectNote: '', views: 0,
+        reviewedBy: '', reviewedAt: '', publishedAt: '', hiddenAt: '',
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
+      return adapter.add('jobPosts', record);
+    },
+
+    saveJobPost: function (id, data) {
+      return adapter.update('jobPosts', id, Object.assign({}, data, {
+        status: 'pending', rejectNote: '',
+        reviewedBy: '', reviewedAt: '', publishedAt: '',
+        updatedAt: nowIso(),
+      }));
+    },
+
+    approveJobPost: function (id) {
+      var me = adapter.auth.current();
+      return adapter.update('jobPosts', id, {
+        status: 'published', publishedAt: nowIso(), rejectNote: '', hiddenAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    rejectJobPost: function (id, note) {
+      var me = adapter.auth.current();
+      var reason = String(note || '').trim();
+      if (!reason) return Promise.reject(new Error('반려 사유를 적어 주세요. 교회에 그대로 보입니다.'));
+      return adapter.update('jobPosts', id, {
+        status: 'rejected', rejectNote: reason, publishedAt: '',
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    hideJobPost: function (id, note) {
+      var me = adapter.auth.current();
+      return adapter.update('jobPosts', id, {
+        status: 'hidden', hiddenAt: nowIso(), rejectNote: String(note || '').trim(),
+        reviewedBy: me ? me.id : '', reviewedAt: nowIso(), updatedAt: nowIso(),
+      });
+    },
+
+    /** 사람을 구했습니다 — 교회가 직접 내립니다. */
+    markJobDone: function (id) {
+      return adapter.update('jobPosts', id, { status: 'done', updatedAt: nowIso() });
+    },
+
+    deleteJobPost: function (row) {
+      var id = typeof row === 'string' ? row : (row && row.id);
+      if (!id) return Promise.resolve();
+      var doc = typeof row === 'object' ? row : null;
+      var paths = (doc && Array.isArray(doc.photos) ? doc.photos : [])
+        .filter(function (ph) { return ph && ph.path; }).map(function (ph) { return ph.path; });
+      return adapter.remove('jobPosts', id).then(function () {
+        return Promise.all(paths.map(function (p) {
+          return adapter.files.remove(p).catch(function () { return null; });
+        }));
+      });
+    },
+
+    publishedJobPosts: function () {
+      return adapter.list('jobPosts', { where: { status: 'published' } })
+        .then(function (rows) {
+          return rows.filter(function (r) { return !api.jobView(r).closed; });
+        })
+        .catch(function () { return []; });
+    },
+
+    myJobPosts: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('jobPosts', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    allJobPosts: function () {
+      return adapter.list('jobPosts');
+    },
+
+    /* =====================================================
+       카드 결제 (payments) — 아직 켜지 않았습니다
+
+       site.payment.enabled 가 false 인 동안에는 paymentEnabled() 가
+       거짓이라 화면에 결제 버튼이 아예 그려지지 않습니다.
+       PG 계약이 끝나 그 값을 true 로 바꾸면 아래 흐름이 그대로 돕니다.
+
+         1. openPayment()   서버가 결제 건을 열고 금액을 정합니다
+                            (브라우저가 보낸 금액은 쓰지 않습니다)
+         2. PG 결제창        브라우저가 띄웁니다 (공개 값만 씁니다)
+         3. confirmPayment() Edge Function 이 PG 에 다시 물어 확인하고,
+                            금액이 맞으면 매물을 바로 게시합니다
+       ===================================================== */
+
+    /** 카드 결제를 쓸 수 있는 상태인지 */
+    paymentEnabled: function () {
+      var p = window.CAPS_PAYMENT || {};
+      return !!(p.enabled && p.provider && p.storeId);
+    },
+
+    /** 결제 설정 (화면이 안내 문구를 꺼내 쓸 때) */
+    paymentConfig: function () {
+      return window.CAPS_PAYMENT || {};
+    },
+
+    /** 결제 건을 엽니다 — 금액은 서버가 정합니다. */
+    openPayment: function (kind, targetId) {
+      if (!adapter.rpc) {
+        return Promise.reject(new Error('카드 결제는 실제 서버에 연결된 뒤에 쓸 수 있습니다.'));
+      }
+      return adapter.rpc('open_payment', { p_kind: kind, p_target: targetId });
+    },
+
+    /** 결제창이 끝난 뒤 서버에 확인을 맡깁니다. */
+    confirmPayment: function (orderId, providerPaymentId) {
+      if (!adapter.fn) {
+        return Promise.reject(new Error('카드 결제는 실제 서버에 연결된 뒤에 쓸 수 있습니다.'));
+      }
+      return adapter.fn('payment-confirm', {
+        orderId: orderId,
+        paymentId: providerPaymentId,
+      });
+    },
+
+    /** 내 결제 내역 */
+    myPayments: function () {
+      var me = adapter.auth.current();
+      if (!me) return Promise.resolve([]);
+      return adapter.list('payments', { where: { userId: me.id } })
+        .catch(function () { return []; });
+    },
+
+    /** 관리자 화면 — 전체 결제 내역 */
+    allPayments: function () {
+      return adapter.list('payments').catch(function () { return []; });
     },
 
     /** 관리자 화면에 들어올 수 있는 계정인지 */

@@ -1,7 +1,7 @@
 -- =========================================================
 -- 우리교회지원센터 (WCSC) — Supabase 전체 설정
 --
--- WCSC_SUPABASE_VERSION: 20260828040000
+-- WCSC_SUPABASE_VERSION: 20260903010000
 --
 -- 새 Supabase 프로젝트를 쓰실 때는 이 파일 하나를 SQL Editor 에 통째로
 -- 붙여넣고 실행하시면 됩니다. 표 · 접근 규칙(RLS) · 저장소 버킷 ·
@@ -941,6 +941,74 @@ create policy listings_update_own on public.listings for update to authenticated
 
 
 -- ---------------------------------------------------------
+-- 20260817072000_wcsc_listing_edit_review.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 매물 수정 승인 요청을 새 등록과 구분합니다
+--
+-- 등록자가 이미 게시된 글을 고치면 다시 pending 으로 돌아가 재검토를 받는데,
+-- 관리자 화면에서는 처음 올라온 글과 똑같이 "승인 대기" 로만 보였습니다.
+-- 둘은 봐야 할 것이 다릅니다 —
+--   · 새 등록      : 서류부터 처음 확인해야 합니다 (등록비도 아직 안 받았습니다)
+--   · 수정 재검토  : 이미 확인한 글이고 등록비도 받았습니다. 바뀐 내용만 봅니다.
+--
+-- 그래서 두 칸을 둡니다.
+--   first_published_at  처음 게시한 시각. 한 번 채우면 지우지 않습니다 —
+--                       "전에 승인받은 적이 있는 글" 이라는 표시입니다.
+--   edit_requested_at   수정 승인을 요청한 시각. 게시하면 비웁니다.
+--
+-- published_at 은 수정 요청 때 비워집니다(내려가 있는 상태이므로).
+-- 그래서 그것만으로는 과거 승인 여부를 알 수 없어 칸을 따로 둡니다.
+-- =========================================================
+
+alter table public.listings
+  add column if not exists first_published_at text not null default '',
+  add column if not exists edit_requested_at  text not null default '';
+
+comment on column public.listings.first_published_at is
+  '처음 게시한 시각. 지우지 않습니다 — 전에 승인받은 글인지 가리는 표시입니다.';
+comment on column public.listings.edit_requested_at is
+  '수정 승인을 요청한 시각. 게시하면 비웁니다.';
+
+-- 이미 게시된 글은 그 게시일을 첫 게시일로 봅니다.
+update public.listings
+   set first_published_at = published_at
+ where first_published_at = '' and published_at <> '';
+
+create index if not exists listings_edit_requested_idx
+  on public.listings (edit_requested_at)
+  where edit_requested_at <> '';
+
+/* 첫 게시일은 센터만 다룹니다 — 등록자가 고쳐서 "새 글" 인 척하거나
+   반대로 "전에 승인받았다" 고 주장할 수 없게 막습니다.
+   (edit_requested_at 은 등록자가 수정을 요청할 때 채우므로 열어 둡니다) */
+create or replace function public.listings_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.no_end_user() or public.can('customers') then return new; end if;
+  if new.user_id is distinct from old.user_id then
+    raise exception '등록자를 바꿀 수 없습니다.' using errcode = '42501';
+  end if;
+  if new.fee is distinct from old.fee then
+    raise exception '등록비 상태는 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  if new.published_at is distinct from old.published_at
+     or new.first_published_at is distinct from old.first_published_at
+     or new.reviewed_by is distinct from old.reviewed_by
+     or new.expires_at is distinct from old.expires_at then
+    raise exception '게시 정보는 센터만 바꿀 수 있습니다.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+
+-- ---------------------------------------------------------
 -- 20260818014534_wcsc_listing_edit_review.sql
 -- ---------------------------------------------------------
 
@@ -1005,6 +1073,188 @@ $$;
 
 -- 함수 실행 권한은 다른 가드들과 같게 맞춰 둡니다 (트리거만 부릅니다).
 revoke execute on function public.listings_guard() from public, anon, authenticated;
+
+
+-- ---------------------------------------------------------
+-- 20260822120000_wcsc_membership_invite.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 요금제 가입 · 초대 할인
+--
+-- 결제는 계좌 입금입니다. 카드 자동결제가 없으므로
+-- "청구서를 만들고 → 입금을 확인하면 → 기간을 늘린다" 세 걸음으로 굴러갑니다.
+-- 청구는 이미 있는 invoices 표를 그대로 씁니다.
+--
+-- 기존 subscriptions 표는 항목별(홈페이지·인투오피스) 구독이라 그대로 두고,
+-- 교회 단위 요금제는 memberships 로 따로 둡니다. 한 교회가 요금제에 가입한 채
+-- 항목 구독을 따로 가질 수 있어야 하기 때문입니다.
+-- =========================================================
+
+/* ---------- 요금제 가입 ---------- */
+create table public.memberships (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  customer_id   uuid references public.customers(id) on delete set null,
+  church_name   text not null default '',
+  contact_name  text not null default '',
+  contact_phone text not null default '',
+
+  -- community · starter · basic · ministry · full
+  plan          text not null default 'community',
+  cycle         text not null default 'month' check (cycle in ('month', 'year')),
+
+  -- trial   : 30일 무료 체험 중 (결제수단 없음)
+  -- pending : 첫 청구서를 드렸고 입금을 기다리는 중
+  -- active  : 입금 확인, 이용 중
+  -- overdue : 기간이 지났는데 입금이 없음
+  -- ended   : 해지 (커뮤니티 무료로 내려감)
+  status        text not null default 'trial'
+                check (status in ('trial', 'pending', 'active', 'overdue', 'ended')),
+
+  trial_started text not null default '',
+  trial_ends    text not null default '',
+  paid_until    text not null default '',   -- 이 날짜까지 이용 (입금 확인 때 늘어납니다)
+
+  -- 할인 (퍼센트). 초대 할인은 invites 를 세어 다시 계산합니다.
+  invite_pct    integer not null default 0 check (invite_pct between 0 and 30),
+  small_church  boolean not null default false,   -- 성도 50명 이하 절반 감면
+  discount_memo text not null default '',
+
+  invite_code   text not null default '',         -- 이 교회가 남에게 주는 코드
+  invited_by    text not null default '',         -- 이 교회가 쓴 남의 코드
+
+  memo          text not null default '',
+  created_at    text not null default '',
+  inserted_at   timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+create unique index memberships_user_id_key on public.memberships (user_id);
+create unique index memberships_invite_code_key on public.memberships (invite_code)
+  where invite_code <> '';
+create index memberships_status_idx on public.memberships (status);
+create index memberships_plan_idx on public.memberships (plan);
+
+comment on table public.memberships is '교회 단위 요금제 가입. 결제는 계좌 입금이라 paid_until 을 입금 확인 때 늘립니다.';
+
+/* ---------- 초대 ---------- */
+create table public.invites (
+  id           uuid primary key default gen_random_uuid(),
+  code         text not null,                     -- 초대한 교회의 invite_code
+  inviter_id   uuid not null references auth.users(id) on delete cascade,
+  invitee_id   uuid references auth.users(id) on delete set null,
+  invitee_name text not null default '',
+
+  -- joined : 가입함 (아직 3개월 미만)  · held : 3개월을 채워 할인이 굳음
+  -- cancelled : 3개월 안에 해지 — 할인에서 빠집니다
+  status       text not null default 'joined'
+               check (status in ('joined', 'held', 'cancelled')),
+  joined_at    text not null default '',
+  holds_at     text not null default '',          -- 이 날짜가 지나면 held
+  created_at   text not null default '',
+  inserted_at  timestamptz not null default now()
+);
+create unique index invites_invitee_key on public.invites (invitee_id)
+  where invitee_id is not null;
+create index invites_inviter_idx on public.invites (inviter_id);
+create index invites_code_idx on public.invites (code);
+
+comment on table public.invites is '초대 관계. 초대받은 교회가 3개월을 채워야(held) 할인이 이어집니다.';
+
+/* ---------- 요금제 열 잠그기 ----------
+   교회가 스스로 요금제를 올리거나 할인을 넣을 수 있으면 안 됩니다.
+   Postgres 의 with check 는 옛 행(OLD)을 못 보므로 트리거로 막습니다. */
+create or replace function public.memberships_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- 서비스 역할(관리 작업)과 직원은 그대로 통과합니다.
+  if auth.role() = 'service_role' or public.is_staff() then
+    return new;
+  end if;
+
+  if new.plan is distinct from old.plan
+     or new.cycle is distinct from old.cycle
+     or new.status is distinct from old.status
+     or new.paid_until is distinct from old.paid_until
+     or new.trial_ends is distinct from old.trial_ends
+     or new.invite_pct is distinct from old.invite_pct
+     or new.small_church is distinct from old.small_church
+     or new.invite_code is distinct from old.invite_code
+     or new.user_id is distinct from old.user_id
+  then
+    raise exception '요금제 · 기간 · 할인은 센터에서만 바꿀 수 있습니다';
+  end if;
+
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger memberships_guard_trg
+  before update on public.memberships
+  for each row execute function public.memberships_guard();
+
+/* ---------- 권한 ---------- */
+alter table public.memberships    enable row level security;
+alter table public.invites        enable row level security;
+
+/* 요금제 — 교회는 자기 것만, 직원은 전부 */
+create policy memberships_read on public.memberships for select to authenticated
+  using (user_id = auth.uid() or public.can('subscriptions'));
+
+-- 교회가 직접 가입 신청(체험 시작)할 수 있습니다. 잠긴 열은 트리거가 지킵니다.
+create policy memberships_insert on public.memberships for insert to authenticated
+  with check (
+    (user_id = auth.uid() and status = 'trial' and invite_pct = 0 and not small_church)
+    or public.can('subscriptions')
+  );
+
+create policy memberships_update on public.memberships for update to authenticated
+  using (user_id = auth.uid() or public.can('subscriptions'))
+  with check (user_id = auth.uid() or public.can('subscriptions'));
+
+create policy memberships_delete on public.memberships for delete to authenticated
+  using (public.can('subscriptions'));
+
+/* 초대 — 초대한 쪽과 초대받은 쪽이 자기 관계를 봅니다 */
+create policy invites_read on public.invites for select to authenticated
+  using (inviter_id = auth.uid() or invitee_id = auth.uid() or public.can('subscriptions'));
+
+create policy invites_insert on public.invites for insert to authenticated
+  with check (invitee_id = auth.uid() or public.can('subscriptions'));
+
+create policy invites_update on public.invites for update to authenticated
+  using (public.can('subscriptions')) with check (public.can('subscriptions'));
+
+create policy invites_delete on public.invites for delete to authenticated
+  using (public.can('subscriptions'));
+
+/* ---------- 초대 코드로 초대한 교회 찾기 ----------
+   가입할 때 남의 코드를 넣습니다. 그 코드의 주인을 알아야 하는데
+   남의 memberships 행 전체를 보여 줄 수는 없으므로 함수로만 엽니다. */
+create or replace function public.invite_owner(p_code text)
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select m.user_id
+  from public.memberships m
+  where m.invite_code = upper(trim(p_code))
+    and m.invite_code <> ''
+    and m.status in ('trial', 'pending', 'active', 'overdue')
+  limit 1;
+$$;
+revoke all on function public.invite_owner(text) from public;
+grant execute on function public.invite_owner(text) to authenticated;
+comment on function public.invite_owner(text) is '초대 코드의 주인. 코드가 맞는지 확인하는 용도로만 씁니다.';
+
+revoke all on function public.memberships_guard() from public;
 
 
 -- ---------------------------------------------------------
@@ -1979,3 +2229,479 @@ $$;
 
 revoke all on function public.reserve_tickets(uuid, integer, jsonb, text, text, text, text) from public, anon;
 grant execute on function public.reserve_tickets(uuid, integer, jsonb, text, text, text, text) to authenticated;
+
+
+-- ---------------------------------------------------------
+-- 20260902010000_wcsc_payments.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 카드 결제 — 아직 켜지 않았습니다
+--
+-- PG 계약 전이라 화면에서는 결제 버튼이 보이지 않습니다
+-- (src/data/site.js 의 payment.enabled 가 false).
+-- 계약이 끝나 그 값을 true 로 바꾸면 이 표가 그대로 쓰입니다.
+--
+-- 왜 표를 따로 두는가
+--   listings.fee 는 "냈다/안 냈다" 한 줄뿐이라, 실패한 시도나 환불,
+--   같은 건에 두 번 결제된 일을 나중에 설명할 수 없습니다.
+--   돈이 오간 기록은 지우지 않고 쌓아 두고, listings.fee 는
+--   그 결과를 비추기만 합니다.
+--
+-- 승인은 반드시 서버(Edge Function)에서 합니다.
+--   금액을 브라우저가 보내 준 값으로 믿으면 6만원짜리를 100원에
+--   결제하고 게시글을 얻을 수 있습니다. 그래서 이 표에 미리 적어 둔
+--   amount 와 PG 가 알려 준 실제 결제 금액을 서버가 맞춰 봅니다.
+-- =========================================================
+
+create table public.payments (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  user_email    text not null default '',
+
+  -- 무엇에 대한 결제인가
+  kind          text not null
+                check (kind in ('listing_fee', 'install_fee')),
+  target_id     uuid,                       -- listings.id 또는 install_requests.id
+  target_title  text not null default '',   -- 나중에 대상이 지워져도 남도록
+
+  -- 주문 — order_id 는 우리가 만들어 PG 에 넘기는 값입니다 (겹치면 안 됩니다)
+  order_id      text not null unique,
+  amount        bigint not null check (amount > 0),
+
+  status        text not null default 'ready'
+                check (status in ('ready','pending','paid','failed','canceled','refunded')),
+
+  -- PG 쪽 값 — 계약 전이라 비어 있습니다
+  provider      text not null default '',
+  provider_id   text not null default '',   -- PG 가 준 결제 번호
+  method        text not null default '',   -- 카드 · 간편결제 등
+  receipt_url   text not null default '',
+
+  paid_at       text not null default '',
+  canceled_at   text not null default '',
+  fail_reason   text not null default '',
+
+  raw           jsonb not null default '{}'::jsonb,  -- PG 응답 원본 (분쟁 때 근거)
+
+  created_at    text not null default '',
+  updated_at    text not null default '',
+  inserted_at   timestamptz not null default now()
+);
+
+create index payments_user_idx on public.payments (user_id);
+create index payments_status_idx on public.payments (status);
+create index payments_target_idx on public.payments (kind, target_id);
+
+comment on table public.payments is
+  '카드 결제 기록. 승인은 Edge Function 이 하며, 브라우저는 이 표를 직접 고칠 수 없습니다.';
+
+-- =========================================================
+-- 접근 규칙
+--
+-- 브라우저에게는 "내 결제 내역을 읽는 것"만 허용합니다.
+-- 만들고 고치는 것은 전부 서버(service_role)와 직원의 몫입니다 —
+-- 결제 상태를 브라우저가 쓸 수 있으면 결제 없이 paid 로 바꿔
+-- 게시글을 얻을 수 있습니다.
+-- =========================================================
+alter table public.payments enable row level security;
+
+create policy payments_read on public.payments for select to authenticated
+  using (user_id = (select auth.uid()) or public.is_staff());
+
+-- insert · update 정책을 일부러 두지 않습니다.
+-- RLS 는 정책이 없으면 막습니다 → 브라우저에서는 아무것도 쓸 수 없습니다.
+-- Edge Function 은 service_role 로 붙으므로 RLS 를 지나갑니다.
+
+create policy payments_staff_update on public.payments for update to authenticated
+  using (public.can('settlement')) with check (public.can('settlement'));
+
+create policy payments_staff_delete on public.payments for delete to authenticated
+  using (public.can('settlement'));
+
+-- =========================================================
+-- 결제할 건을 여는 함수
+--
+-- 브라우저가 직접 payments 행을 만들지 못하므로, 이 함수로 엽니다.
+-- 금액은 인자로 받지 않습니다 — 서버가 정합니다.
+-- =========================================================
+create or replace function public.open_payment(p_kind text, p_target uuid)
+returns public.payments
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  me     uuid := auth.uid();
+  fee    bigint;
+  title  text;
+  ord    text;
+  out_row public.payments%rowtype;
+begin
+  if me is null then
+    raise exception '결제하려면 로그인해 주세요.' using errcode = '28000';
+  end if;
+
+  if p_kind = 'listing_fee' then
+    -- 내가 올린 글이고, 입금을 기다리는 상태일 때만 열어 줍니다.
+    select l.title into title from public.listings l
+     where l.id = p_target and l.user_id = me and l.status = 'awaiting_payment';
+    if not found then
+      raise exception '지금 결제하실 수 있는 매물이 아닙니다.';
+    end if;
+    -- 금액은 글에 적혀 있는 등록비를 그대로 씁니다 (브라우저 값을 믿지 않습니다).
+    select coalesce((l.fee ->> 'amount')::bigint, 60000) into fee
+      from public.listings l where l.id = p_target;
+
+  elsif p_kind = 'install_fee' then
+    select r.item_title, r.quote_amount into title, fee
+      from public.install_requests r
+     where r.id = p_target and r.user_id = me and r.status = 'quoted';
+    if not found then
+      raise exception '지금 결제하실 수 있는 설치 건이 아닙니다.';
+    end if;
+    if coalesce(fee, 0) <= 0 then
+      raise exception '아직 견적이 확정되지 않았습니다.';
+    end if;
+
+  else
+    raise exception '알 수 없는 결제 종류입니다.';
+  end if;
+
+  -- 이미 열어 둔 건이 있으면 그것을 그대로 씁니다 (중복 결제를 막습니다).
+  select * into out_row from public.payments
+   where kind = p_kind and target_id = p_target and user_id = me
+     and status in ('ready', 'pending')
+   order by inserted_at desc limit 1;
+  if found then
+    return out_row;
+  end if;
+
+  -- 이미 낸 건이면 다시 열지 않습니다.
+  if exists (select 1 from public.payments
+              where kind = p_kind and target_id = p_target and status = 'paid') then
+    raise exception '이미 결제가 끝난 건입니다.';
+  end if;
+
+  ord := 'wcsc-' || replace(p_kind, '_', '') || '-' ||
+         to_char(now() at time zone 'utc', 'YYYYMMDDHH24MISS') || '-' ||
+         substr(replace(gen_random_uuid()::text, '-', ''), 1, 8);
+
+  insert into public.payments
+    (user_id, user_email, kind, target_id, target_title, order_id, amount,
+     status, created_at, updated_at)
+  values
+    (me, coalesce((select email from auth.users where id = me), ''),
+     p_kind, p_target, coalesce(title, ''), ord, fee,
+     'ready',
+     to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+     to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'))
+  returning * into out_row;
+
+  return out_row;
+end;
+$$;
+
+revoke all on function public.open_payment(text, uuid) from public, anon;
+grant execute on function public.open_payment(text, uuid) to authenticated;
+
+-- =========================================================
+-- 결제 완료 처리 — service_role 만 부릅니다 (Edge Function)
+--
+-- 승인 결과를 받아 결제 기록을 닫고, 대상 글을 다음 단계로 넘깁니다.
+-- 매물이면 등록비를 낸 것으로 표시하고 바로 게시합니다 — 지금
+-- 직원이 손으로 하던 [입금 확인 → 게시하기] 두 걸음이 여기서 끝납니다.
+-- =========================================================
+create or replace function public.settle_payment(
+  p_order   text,
+  p_paid    bigint,
+  p_provider text,
+  p_pid     text,
+  p_method  text,
+  p_receipt text,
+  p_raw     jsonb
+)
+returns public.payments
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  pay public.payments%rowtype;
+  ts  text := to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
+begin
+  select * into pay from public.payments where order_id = p_order for update;
+  if not found then
+    raise exception '결제 건을 찾을 수 없습니다: %', p_order;
+  end if;
+
+  if pay.status = 'paid' then
+    return pay;   -- 이미 처리했습니다 (같은 통지가 두 번 와도 안전하도록)
+  end if;
+
+  -- 금액이 다르면 절대 통과시키지 않습니다.
+  if p_paid is distinct from pay.amount then
+    update public.payments
+       set status = 'failed',
+           fail_reason = format('금액이 맞지 않습니다 (기대 %s, 결제 %s)', pay.amount, p_paid),
+           raw = coalesce(p_raw, '{}'::jsonb), updated_at = ts
+     where id = pay.id returning * into pay;
+    raise exception '결제 금액이 맞지 않습니다.';
+  end if;
+
+  update public.payments
+     set status = 'paid', provider = p_provider, provider_id = p_pid,
+         method = coalesce(p_method, ''), receipt_url = coalesce(p_receipt, ''),
+         raw = coalesce(p_raw, '{}'::jsonb), paid_at = ts, updated_at = ts
+   where id = pay.id
+  returning * into pay;
+
+  if pay.kind = 'listing_fee' then
+    update public.listings
+       set fee = jsonb_build_object(
+             'amount', pay.amount, 'paid', true, 'paidAt', ts,
+             'noticeSentAt', coalesce(fee ->> 'noticeSentAt', ''),
+             'invoiceId', pay.order_id),
+           status = 'published',
+           published_at = ts,
+           first_published_at = case when first_published_at = '' then ts else first_published_at end,
+           edit_requested_at = '',
+           updated_at = ts
+     where id = pay.target_id;
+
+  elsif pay.kind = 'install_fee' then
+    update public.install_requests
+       set status = 'scheduled', updated_at = ts
+     where id = pay.target_id;
+  end if;
+
+  return pay;
+end;
+$$;
+
+revoke all on function public.settle_payment(text, bigint, text, text, text, text, jsonb)
+  from public, anon, authenticated;
+-- service_role 만 부릅니다. 따로 grant 하지 않습니다
+-- (service_role 은 함수 실행 권한을 기본으로 가집니다).
+
+alter publication supabase_realtime add table public.payments;
+
+
+-- ---------------------------------------------------------
+-- 20260902030000_wcsc_job_posts.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 교역자 구인 공고 (job_posts)
+--
+-- 지금까지는 교회가 조건을 알려 주면 센터가 사람을 찾아 이어 주는
+-- 방식이었습니다. 그러면 센터가 아는 사람 안에서만 이어집니다.
+-- 그래서 공고를 열어 두고 사역자가 직접 보고 연락하도록 바꿉니다 —
+-- 특히 멀어서 사람 구하기 어려운 교회일수록 이 편이 낫습니다.
+--
+-- 지원은 아직 사이트 안에서 받지 않습니다.
+--   공고에 적힌 연락처로 직접 연락합니다. 지원서를 사이트에 받으면
+--   센터가 지원자 개인정보의 보관·파기 책임을 지게 되므로,
+--   처리방침과 보관 기간을 정한 뒤에 붙이기로 했습니다.
+--   그때를 위해 apply_mode 칸만 미리 두었습니다 ('contact' → 'onsite').
+--
+-- 사례비 · 사택 · 교통을 따로 칸으로 받는 이유
+--   "협의" 한 줄만 있는 공고는 멀리 있는 사역자가 판단을 못 합니다.
+--   갈지 말지를 정하는 건 결국 이 셋이라, 눈에 띄게 적게 했습니다.
+-- =========================================================
+
+create table public.job_posts (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references auth.users(id) on delete cascade,
+  user_email      text not null default '',
+  status          text not null default 'pending'
+                  check (status in ('pending','published','rejected','hidden','done')),
+
+  -- 어느 교회인가
+  church_name     text not null default '',
+  denomination    text not null default '',
+  church_size     text not null default '',   -- 출석 교인 수 (구간)
+  region          text not null default '',
+  address_rough   text not null default '',
+
+  -- 어떤 자리인가
+  title           text not null default '',
+  position        text not null default 'assistant',   -- 직분
+  position_other  text not null default '',
+  department      text not null default '',            -- 맡을 부서
+  employment      text not null default 'full'
+                  check (employment in ('full','part','weekend','short')),
+  headcount       integer not null default 1,
+
+  -- 사례비 — 멀리 있는 사역자가 가장 먼저 보는 값입니다
+  pay_type        text not null default 'monthly'
+                  check (pay_type in ('monthly','weekly','per_service','negotiable')),
+  pay_min         bigint not null default 0,
+  pay_max         bigint not null default 0,
+  pay_note        text not null default '',
+  housing         text not null default 'none'
+                  check (housing in ('none','provided','support','negotiable')),
+  insurance       boolean not null default false,
+
+  -- 오가는 일 — "가기 어려운 곳" 을 숨기지 않고 미리 알리기 위한 칸들
+  commute_note    text not null default '',   -- 가까운 역 · 터미널, 차량 필요 여부
+  work_days       text not null default '',   -- 주일만 · 주중 포함 등
+  start_date      text not null default '',   -- 부임 희망 시기
+  closes_at       text not null default '',   -- 모집 마감 (비면 구할 때까지)
+
+  -- 내용
+  qualification   text not null default '',   -- 바라는 자격 · 경험
+  "desc"          text not null default '',   -- 교회 소개와 하실 일
+  photos          jsonb not null default '[]'::jsonb,
+
+  -- 연락 (지금은 여기로 직접 지원합니다)
+  contact_name    text not null default '',
+  contact_phone   text not null default '',
+  contact_email   text not null default '',
+  contact_hours   text not null default '',
+
+  -- 나중에 사이트 안 지원을 열 때 씁니다
+  apply_mode      text not null default 'contact'
+                  check (apply_mode in ('contact','onsite')),
+
+  reject_note     text not null default '',
+  views           integer not null default 0,
+  reviewed_by     text not null default '',
+  reviewed_at     text not null default '',
+  published_at    text not null default '',
+  hidden_at       text not null default '',
+  sample          boolean not null default false,
+  created_at      text not null default '',
+  updated_at      text not null default '',
+  inserted_at     timestamptz not null default now()
+);
+
+create index job_posts_status_idx on public.job_posts (status);
+create index job_posts_user_id_idx on public.job_posts (user_id);
+create index job_posts_region_idx on public.job_posts (region);
+
+comment on table public.job_posts is
+  '교역자 구인 공고. 지원은 공고에 적힌 연락처로 직접 합니다 (사이트 안 지원은 아직 열지 않았습니다).';
+comment on column public.job_posts.apply_mode is
+  '지원 방식. 지금은 contact 뿐입니다. 사이트 안 지원을 열 때 onsite 를 씁니다.';
+
+-- =========================================================
+-- 접근 규칙 — 다른 게시판과 같은 흐름입니다
+-- =========================================================
+alter table public.job_posts enable row level security;
+
+create policy jobs_read_public on public.job_posts for select to anon, authenticated
+  using (status = 'published');
+
+create policy jobs_read_own on public.job_posts for select to authenticated
+  using (user_id = (select auth.uid()) or public.is_staff());
+
+create policy jobs_insert on public.job_posts for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and status = 'pending'
+    and reviewed_by = ''
+    and published_at = ''
+  );
+
+-- 고치면 다시 확인을 받습니다. 다만 '모집 완료'로 내리는 것은 언제든 됩니다 —
+-- 사람을 구했는지 가장 먼저 아는 쪽은 교회입니다.
+create policy jobs_update_own on public.job_posts for update to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()) and status in ('pending', 'done'));
+
+create policy jobs_update_staff on public.job_posts for update to authenticated
+  using (public.can('customers')) with check (public.can('customers'));
+
+create policy jobs_delete on public.job_posts for delete to authenticated
+  using (user_id = (select auth.uid()) or public.can('customers'));
+
+alter publication supabase_realtime add table public.job_posts;
+
+
+-- ---------------------------------------------------------
+-- 20260903010000_wcsc_search_logs.sql
+-- ---------------------------------------------------------
+
+-- =========================================================
+-- 찾은 말 기록 (search_logs)
+--
+-- 로그인하신 분만 남습니다. 로그인하지 않은 분은 아무것도
+-- 저장하지 않습니다 — 남길 자리(계정)가 없기 때문입니다.
+--
+-- 무엇을 찾으셨는지는 개인정보입니다. 그래서
+--   · 본인만 읽고, 본인만 지울 수 있습니다 (직원도 못 봅니다)
+--   · 찾기 창에서 [지우기] 로 언제든 한 번에 지울 수 있습니다
+--   · 계정을 지우면 함께 지워집니다 (on delete cascade)
+--
+-- 같은 말을 여러 번 찾으시면 줄을 늘리지 않고 시각만 새로 씁니다.
+-- 그래야 목록이 같은 말로 가득 차지 않습니다.
+-- =========================================================
+
+create table public.search_logs (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  q           text not null check (length(q) between 1 and 100),
+  hits        integer not null default 0,   -- 그때 몇 개가 나왔는지
+  created_at  timestamptz not null default now(),
+
+  -- 사람마다 같은 말은 한 줄만 둡니다
+  unique (user_id, q)
+);
+
+create index search_logs_recent_idx on public.search_logs (user_id, created_at desc);
+
+comment on table public.search_logs is
+  '로그인한 분이 찾은 말. 본인만 읽고 지울 수 있으며, 직원도 볼 수 없습니다.';
+
+alter table public.search_logs enable row level security;
+
+-- 직원도 제외합니다. 무엇을 찾았는지는 운영에 필요한 정보가 아닙니다.
+create policy search_logs_read on public.search_logs for select to authenticated
+  using (user_id = (select auth.uid()));
+
+create policy search_logs_insert on public.search_logs for insert to authenticated
+  with check (user_id = (select auth.uid()));
+
+create policy search_logs_update on public.search_logs for update to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+
+create policy search_logs_delete on public.search_logs for delete to authenticated
+  using (user_id = (select auth.uid()));
+
+-- =========================================================
+-- 남기기 — 같은 말이면 시각만 새로 씁니다.
+-- 그리고 한 사람당 스무 줄만 남기고 오래된 것부터 지웁니다.
+-- 기록이 끝없이 쌓이면 그것대로 부담입니다.
+-- =========================================================
+create or replace function public.log_search(p_q text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  me   uuid := auth.uid();
+  word text := btrim(p_q);
+begin
+  if me is null or word = '' or length(word) > 100 then
+    return;
+  end if;
+
+  insert into public.search_logs (user_id, q)
+  values (me, word)
+  on conflict (user_id, q) do update set created_at = now();
+
+  delete from public.search_logs
+   where user_id = me
+     and id not in (
+       select id from public.search_logs
+        where user_id = me
+        order by created_at desc
+        limit 20
+     );
+end;
+$$;
+
+revoke all on function public.log_search(text) from public, anon;
+grant execute on function public.log_search(text) to authenticated;

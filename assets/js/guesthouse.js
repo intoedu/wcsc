@@ -275,7 +275,7 @@
       box.innerHTML = mineRows.length
         ? mineRows.map(mineCard).join('')
         : '<div class="ls-empty is-inline"><h3>아직 올리신 방이 없습니다</h3>' +
-          '<p>비어 있는 사택이나 선교관이 있으시면 올려 주세요. 등록비는 없습니다.</p>' +
+          '<p>비어 있는 사택이나 선교관이 있으시면 올려 주세요.</p>' +
           '<a class="btn btn-primary" href="#new">방 내어 놓기</a></div>';
     });
   }

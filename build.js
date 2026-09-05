@@ -12,8 +12,12 @@ const path = require('path');
 const T = require('./src/templates');
 const Boards = require('./src/boards');
 
+/* 갈래 수를 우리말로. 손으로 적어 두면 항목이 늘 때마다 어긋납니다. */
+const NUM = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
-  applyLink, externalNote, site, categories, services, serviceGroups, categoryOf, boardTabs,
+  applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
+  plans, planRules, trial, invite, boardTabs,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
@@ -31,85 +35,185 @@ function write(rel, html) {
    홈
    ========================================================= */
 function buildIndex() {
+  /* 렌탈 회사 홈페이지의 배치를 따랐습니다 (렌트리 참고).
+
+     한 번 잘못 놓았다가 고친 것 셋 — 적어 둡니다.
+       1. 제목 없이 배너부터 나왔습니다. 처음 오신 교회는 이곳이
+          무엇을 하는 곳인지 한 줄도 못 읽고 지나갔습니다.
+       2. 아이콘 열둘 바로 밑에 같은 항목 카드 열하나를 또 놓았습니다.
+          같은 것을 두 번 보여 주면 둘 다 대충 보게 됩니다.
+          아이콘 줄은 성격이 다른 [게시판] 로 바꿨습니다.
+       3. 짙은 초록 연락 블록이 가운데와 맨 밑에 하나씩 있었습니다.
+          맨 밑 하나로 합쳤습니다. */
+
+  /* 값을 앞에 내놓습니다 — 무엇을 얼마에 맡길 수 있는지가 먼저
+     보여야 다음을 눌러 보십니다. 다만 패키지 페이지가 지금 닫혀
+     있어 "패키지에 포함" 이라고만 적힌 항목은 그 말을 쓰지 않습니다. */
+  const priceTag = (s) => {
+    const p = String(s.price || '').trim();
+    if (!p || p === '상담 후 결정' || p === '상담 후 안내') return { text: '상담 후 견적', kind: 'ask' };
+    if (p === '무료') return { text: '무료', kind: 'free' };
+    if (p === '패키지에 포함') return { text: '상담 후 견적', kind: 'ask' };
+    if (p === '캠프마다 상이') return { text: '캠프별 안내', kind: 'ask' };
+    return { text: p, kind: 'won' };
+  };
+
+  /* 첫 화면의 미는 배너. 사진 대신 은은한 바탕색과 큰 글씨로 갑니다 —
+     교회 사진을 급조해 넣는 것보다 깔끔하고, 거짓이 없습니다. */
+  const BANNERS = [
+    {
+      tone: 'green',
+      eyebrow: '홈페이지 제작',
+      title: '제작비 0원으로<br>교회 홈페이지를',
+      lead: '만들어 드립니다. 관리비는 월 5만원입니다.',
+      href: 'services/homepage.html',
+      icon: 'monitor',
+    },
+    {
+      tone: 'gold',
+      eyebrow: '교역자 구인',
+      title: '아는 분께 부탁하는 것<br>말고는 없었습니다',
+      lead: '이제 교회가 직접 공고를 올리고, 사역자가 보고 연락합니다.',
+      href: 'jobs.html',
+      icon: 'users',
+    },
+    {
+      tone: 'deep',
+      eyebrow: '중고 장터',
+      title: '쓰던 음향과 악기를<br>교회끼리',
+      lead: '설치가 필요하시면 별도 비용으로 맡아 드립니다.',
+      href: 'market.html',
+      icon: 'speaker',
+    },
+    {
+      tone: 'mint',
+      eyebrow: '게스트하우스',
+      title: '비어 있는 사택을<br>필요한 분께',
+      lead: '한국에 잠시 머무는 선교사와 사역자가 묵을 자리입니다.',
+      href: 'guesthouse.html',
+      icon: 'building',
+    },
+  ];
+
+  const banner = (b) => `<a class="bn is-${b.tone}" href="${b.href}">
+        <span class="bn-art" aria-hidden="true">${icon(b.icon)}</span>
+        <span class="bn-in">
+          <span class="bn-eyebrow">${esc(b.eyebrow)}</span>
+          <strong class="bn-title">${b.title}</strong>
+          <span class="bn-lead">${esc(b.lead)}</span>
+        </span>
+      </a>`;
+
+  /* 아이콘 줄은 게시판입니다 — 아래 항목 카드와 성격이 다릅니다.
+     항목은 센터가 해 드리는 일이고, 게시판은 교회끼리 오가는 자리입니다. */
+  const BOARD_ICON = {
+    'listings.html': 'building',
+    'market.html': 'speaker',
+    'guesthouse.html': 'home',
+    'tickets.html': 'ticket',
+    'jobs.html': 'users',
+  };
+
+  const shortcut = (s) => `<a class="sc" href="services/${s.slug}.html">
+        <span class="sc-ico">${icon(s.icon)}</span>
+        <span class="sc-name">${esc(s.short || s.name)}</span>
+      </a>`;
+
+  const boardShortcut = (b) => `<a class="sc" href="${b.href}">
+        <span class="sc-ico">${icon(BOARD_ICON[b.href] || 'doc')}</span>
+        <span class="sc-name">${esc(b.label)}</span>
+        <span class="sc-sub">${esc(b.sub)}</span>
+      </a>`;
+
+  const itemTile = (s) => {
+    const tag = priceTag(s);
+    return `<a class="item" href="services/${s.slug}.html" data-cat="${s.category}">
+        <span class="item-ico">${icon(s.icon)}</span>
+        <span class="item-body">
+          <strong class="item-name">${esc(s.name)}</strong>
+          <span class="item-line">${esc(s.tagline)}</span>
+        </span>
+        <span class="item-foot">
+          <span class="item-price is-${tag.kind}">${esc(tag.text)}</span>
+          <span class="item-go">자세히 ${icon('arrow', 'ico ico-sm')}</span>
+        </span>
+      </a>`;
+  };
+
+  /* 구역 제목 오른쪽에 [전체보기] 를 붙이는 자리 */
+  const head = (title, lead, moreHref, moreLabel) => `<div class="hd-row">
+      <div>
+        <h2>${title}</h2>
+        ${lead ? `<p>${esc(lead)}</p>` : ''}
+      </div>
+      ${moreHref ? `<a class="hd-more" href="${moreHref}">${esc(moreLabel || '전체보기')} ${icon('arrow', 'ico ico-sm')}</a>` : ''}
+    </div>`;
+
   const body = `
-<section class="hero">
-  <div class="hero-bg" aria-hidden="true"></div>
-  <div class="wrap hero-in">
-    <div class="hero-copy">
-      <p class="hero-eyebrow">Wori Church Support Center</p>
-      <h1>교회는 사역에 집중하고,<br>나머지는 <span class="hl">전문가</span>가 맡습니다</h1>
-      <p class="hero-lead">
-        홈페이지와 주보 제작부터 교역자 청빙, 음향, 부동산, 앱, 행정까지.
-        한국 교회에 필요한 8개 지원 항목을 전담창구 4곳이 나눠 맡습니다.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
-        <a class="btn btn-outline btn-lg" href="services/index.html">지원 항목 살펴보기</a>
-      </div>
-      <ul class="hero-trust">
-        <li>${icon('check', 'ico ico-sm')} 상담 · 견적 무료</li>
-        <li>${icon('check', 'ico ico-sm')} 담당자 1인 전담</li>
-        <li>${icon('check', 'ico ico-sm')} 교단 · 규모 제한 없음</li>
-      </ul>
+<!-- ============ 1. 미는 배너 ============
+     가로로 밀어 봅니다. 다음 장이 살짝 걸쳐 보이게 두어,
+     더 있다는 것이 손짓 없이도 보이게 했습니다. -->
+<section class="bn-wrap">
+  <div class="wrap">
+    <div class="bn-rail" id="bnRail" role="region" aria-label="주요 안내">
+      ${BANNERS.map(banner).join('\n      ')}
     </div>
-    <div class="hero-panel">
-      <div class="hero-card">
-        <p class="hero-card-label">지원 항목</p>
-        <ul class="hero-card-list">
-          ${services
-            .map(
-              (s) =>
-                `<li><a href="services/${s.slug}.html"><span class="hc-no">${s.no}</span><span class="hc-name">${esc(
-                  s.name
-                )}</span>${icon('arrow', 'ico ico-sm')}</a></li>`
-            )
-            .join('\n          ')}
-        </ul>
-      </div>
+    <div class="bn-dots" id="bnDots" aria-hidden="true">
+      ${BANNERS.map((b, i) => `<button type="button" class="bn-dot${i === 0 ? ' is-on' : ''}" data-go="${i}" tabindex="-1"></button>`).join('\n      ')}
     </div>
   </div>
 </section>
 
-<section class="stats">
-  <div class="wrap stats-in">
-    <div class="stat"><strong>8</strong><span>지원 항목</span></div>
-    <div class="stat"><strong>4</strong><span>전담창구</span></div>
-    <div class="stat"><strong>1~2일</strong><span>상담 연락</span></div>
-    <div class="stat"><strong>전국</strong><span>지원 지역</span></div>
-  </div>
-</section>
-
-<section class="section">
+<!-- ============ 2. 바로가기 ============
+     두 줄입니다. 성격이 다르기 때문입니다 —
+     위는 센터가 해 드리는 일, 아래는 교회끼리 오가는 자리. -->
+<section class="sc-wrap">
   <div class="wrap">
-    ${sectionHead(
-      '지원 항목',
-      '교회에 필요한 일, 여기서 함께 정리합니다',
-      '어느 항목이 필요한지 확실하지 않아도 괜찮습니다. 상황을 알려주시면 담당자가 함께 정리해 드립니다.'
-    )}
-    ${serviceGroups('')}
-  </div>
-</section>
+    <p class="sc-label">지원 항목 <small>센터가 해 드리는 일</small></p>
+    <div class="sc-grid">
+      ${services.map(shortcut).join('\n      ')}
+      <a class="sc is-all" href="services/index.html">
+        <span class="sc-ico">${icon('grid')}</span>
+        <span class="sc-name">전체보기</span>
+      </a>
+    </div>
 
-<section class="section section-alt">
-  <div class="wrap">
-    ${sectionHead('우리교회지원센터가 일하는 방식', '업체가 아니라, 교회를 아는 담당자와 일합니다')}
-    <div class="why-grid">
-      ${site.principles
-        .map(
-          (p, i) => `<article class="why-card">
-        <span class="why-no">0${i + 1}</span>
-        <h3>${esc(p.title)}</h3>
-        <p>${esc(p.desc)}</p>
-      </article>`
-        )
-        .join('\n      ')}
+    <p class="sc-label is-second">게시판 <small>교회끼리 사고, 나누고, 만나는 곳</small></p>
+    <div class="sc-grid is-boards">
+      ${T.BOARDS.map(boardShortcut).join('\n      ')}
     </div>
   </div>
 </section>
 
-<section class="section">
+<!-- ============ 3. 지원 항목 카탈로그 ============ -->
+<section class="section" id="items">
   <div class="wrap">
-    ${sectionHead('이용 절차', '신청부터 사후 지원까지 5단계')}
+    ${head('무엇이든 하나씩 맡기실 수 있습니다',
+    '전부 맡기지 않으셔도 됩니다. 지금 급한 것 하나만 고르셔도 됩니다.',
+    'services/index.html')}
+
+    <div class="cat-tabs" id="catTabs" role="tablist" aria-label="갈래로 걸러 보기">
+      <button type="button" class="cat-tab is-on" data-cat="">전체</button>
+      ${categories.map((c) => `<button type="button" class="cat-tab" data-cat="${c.id}">${esc(c.name)}</button>`).join('\n      ')}
+    </div>
+
+    <div class="items" id="itemGrid">
+      ${services.map(itemTile).join('\n      ')}
+    </div>
+
+    <p class="items-note">
+      값이 <strong>상담 후 견적</strong> 인 항목은 교회 규모와 상황에 따라 달라, 보고 정해 드립니다.
+      물어보시는 것은 무료이고, 견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
+    </p>
+  </div>
+</section>
+
+<!-- ============ 4. 이용 절차 ============ -->
+<section class="section is-soft">
+  <div class="wrap">
+    ${head('신청부터 사후 지원까지 5단계',
+    '어디까지 왔는지 신청 현황에서 언제든 보실 수 있습니다.',
+    'process.html', '자세히 보기')}
     <ol class="steps">
       ${site.steps
         .map(
@@ -121,19 +225,47 @@ function buildIndex() {
         )
         .join('\n      ')}
     </ol>
-    <p class="center"><a class="btn btn-outline" href="process.html">이용 절차 자세히 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
   </div>
 </section>
 
-<section class="section section-alt">
+<!-- ============ 5. 자주 묻는 질문 ============ -->
+<section class="section">
   <div class="wrap narrow">
-    ${sectionHead('자주 묻는 질문', '신청 전에 많이 묻는 것들')}
+    ${head('신청 전에 많이 묻는 것들', '', 'faq.html')}
     ${faqList(site.faqs.slice(0, 4), 'home-faq')}
-    <p class="center"><a class="btn btn-outline" href="faq.html">전체 질문 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
   </div>
 </section>
 
-${ctaBand('')}
+<!-- ============ 6. 연락 ============
+     짙은 초록으로 두었더니 바로 아래 붙는 푸터와 뭉개졌습니다.
+     밝은 면으로 바꿔 푸터와 갈라 놓습니다. -->
+<section class="section is-soft">
+  <div class="wrap call-in">
+    <div class="call-copy">
+      <p class="call-eyebrow">상담 · 견적 무료</p>
+      <h2>전화 한 통이면 됩니다</h2>
+      <p class="call-lead">
+        무엇이 필요하신지 아직 정하지 않으셔도 됩니다.
+        형편을 여쭙고, 지금 급한 것부터 함께 정리해 드립니다.
+        견적을 받으셨다고 맡기셔야 하는 것도 아닙니다.
+      </p>
+    </div>
+
+    <div class="call-card">
+      <a class="call-dial" href="${site.contact.phoneHref}">
+        ${icon('phoneCall', 'ico')}
+        <span>${phoneText()}</span>
+      </a>
+      <p class="call-hours">${icon('clock', 'ico ico-sm')} ${hoursText()}</p>
+
+      <p class="call-or">통화가 어려우시면</p>
+      <ul class="call-alt">
+        <li><a href="apply.html">${icon('doc', 'ico ico-sm')} 지원 신청서 남기기</a></li>
+        <li><a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
 `;
 
   write(
@@ -144,6 +276,8 @@ ${ctaBand('')}
       base: '',
       active: 'index.html',
       body,
+      bodyClass: 'is-home',
+      scripts: ['home.js'],
     })
   );
 }
@@ -152,41 +286,175 @@ ${ctaBand('')}
    센터 소개
    ========================================================= */
 function buildAbout() {
+  /* 애플의 제품 소개 방식은 물건을 파는 회사의 말투입니다.
+     여기는 목회자를 상대하는 기관이라 결이 맞지 않았습니다.
+
+     이 페이지는 이렇게 갑니다 —
+       교회에서 실제로 벌어지는 일을 먼저 적고,
+       그 옆에 저희가 맡는 것을 나란히 둡니다.
+     자랑하는 문장보다 "이 일, 저희가 합니다" 가 분명합니다. */
+
+  /* 왼쪽은 교회에서 실제로 벌어지는 일, 오른쪽은 저희가 맡는 것.
+     추상적인 말을 쓰지 않습니다 — 목회자가 겪은 그 장면을 그대로 적습니다. */
+  const PAIRS = [
+    {
+      church: '주보를 매주 밤늦게 담당자가 편집합니다',
+      us: '원고만 주시면 만들어 드립니다. 절기 현수막과 포스터도 함께 합니다.',
+      href: 'services/design.html',
+      label: '마케팅 지원',
+    },
+    {
+      church: '검색해도 교회 정보가 나오지 않습니다',
+      us: '관리비 월 5만원으로 홈페이지를 만들어 드립니다. 제작비는 따로 받지 않습니다.',
+      href: 'services/homepage.html',
+      label: '홈페이지 제작',
+    },
+    {
+      church: '부교역자를 청빙하려면 아는 분께 부탁하는 수밖에 없습니다',
+      us: '교회가 직접 공고를 올리고, 사역자가 보고 연락합니다. 아는 분께 부탁하지 않아도 됩니다.',
+      href: 'jobs.html',
+      label: '교역자 구인',
+    },
+    {
+      church: '음향이 안 좋은데 무엇이 문제인지 알 수 없습니다',
+      us: '예배당을 보고 진단합니다. 있는 장비 조정만으로 해결되는 경우도 많습니다.',
+      href: 'services/sound.html',
+      label: '음향 세팅',
+    },
+    {
+      church: '교회를 옮기려는데 계약 직전에야 용도 문제를 발견합니다',
+      us: '서류를 확인한 매물만 올라가는 게시판입니다. 조건만 보시면 됩니다.',
+      href: 'listings.html',
+      label: '부동산 매물',
+    },
+    {
+      church: '서류에 도장 받으러 여기저기 다녀야 합니다',
+      us: '휴대폰으로 주고받고 자동으로 보관합니다. 월 6,900원입니다.',
+      href: 'services/intooffice.html',
+      label: '인투오피스',
+    },
+  ];
+
+  /* 우리가 하지 않는 일. 게시판마다 적어 둔 경계를 한자리에 모았습니다.
+     할 수 있는 것만 적어 두면 나중에 서로 얼굴을 붉히게 됩니다. */
+  const NOT_OURS = [
+    {
+      title: '부동산 중개는 하지 않습니다',
+      desc: '매물 게시판을 운영합니다. 공인중개사법상의 중개 행위는 하지 않으며, '
+        + '가격 · 조건 협상과 계약에는 관여하지 않습니다. 매물 내용은 올린 교회가 적은 것입니다.',
+    },
+    {
+      title: '채용의 당사자가 아닙니다',
+      desc: '교역자 구인은 공고 게시판입니다. 면접과 청빙 결정은 교회와 사역자가 직접 하십니다. '
+        + '공고 내용도 올린 교회가 적은 것입니다.',
+    },
+    {
+      title: '중고 거래에 끼지 않습니다',
+      desc: '중고 장터에서 값과 대금, 인도 방법은 파는 교회와 사는 교회가 직접 정하십니다. '
+        + '설치를 맡기시면 센터가 하되, 물건값과 별개로 비용을 받습니다.',
+    },
+    {
+      title: '인쇄와 배송은 맡지 않습니다',
+      desc: '현수막 · 포스터 · 주보는 인쇄용 파일까지 만들어 드립니다. '
+        + '인쇄는 교회에서 편한 곳에 맡기시는 편이 값도 싸고 빠릅니다.',
+    },
+  ];
+
   const body = `
 ${pageHero({
   eyebrow: '센터 소개',
   title: '한국 교회 곁에서<br>실무를 맡는 기관',
-  lead: '우리교회지원센터는 교회가 사역 외의 일로 소모하는 시간과 비용을 줄이기 위해 만들어졌습니다.',
+  lead: '사역이 아닌 일에 목회자의 시간이 갑니다. 하지 않으면 사역이 막히는 일인데, '
+    + '대부분의 교회에는 이 일을 맡을 사람이 없습니다. 그 자리를 대신 맡으려고 만들어졌습니다.',
 })}
 
+<!-- 교회에서 벌어지는 일 ↔ 저희가 맡는 것 -->
 <section class="section">
+  <div class="wrap">
+    ${sectionHead('하는 일', '이런 일을 대신 맡습니다',
+    '자랑하는 말 대신, 교회에서 실제로 벌어지는 일과 저희가 맡는 것을 나란히 적었습니다.')}
+
+    <ul class="pairs">
+      ${PAIRS.map((p) => `<li class="pair">
+        <div class="pair-church">
+          <span class="pair-tag">교회에서는</span>
+          <p>${esc(p.church)}</p>
+        </div>
+        <span class="pair-arrow" aria-hidden="true">${icon('arrow')}</span>
+        <div class="pair-us">
+          <span class="pair-tag is-us">저희가</span>
+          <p>${esc(p.us)}</p>
+          <a class="pair-link" href="${p.href}">${esc(p.label)} 자세히 ${icon('arrow', 'ico ico-sm')}</a>
+        </div>
+      </li>`).join('\n      ')}
+    </ul>
+
+    <p class="center"><a class="btn btn-outline" href="services/index.html">지원 항목 전체 보기 ${icon('arrow', 'ico ico-sm')}</a></p>
+  </div>
+</section>
+
+<!-- 왜 만들어졌나 -->
+<section class="section section-alt">
   <div class="wrap narrow prose">
     <h2>왜 만들어졌나</h2>
     <p>
-      많은 교회가 비슷한 어려움을 겪습니다. 홈페이지를 만들려면 업체를 찾아야 하고, 주보는 매주 담당자가 밤늦게 편집합니다.
-      부교역자를 청빙하려면 아는 분들께 부탁하는 것 외에 방법이 마땅치 않고, 음향이 안 좋아도 무엇이 문제인지 알기 어렵습니다.
-      교회를 옮길 때는 계약 직전에야 용도 문제를 발견하기도 합니다.
+      많은 교회가 비슷한 어려움을 겪습니다. 홈페이지를 만들려면 업체를 찾아야 하고,
+      주보는 매주 담당자가 밤늦게 편집합니다. 부교역자를 청빙하려면 아는 분들께 부탁하는 것 외에
+      방법이 마땅치 않고, 음향이 안 좋아도 무엇이 문제인지 알기 어렵습니다.
     </p>
     <p>
-      이 일들은 모두 사역이 아니지만, 하지 않으면 사역이 막힙니다. 그리고 대부분의 교회에는 이 일을 전담할 사람이 없습니다.
-      우리교회지원센터는 그 자리를 대신 맡기 위해 만들어진 기관입니다.
-    </p>
-
-    <h2>어떻게 일하나</h2>
-    <p>
-      우리교회지원센터는 항목별로 다른 담당자에게 넘기지 않습니다. 교회 한 곳에 담당자 한 명이 배정되어, 여러 항목을 진행하더라도
-      같은 사람과 이야기하게 됩니다. 교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 사람과 일한다는 뜻입니다.
+      이 일들은 사역이 아닙니다. 그런데 하지 않으면 사역이 막힙니다.
+      결국 목회자나 몇 안 되는 교역자가 밤에 붙들게 되고, 그만큼 사람을 만나고
+      말씀을 준비할 시간이 줄어듭니다.
     </p>
     <p>
-      또한 모든 제안은 문서로 드립니다. 당회와 제직회에 그대로 올릴 수 있도록 항목별 범위와 일정, 비용을 정리해 드리며,
-      구두로만 진행되는 부분을 남기지 않습니다.
+      업체를 항목마다 찾아다니는 것도 일입니다. 견적을 받고 비교하고 설명을 반복하는 사이에
+      정작 급한 일이 미뤄집니다. 우리교회지원센터는 그 자리를 한곳에서 대신 맡기 위해
+      만들어진 기관입니다. 전국 어느 교회든 규모 · 지역 · 교단 제한이 없습니다.
     </p>
   </div>
 </section>
 
+<!-- 일하는 방식 -->
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('일하는 방식', '이렇게 일합니다')}
+    <div class="feat-grid">
+      <article class="feat-card">
+        <span class="feat-ico">${icon('users')}</span>
+        <h3>한곳에서 이어서</h3>
+        <p>
+          여러 항목을 진행하셔도 업체를 따로 찾게 하지 않습니다.
+          교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 곳과 일한다는 뜻입니다.
+          매번 처음부터 설명하지 않으셔도 됩니다.
+        </p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico">${icon('doc')}</span>
+        <h3>말이 아니라 문서로</h3>
+        <p>
+          모든 제안은 문서로 드립니다. 항목별 범위와 일정, 비용을 정리해
+          당회와 제직회에 그대로 올리실 수 있게 합니다.
+          구두로만 진행되는 부분을 남기지 않습니다.
+        </p>
+      </article>
+      <article class="feat-card">
+        <span class="feat-ico">${icon('check')}</span>
+        <h3>납품하고 끝이 아니라</h3>
+        <p>
+          만들어 드린 뒤에 생기는 수정과 장애는 정해진 창구로 받습니다.
+          항목마다 지원 기간을 미리 적어 드리고, 신청 현황에서 지금 어디까지
+          왔는지 언제든 보실 수 있습니다.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 원칙 -->
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('원칙', '이 네 가지는 지킵니다')}
+    ${sectionHead('원칙', '이 세 가지는 지킵니다')}
     <div class="why-grid">
       ${site.principles
         .map(
@@ -201,10 +469,33 @@ ${pageHero({
   </div>
 </section>
 
+<!-- 하지 않는 일 -->
 <section class="section">
   <div class="wrap">
-    ${sectionHead('지원 범위', '세 갈래, 8개 항목 — 전담창구 4곳')}
-    ${serviceGroups('')}
+    ${sectionHead('경계', '이건 저희 몫이 아닙니다',
+    '할 수 있는 것만 적어 두면 나중에 서로 얼굴을 붉히게 됩니다. 하지 않는 일도 미리 적어 둡니다.')}
+    <div class="feat-grid">
+      ${NOT_OURS.map((n) => `<article class="feat-card is-plain">
+        <h3>${esc(n.title)}</h3>
+        <p>${esc(n.desc)}</p>
+      </article>`).join('\n      ')}
+    </div>
+  </div>
+</section>
+
+<!-- 센터 정보 -->
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('센터 정보', '어디에, 언제, 누구에게')}
+    <dl class="facts">
+      <div><dt>이름</dt><dd>${esc(site.fullName || site.name)}</dd></div>
+      <div><dt>하는 일</dt><dd>${NUM[categories.length]} 갈래, ${services.length}개 항목 · 게시판 ${T.BOARDS.length}개</dd></div>
+      <div><dt>지원 지역</dt><dd>전국 (규모 · 교단 제한 없음)</dd></div>
+      <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
+      <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
+      <div><dt>업무 시간</dt><dd>${hoursText()}</dd></div>
+      <div><dt>주소</dt><dd>${addressText()}</dd></div>
+    </dl>
   </div>
 </section>
 
@@ -218,9 +509,231 @@ ${ctaBand('', {
     'about.html',
     layout({
       title: '센터 소개 | 우리교회지원센터',
-      description: '우리교회지원센터가 만들어진 이유와 일하는 방식, 그리고 지키는 원칙을 소개합니다.',
+      description: '교회에서 실제로 벌어지는 일과 우리교회지원센터가 맡는 일을 나란히 적었습니다. '
+        + '일하는 방식과 원칙, 그리고 하지 않는 일까지 적어 두었습니다.',
       base: '',
       active: 'about.html',
+      body,
+    })
+  );
+}
+
+/* =========================================================
+   옮겨진 페이지
+
+   [교역자 구인] 은 지원 항목에서 게시판으로 옮겼습니다.
+   센터가 사람을 찾아 이어 주던 방식에서, 교회가 직접 공고를
+   올리고 사역자가 보고 연락하는 방식으로 바뀌었기 때문입니다.
+
+   옛 주소를 그냥 지우면 링크가 끊깁니다. 그렇다고 옛 내용을
+   그대로 두면 "저희가 연결해 드립니다" 라는 지금과 다른 말이
+   남습니다. 둘 다 나쁘므로, 옮겨 갔다는 안내만 두고 새 자리로
+   보냅니다.
+   ========================================================= */
+function buildMoved() {
+  const body = `
+${pageHero({
+  eyebrow: '자리를 옮겼습니다',
+  title: '교역자 구인은<br>게시판으로 옮겼습니다',
+  lead: '센터가 사람을 찾아 이어 드리던 것을, 교회가 직접 공고를 올리고 '
+    + '사역자가 보고 연락하는 방식으로 바꿨습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="moved">
+      <p>
+        아는 사람 안에서만 이어 주면, 그 연결망 밖에 있는 교회는 후보를 아예
+        만나지 못합니다. 그래서 공고를 열어 두어 <strong>교회와 사역자가 서로를 볼 수
+        있게</strong> 바꿨습니다.
+      </p>
+      <div class="moved-act">
+        <a class="btn btn-primary btn-lg" href="../jobs.html">교역자 구인 게시판으로 ${icon('arrow', 'ico ico-sm')}</a>
+        <a class="btn btn-outline btn-lg" href="index.html">지원 항목 전체 보기</a>
+      </div>
+      <p class="moved-fine">잠시 뒤 게시판으로 자동으로 넘어갑니다.</p>
+    </div>
+  </div>
+</section>
+`;
+
+  write(
+    'services/staffing.html',
+    layout({
+      title: '교역자 구인은 게시판으로 옮겼습니다 | 우리교회지원센터',
+      description: '교역자 구인은 지원 항목에서 게시판으로 옮겼습니다. '
+        + '교회가 직접 공고를 올리고 사역자가 보고 연락합니다.',
+      base: '../',
+      active: '',
+      body,
+      /* 화면을 먼저 보여 드린 뒤 넘깁니다. 바로 튕기면 무슨 일인지
+         모른 채 넘어가고, 뒤로 가기도 눌리지 않습니다. */
+      head: '<meta http-equiv="refresh" content="6; url=../jobs.html">',
+    })
+  );
+}
+
+/* =========================================================
+   개인정보 처리방침
+
+   이 페이지는 실제로 저장되는 것에서 뽑아 적었습니다 — 표와
+   저장소를 하나씩 따라가며 무엇이 남는지 확인해 옮겼습니다.
+   그래야 방침과 실제가 어긋나지 않습니다.
+
+   ⚠ 사업자 정보와 개인정보 보호책임자는 대표님만 채우실 수
+     있습니다. src/data/site.js 의 privacy 에 적어 주시면 여기에
+     그대로 나옵니다. 비어 있으면 [확인 필요] 로 보입니다.
+   ========================================================= */
+function buildPrivacy() {
+  const P = site.privacy || {};
+  const todo = (v, what) => (String(v || '').trim()
+    ? esc(v)
+    : `<span class="todo">확인 필요 — ${esc(what)}</span>`);
+
+  /* 어디에 무엇이 남는지. 표를 하나씩 따라가며 적었습니다. */
+  const ITEMS = [
+    {
+      when: '회원가입',
+      what: '이메일, 이름, 연락처, 교회명, 직분, 생년월일',
+      why: '로그인, 내가 올린 글과 신청 내역 확인, 본인 확인',
+      keep: '탈퇴할 때까지',
+    },
+    {
+      when: '지원 신청',
+      what: '교회명, 담당자 성함 · 직분, 연락처, 이메일, 소재지, 교회 규모, 예산 · 일정, 신청 내용',
+      why: '상담, 견적 산출, 진행 안내',
+      keep: '상담 종료 후 1년',
+    },
+    {
+      when: '게시판에 글을 올릴 때',
+      what: '연락처, 연락 가능 시간, 올리신 사진, 대략의 위치 — 게시판에 따라 증빙 서류(등기부등본 · 임대차계약서)',
+      why: '게시글 확인과 게시, 보시는 분이 등록자에게 직접 연락',
+      keep: '글을 지우실 때까지 (증빙 서류는 확인 후 지웁니다)',
+    },
+    {
+      when: '집회 신청',
+      what: '신청자 성함, 연락처, 인원, 좌석',
+      why: '참가자 명단 확인, 집회 주최 교회에 전달',
+      keep: '집회가 끝난 후 6개월',
+    },
+    {
+      when: '결제 (준비 중)',
+      what: '주문번호, 결제 금액, 결제 수단, 결제사 응답 기록',
+      why: '결제 확인, 환불 · 분쟁 대응',
+      keep: '전자상거래법에 따라 5년',
+      note: '카드번호와 계좌번호는 저희 쪽에 저장되지 않습니다 — 결제사가 직접 처리합니다.',
+    },
+    {
+      when: '사이트 안에서 찾을 때 (로그인하신 분만)',
+      what: '찾으신 낱말',
+      why: '다음에 다시 찾으실 때 [최근에 찾으신 것] 으로 보여 드리기',
+      keep: '가장 최근 20건 (넘으면 오래된 것부터 자동 삭제)',
+      note: '로그인하지 않으신 분은 저장하지 않습니다. 본인만 보실 수 있고 직원도 볼 수 없으며, '
+        + '찾기 창의 [지우기] 로 언제든 한 번에 지우실 수 있습니다.',
+    },
+  ];
+
+  const body = `
+${pageHero({
+  eyebrow: '개인정보 처리방침',
+  title: '무엇을 받아 두고,<br>언제 지우는지',
+  lead: '실제로 저장되는 것만 적었습니다. 적혀 있지 않은 것은 받지 않습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    ${sectionHead('무엇을', '받아 두는 것과 지우는 때')}
+    <div class="pv-list">
+      ${ITEMS.map((it) => `<article class="pv-item">
+        <h3>${esc(it.when)}</h3>
+        <dl>
+          <div><dt>받는 것</dt><dd>${esc(it.what)}</dd></div>
+          <div><dt>쓰는 데</dt><dd>${esc(it.why)}</dd></div>
+          <div><dt>가지고 있는 기간</dt><dd>${esc(it.keep)}</dd></div>
+        </dl>
+        ${it.note ? `<p class="pv-note">${esc(it.note)}</p>` : ''}
+      </article>`).join('\n      ')}
+    </div>
+    <p class="pv-fine">
+      기간이 지나면 지웁니다. 다만 법에서 보관하라고 정한 것(전자상거래법의 계약 · 결제 기록 등)은
+      그 기간 동안 따로 보관한 뒤 지웁니다.
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('어디에', '맡겨 둔 곳과 보관 위치')}
+    <div class="pv-list">
+      <article class="pv-item">
+        <h3>Supabase</h3>
+        <dl>
+          <div><dt>맡기는 일</dt><dd>데이터베이스, 로그인 처리, 사진 · 서류 보관</dd></div>
+          <div><dt>보관 국가</dt><dd><strong>일본 (도쿄)</strong></dd></div>
+          <div><dt>받는 이</dt><dd>Supabase, Inc.</dd></div>
+        </dl>
+        <p class="pv-note">
+          이 사이트의 자료는 일본에 있는 서버에 저장됩니다. 국외로 옮겨 보관하는 것이므로
+          미리 알려 드립니다. 동의하지 않으실 수 있으나, 그 경우 회원가입과 게시판 이용이 어렵습니다.
+        </p>
+      </article>
+      <article class="pv-item">
+        <h3>GitHub Pages</h3>
+        <dl>
+          <div><dt>맡기는 일</dt><dd>웹 페이지 전송</dd></div>
+          <div><dt>받는 이</dt><dd>GitHub, Inc. (미국)</dd></div>
+        </dl>
+        <p class="pv-note">화면을 보내 주는 역할만 합니다. 개인정보를 따로 저장하지 않습니다.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow">
+    ${sectionHead('권리', '언제든 하실 수 있는 것')}
+    <ul class="pv-rights">
+      <li><strong>보기</strong> — 내 계정 화면과 [신청 조회] 에서 남아 있는 내용을 보실 수 있습니다.</li>
+      <li><strong>고치기</strong> — 계정 정보와 올리신 글은 직접 고치실 수 있습니다.</li>
+      <li><strong>지우기</strong> — 올리신 글은 직접 지우실 수 있고, 찾은 낱말은 찾기 창의 [지우기] 로 한 번에 지웁니다.</li>
+      <li><strong>탈퇴</strong> — 탈퇴하시면 계정과 함께 저장된 것이 지워집니다. 법에서 보관하라고 정한 것만 남습니다.</li>
+      <li><strong>동의 철회</strong> — 아래 연락처로 말씀해 주시면 처리해 드립니다.</li>
+    </ul>
+    <p class="pv-fine">
+      만 14세 미만은 가입하실 수 없습니다. 광고성 안내는 따로 동의하신 분께만 보내며,
+      언제든 그만 받으실 수 있습니다.
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('누구에게', '물어보실 곳')}
+    <dl class="facts">
+      <div><dt>기관명</dt><dd>${esc(site.fullName || site.name)}</dd></div>
+      <div><dt>개인정보 보호책임자</dt><dd>${todo(P.officer, '보호책임자 성함과 직책')}</dd></div>
+      <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
+      <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
+      <div><dt>주소</dt><dd>${addressText()}</dd></div>
+      <div><dt>사업자등록번호</dt><dd>${todo(P.bizNo, '사업자등록번호')}</dd></div>
+      <div><dt>통신판매업 신고번호</dt><dd>${todo(P.mailOrderNo, '통신판매업 신고번호')}</dd></div>
+      <div><dt>시행일</dt><dd>${todo(P.effectiveDate, '이 방침을 처음 적용하는 날짜')}</dd></div>
+    </dl>
+    <p class="pv-fine">
+      침해를 당하셨다고 생각되시면 개인정보침해신고센터(국번 없이 118)나
+      개인정보 분쟁조정위원회(1833-6972)에 도움을 요청하실 수 있습니다.
+    </p>
+  </div>
+</section>
+`;
+
+  write(
+    'privacy.html',
+    layout({
+      title: '개인정보 처리방침 | 우리교회지원센터',
+      description: '우리교회지원센터가 무엇을 받아 두고 언제 지우는지, 어디에 보관하는지 적어 두었습니다.',
+      base: '',
+      active: 'privacy.html',
       body,
     })
   );
@@ -371,14 +884,32 @@ function buildServicesIndex() {
   const body = `
 ${pageHero({
   eyebrow: '지원 항목',
-  title: '세 갈래 8개 항목,<br>전담창구 4곳이 맡습니다',
-  lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 알리는 교회 · 모이는 교회 · 세우는 교회. '
-    + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
+  title: `${NUM[categories.length]} 갈래 ${services.length}개 항목과<br>게시판 ${T.BOARDS.length}개`,
+  lead: '교회가 겪는 자리별로 묶었습니다. 여러 항목을 한 번에 신청하실 수 있고, 전체 일정을 묶어 조율합니다. '
+    + '아래쪽에는 센터를 거치지 않고 교회끼리 직접 잇는 게시판도 함께 두었습니다.',
 })}
 
 <section class="section">
   <div class="wrap">
     ${serviceGroups('../')}
+  </div>
+</section>
+
+<!-- 게시판도 여기에 함께 둡니다.
+     성격은 다르지만 [지원 항목] 을 눌러 들어온 분이 "여기 있는 게
+     전부인가" 하고 나가시면 게시판 다섯을 아예 못 보십니다. -->
+<section class="section">
+  <div class="wrap">
+    ${sectionHead('게시판', '교회끼리 직접 잇는 자리',
+      '위 항목은 센터가 맡아 해 드리는 일이고, 아래는 교회와 교회가 센터를 거치지 않고 '
+      + '직접 만나는 곳입니다.')}
+    <div class="bd-tiles">
+      ${T.BOARDS.map((b, i) => `<a class="bd-tile" href="../${b.href}">
+        <span class="bd-no">0${i + 1}</span>
+        <strong>${esc(b.label)}</strong>
+        <span>${esc(b.sub)}</span>
+      </a>`).join('\n      ')}
+    </div>
   </div>
 </section>
 
@@ -393,16 +924,18 @@ ${pageHero({
       <article class="bill-card">
         <span class="bill-tag">달마다</span>
         <h3>홈페이지 제작 · 인투오피스</h3>
-        <p class="bill-price">홈페이지 <strong>월 관리비 3만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
-        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 3만원은
-          서버 · 도메인 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
+        <p class="bill-price">홈페이지 <strong>월 관리비 5만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
+        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 5만원은
+          서버 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
           둘 다 월 단위로 중단하실 수 있습니다.</p>
+        <p class="bill-where">인투오피스는 <strong>인투오피스에서 직접 결제</strong>하십니다 — 센터를 거치지 않습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">1회 결제</span>
-        <h3>디자인 제작 · 부동산</h3>
-        <p class="bill-price">디자인 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
-        <p>필요할 때 한 번만 결제하는 항목입니다. 주보처럼 매주 반복되는 경우에는 월 정기 계약으로 묶을 수 있습니다.</p>
+        <h3>마케팅 지원 · 부동산</h3>
+        <p class="bill-price">디자인 시안 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
+        <p>필요할 때 한 번만 결제하는 항목입니다.
+          주보처럼 매주 반복되는 경우에는 사역 패키지에 매주 제작이 들어 있습니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">건별 견적</span>
@@ -471,7 +1004,7 @@ function buildServicePage(s, i) {
       <a href="../services/index.html">지원 항목</a> ${icon('arrow', 'ico ico-xs')}
       <span>${esc(s.name)}</span>
     </nav>
-    <div class="svc-hero-in">
+    <div class="svc-hero-in${s.hideMeta ? ' is-wide' : ''}">
       <div class="svc-hero-copy">
         <p class="eyebrow"><span class="svc-hero-no">${s.no}</span> 지원 항목</p>
         <h1 data-live="svc.${s.id}.name">${esc(s.name)}</h1>
@@ -483,7 +1016,7 @@ function buildServicePage(s, i) {
         </div>
         ${externalNote(s)}
       </div>
-      <div class="svc-hero-side">
+      ${s.hideMeta ? '' : `<div class="svc-hero-side">
         <span class="svc-hero-ico">${icon(s.icon)}</span>
         ${s.siteLink ? `<a class="btn btn-gold svc-site-btn" href="${s.siteLink.url}" target="_blank" rel="noopener">
           ${esc(s.siteLink.label)} 바로가기 ↗
@@ -495,7 +1028,7 @@ function buildServicePage(s, i) {
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           <div><dt>지원 지역</dt><dd>전국</dd></div>
         </dl>
-      </div>
+      </div>`}
     </div>
   </div>
 </section>
@@ -630,6 +1163,9 @@ ${s.scope ? `
         <div class="price-card">
           <p class="price-figure">${esc(s.price || '상담 후 결정')}<small>${esc(s.billing || '건별 견적')}</small></p>
           <p data-live="svc.${s.id}.priceNote">${esc(s.priceNote)}</p>
+          ${s.payElsewhere ? `<p class="pay-where">
+            결제는 <strong>${esc(s.payElsewhere)}</strong>에서 직접 하십니다 — 센터를 거치지 않습니다.
+          </p>` : ''}
           <dl class="price-meta">
             <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
@@ -692,7 +1228,7 @@ function buildApply() {
           href="${s.externalApply}" target="_blank" rel="noopener">
           <span class="pick-in">
             <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
-            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(who)} 접수 페이지에서 신청합니다</small></span>
+            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(s.externalApplyShort || (who + ' 접수 페이지에서 신청합니다'))}</small></span>
             <span class="pick-out">${esc(who)} ${icon('arrow', 'ico ico-xs')}</span>
           </span>
         </a>`;
@@ -728,7 +1264,7 @@ ${pageHero({
 
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
-        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 담당자 한 명이 묶어서 진행합니다.</p>
+        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 묶어서 진행합니다.</p>
         ${externalIds.length
           ? `<p class="fs-help fs-help-external">${externalIds
               .map((id) => esc(services.find((v) => v.id === id).name))
@@ -952,6 +1488,94 @@ ${pageHero({
 /* =========================================================
    문의
    ========================================================= */
+/* =========================================================
+   패키지
+   ========================================================= */
+const won = (n) => n.toLocaleString('ko-KR');
+
+function planCard(p) {
+  const monthly = p.free ? '0원' : `${won(p.price)}원`;
+  const perMonth = p.free ? '' : `${won(Math.round(p.yearly / 12))}원`;
+
+  return `<article class="plan${p.popular ? ' is-popular' : ''}${p.free ? ' is-free' : ''}" id="plan-${p.id}">
+      ${p.popular ? '<span class="plan-flag">가장 많이 고르십니다</span>' : ''}
+      <h3 class="plan-name">${esc(p.name)}</h3>
+      <p class="plan-tag">${esc(p.tagline)}</p>
+
+      <p class="plan-price" data-month="${monthly}" data-year="${perMonth || monthly}">
+        <strong>${monthly}</strong><span>${p.free ? '' : ' / 월'}</span>
+      </p>
+      ${p.free
+        ? '<p class="plan-sub">가입비도 월 요금도 없습니다</p>'
+        : `<p class="plan-sub plan-year">연납 ${won(p.yearly)}원 — <b>2개월 무료</b></p>`}
+
+      <p class="plan-lead">${esc(p.lead)}</p>
+
+      <dl class="plan-quota">
+        <div><dt>나눔집</dt><dd>${esc(p.quota.sharing)}</dd></div>
+        <div><dt>AI 숏츠</dt><dd>${esc(p.quota.shorts)}</dd></div>
+      </dl>
+
+      ${p.inherits ? `<p class="plan-inherit">${esc(p.inherits)} 패키지에 더해서</p>` : ''}
+      <ul class="plan-list">
+        ${p.includes.map((t) => `<li>${icon('check', 'ico ico-xs')}<span>${esc(t)}</span></li>`).join('\n        ')}
+      </ul>
+      ${p.note ? `<p class="plan-note">${esc(p.note)}</p>` : ''}
+
+      <a class="btn ${p.popular ? 'btn-primary' : 'btn-ghost'} plan-cta"
+         href="apply.html?plan=${p.id}">${p.free ? '무료로 시작하기' : '30일 체험 신청'}</a>
+    </article>`;
+}
+
+function buildPricing() {
+  /* 패키지를 다시 짜는 동안 내용을 내려 둡니다.
+     주소는 살려 두고(들어오시는 분이 404 를 만나지 않게) 안내만 보여 줍니다.
+     패키지 내용(plans · trial · invite)은 src/data/site.js 에 그대로 있으니,
+     다시 여실 때는 이 함수만 예전 모양으로 되돌리면 됩니다. */
+  const body = `
+${pageHero({
+  eyebrow: '패키지',
+  title: '패키지를 다시 짜고 있습니다',
+  lead: '더 알맞은 기준으로 고쳐 쓰는 중입니다. 준비되는 대로 이 자리에 올려 드리겠습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="renew-box">
+      <h2>지금은 요금을 안내해 드리지 못합니다</h2>
+      <p>
+        비용이 궁금하시면 전화나 문의로 알려 주세요. 지금 필요하신 항목만 놓고
+        견적을 따로 내어 드립니다. 상담과 견적에는 비용이 들지 않습니다.
+      </p>
+      <div class="renew-actions">
+        <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+        <a class="btn btn-outline btn-lg" href="contact.html">문의하기</a>
+      </div>
+      <p class="renew-fine">
+        홈페이지 · 인투오피스처럼 이미 금액이 정해진 항목은
+        <a href="services/index.html">지원 항목</a> 에서 그대로 보실 수 있습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+${ctaBand('')}
+`;
+
+  write(
+    'pricing.html',
+    layout({
+      title: '패키지 (준비 중) | 우리교회지원센터',
+      description:
+        '패키지를 다시 짜고 있습니다. 준비되는 대로 안내해 드리며, '
+        + '그 사이에는 필요하신 항목만 놓고 견적을 따로 내어 드립니다.',
+      base: '',
+      active: 'pricing.html',
+      body,
+    })
+  );
+}
+
 function buildContact() {
   const body = `
 ${pageHero({
@@ -972,7 +1596,7 @@ ${pageHero({
       <a class="contact-card" href="mailto:${esc(site.contact.email)}">
         <span class="contact-ico">${icon('mail')}</span>
         <h2>이메일</h2>
-        <strong>${emailText()}</strong>
+        <strong class="is-email">${emailText()}</strong>
         <p>영업일 기준 1일 이내 회신드립니다.</p>
       </a>
       <a class="contact-card is-accent" href="apply.html">
@@ -1125,14 +1749,14 @@ ${boardTabs('', 'listings.html')}
 
 ${pageHero({
   eyebrow: '부동산 · 매물 게시판',
-  title: '교회 매물을<br>직접 올리고, 직접 찾습니다',
-  lead: '예배 공간을 내놓는 교회와 구하는 교회가 서로 만나는 게시판입니다. '
-    + '서류를 확인한 글만 올라갑니다 — 허위 매물 걱정 없이 조건만 보세요.',
+  title: '예배 공간을 내놓는 교회와<br>구하는 교회가 만납니다',
+  lead: '중개업소를 거치지 않고 교회와 교회가 직접 만나는 자리입니다. '
+    + '올리실 때 권리 증빙 서류를 확인해 게시하며, 조건과 서류는 계약 전에 '
+    + '직접 한 번 더 확인해 주세요.',
   extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
       <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill is-key">권리 증빙 서류 <strong>필수</strong></span>
     </div>
     <div class="ls-hero-actions">
       <a class="btn btn-gold btn-lg" href="#new" id="lsNewBtn">매물 등록하기 ${icon('arrow', 'ico ico-sm')}</a>
@@ -1528,6 +2152,116 @@ window.CAPS_STORAGE_RULES_VERSION = ${JSON.stringify(stVersion)};
 /* =========================================================
    브라우저용 데이터 파일
    ========================================================= */
+/* =========================================================
+   찾아보기 목록 (assets/js/search-index.js)
+
+   사이트가 커지면서 "그 기능이 어디 있더라" 가 됩니다.
+   메뉴를 다 뒤지지 않고 한 칸에 적어 찾도록, 페이지 · 지원 항목 ·
+   게시판 · 자주 묻는 질문을 미리 한 벌로 만들어 둡니다.
+
+   게시판에 올라온 실제 글(매물 · 공고 등)은 여기 넣지 않습니다 —
+   수시로 바뀌므로 찾을 때 그 자리에서 읽어 옵니다.
+   ========================================================= */
+function buildSearchIndex() {
+  const rows = [];
+  const add = (o) => rows.push(o);
+
+  /* 주요 페이지 */
+  [
+    ['index.html', '홈', '우리교회지원센터가 하는 일을 한눈에', '페이지', '처음 메인 홈'],
+    ['about.html', '센터 소개', '어떤 사람들이 무엇을 위해 모였는지', '페이지', '소개 우리 누구'],
+    ['services/index.html', '지원 항목 전체', '센터가 해 드리는 일 전부', '페이지', '서비스 목록'],
+    ['process.html', '이용 절차', '신청부터 시작까지 어떻게 진행되는지', '페이지', '순서 진행 방법'],
+    ['faq.html', '자주 묻는 질문', '많이 물어보시는 것들을 모았습니다', '페이지', 'FAQ 질문'],
+    ['contact.html', '문의', '전화 · 카카오톡 · 이메일로 여쭤보기', '페이지', '연락처 상담 전화'],
+    ['apply.html', '지원 신청', '필요한 것을 적어 보내 주시면 연락드립니다', '페이지', '신청서 접수'],
+    ['status.html', '신청 현황', '내가 넣은 신청이 어디까지 갔는지', '페이지', '진행 상황 조회'],
+    ['privacy.html', '개인정보 처리방침', '무엇을 받아 두고 언제 지우는지', '페이지', '개인정보 방침 약관 수집 보관 삭제 탈퇴'],
+  ].forEach(([url, title, desc, cat, kw]) => add({ url, title, desc, cat, kw }));
+
+  /* 큰 갈래 */
+  categories.forEach((c) => add({
+    url: `services/index.html#${c.id}`,
+    title: c.name, desc: c.tagline, cat: '갈래', kw: c.desc,
+  }));
+
+  /* 지원 항목 하나하나 — 여기가 사람들이 가장 많이 찾는 곳입니다 */
+  services.forEach((s) => add({
+    url: `services/${s.slug}.html`,
+    title: s.name,
+    desc: s.tagline,
+    cat: '지원 항목',
+    kw: [s.short, s.summary,
+      (s.features || []).map((f) => f.title || f).join(' '),
+      (s.deliverables || []).join(' '),
+      (s.problems || []).map((x) => x.title).join(' ')].join(' '),
+  }));
+
+  /* 사람들이 실제로 치는 말 — 우리가 쓰는 이름과 다릅니다.
+     "사택" 을 치면 게스트하우스가, "얼마" 를 치면 비용이 나와야 합니다. */
+  const SYNONYM = {
+    'services/sound.html': '스피커 마이크 믹서 앰프 소리 하울링 음향장비 설치',
+    'services/homepage.html': '웹사이트 홈피 사이트 도메인 제작 만들기',
+    'services/smartchurch.html': '앱 어플 모바일 주보앱 출석',
+    'services/shorts.html': '영상 편집 유튜브 릴스 설교영상',
+    'services/design.html': '현수막 배너 포스터 명함 로고 인쇄 디자인',
+    'services/realestate.html': '교회 매매 임대 상가 건물 부동산 이전',
+    'services/sharing.html': '나눔집 소그룹 교재 순모임 성경공부',
+    'services/intooffice.html': '행정 서류 결재 문서 전자결재 사무',
+    'services/akc.html': '수련회 집회 컨퍼런스 대회',
+    'services/community.html': '커뮤니티 모임 기도요청 중보 광고',
+  };
+  rows.forEach((r) => { if (SYNONYM[r.url]) r.kw = (r.kw || '') + ' ' + SYNONYM[r.url]; });
+
+  /* 게시판 */
+  const BOARD_KW = {
+    'listings.html': '교회 매매 임대 상가 건물 부동산 매물 이전 예배당 자리',
+    'market.html': '중고 스피커 마이크 믹서 앰프 악기 피아노 의자 강대상 싸게 사기 팔기',
+    'guesthouse.html': '사택 선교관 숙소 숙박 방 머물 곳 선교사 유학생 게스트하우스 잠자리',
+    'tickets.html': '집회 수련회 세미나 예매 티켓 신청 참가 좌석',
+    'jobs.html': '전도사 목사 반주자 찬양인도자 간사 채용 구인 구직 사역지 청빙 사택 사례비 교역자 부교역자 교육전도사',
+  };
+  T.BOARDS.forEach((b) => add({
+    url: b.href, title: b.label, desc: b.sub, cat: '게시판', kw: BOARD_KW[b.href] || '',
+  }));
+  add({ url: 'listings.html#new', title: '매물 올리기', desc: '교회 부동산을 게시판에 내놓기', cat: '게시판', kw: '등록 매매 임대' });
+  add({ url: 'market.html#new', title: '중고 물품 팔기', desc: '쓰던 음향 · 악기 · 집기를 내놓기', cat: '게시판', kw: '등록 판매 중고' });
+  add({ url: 'market.html#install', title: '설치 대행 신청', desc: '사 오신 장비를 예배당에 달아 드립니다 (별도 비용)', cat: '게시판', kw: '음향 설치 시공 견적' });
+  add({ url: 'guesthouse.html#new', title: '방 내어 놓기', desc: '비어 있는 사택 · 선교관을 나누기', cat: '게시판', kw: '등록 숙소' });
+  add({ url: 'tickets.html#new', title: '집회 등록하기', desc: '집회 · 수련회 신청을 받기', cat: '게시판', kw: '등록 예매 티켓' });
+  add({ url: 'jobs.html#new', title: '구인 공고 올리기', desc: '우리 교회에서 함께할 사역자를 찾기', cat: '게시판', kw: '등록 채용 모집 전도사' });
+  add({ url: 'jobs.html', title: '사역자 자리 찾기', desc: '교회들이 올린 구인 공고 보기', cat: '게시판', kw: '취업 지원 사역지 청빙' });
+
+  /* 값을 물으시는 분이 많은데 패키지 페이지는 지금 닫혀 있습니다.
+     빈손으로 돌려보내지 말고 물어보실 곳으로 안내합니다. */
+  add({
+    url: 'pricing.html',
+    title: '비용이 얼마인가요',
+    desc: '항목마다 다릅니다. 무엇이 필요하신지 알려 주시면 견적을 내어 드립니다 — 상담은 무료입니다.',
+    cat: '자주 찾는 것',
+    kw: '요금 가격 비용 값 얼마 견적 금액 무료 돈 월 관리비 패키지 요금제',
+  });
+  add({
+    url: 'status.html',
+    title: '내 신청이 어디까지 갔나요',
+    desc: '넣으신 신청의 진행 상황을 확인하실 수 있습니다.',
+    cat: '자주 찾는 것',
+    kw: '조회 확인 진행 접수 신청현황',
+  });
+
+  /* 자주 묻는 질문 — 질문 자체로 찾는 분이 많습니다 */
+  site.faqs.forEach((f, i) => add({
+    url: `faq.html#faq-common-${i}`, title: f.q, desc: f.a, cat: '질문', kw: '',
+  }));
+  services.forEach((s) => (s.faqs || []).forEach((f, i) => add({
+    url: `faq.html#faq-${s.id}-${i}`, title: f.q, desc: f.a, cat: '질문', kw: s.name,
+  })));
+
+  write('assets/js/search-index.js',
+    '/* 자동 생성 파일입니다 — build.js 의 buildSearchIndex() 가 만듭니다. */\n'
+    + 'window.CAPS_SEARCH = ' + JSON.stringify(rows) + ';\n');
+}
+
 function buildDataScript() {
   // 관리자 화면의 항목 편집기와 신청서가 함께 사용합니다.
   const payload = services.map((s) => ({
@@ -1554,35 +2288,80 @@ window.CAPS_SERVICES = ${JSON.stringify(payload, null, 2)};
    계좌는 게시판에 노출하지 않고, 관리자가 승인할 때 카카오톡으로 보냅니다. */
 window.CAPS_LISTING_BOARD = ${JSON.stringify(site.listingBoard, null, 2)};
 
-/* 중고 장터 — 센터의 몫은 등록비가 아니라 설치 대행료입니다. */
+/* 중고 장터 운영 기준 */
 window.CAPS_MARKET_BOARD = ${JSON.stringify(site.marketBoard, null, 2)};
 
 /* 교회 게스트하우스 운영 기준 */
 window.CAPS_GUEST_BOARD = ${JSON.stringify(site.guestHouseBoard, null, 2)};
 
+/* 교역자 구인 공고 운영 기준 */
+window.CAPS_JOB_BOARD = ${JSON.stringify(site.jobBoard, null, 2)};
+
 /* 집회 티켓팅 운영 기준 */
 window.CAPS_TICKET_BOARD = ${JSON.stringify(site.ticketBoard, null, 2)};
+
+/* 카드 결제 설정. enabled 가 false 면 결제 버튼이 아예 그려지지 않습니다.
+   공개해도 되는 값만 들어갑니다 — 비밀키는 Edge Function 환경변수에 있습니다. */
+window.CAPS_PAYMENT = ${JSON.stringify(site.payment, null, 2)};
 `;
   write('assets/js/data.js', js);
 }
 
 /* ========================================================= */
+/* =========================================================
+   손으로 쓴 화면(admin.html · staff.html)의 자산 주소에도
+   내용 요약 번호를 붙입니다.
+
+   이 둘은 build.js 가 만드는 파일이 아니라 직접 쓴 파일입니다.
+   그래도 옛 css 가 붙는 문제는 똑같이 생기고, 오히려 직원이
+   매일 여는 화면이라 더 성가십니다. 그래서 빌드할 때 주소만
+   덧칠합니다 — 내용이 그대로면 번호도 그대로라, 쓸데없이
+   파일이 바뀌지는 않습니다.
+   ========================================================= */
+function stampAssets() {
+  ['admin.html', 'staff.html'].forEach((file) => {
+    const full = path.join(__dirname, file);
+    if (!fs.existsSync(full)) return;
+
+    const before = fs.readFileSync(full, 'utf8');
+    const after = before.replace(
+      /(href|src)="(assets\/[^"?]+\.(?:css|js))(?:\?v=[a-f0-9]+)?"/g,
+      (m, attr, rel) => `${attr}="${rel}${T.ver(rel)}"`
+    );
+
+    if (after !== before) {
+      fs.writeFileSync(full, after);
+      console.log('  ' + file + ' (자산 번호 갱신)');
+    }
+  });
+}
+
 function main() {
+  /* 자동 생성되는 스크립트를 먼저 만듭니다.
+     페이지에 붙는 주소에 파일 내용을 요약한 번호(?v=)를 다는데,
+     그러려면 파일이 이미 있어야 합니다. */
+  buildSearchIndex();
+  buildDataScript();
+  buildRulesScript(buildSupabaseSql());
+  stampAssets();
+
   buildIndex();
   buildAbout();
   buildProcess();
   buildFaq();
   buildServicesIndex();
+  buildPricing();
   services.forEach(buildServicePage);
   buildApply();
   buildStatus();
   buildContact();
+  buildPrivacy();
+  buildMoved();
   buildListings();
   Boards.buildMarket(write);
   Boards.buildGuesthouse(write);
   Boards.buildTickets(write);
-  buildDataScript();
-  buildRulesScript(buildSupabaseSql());
+  Boards.buildJobs(write);
   console.log(`생성 완료 (${out.length}개)`);
   out.forEach((f) => console.log('  ' + f));
 }

@@ -343,6 +343,78 @@
   }));
 
   /* =========================================================
+     교역자 구인 공고
+
+     여기서 보는 것은 하나입니다 — 사례비 · 사택 · 교통이
+     실제로 적혀 있는가. 이 셋이 비어 있으면
+     지원이 오지 않아, 게시해도 교회에 도움이 되지 않습니다.
+     ========================================================= */
+
+  A.register('jobBoard', boardView({
+    collection: 'jobPosts',
+    title: '교역자 구인',
+    nav: '교역자 구인',
+    desc: '교회가 올린 구인 공고를 확인해 게시합니다. 사례비 · 사택 · 교통이 적혀 있는지 보아 주세요.',
+    titleKey: 'title',
+    searchHint: '공고 제목 · 교회명 · 지역으로 검색',
+    view: function (r) { return db.jobView(r); },
+    haystack: function (r) {
+      return [r.title, r.churchName, r.region, r.department, r.userEmail].join(' ');
+    },
+    columns: ['제목', '교회', '직분', '사례비', '사택', '지역', '등록일', '상태'],
+    cells: function (r, v) {
+      return [
+        '<td class="strong">' + h(r.title || '(제목 없음)') + '</td>',
+        '<td>' + h(r.churchName || '') + '</td>',
+        '<td>' + h(v.positionLabel) + '</td>',
+        '<td>' + h(db.jobPay(r)) + '</td>',
+        '<td>' + h(v.housingLabel) + '</td>',
+        '<td>' + h(r.region || '') + '</td>',
+        '<td>' + h(db.formatDate(r.createdAt, false)) + '</td>',
+      ];
+    },
+    detail: function (r, v) {
+      return '<dl class="adm-dl">' +
+        '<div><dt>교회</dt><dd>' + h([r.churchName, r.denomination, r.churchSize].filter(Boolean).join(' · ')) + '</dd></div>' +
+        '<div><dt>직분 · 형태</dt><dd>' + h(v.positionLabel) + ' · ' + h(v.employmentLabel) +
+          (r.department ? ' · ' + h(r.department) : '') + '</dd></div>' +
+        '<div><dt>모집 인원</dt><dd>' + (Number(r.headcount) || 1) + '명</dd></div>' +
+        '<div><dt>사례비</dt><dd>' + h(db.jobPay(r)) +
+          (r.payNote ? ' · ' + h(r.payNote) : '') + '</dd></div>' +
+        '<div><dt>사택</dt><dd>' + h(v.housingLabel) +
+          (r.insurance ? ' · 4대보험 가입' : '') + '</dd></div>' +
+        '<div><dt>근무 요일</dt><dd>' + h(r.workDays || '-') + '</dd></div>' +
+        '<div><dt>지역</dt><dd>' + h([r.region, r.addressRough].filter(Boolean).join(' · ')) + '</dd></div>' +
+        '<div><dt>부임 희망</dt><dd>' + h(r.startDate || '-') + '</dd></div>' +
+        '<div><dt>모집 마감</dt><dd>' + h(r.closesAt ? db.formatDate(r.closesAt, false) : '구할 때까지') + '</dd></div>' +
+        '<div><dt>연락처</dt><dd>' + h(r.contactName) + ' · ' + h(db.formatPhone(r.contactPhone)) +
+          (r.contactEmail ? ' · ' + h(r.contactEmail) : '') + '</dd></div>' +
+        '<div><dt>연락 가능 시간</dt><dd>' + h(r.contactHours || '-') + '</dd></div>' +
+        '</dl>' +
+        (r.commuteNote ? '<h3>오가는 길</h3><p class="adm-card-lead">' + h(r.commuteNote) + '</p>' : '') +
+        '<h3>교회 소개와 하실 일</h3><p class="adm-card-lead">' + h(r.desc || '') + '</p>' +
+        (r.qualification ? '<h3>바라는 자격</h3><p class="adm-card-lead">' + h(r.qualification) + '</p>' : '');
+    },
+    approve: function (id) { return db.approveJobPost(id); },
+    reject: function (id, note) { return db.rejectJobPost(id, note); },
+    hide: function (id, note) { return db.hideJobPost(id, note); },
+    csvName: 'wcsc-교역자구인.csv',
+    csvHead: ['제목', '교회', '교단', '직분', '근무 형태', '부서', '모집 인원', '사례비',
+      '사택', '4대보험', '지역', '근무 요일', '부임 희망', '모집 마감',
+      '등록 계정', '담당자', '연락처', '이메일', '연락 가능 시간', '게시 상태', '등록일', '사유'],
+    csvRow: function (r, v, state) {
+      var u = userOf(state, r.userId);
+      return [r.title, r.churchName, r.denomination, v.positionLabel, v.employmentLabel,
+        r.department, r.headcount, db.jobPay(r), v.housingLabel, r.insurance ? '가입' : '',
+        r.region, r.workDays, r.startDate,
+        r.closesAt ? db.formatDate(r.closesAt, false) : '구할 때까지',
+        u ? u.email : (r.userEmail || ''), r.contactName, db.formatPhone(r.contactPhone),
+        r.contactEmail, r.contactHours,
+        v.label, db.formatDate(r.createdAt, false), r.rejectNote];
+    },
+  }));
+
+  /* =========================================================
      집회 티켓팅
 
      여기만 하나 더 봅니다 — 신청 현황입니다.
@@ -505,7 +577,6 @@
         if (!r) return;
 
         var tier = db.INSTALL_TIERS[r.tier] || {};
-        var quote = db.installQuote(r.tier, 1);
 
         A.openDrawer({
           title: r.churchName || '(교회명 없음)',
@@ -514,7 +585,6 @@
             '<div class="adm-card"><dl class="adm-dl">' +
               '<div><dt>설치할 물건</dt><dd>' + h(r.itemTitle || '-') + '</dd></div>' +
               '<div><dt>맡기시는 범위</dt><dd>' + h(tier.label || r.tier) + '</dd></div>' +
-              '<div><dt>기본 견적</dt><dd>' + A.money(quote.amount) + '원 (실측 전 어림값)</dd></div>' +
               '<div><dt>주소</dt><dd>' + h([r.region, r.address].filter(Boolean).join(' ')) + '</dd></div>' +
               '<div><dt>층 · 엘리베이터</dt><dd>' +
                 h([r.floor, r.elevator].filter(Boolean).join(' · ') || '-') + '</dd></div>' +

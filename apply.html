@@ -13,8 +13,9 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=db992afa">
+  <link rel="stylesheet" href="assets/css/auth.css?v=1d79afe0">
+  
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
@@ -23,48 +24,58 @@
     <div class="wrap topbar-in">
       <span class="topbar-item"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></span>
       <span class="topbar-links">
-        <a href="tel:0200000000"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <span data-live="site.phone">02-0000-0000</span></a>
-        <a href="mailto:help@caps.or.kr"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <span data-live="site.email">help@caps.or.kr</span></a>
+        <a href="tel:01042542270"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <span data-live="site.phone">010-4254-2270</span></a>
+        <a href="mailto:worichurchsupportcenter@gmail.com"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <span data-live="site.email">worichurchsupportcenter@gmail.com</span></a>
       </span>
     </div>
   </div>
+
+  <!-- 윗줄 — 로고 · 찾기 · 내 계정
+       찾기 칸을 머리 안에 두면 어느 페이지에서나 같은 자리에 있습니다.
+       메뉴와 자리를 다투지 않으므로 넓게 쓸 수 있습니다. -->
   <div class="wrap header-in">
-    <a class="brand" href="index.html">
-      <svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-    <rect width="40" height="40" rx="10" fill="var(--brand-800)"/>
-    <path d="M20 9.5v21M13 16.5h14" stroke="var(--gold-400)" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M27.5 25.4a8.4 8.4 0 0 1-15 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-  </svg>
-      <span class="brand-text">
-        <strong>우리교회지원센터</strong>
-        <small>Wori Church Support Center</small>
-      </span>
+    <a class="brand" href="index.html" aria-label="우리교회지원센터 홈으로">
+      <img class="logo-img is-row" src="assets/img/logo-row.png"
+    width="1780" height="307" alt="우리교회지원센터" decoding="async">
     </a>
-    <nav class="nav" id="nav" aria-label="주 메뉴">
-      <a class="nav-link" href="about.html">센터 소개</a><a class="nav-link" href="services/index.html">지원 항목</a><a class="nav-link" href="listings.html">게시판</a><a class="nav-link" href="process.html">이용 절차</a><a class="nav-link" href="faq.html">자주 묻는 질문</a><a class="nav-link" href="contact.html">문의</a>
+
+    <button type="button" class="hsearch" data-search-open aria-label="사이트 안에서 찾기">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+      <span class="hsearch-text">무엇을 찾으시나요?</span>
+      <span class="hsearch-key" aria-hidden="true">/</span>
+    </button>
+
+    <div class="header-side">
       <span id="authSlot"></span>
       <a class="btn btn-primary btn-sm nav-cta" href="apply.html">지원 신청</a>
-    </nav>
-    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
+
+  <!-- 아랫줄 — 메뉴 -->
+  <div class="navbar">
+    <div class="wrap">
+      <nav class="nav" id="nav" aria-label="주 메뉴">
+        <a class="nav-link" href="index.html">홈</a><a class="nav-link" href="about.html">센터 소개</a><a class="nav-link" href="services/index.html">지원 항목</a><a class="nav-link" href="pricing.html">패키지</a><a class="nav-link" href="listings.html">게시판</a><a class="nav-link" href="process.html">이용 절차</a><a class="nav-link" href="faq.html">자주 묻는 질문</a><a class="nav-link" href="contact.html">문의</a>
+      </nav>
+    </div>
+  </div>
+
   <div class="mega" id="mega" hidden>
     <div class="wrap mega-in"><a class="mega-item" href="services/homepage.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
           <span class="mega-text"><strong>홈페이지 제작</strong><small>처음 찾아오는 사람이 가장 먼저 보는 교회의 얼굴</small></span>
         </a><a class="mega-item" href="services/design.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.6-1.9-.2-1 .5-1.9 1.6-1.9h1.6A4.2 4.2 0 0 0 21 13C21 7.5 16.9 3 12 3Z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="11" cy="7.6" r="1.1"/><circle cx="15.6" cy="9.2" r="1.1"/></svg></span>
-          <span class="mega-text"><strong>디자인 제작</strong><small>배너 · 포스터 · 현수막 · 주보를 한 곳에서</small></span>
-        </a><a class="mega-item" href="services/staffing.html">
-          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5M15.8 4.5a3.6 3.6 0 0 1 0 6.9"/></svg></span>
-          <span class="mega-text"><strong>교역자 구인</strong><small>필요한 사역자를 알려주시면, 저희가 연결해 드립니다</small></span>
+          <span class="mega-text"><strong>마케팅 지원</strong><small>현수막 · 포스터 · 주보부터 SNS 콘텐츠까지</small></span>
         </a><a class="mega-item" href="services/sound.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.4"/><circle cx="12" cy="14.6" r="3.6"/><circle cx="12" cy="6.6" r="1.4"/></svg></span>
           <span class="mega-text"><strong>음향 세팅</strong><small>설교가 또렷하게 들리는 예배당</small></span>
         </a><a class="mega-item" href="services/realestate.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5.6c0-.9.6-1.6 1.5-1.6h5c.9 0 1.5.7 1.5 1.6V21M13 21V10.4h4.5c.9 0 1.5.7 1.5 1.6V21"/><path d="M8 8h2M8 12h2M8 16h2M16 14h1"/></svg></span>
-          <span class="mega-text"><strong>부동산</strong><small>교회 매물 게시판 — 올리고, 찾습니다</small></span>
+          <span class="mega-text"><strong>부동산</strong><small>예배 공간을 내놓는 교회와 구하는 교회가 만납니다</small></span>
         </a><a class="mega-item" href="services/akc.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.4 7 6.6 15.8M13.6 7l3.8 8.8M7.4 18h9.2"/></svg></span>
           <span class="mega-text"><strong>AKC</strong><small>어라이즈 코리아 캠프 — 여름 · 겨울, 두 가지 방식으로</small></span>
@@ -74,6 +85,15 @@
         </a><a class="mega-item" href="services/intooffice.html">
           <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7.2" width="19" height="12.6" rx="2"/><path d="M8.6 7.2V5.4c0-.9.7-1.6 1.6-1.6h3.6c.9 0 1.6.7 1.6 1.6v1.8"/><path d="M2.5 12.4h19"/></svg></span>
           <span class="mega-text"><strong>인투오피스</strong><small>교회 서류에 도장 받으러 다니지 마세요 — 전자서명</small></span>
+        </a><a class="mega-item" href="services/shorts.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.6" y="2.5" width="10.8" height="19" rx="2.4"/><path d="m10.8 9.4 4.4 2.6-4.4 2.6Z"/></svg></span>
+          <span class="mega-text"><strong>숏츠 제작</strong><small>이번 주 설교 한 편에서 숏츠 3~5편</small></span>
+        </a><a class="mega-item" href="services/sharing.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.6h6.2c1 0 1.8.8 1.8 1.8V19a1.6 1.6 0 0 0-1.6-1.6H4Z"/><path d="M20 4.6h-6.2c-1 0-1.8.8-1.8 1.8V19a1.6 1.6 0 0 1 1.6-1.6H20Z"/><path d="M6.4 8.4h2.8M6.4 11.6h2.8M14.8 8.4h2.8M14.8 11.6h2.8"/></svg></span>
+          <span class="mega-text"><strong>소그룹 나눔집</strong><small>설교 원고를 넣으면, 이번 주 나눔집이 나옵니다</small></span>
+        </a><a class="mega-item" href="services/community.html">
+          <span class="mega-ico"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5M15.8 4.5a3.6 3.6 0 0 1 0 6.9"/></svg></span>
+          <span class="mega-text"><strong>커뮤니티 센터</strong><small>목회자와 교역자가 서로 잇는 자리 — 가입 무료</small></span>
         </a></div>
   </div>
 </header>
@@ -99,8 +119,8 @@
 
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
-        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 담당자 한 명이 묶어서 진행합니다.</p>
-        <p class="fs-help fs-help-external">홈페이지 제작 · 디자인 제작 은 별도 접수 페이지에서 신청받습니다. 아래에서 해당 항목을 누르면 새 창으로 열립니다.</p>
+        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 묶어서 진행합니다.</p>
+        <p class="fs-help fs-help-external">홈페이지 제작 · 마케팅 지원 · 인투오피스 은 별도 접수 페이지에서 신청받습니다. 아래에서 해당 항목을 누르면 새 창으로 열립니다.</p>
         <div class="pick-grid">
         <a class="pick pick-external" data-service="homepage" data-apply="homepage"
           href="https://koreayjk.github.io/aim/request.html" target="_blank" rel="noopener">
@@ -114,18 +134,10 @@
           href="https://koreayjk.github.io/aim/request.html" target="_blank" rel="noopener">
           <span class="pick-in">
             <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.6-1.9-.2-1 .5-1.9 1.6-1.9h1.6A4.2 4.2 0 0 0 21 13C21 7.5 16.9 3 12 3Z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="11" cy="7.6" r="1.1"/><circle cx="15.6" cy="9.2" r="1.1"/></svg></span>
-            <span class="pick-text"><strong>디자인 제작</strong><small>@IM 접수 페이지에서 신청합니다</small></span>
+            <span class="pick-text"><strong>마케팅 지원</strong><small>@IM 접수 페이지에서 신청합니다</small></span>
             <span class="pick-out">@IM <svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span>
           </span>
         </a>
-        <label class="pick" data-service="staffing">
-          <input type="checkbox" name="services" value="staffing">
-          <span class="pick-in">
-            <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5M15.8 4.5a3.6 3.6 0 0 1 0 6.9"/></svg></span>
-            <span class="pick-text"><strong>교역자 구인</strong><small>필요한 사역자를 알려주시면, 저희가 연결해 드립니다</small></span>
-            <span class="pick-mark"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
-          </span>
-        </label>
         <label class="pick" data-service="sound">
           <input type="checkbox" name="services" value="sound">
           <span class="pick-in">
@@ -138,7 +150,7 @@
           <input type="checkbox" name="services" value="realestate">
           <span class="pick-in">
             <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5.6c0-.9.6-1.6 1.5-1.6h5c.9 0 1.5.7 1.5 1.6V21M13 21V10.4h4.5c.9 0 1.5.7 1.5 1.6V21"/><path d="M8 8h2M8 12h2M8 16h2M16 14h1"/></svg></span>
-            <span class="pick-text"><strong>부동산</strong><small>교회 매물 게시판 — 올리고, 찾습니다</small></span>
+            <span class="pick-text"><strong>부동산</strong><small>예배 공간을 내놓는 교회와 구하는 교회가 만납니다</small></span>
             <span class="pick-mark"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
           </span>
         </label>
@@ -158,11 +170,35 @@
             <span class="pick-mark"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
           </span>
         </label>
-        <label class="pick" data-service="intooffice">
-          <input type="checkbox" name="services" value="intooffice">
+        <a class="pick pick-external" data-service="intooffice" data-apply="intooffice"
+          href="https://intoedu.github.io/into-office/" target="_blank" rel="noopener">
           <span class="pick-in">
             <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7.2" width="19" height="12.6" rx="2"/><path d="M8.6 7.2V5.4c0-.9.7-1.6 1.6-1.6h3.6c.9 0 1.6.7 1.6 1.6v1.8"/><path d="M2.5 12.4h19"/></svg></span>
-            <span class="pick-text"><strong>인투오피스</strong><small>교회 서류에 도장 받으러 다니지 마세요 — 전자서명</small></span>
+            <span class="pick-text"><strong>인투오피스</strong><small>인투오피스에서 바로 가입하고 쓰십니다</small></span>
+            <span class="pick-out">인투오피스 <svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span>
+          </span>
+        </a>
+        <label class="pick" data-service="shorts">
+          <input type="checkbox" name="services" value="shorts">
+          <span class="pick-in">
+            <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.6" y="2.5" width="10.8" height="19" rx="2.4"/><path d="m10.8 9.4 4.4 2.6-4.4 2.6Z"/></svg></span>
+            <span class="pick-text"><strong>숏츠 제작</strong><small>이번 주 설교 한 편에서 숏츠 3~5편</small></span>
+            <span class="pick-mark"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+          </span>
+        </label>
+        <label class="pick" data-service="sharing">
+          <input type="checkbox" name="services" value="sharing">
+          <span class="pick-in">
+            <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.6h6.2c1 0 1.8.8 1.8 1.8V19a1.6 1.6 0 0 0-1.6-1.6H4Z"/><path d="M20 4.6h-6.2c-1 0-1.8.8-1.8 1.8V19a1.6 1.6 0 0 1 1.6-1.6H20Z"/><path d="M6.4 8.4h2.8M6.4 11.6h2.8M14.8 8.4h2.8M14.8 11.6h2.8"/></svg></span>
+            <span class="pick-text"><strong>소그룹 나눔집</strong><small>설교 원고를 넣으면, 이번 주 나눔집이 나옵니다</small></span>
+            <span class="pick-mark"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
+          </span>
+        </label>
+        <label class="pick" data-service="community">
+          <input type="checkbox" name="services" value="community">
+          <span class="pick-in">
+            <span class="pick-ico"><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 20v-1.6a3.6 3.6 0 0 0-3.6-3.6H6.6A3.6 3.6 0 0 0 3 18.4V20"/><circle cx="9.2" cy="7.6" r="3.3"/><path d="M21 20v-1.6a3.6 3.6 0 0 0-2.7-3.5M15.8 4.5a3.6 3.6 0 0 1 0 6.9"/></svg></span>
+            <span class="pick-text"><strong>커뮤니티 센터</strong><small>목회자와 교역자가 서로 잇는 자리 — 가입 무료</small></span>
             <span class="pick-mark"><svg class="ico ico-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg></span>
           </span>
         </label>
@@ -285,7 +321,7 @@
 
       <div class="form-submit">
         <button type="submit" class="btn btn-primary btn-lg btn-block" id="submitBtn">신청서 제출하기</button>
-        <p class="form-note">제출 후 접수번호가 발급됩니다. 문의: <a href="tel:0200000000"><span data-live="site.phone">02-0000-0000</span></a></p>
+        <p class="form-note">제출 후 접수번호가 발급됩니다. 문의: <a href="tel:01042542270"><span data-live="site.phone">010-4254-2270</span></a></p>
       </div>
       <p class="form-error" id="formError" hidden></p>
     </form>
@@ -315,23 +351,16 @@
   <footer class="site-footer">
   <div class="wrap footer-top">
     <div class="footer-brand">
-      <a class="brand brand-light" href="index.html">
-        <svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-    <rect width="40" height="40" rx="10" fill="var(--brand-800)"/>
-    <path d="M20 9.5v21M13 16.5h14" stroke="var(--gold-400)" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M27.5 25.4a8.4 8.4 0 0 1-15 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-  </svg>
-        <span class="brand-text">
-          <strong>우리교회지원센터</strong>
-          <small>Wori Church Support Center</small>
-        </span>
+      <a class="brand brand-light" href="index.html" aria-label="우리교회지원센터 홈으로">
+        <img class="logo-img" src="assets/img/logo-light.png"
+    width="899" height="549" alt="우리교회지원센터" decoding="async">
       </a>
-      <p class="footer-desc">우리교회지원센터는 교회에 필요를 채워주는 곳입니다. 홈페이지 제작부터 디자인, 교역자 구인, 음향, 부동산, 캠프, 앱, 행정까지 8개 항목을 전담창구 4곳이 나눠 맡고, 교회에는 담당자 한 명이 배정됩니다. 전국 모든 교회 — 규모 · 지역 · 교단 제한이 없습니다.</p>
+      <p class="footer-desc">우리교회지원센터는 교회에 필요를 채워주는 곳입니다. 홈페이지 제작부터 디자인, 교역자 구인, 음향, 부동산, 캠프, 앱, 행정까지 여러 항목을 한곳에서 이어서 맡습니다. 전국 모든 교회 — 규모 · 지역 · 교단 제한이 없습니다.</p>
       <a class="btn btn-gold" href="apply.html">지원 신청하기 <svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
     </div>
     <div class="footer-col">
       <h3>지원 항목</h3>
-      <ul><li><a href="services/homepage.html">홈페이지 제작</a></li><li><a href="services/design.html">디자인 제작</a></li><li><a href="services/staffing.html">교역자 구인</a></li><li><a href="services/sound.html">음향 세팅</a></li><li><a href="services/realestate.html">부동산</a></li><li><a href="services/akc.html">AKC</a></li><li><a href="services/smartchurch.html">스마트처치 앱</a></li><li><a href="services/intooffice.html">인투오피스</a></li></ul>
+      <ul><li><a href="services/homepage.html">홈페이지 제작</a></li><li><a href="services/design.html">마케팅 지원</a></li><li><a href="services/sound.html">음향 세팅</a></li><li><a href="services/realestate.html">부동산</a></li><li><a href="services/akc.html">AKC</a></li><li><a href="services/smartchurch.html">스마트처치 앱</a></li><li><a href="services/intooffice.html">인투오피스</a></li><li><a href="services/shorts.html">숏츠 제작</a></li><li><a href="services/sharing.html">소그룹 나눔집</a></li><li><a href="services/community.html">커뮤니티 센터</a></li></ul>
     </div>
     <div class="footer-col">
       <h3>센터 안내</h3>
@@ -341,18 +370,20 @@
         <li><a href="faq.html">자주 묻는 질문</a></li>
         <li><a href="contact.html">문의하기</a></li>
         <li><a href="status.html">신청 조회</a></li>
+        <li><a href="privacy.html">개인정보 처리방침</a></li>
         <li><a href="listings.html">부동산 매물</a></li>
         <li><a href="market.html">중고 장터</a></li>
         <li><a href="guesthouse.html">게스트하우스</a></li>
         <li><a href="tickets.html">집회 티켓팅</a></li>
+        <li><a href="jobs.html">교역자 구인</a></li>
         <li><a href="staff.html" class="footer-staff">직원 로그인</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h3>문의</h3>
       <ul class="footer-contact">
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:0200000000"><span data-live="site.phone">02-0000-0000</span></a></li>
-        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:help@caps.or.kr"><span data-live="site.email">help@caps.or.kr</span></a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.8 1.8 0 0 1-2 1.8 17.8 17.8 0 0 1-7.8-2.8 17.5 17.5 0 0 1-5.4-5.4A17.8 17.8 0 0 1 3 4.9 1.8 1.8 0 0 1 4.8 3h2.6a1.8 1.8 0 0 1 1.8 1.6c.1 1 .4 1.9.7 2.8a1.8 1.8 0 0 1-.4 1.9l-1.1 1.1a14.4 14.4 0 0 0 5.4 5.4l1.1-1.1a1.8 1.8 0 0 1 1.9-.4c.9.3 1.8.6 2.8.7A1.8 1.8 0 0 1 21 16.5Z"/></svg> <a href="tel:01042542270"><span data-live="site.phone">010-4254-2270</span></a></li>
+        <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6.5 9 6.4 9-6.4"/></svg> <a href="mailto:worichurchsupportcenter@gmail.com"><span data-live="site.email">worichurchsupportcenter@gmail.com</span></a></li>
         <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.4 2"/></svg> <span data-live="site.hours">평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무</span></li>
         <li><svg class="ico ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10.3c0 5.4-8 12-8 12s-8-6.6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.1" r="2.8"/></svg> <span data-live="site.address">서울특별시 ○○구 ○○로 00, 0층</span></li>
       </ul>
@@ -364,16 +395,35 @@
   </div>
 </footer>
   <a class="float-cta" href="apply.html">지원 신청</a>
-  <script src="assets/js/supabase-config.js" defer></script>
-  <script src="assets/js/firebase-config.js" defer></script>
-  <script src="assets/js/data.js" defer></script>
-  <script src="assets/js/db.js" defer></script>
-  <script src="assets/js/profile.js" defer></script>
-  <script src="assets/js/account.js" defer></script>
-  <script src="assets/js/auth-ui.js" defer></script>
-  <script src="assets/js/consent-ui.js" defer></script>
-  <script src="assets/js/live-content.js" defer></script>
-  <script src="assets/js/app.js" defer></script>
-  <script src="assets/js/apply.js" defer></script>
+
+  <!-- 찾아보기 — assets/js/search.js 가 채웁니다 -->
+  <div class="ss" id="siteSearch" data-base="" hidden role="dialog" aria-modal="true" aria-label="찾아보기">
+    <div class="ss-panel">
+      <div class="ss-bar">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input type="search" id="ssInput" autocomplete="off"
+          placeholder="찾으시는 것을 적어 주세요 (예: 음향, 사택, 요금)" aria-label="찾아보기">
+        <button type="button" class="ss-close" data-search-close aria-label="닫기">닫기</button>
+      </div>
+      <div class="ss-results" id="ssResults"></div>
+      <p class="ss-foot">
+        <kbd>↑</kbd><kbd>↓</kbd> 로 고르고 <kbd>Enter</kbd> 로 엽니다 ·
+        어디서든 <kbd>/</kbd> 로 열립니다
+      </p>
+    </div>
+  </div>
+  <script src="assets/js/supabase-config.js?v=9b329d2d" defer></script>
+  <script src="assets/js/firebase-config.js?v=cc88c05f" defer></script>
+  <script src="assets/js/data.js?v=2af88a1a" defer></script>
+  <script src="assets/js/db.js?v=5622b866" defer></script>
+  <script src="assets/js/profile.js?v=042b697c" defer></script>
+  <script src="assets/js/account.js?v=2e49bb79" defer></script>
+  <script src="assets/js/auth-ui.js?v=ffa508bb" defer></script>
+  <script src="assets/js/consent-ui.js?v=0dc5f1b9" defer></script>
+  <script src="assets/js/live-content.js?v=4a0deb28" defer></script>
+  <script src="assets/js/search-index.js?v=4981fef0" defer></script>
+  <script src="assets/js/search.js?v=20738c88" defer></script>
+  <script src="assets/js/app.js?v=33bffa2a" defer></script>
+  <script src="assets/js/apply.js?v=a161672a" defer></script>
 </body>
 </html>

@@ -207,7 +207,7 @@ function buildMarket(write) {
             <input type="radio" name="mkTier" value="${t.key}"${t.key === 'install' ? ' checked' : ''}>
             <span class="ls-tier-in">
               <strong>${esc(t.label)}</strong>
-              <b>${t.price.toLocaleString('ko-KR')}원~</b>
+              <b>${t.price ? t.price.toLocaleString('ko-KR') + '원~' : '상담 후 견적'}</b>
               <small>${esc(t.desc)}</small>
             </span>
           </label>`).join('\n          ');
@@ -299,9 +299,11 @@ function buildMarket(write) {
       <fieldset class="ls-fs" id="mkInstallFs">
         <legend><span class="ls-step">3</span> 설치는 센터가 맡아도 될까요?</legend>
         <p class="ls-fs-lead">
-          음향 · 영상 · 조명은 사고 나서 <strong>다는 일</strong>이 진짜 일입니다.
-          사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다
-          (설치비는 사시는 교회가 냅니다 — 파시는 분께 드는 비용은 없습니다).
+          음향 · 영상 · 조명은 사고 나서 <strong>다는 일</strong>이 남습니다.
+          그 일은 센터가 <strong>따로 비용을 받고</strong> 맡습니다.
+          사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다.
+          설치는 물건값과 <strong>별개로 비용이 드는 서비스</strong>이며,
+          그 비용은 사시는 교회가 냅니다 — 파시는 분께 드는 비용은 없습니다.
         </p>
         <label class="ls-chk is-wide"><input type="checkbox" id="mkFInstallOk" checked><span>
           <strong>설치 대행을 안내해도 좋습니다</strong> — 글에 [설치 맡기기] 버튼이 붙습니다.</span></label>
@@ -370,12 +372,10 @@ ${pageHero({
     eyebrow: '중고 장터 · 교회 물품',
     title: '교회에서 쓰던 것을<br>필요한 교회로',
     lead: '스피커와 믹서, 악기, 장의자까지 — 교회에서 나온 물건이 다른 교회로 갑니다. '
-      + '등록비는 없습니다. 사시는 교회가 원하면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
+      + '설치까지 필요하시면 센터 음향팀이 철거 · 운반 · 설치 · 튜닝을 맡습니다 — 물건값과 별개로 비용이 듭니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
-      <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill is-key">설치 대행 <strong>${board.install.baseFee.toLocaleString('ko-KR')}원~</strong></span>
+      <span class="ls-hero-pill is-key">설치 대행 <strong>별도 비용 · 상담 후 견적</strong></span>
     </div>
     <div class="ls-hero-actions">
       <a class="btn btn-gold btn-lg" href="#new" id="mkNewBtn">물건 올리기 ${icon('arrow', 'ico ico-sm')}</a>
@@ -388,11 +388,14 @@ ${pageHero({
   <div class="wrap">
     ${sectionHead('설치 대행', '사는 것까지는 쉽습니다 — 다는 것이 일입니다',
     '중고로 싸게 산 스피커도, 예배당 천장에 달고 배선을 정리하고 소리를 잡는 일은 남습니다. '
-    + '그 일을 센터 음향팀이 맡습니다. 장터에 올라온 물건이 아니어도 부르실 수 있습니다.')}
+    + '그 일을 센터 음향팀이 맡습니다 — 물건값에 포함되지 않는 별도 유상 서비스입니다. '
+    + '장터에 올라온 물건이 아니어도 부르실 수 있습니다.')}
     <div class="ls-tiers">
       ${tiers.map((t) => `<div class="ls-tier-card">
         <h3>${esc(t.label)}</h3>
-        <p class="ls-tier-price">${t.price.toLocaleString('ko-KR')}<span>원~</span></p>
+        <p class="ls-tier-price">${t.price
+          ? t.price.toLocaleString('ko-KR') + '<span>원~</span>'
+          : '<span class="is-ask">상담 후 견적</span>'}</p>
         <p>${esc(t.desc)}</p>
       </div>`).join('\n      ')}
     </div>
@@ -424,7 +427,7 @@ ${boardShell({
     mineLead: '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '물건 올리기',
     formTitle: '쓰지 않는 물건을 올립니다',
-    formLead: '등록비는 없습니다. 관리자가 사진과 설명을 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 사진과 설명을 확인한 뒤 게시됩니다.',
     gateText: '물건 등록은 로그인 후 이용하실 수 있습니다. 등록 후 진행 상태를 알려드리기 위해 계정이 필요합니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -528,14 +531,14 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '장비를 새로 들이실 계획이신가요?',
-    lead: '중고로 채울 것과 새로 사야 할 것을 함께 정리해 드립니다. 상담과 견적은 무료입니다.',
+    lead: '중고로 채울 것과 새로 사야 할 것을 함께 정리해 드립니다.',
   })}
 `;
 
   write('market.html', layout({
     title: '교회 중고 장터 | 우리교회지원센터',
-    description: '교회 음향 · 악기 · 집기 중고 장터. 등록비 없이 올리고, 사시는 교회가 원하면 '
-      + '센터 음향팀이 철거 · 운반 · 설치 · 튜닝까지 맡습니다.',
+    description: '교회 음향 · 악기 · 집기 중고 장터. 사시는 교회가 원하면 '
+      + '센터 음향팀이 설치를 맡습니다 (별도 비용).',
     base: '',
     active: 'market.html',
     body,
@@ -773,9 +776,7 @@ ${pageHero({
     lead: '비어 있는 사택과 선교관을 교회가 내어 놓습니다. 안식년으로 들어오신 선교사님, '
       + '방문 교역자, 유학생이 머물 곳을 찾습니다. 요금과 기간은 교회와 직접 정하십니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
-      <span class="ls-hero-pill">무료로 내어 주는 방 <strong>있습니다</strong></span>
       <span class="ls-hero-pill is-key">교회 확인 <strong>후 게시</strong></span>
     </div>
     <div class="ls-hero-actions">
@@ -804,7 +805,7 @@ ${boardShell({
     mineLead: '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '방 내어 놓기',
     formTitle: '우리 교회의 방을 올립니다',
-    formLead: '등록비는 없습니다. 관리자가 교회와 방을 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 교회와 방을 확인한 뒤 게시됩니다.',
     gateText: '게스트하우스 등록은 로그인 후 이용하실 수 있습니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -812,7 +813,7 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '사택이나 선교관을 어떻게 쓸지 고민이신가요?',
-    lead: '비어 있는 공간을 어떻게 쓸 수 있을지 함께 정리해 드립니다. 상담과 견적은 무료입니다.',
+    lead: '비어 있는 공간을 어떻게 쓸 수 있을지 함께 정리해 드립니다.',
   })}
 `;
 
@@ -1073,7 +1074,6 @@ ${pageHero({
     lead: '찬양집회와 수련회 신청을 한곳에서 받습니다. 예매 시작 시각을 정해 두면 그 시각 정각에 열리고, '
       + '정원이 차면 자동으로 마감됩니다. 좌석 지정은 원하는 집회만 쓰시면 됩니다.',
     extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>없음</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
       <span class="ls-hero-pill">예매 시작 시각 <strong>지정</strong></span>
       <span class="ls-hero-pill is-key">정원 차면 <strong>자동 마감</strong></span>
@@ -1105,7 +1105,7 @@ ${boardShell({
     mineLead: '신청 현황과 관리자 확인 결과를 여기에서 보실 수 있습니다.',
     formEyebrow: '집회 올리기',
     formTitle: '집회 신청을 받습니다',
-    formLead: '등록비는 없습니다. 관리자가 주최 · 장소 · 일시를 확인한 뒤 게시됩니다.',
+    formLead: '관리자가 주최 · 장소 · 일시를 확인한 뒤 게시됩니다.',
     gateText: '집회 등록은 로그인 후 이용하실 수 있습니다.',
     formBody,
     submitLabel: '등록 신청하기',
@@ -1132,7 +1132,7 @@ ${boardShell({
 
 ${ctaBand('', {
     title: '집회 포스터나 홍보물이 필요하신가요?',
-    lead: '집회 포스터 · 현수막 · 영상까지 디자인 지원 항목에서 함께 만들어 드립니다. 상담과 견적은 무료입니다.',
+    lead: '집회 포스터 · 현수막 · 영상까지 디자인 지원 항목에서 함께 만들어 드립니다.',
   })}
 `;
 
@@ -1147,4 +1147,316 @@ ${ctaBand('', {
   }));
 }
 
-module.exports = { buildMarket, buildGuesthouse, buildTickets };
+/* =========================================================
+   4. 교역자 구인 공고
+
+   지금까지는 교회가 조건을 알려 주면 센터가 사람을 찾아 이어 주었습니다.
+   그러면 센터가 아는 사람 안에서만 이어집니다. 그 밖에 있는 교회는
+   후보를 아예 만나지 못합니다. 그래서 공고를 열어 두고 사역자가
+   직접 보고 연락하도록 바꿨습니다.
+
+   센터가 할 수 있는 것은 여기까지입니다 — 사람을 늘려 드릴 수는
+   없고, 서로를 볼 수 있게 해 드릴 뿐입니다. 그래서 사례비 · 사택 ·
+   근무 조건을 반드시 적게 했습니다. "협의" 한 줄만 있는 공고는
+   보시는 분이 판단할 수가 없습니다.
+   ========================================================= */
+function buildJobs(write) {
+  const board = site.jobBoard;
+
+  const positions = [
+    ['senior', '담임목사'],
+    ['associate', '부목사'],
+    ['assistant', '전도사'],
+    ['education', '교육전도사'],
+    ['worship', '찬양인도자'],
+    ['pianist', '반주자'],
+    ['staff', '행정 간사'],
+    ['other', '기타'],
+  ];
+
+  const employment = [
+    ['full', '전임'],
+    ['part', '파트'],
+    ['weekend', '주말 사역'],
+    ['short', '단기 · 대체'],
+  ];
+
+  const payTypes = [
+    ['monthly', '월 사례비'],
+    ['weekly', '주 단위'],
+    ['per_service', '집회 · 예배 건별'],
+    ['negotiable', '면접 후 협의'],
+  ];
+
+  const housing = [
+    ['provided', '사택 제공'],
+    ['support', '주거비 지원'],
+    ['negotiable', '협의'],
+    ['none', '없음'],
+  ];
+
+  const departments = ['영아 · 유아부', '유치부', '유년 · 초등부', '중고등부',
+    '청년부', '장년 · 남녀전도회', '찬양팀', '전체 · 협력', '기타'];
+  const sizes = ['50명 미만', '50~150명', '150~500명', '500~1,000명', '1,000명 이상'];
+
+  const formBody = `
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">1</span> 어느 교회인가요?</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFChurch">교회명 <em>*</em></label>
+            <input type="text" id="jbFChurch" maxlength="40" placeholder="예: 새길교회">
+          </div>
+          <div class="field">
+            <label for="jbFDenom">교단</label>
+            <input type="text" id="jbFDenom" maxlength="30" placeholder="예: 예장 통합">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFRegion">지역 <em>*</em></label>
+            <select id="jbFRegion">${regionForm()}</select>
+          </div>
+          <div class="field">
+            <label for="jbFSize">출석 교인 수</label>
+            <select id="jbFSize">
+              <option value="">선택해 주세요</option>
+              ${sizes.map((v) => `<option>${esc(v)}</option>`).join('\n              ')}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="jbFAddress">대략의 위치</label>
+          <input type="text" id="jbFAddress" maxlength="60" placeholder="예: 강원 홍천군 서면">
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">2</span> 어떤 자리인가요?</legend>
+        <div class="field">
+          <label for="jbFTitle">공고 제목 <em>*</em> <span class="ls-counter" id="jbTitleCount"></span></label>
+          <input type="text" id="jbFTitle" maxlength="60"
+            placeholder="예: 중고등부 교육전도사님을 모십니다 (사택 제공)">
+          ${egChips('jbFTitle', [
+    '중고등부 교육전도사님을 모십니다 (사택 제공)',
+    '주일 오전 반주자 — 주말 사역, 교통비 별도',
+    '청년부 담당 전도사 (전임) — 사택과 4대보험',
+    '유년부 교육전도사 — 신학생 환영, 주 2회',
+    '찬양인도자 모집 — 주일 1부 · 3부',
+  ])}
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="jbFPosition">직분 <em>*</em></label>
+            <select id="jbFPosition">${opts(positions)}</select>
+          </div>
+          <div class="field" id="jbPosOtherBox" hidden>
+            <label for="jbFPositionOther">직분 직접 입력 <em>*</em></label>
+            <input type="text" id="jbFPositionOther" maxlength="20">
+          </div>
+          <div class="field">
+            <label for="jbFEmployment">근무 형태 <em>*</em></label>
+            <select id="jbFEmployment">${opts(employment)}</select>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="jbFDept">맡을 부서</label>
+            <select id="jbFDept">
+              <option value="">선택해 주세요</option>
+              ${departments.map((v) => `<option>${esc(v)}</option>`).join('\n              ')}
+            </select>
+          </div>
+          <div class="field">
+            <label for="jbFHeadcount">모집 인원</label>
+            <input type="number" id="jbFHeadcount" min="1" max="20" value="1">
+          </div>
+          <div class="field">
+            <label for="jbFWorkDays">근무 요일 · 시간</label>
+            <input type="text" id="jbFWorkDays" maxlength="60" placeholder="예: 주일 종일 · 수요 저녁">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFStart">부임 희망 시기</label>
+            <input type="text" id="jbFStart" maxlength="30" placeholder="예: 2026년 3월 · 협의 가능">
+          </div>
+          <div class="field">
+            <label for="jbFCloses">모집 마감</label>
+            <input type="date" id="jbFCloses">
+            <small class="hint">비워 두시면 마감일 없이 올라갑니다.</small>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">3</span> 사례비와 사택</legend>
+        <p class="ls-fs-lead">
+          지원하시는 분이 <strong>갈지 말지를 정하는 건 결국 이 두 가지</strong>입니다.
+          &ldquo;협의&rdquo; 한 줄만 적힌 공고에는 연락이 잘 오지 않습니다.
+          범위라도 적어 주시면 지원이 확실히 늘어납니다.
+        </p>
+        <div class="field">
+          <label for="jbFPayType">사례비 방식 <em>*</em></label>
+          <select id="jbFPayType">${opts(payTypes)}</select>
+        </div>
+        <div class="grid-2" id="jbPayBox">
+          ${money('jbFPayMin', '얼마부터', '아래 칸을 비우시면 이 금액으로만 보입니다.')}
+          ${money('jbFPayMax', '얼마까지', '범위가 없으면 비워 두세요.')}
+        </div>
+        <div class="field">
+          <label for="jbFPayNote">사례비에 관해 덧붙일 말</label>
+          <input type="text" id="jbFPayNote" maxlength="80" placeholder="예: 교통비 별도 · 명절 상여 있음">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFHousing">사택 <em>*</em></label>
+            <select id="jbFHousing">${opts(housing)}</select>
+          </div>
+          <div class="field">
+            <span class="label-txt">4대보험</span>
+            <label class="ls-chk"><input type="checkbox" id="jbFInsurance"><span>가입해 드립니다</span></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">4</span> 오가는 길</legend>
+        <p class="ls-fs-lead">
+          멀거나 대중교통이 어려운 곳이라면 <strong>숨기지 말고 적어 주세요.</strong>
+          알고 오신 분은 오래 계시지만, 모르고 오신 분은 곧 그만두십니다.
+        </p>
+        <div class="field">
+          <label for="jbFCommute">교통 안내</label>
+          <textarea id="jbFCommute" rows="3" maxlength="300"
+            placeholder="예: 시외버스터미널에서 차로 20분, 대중교통이 드물어 자차가 있으시면 좋습니다. 주일에는 교회 차량으로 모시러 갑니다."></textarea>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">5</span> 교회 사진과 소개</legend>
+        ${photoField('jb', board.photoMax, board.photoMin,
+    '예배당과 교회 바깥, 그리고 함께 일하실 공간을 보여 주세요. '
+    + '사택을 제공하신다면 그 방도 한 장 넣어 주시면 좋습니다.')}
+
+        <div class="field">
+          <label for="jbFDesc">교회 소개와 하실 일 <em>*</em></label>
+          <textarea id="jbFDesc" rows="8" maxlength="3000"
+            placeholder="어떤 교회인지, 어떤 사역을 맡게 되는지, 함께 일할 분들은 어떤 분들인지 적어 주세요. 지원하시는 분이 읽고 결정합니다."></textarea>
+        </div>
+        <div class="field">
+          <label for="jbFQual">바라는 자격 · 경험</label>
+          <textarea id="jbFQual" rows="3" maxlength="500"
+            placeholder="예: 신학대학원 재학 이상 · 중고등부 사역 경험이 있으시면 좋습니다 · 운전 가능하신 분"></textarea>
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">6</span> 연락처</legend>
+        <p class="ls-fs-lead">
+          <strong>지원은 여기로 직접 옵니다.</strong> 사이트 안에서 지원서를 받는 기능은
+          아직 열지 않았습니다.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="jbFContactName">담당자 <em>*</em></label>
+            <input type="text" id="jbFContactName" maxlength="20" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="jbFContactPhone">연락처 <em>*</em></label>
+            <input type="tel" id="jbFContactPhone" placeholder="010-0000-0000" autocomplete="tel">
+          </div>
+        </div>
+        <div class="field">
+          <label for="jbFContactEmail">이메일 <small>(이력서를 받으실 주소)</small></label>
+          <input type="email" id="jbFContactEmail" maxlength="60" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="jbFHours">연락 가능 시간 <em>*</em></label>
+          <input type="text" id="jbFHours" maxlength="120" placeholder="예: 평일 낮 10–18시 · 주일 오전 제외">
+          ${hoursPicker('jbFHours')}
+        </div>
+      </fieldset>
+
+      <fieldset class="ls-fs">
+        <legend><span class="ls-step">7</span> 확인</legend>
+        <div class="ls-vows">
+          <label class="ls-chk is-wide"><input type="checkbox" id="jbVow1"><span>
+            제가 <strong>이 교회를 대신해 공고를 올릴 수 있는 사람</strong>입니다.</span></label>
+          <label class="ls-chk is-wide"><input type="checkbox" id="jbVow2"><span>
+            적은 <strong>사례비 · 사택 · 근무 조건은 실제와 같으며</strong>,
+            오시는 분께 그대로 지키겠습니다.</span></label>
+          <label class="ls-chk is-wide"><input type="checkbox" id="jbVow3"><span>
+            면접과 청빙 결정은 <strong>교회와 사역자가 직접</strong> 하며,
+            센터는 공고 게시판만 운영한다는 것을 압니다.</span></label>
+        </div>
+      </fieldset>`;
+
+  const filters = `<select id="jbPosition" aria-label="직분">${opts(positions, '전체 직분')}</select>
+      <select id="jbEmployment" aria-label="근무 형태">${opts(employment, '전체 형태')}</select>
+      <select id="jbRegion" aria-label="지역">${regionFilter('전체 지역')}</select>
+      <label class="ls-toggle"><input type="checkbox" id="jbHousingOnly"><span>사택 있는 곳만</span></label>`;
+
+  const body = `
+${boardTabs('', 'jobs.html')}
+
+${pageHero({
+    eyebrow: '교역자 구인 · 사역자를 찾습니다',
+    title: '교회가 직접 올리고,<br>사역자가 직접 봅니다',
+    lead: '아는 분께 부탁하는 것 말고는 방법이 없었습니다. 그러면 그 연결망 밖에 있는 '
+      + '교회는 후보를 아예 만나지 못합니다. 공고를 열어 두어, 교회와 사역자가 '
+      + '서로를 볼 수 있게 합니다.',
+    extra: `<div class="ls-hero-meta">
+      <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
+      <span class="ls-hero-pill is-key">사례비 · 사택 <strong>필수 표기</strong></span>
+    </div>
+    <div class="ls-hero-actions">
+      <a class="btn btn-gold btn-lg" href="#new" id="jbNewBtn">공고 올리기 ${icon('arrow', 'ico ico-sm')}</a>
+      <a class="btn btn-outline btn-lg" href="#mine">내가 올린 공고</a>
+    </div>`,
+  })}
+
+${boardShell({
+    prefix: 'jb',
+    searchHint: '교회명 · 지역 · 부서로 검색 (예: 중고등부, 홍천)',
+    filters,
+    loadingText: '공고를 불러오는 중입니다…',
+    emptyTitle: '아직 올라온 공고가 없습니다',
+    emptyLead: '조건을 바꿔 다시 찾아보시거나, 우리 교회의 자리를 먼저 올려 주세요.',
+    newLabel: '공고 올리기',
+    does: board.does,
+    tipTitle: '지원하시기 전에',
+    tipBody: '<strong>사례비 · 사택 · 근무 요일</strong>은 공고에 적힌 그대로가 맞는지 '
+      + '전화로 한 번 더 확인해 주세요. 특히 <strong>오가는 길</strong>은 직접 한 번 가 보시는 편이 좋습니다 — '
+      + '지도에서 가까워 보여도 대중교통이 끊기는 곳이 있습니다. '
+      + '지원은 공고에 적힌 연락처로 직접 하시면 되고, 센터를 거치지 않습니다.',
+    fineprint: board.fineprint,
+    mineEyebrow: '내 공고',
+    mineTitle: '내가 올린 공고',
+    mineLead: '상태와 관리자 확인 결과를 여기에서 보실 수 있습니다.',
+    formEyebrow: '공고 올리기',
+    formTitle: '우리 교회의 자리를 올립니다',
+    formLead: '관리자가 교회와 내용을 확인한 뒤 게시됩니다.',
+    gateText: '공고 등록은 로그인 후 이용하실 수 있습니다.',
+    formBody,
+    submitLabel: '등록 신청하기',
+  })}
+
+${ctaBand('', {
+    title: '사람을 구하는 일이 처음이신가요?',
+    lead: '어떤 조건으로 올려야 연락이 오는지, 공고 문구부터 함께 정리해 드립니다.',
+  })}
+`;
+
+  write('jobs.html', layout({
+    title: '교역자 구인 | 우리교회지원센터',
+    description: '교회가 직접 올리는 교역자 구인 공고. 아는 분께 부탁하지 않아도 '
+      + '사역자가 보고 연락합니다. 사례비 · 사택 · 근무 조건을 분명히 적습니다.',
+    base: '',
+    active: 'jobs.html',
+    body,
+    scripts: ['board-core.js', 'jobs.js'],
+  }));
+}
+
+module.exports = { buildMarket, buildGuesthouse, buildTickets, buildJobs };

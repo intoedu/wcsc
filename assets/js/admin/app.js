@@ -123,7 +123,7 @@ window.CAPSAdmin = (function () {
     { title: '', keys: ['dashboard'] },
     { title: '작업', keys: ['mytasks', 'alltasks', 'workload'] },
     { title: '의뢰 관리', keys: ['requests', 'customers', 'consents', 'subscriptions'] },
-    { title: '게시판', keys: ['listings', 'marketBoard', 'guestBoard', 'eventBoard'] },
+    { title: '게시판', keys: ['listings', 'marketBoard', 'guestBoard', 'eventBoard', 'jobBoard'] },
     { title: '설치 대행', keys: ['installs'] },
     { title: '정산', keys: ['settlement'] },
     { title: '센터 관리', keys: ['services', 'members', 'settings', 'rules'] },
@@ -211,7 +211,7 @@ window.CAPSAdmin = (function () {
   function watchAll(done) {
     var names = ['requests', 'customers', 'subscriptions', 'users', 'invoices',
       'serviceContent', 'settings', 'editConsents', 'listings',
-      'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders'];
+      'marketItems', 'installRequests', 'guestHouses', 'events', 'ticketOrders', 'jobPosts'];
     var seen = 0;
     var finished = false;
 

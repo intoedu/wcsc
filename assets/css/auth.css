@@ -12,6 +12,7 @@
   border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center;
 }
 .gate-card .logo-mark { width: 54px; height: 54px; margin-bottom: 18px; }
+.gate-card .logo-img { height: 38px; width: auto; margin: 0 auto 18px; display: block; }
 .gate-card h1 { font-size: 24px; letter-spacing: -.035em; }
 .gate-card p { margin-top: 12px; font-size: 15px; color: var(--muted); line-height: 1.8; }
 .gate-actions { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; }
@@ -163,6 +164,7 @@ body.staff { background: var(--brand-900); }
 
 .sp-brand { display: inline-flex; align-items: center; gap: 12px; }
 .sp-brand .logo-mark { width: 44px; height: 44px; }
+.sp-brand .logo-img { height: 32px; width: auto; flex: none; display: block; }
 .sp-brand-text { display: flex; flex-direction: column; line-height: 1.25; }
 .sp-brand-text strong { font-size: 17px; color: #fff; letter-spacing: -.03em; }
 .sp-brand-text small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #9DB4D8; }

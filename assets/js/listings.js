@@ -251,21 +251,6 @@
           '</p>' +
         '</div>' +
 
-        '<div class="ls-verified">' +
-          '<h2>' + esc(v.holderLabel) + ' 확인을 마친 매물입니다</h2>' +
-          '<p>' +
-            '등록자가 <strong>' + esc(v.proofLabel || '권리 증빙 서류') + '</strong>를 제출하고, ' +
-            '관리자가 확인한 뒤 게시했습니다. ' +
-            '서류에는 이름 · 주소 · 금액 같은 민감한 정보가 있어 게시판에는 공개하지 않습니다.' +
-          '</p>' +
-          '<p class="ls-verified-warn">' +
-            '<strong>확인한 것은 등록자가 이 매물의 권리자라는 사실까지입니다.</strong> ' +
-            '계약 전에는 등기부등본을 직접 떼어 확인하시고, 종교시설로 쓸 수 있는지는 ' +
-            '관할 지자체 건축과에, 계약 조건은 공인중개사에게 확인해 주세요. ' +
-            '센터는 이 매물을 중개하지 않아 이 확인을 대신해 드리지 않습니다.' +
-          '</p>' +
-        '</div>' +
-
         (isMine
           ? '<div class="ls-owner-bar">' +
               '<span>내가 올린 매물입니다.</span>' +
@@ -316,14 +301,35 @@
         '보통 영업일 1일 이내입니다.' +
         '</p>';
     }
-    if (v.status === 'awaiting_payment') {
-      lines += '<p class="ls-mine-note is-pay">' +
-        '<strong>서류 확인이 끝났습니다. 입금해 주세요.</strong><br>' +
-        '등록비 ' + db.money(fee.amount || db.LISTING_FEE) + '원 · ' +
-        '계좌는 <strong>카카오톡으로 보내드렸습니다</strong>' +
-        (fee.noticeSentAt ? ' (' + esc(db.formatDate(fee.noticeSentAt)) + ')' : '') + '.<br>' +
-        '입금이 확인되면 바로 게시됩니다. 카카오톡을 못 받으셨으면 센터로 알려 주세요.' +
+    if (v.status === 'edit_pending') {
+      lines += '<p class="ls-mine-note is-wait">' +
+        '<strong>수정 승인을 기다리고 있습니다.</strong>' +
+        (v.editRequestedAt ? ' (' + esc(db.formatDate(v.editRequestedAt)) + " 요청)" : '') + '<br>' +
+        '확인하는 동안에는 게시판에서 잠시 내려가 있습니다. 바뀐 내용이 확인되면 다시 게시됩니다.<br>' +
+        '<strong>등록비를 다시 내지 않으셔도 됩니다.</strong>' +
         '</p>';
+    }
+    if (v.status === 'awaiting_payment') {
+      /* 카드 결제가 연결되어 있으면 그 자리에서 내실 수 있게 버튼을 답니다.
+         연결 전(기본값)에는 아래 계좌 안내만 나가 지금과 똑같습니다. */
+      var canCard = db.paymentEnabled();
+      lines += '<p class="ls-mine-note is-pay">' +
+        '<strong>서류 확인이 끝났습니다. ' + (canCard ? '등록비를 내주세요.' : '입금해 주세요.') + '</strong><br>' +
+        '등록비 ' + db.money(fee.amount || db.LISTING_FEE) + '원 · ' +
+        (canCard
+          ? '카드로 내시면 <strong>바로 게시됩니다</strong>. 계좌 이체도 그대로 됩니다 — ' +
+            '계좌는 카카오톡으로 보내드렸습니다.'
+          : '계좌는 <strong>카카오톡으로 보내드렸습니다</strong>' +
+            (fee.noticeSentAt ? ' (' + esc(db.formatDate(fee.noticeSentAt)) + ')' : '') + '.<br>' +
+            '입금이 확인되면 바로 게시됩니다. 카카오톡을 못 받으셨으면 센터로 알려 주세요.') +
+        '</p>';
+      if (canCard) {
+        lines += '<div class="ls-pay-act">' +
+          '<button type="button" class="btn btn-primary btn-sm" data-pay="' + esc(r.id) + '">' +
+            '카드로 ' + db.money(fee.amount || db.LISTING_FEE) + '원 결제하기</button>' +
+          '<span class="ls-pay-hint">결제가 끝나면 바로 게시됩니다.</span>' +
+          '</div>';
+      }
     }
     if (v.status === 'rejected') {
       lines += '<p class="ls-mine-note is-no"><strong>반려 사유</strong> ' +
@@ -421,6 +427,36 @@
         btn.disabled = false;
         window.alert(err.message || '처리하지 못했습니다.');
       });
+    });
+
+    /* 카드 결제 — 스위치가 꺼져 있으면 버튼 자체가 없어 여기까지 오지 않습니다. */
+    el.mineBody.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-pay]');
+      if (!btn) return;
+      var id = btn.getAttribute('data-pay');
+      var original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '결제창을 여는 중…';
+
+      db.openPayment('listing_fee', id)
+        .then(function (pay) {
+          return payWithPg(pay).then(function (providerPaymentId) {
+            btn.textContent = '결제를 확인하는 중…';
+            return db.confirmPayment(pay.orderId || pay.order_id, providerPaymentId);
+          });
+        })
+        .then(function () {
+          window.alert('결제가 끝났습니다. 매물이 게시되었습니다.');
+          renderMine();
+          load();
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = original;
+          // 이용자가 결제창을 닫은 것은 오류가 아닙니다.
+          if (err && err.canceled) return;
+          window.alert(err.message || '결제하지 못했습니다.');
+        });
     });
 
     el.mineBody.addEventListener('click', function (e) {
@@ -959,17 +995,25 @@
         ? db.uploadProof(file, el.proofKind.value)
         : Promise.resolve(Object.assign({}, keptProof, { kind: el.proofKind.value }));
 
+      // 전에 게시된 적이 있는 글을 고치는 것이면 안내 문구가 달라집니다.
+      var isEditOfLive = !!(editId && existing &&
+        (existing.firstPublishedAt || existing.publishedAt));
+
       step.then(function (proof) {
         if (editId && existing) {
-          return db.saveListing(editId, Object.assign({}, data, { proof: proof }));
+          return db.saveListing(editId, Object.assign({}, data, { proof: proof }), existing);
         }
         return db.submitListing(data, proof);
       }).then(function () {
-        say(el.ok,
-          '<strong>접수되었습니다.</strong> 아직 공개되지 않은 <em>승인 대기</em> 상태입니다.<br>' +
-          '관리자가 서류를 확인하고 승인하면 <strong>입금 계좌를 카카오톡으로 보내드립니다.</strong> ' +
-          '입금이 확인되면 게시글이 올라갑니다. <em>지금 입금하지 않으셔도 됩니다.</em><br>' +
-          '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.');
+        say(el.ok, isEditOfLive
+          ? '<strong>수정 승인을 요청했습니다.</strong> 확인하는 동안에는 게시판에서 잠시 내려갑니다.<br>' +
+            '관리자가 바뀐 내용을 확인하면 다시 게시됩니다. ' +
+            '<em>등록비를 다시 내지 않으셔도 됩니다.</em><br>' +
+            '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.'
+          : '<strong>접수되었습니다.</strong> 아직 공개되지 않은 <em>승인 대기</em> 상태입니다.<br>' +
+            '관리자가 서류를 확인하고 승인하면 <strong>입금 계좌를 카카오톡으로 보내드립니다.</strong> ' +
+            '입금이 확인되면 게시글이 올라갑니다. <em>지금 입금하지 않으셔도 됩니다.</em><br>' +
+            '진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 보실 수 있습니다.');
         el.submit.disabled = false;
         el.submit.textContent = '등록 신청하기';
         el.editId.value = '';
@@ -980,6 +1024,58 @@
         el.submit.textContent = editId ? '수정 신청하기' : '등록 신청하기';
       });
     });
+  }
+
+
+  /**
+   * PG 결제창을 띄우고, 끝나면 PG 가 준 결제 번호를 돌려줍니다.
+   *
+   * 계약 전에는 이 자리에 올 일이 없습니다 (버튼이 안 그려집니다).
+   * 계약 후에는 site.payment.sdk 에 적어 둔 SDK 를 한 번 읽어 씁니다.
+   * PG 를 바꾸시면 이 함수와 Edge Function 의 verifyWithPg 두 곳만 고치면 됩니다.
+   */
+  function payWithPg(pay) {
+    var cfg = db.paymentConfig();
+    var orderId = pay.orderId || pay.order_id;
+    var amount = pay.amount;
+    var title = pay.targetTitle || pay.target_title || '매물 등록비';
+
+    return loadSdk(cfg.sdk).then(function () {
+      if (cfg.provider === 'portone' && window.PortOne) {
+        return window.PortOne.requestPayment({
+          storeId: cfg.storeId,
+          channelKey: cfg.channelKey,
+          paymentId: orderId,
+          orderName: title,
+          totalAmount: amount,
+          currency: 'CURRENCY_KRW',
+          payMethod: 'CARD',
+        }).then(function (res) {
+          if (res && res.code) {
+            var e = new Error(res.message || '결제가 취소되었습니다.');
+            e.canceled = true;
+            throw e;
+          }
+          return (res && res.paymentId) || orderId;
+        });
+      }
+      throw new Error('결제 수단이 설정되지 않았습니다. 센터로 알려 주세요.');
+    });
+  }
+
+  /** SDK 를 한 번만 읽습니다. */
+  var sdkLoaded = null;
+  function loadSdk(src) {
+    if (!src) return Promise.reject(new Error('결제 SDK 주소가 설정되지 않았습니다.'));
+    if (sdkLoaded) return sdkLoaded;
+    sdkLoaded = new Promise(function (resolve, reject) {
+      var el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = function () { reject(new Error('결제 모듈을 불러오지 못했습니다.')); };
+      document.head.appendChild(el);
+    });
+    return sdkLoaded;
   }
 
   /* =========================================================

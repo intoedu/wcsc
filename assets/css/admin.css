@@ -25,6 +25,7 @@ body.admin .float-cta { display: none !important; }
 
 .adm-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 22px; }
 .adm-brand .logo-mark { width: 42px; height: 42px; }
+.adm-brand .logo-img { height: 30px; width: auto; flex: none; display: block; }
 .adm-brand-text { display: flex; flex-direction: column; line-height: 1.25; }
 .adm-brand-text strong { color: #fff; font-size: 16.5px; letter-spacing: -.03em; }
 .adm-brand-text small { color: #85A793; font-size: 11.5px; }

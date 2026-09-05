@@ -698,7 +698,7 @@
       box.innerHTML = mineRows.length
         ? mineRows.map(mineCard).join('')
         : '<div class="ls-empty is-inline"><h3>아직 올리신 집회가 없습니다</h3>' +
-          '<p>여시는 집회의 신청을 여기에서 받으실 수 있습니다. 등록비는 없습니다.</p>' +
+          '<p>여시는 집회의 신청을 여기에서 받으실 수 있습니다.</p>' +
           '<a class="btn btn-primary" href="#new">집회 올리기</a></div>';
     });
   }
