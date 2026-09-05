@@ -65,7 +65,7 @@ function buildIndex() {
       tone: 'green',
       eyebrow: '홈페이지 제작',
       title: '제작비 0원으로<br>교회 홈페이지를',
-      lead: '만들어 드립니다. 관리비는 월 3만원입니다.',
+      lead: '만들어 드립니다. 관리비는 월 5만원입니다.',
       href: 'services/homepage.html',
       icon: 'monitor',
     },
@@ -305,7 +305,7 @@ function buildAbout() {
     },
     {
       church: '검색해도 교회 정보가 나오지 않습니다',
-      us: '관리비 월 3만원으로 홈페이지를 만들어 드립니다. 제작비는 따로 받지 않습니다.',
+      us: '관리비 월 5만원으로 홈페이지를 만들어 드립니다. 제작비는 따로 받지 않습니다.',
       href: 'services/homepage.html',
       label: '홈페이지 제작',
     },
@@ -924,8 +924,8 @@ ${pageHero({
       <article class="bill-card">
         <span class="bill-tag">달마다</span>
         <h3>홈페이지 제작 · 인투오피스</h3>
-        <p class="bill-price">홈페이지 <strong>월 관리비 3만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
-        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 3만원은
+        <p class="bill-price">홈페이지 <strong>월 관리비 5만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
+        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 5만원은
           서버 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
           둘 다 월 단위로 중단하실 수 있습니다.</p>
         <p class="bill-where">인투오피스는 <strong>인투오피스에서 직접 결제</strong>하십니다 — 센터를 거치지 않습니다.</p>
