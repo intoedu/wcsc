@@ -151,14 +151,26 @@
   if (rail && dots) {
     var buttons = dots.querySelectorAll('.bn-dot');
 
+    /* 화면이 넓으면 배너가 한 번에 두 장씩 보입니다. 그때는 끝까지 밀어도
+       마지막 장이 첫 자리에 오지 않으므로, 갈 수 있는 자리 수만큼만 점을 둡니다.
+       (점이 넷인데 셋까지밖에 안 가면 눌러도 반응이 없는 점이 생깁니다.) */
     var paint = function () {
       var cards = rail.querySelectorAll('.bn');
       if (!cards.length) return;
       var step = cards[0].offsetWidth + 16;
-      var at = Math.round(rail.scrollLeft / step);
+      var perView = Math.max(1, Math.round((rail.clientWidth + 16) / step));
+      var stops = Math.max(1, cards.length - perView + 1);
+      var end = rail.scrollWidth - rail.clientWidth;
+
+      var at = end - rail.scrollLeft < 4
+        ? stops - 1
+        : Math.min(stops - 1, Math.max(0, Math.round(rail.scrollLeft / step)));
+
       Array.prototype.forEach.call(buttons, function (b, i) {
+        b.hidden = i >= stops;
         b.classList.toggle('is-on', i === at);
       });
+      dots.hidden = stops < 2;
     };
 
     var waiting = false;
@@ -176,6 +188,7 @@
       if (cards[i]) rail.scrollTo({ left: cards[i].offsetLeft - rail.offsetLeft, behavior: 'smooth' });
     });
 
+    window.addEventListener('resize', paint);
     paint();
   }
 
