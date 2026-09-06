@@ -2715,11 +2715,11 @@ body.is-search-open { overflow: hidden; }
 }
 .bn:hover { transform: translateY(-2px); }
 
-.bn.is-green { background: linear-gradient(150deg, #1F8046 0%, #146033 100%); }
-.bn.is-deep  { background: linear-gradient(150deg, #1B4D2E 0%, #0E2A1B 100%); }
-.bn.is-mint  { background: linear-gradient(150deg, #34A863 0%, #1F7A44 100%); }
+.bn.is-green { background: linear-gradient(150deg, #1F8046 0%, #146033 100%); --bn-tint: 20, 96, 51; }
+.bn.is-deep  { background: linear-gradient(150deg, #1B4D2E 0%, #0E2A1B 100%); --bn-tint: 14, 42, 27; }
+.bn.is-mint  { background: linear-gradient(150deg, #34A863 0%, #1F7A44 100%); --bn-tint: 31, 122, 68; }
 /* 노랑 배너만 글자를 짙게 씁니다 — 흰 글씨는 노란 바탕에서 읽히지 않습니다. */
-.bn.is-gold  { background: linear-gradient(150deg, #F5D45A 0%, #E9B824 100%); color: var(--gold-ink-deep); }
+.bn.is-gold  { background: linear-gradient(150deg, #F5D45A 0%, #E9B824 100%); color: var(--gold-ink-deep); --bn-tint: 122, 88, 12; }
 
 /* 사진이 들어간 배너 — 글자가 사진에 묻히지 않도록 아래쪽을 어둡게 덮습니다. */
 .bn-shot {
@@ -2734,9 +2734,10 @@ body.is-search-open { overflow: hidden; }
   content: '';
   position: absolute;
   inset: 0;
+  /* 배너의 원래 색을 사진 위에 겹쳐 둡니다 — 사진만 깔면 배너 줄의 색이 빠져 허전합니다. */
   background:
-    linear-gradient(180deg, rgba(10, 26, 17, .20) 0%, rgba(10, 26, 17, .58) 55%, rgba(8, 22, 14, .88) 100%),
-    linear-gradient(90deg, rgba(8, 22, 14, .62) 0%, rgba(8, 22, 14, .18) 62%, rgba(8, 22, 14, 0) 100%);
+    linear-gradient(180deg, rgba(var(--bn-tint), .18) 0%, rgba(var(--bn-tint), .62) 55%, rgba(var(--bn-tint), .93) 100%),
+    linear-gradient(90deg, rgba(6, 18, 12, .58) 0%, rgba(6, 18, 12, .16) 62%, rgba(6, 18, 12, 0) 100%);
 }
 .bn.has-shot { color: #fff; }
 .bn.has-shot .bn-eyebrow { background: rgba(255, 255, 255, .22); }

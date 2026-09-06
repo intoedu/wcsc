@@ -96,6 +96,8 @@ function buildIndex() {
       lead: '한국에 잠시 머무는 선교사와 사역자가 묵을 자리입니다.',
       href: 'guesthouse.html',
       icon: 'building',
+      photo: 'guesthouse',
+      focus: 'center 35%',
     },
   ];
 
