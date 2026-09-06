@@ -151,26 +151,33 @@
   if (rail && dots) {
     var buttons = dots.querySelectorAll('.bn-dot');
 
-    /* 화면이 넓으면 배너가 한 번에 두 장씩 보입니다. 그때는 끝까지 밀어도
-       마지막 장이 첫 자리에 오지 않으므로, 갈 수 있는 자리 수만큼만 점을 둡니다.
-       (점이 넷인데 셋까지밖에 안 가면 눌러도 반응이 없는 점이 생깁니다.) */
+    /* 점은 배너 한 장에 하나씩 둡니다. 다만 화면이 넓으면 배너가 두 장씩
+       보여, 끝까지 밀어도 마지막 장이 첫 자리에 오지 않습니다. 그래서
+       끝에 닿으면 마지막 점을 켜 줍니다 — 그러지 않으면 눌러도 켜지지
+       않는 점이 생깁니다. */
     var paint = function () {
       var cards = rail.querySelectorAll('.bn');
       if (!cards.length) return;
       var step = cards[0].offsetWidth + 16;
-      var perView = Math.max(1, Math.round((rail.clientWidth + 16) / step));
-      var stops = Math.max(1, cards.length - perView + 1);
       var end = rail.scrollWidth - rail.clientWidth;
 
-      var at = end - rail.scrollLeft < 4
-        ? stops - 1
-        : Math.min(stops - 1, Math.max(0, Math.round(rail.scrollLeft / step)));
+      var at = Math.min(buttons.length - 1, Math.max(0, Math.round(rail.scrollLeft / step)));
+
+      if (end > 0 && end - rail.scrollLeft < 4) {
+        // 끝에서는 마지막 두 장이 함께 보입니다. 방금 고른 점이 화면에 있으면
+        // 그 점을 그대로 두고, 아니면 마지막 점을 켭니다.
+        var on = -1;
+        Array.prototype.forEach.call(buttons, function (b, i) {
+          if (b.classList.contains('is-on')) on = i;
+        });
+        var seen = on > -1 && cards[on]
+          && cards[on].offsetLeft - rail.offsetLeft >= rail.scrollLeft - 4;
+        at = seen ? on : buttons.length - 1;
+      }
 
       Array.prototype.forEach.call(buttons, function (b, i) {
-        b.hidden = i >= stops;
         b.classList.toggle('is-on', i === at);
       });
-      dots.hidden = stops < 2;
     };
 
     var waiting = false;
@@ -185,7 +192,11 @@
       if (!b) return;
       var cards = rail.querySelectorAll('.bn');
       var i = Number(b.getAttribute('data-go'));
-      if (cards[i]) rail.scrollTo({ left: cards[i].offsetLeft - rail.offsetLeft, behavior: 'smooth' });
+      if (!cards[i]) return;
+      // 오른쪽 끝을 넘겨 밀 수는 없습니다. 마지막 점은 끝까지 데려다 줍니다.
+      var to = Math.min(cards[i].offsetLeft - rail.offsetLeft, rail.scrollWidth - rail.clientWidth);
+      rail.scrollTo({ left: to, behavior: 'smooth' });
+      Array.prototype.forEach.call(buttons, function (x, n) { x.classList.toggle('is-on', n === i); });
     });
 
     window.addEventListener('resize', paint);
