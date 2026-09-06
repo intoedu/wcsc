@@ -69,6 +69,7 @@ function buildIndex() {
       href: 'services/homepage.html',
       icon: 'monitor',
       photo: 'homepage',
+      focus: 'center top',
     },
     {
       tone: 'gold',
@@ -86,6 +87,7 @@ function buildIndex() {
       href: 'market.html',
       icon: 'speaker',
       photo: 'market',
+      focus: 'center bottom',
     },
     {
       tone: 'mint',
@@ -111,7 +113,7 @@ function buildIndex() {
     const src = shot(b.photo);
     return `<a class="bn is-${b.tone}${src ? ' has-shot' : ''}" href="${b.href}">
         ${src
-    ? `<span class="bn-shot" aria-hidden="true" style="background-image:url('${src}')"></span>`
+    ? `<span class="bn-shot" aria-hidden="true" style="background-image:url('${src}');background-position:${b.focus || 'center'}"></span>`
     : `<span class="bn-art" aria-hidden="true">${icon(b.icon)}</span>`}
         <span class="bn-in">
           <span class="bn-eyebrow">${esc(b.eyebrow)}</span>
