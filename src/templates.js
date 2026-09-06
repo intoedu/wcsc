@@ -516,8 +516,9 @@ function categoryOf(s) {
 }
 
 function serviceCard(s, base) {
-  return `<a class="svc-card" href="${base}services/${s.slug}.html">
+  return `<a class="svc-card${s.soon ? ' is-soon' : ''}" href="${base}services/${s.slug}.html">
     <span class="svc-no">${s.no}</span>
+    ${s.soon ? '<span class="svc-soon">준비 중</span>' : ''}
     <span class="svc-ico">${icon(s.icon)}</span>
     <h3 data-live="svc.${s.id}.name">${esc(s.name)}</h3>
     <p class="svc-tag" data-live="svc.${s.id}.tagline">${esc(s.tagline)}</p>

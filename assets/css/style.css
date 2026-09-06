@@ -3838,3 +3838,28 @@ body.is-intro { overflow: hidden; }
 
 /* 값을 정하지 않은 설치 갈래 */
 .ls-tier-price .is-ask { font-size: 20px; font-weight: 800; color: var(--muted); letter-spacing: -.03em; }
+
+
+/* 아직 열지 않은 지원 항목 — 카드와 상세 화면에 그대로 밝혀 둡니다. */
+.svc-card.is-soon { position: relative; }
+.svc-soon {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--gold-100, #FBF0C9);
+  color: var(--gold-ink-deep, #4A3A08);
+  font-size: 12px;
+  font-weight: 700;
+}
+.svc-soon-note {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--gold-100, #FBF0C9);
+  color: var(--gold-ink-deep, #4A3A08);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.svc-soon-note a { color: inherit; font-weight: 700; }

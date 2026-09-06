@@ -1035,6 +1035,8 @@ function buildServicePage(s, i) {
           ${applyLink(s, '../')}
           <a class="btn btn-outline btn-lg" href="${site.contact.phoneHref}">전화 상담</a>
         </div>
+        ${s.soon ? `<p class="svc-soon-note">아직 준비 중인 항목입니다. 문의는 받고 있으니
+          <a href="${site.contact.phoneHref}">${phoneText()}</a> 로 말씀해 주세요.</p>` : ''}
         ${externalNote(s)}
       </div>
       ${s.hideMeta ? '' : `<div class="svc-hero-side">
