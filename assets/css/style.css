@@ -2721,6 +2721,31 @@ body.is-search-open { overflow: hidden; }
 /* 노랑 배너만 글자를 짙게 씁니다 — 흰 글씨는 노란 바탕에서 읽히지 않습니다. */
 .bn.is-gold  { background: linear-gradient(150deg, #F5D45A 0%, #E9B824 100%); color: var(--gold-ink-deep); }
 
+/* 사진이 들어간 배너 — 글자가 사진에 묻히지 않도록 아래쪽을 어둡게 덮습니다. */
+.bn-shot {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  transition: transform .4s;
+}
+.bn-shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 26, 17, .12) 0%, rgba(10, 26, 17, .55) 52%, rgba(8, 22, 14, .84) 100%);
+}
+.bn.has-shot { color: #fff; }
+.bn.has-shot .bn-eyebrow { background: rgba(255, 255, 255, .22); }
+.bn.has-shot .bn-title,
+.bn.has-shot .bn-lead { text-shadow: 0 1px 12px rgba(0, 0, 0, .35); }
+.bn.has-shot:hover .bn-shot { transform: scale(1.03); }
+@media (prefers-reduced-motion: reduce) {
+  .bn-shot { transition: none; }
+  .bn.has-shot:hover .bn-shot { transform: none; }
+}
+
 /* 큰 아이콘을 바탕 무늬처럼 깔아 둡니다. 사진이 없어도 허전하지 않게. */
 .bn-art {
   position: absolute;

@@ -68,6 +68,7 @@ function buildIndex() {
       lead: '만들어 드립니다. 관리비는 월 5만원입니다.',
       href: 'services/homepage.html',
       icon: 'monitor',
+      photo: 'homepage',
     },
     {
       tone: 'gold',
@@ -84,6 +85,7 @@ function buildIndex() {
       lead: '설치가 필요하시면 별도 비용으로 맡아 드립니다.',
       href: 'market.html',
       icon: 'speaker',
+      photo: 'market',
     },
     {
       tone: 'mint',
@@ -95,14 +97,29 @@ function buildIndex() {
     },
   ];
 
-  const banner = (b) => `<a class="bn is-${b.tone}" href="${b.href}">
-        <span class="bn-art" aria-hidden="true">${icon(b.icon)}</span>
+  /* 배너 사진 — assets/img/banner/<이름>.jpg 를 넣어 두면 그 배너의 배경이 됩니다.
+     파일이 없으면 지금처럼 색과 아이콘으로 나옵니다 (빌드는 깨지지 않습니다). */
+  const shot = (name) => {
+    if (!name) return '';
+    const found = ['jpg', 'jpeg', 'png', 'webp']
+      .map((ext) => 'assets/img/banner/' + name + '.' + ext)
+      .filter((rel) => fs.existsSync(path.join(__dirname, rel)))[0];
+    return found ? found + T.ver(found) : '';
+  };
+
+  const banner = (b) => {
+    const src = shot(b.photo);
+    return `<a class="bn is-${b.tone}${src ? ' has-shot' : ''}" href="${b.href}">
+        ${src
+    ? `<span class="bn-shot" aria-hidden="true" style="background-image:url('${src}')"></span>`
+    : `<span class="bn-art" aria-hidden="true">${icon(b.icon)}</span>`}
         <span class="bn-in">
           <span class="bn-eyebrow">${esc(b.eyebrow)}</span>
           <strong class="bn-title">${b.title}</strong>
           <span class="bn-lead">${esc(b.lead)}</span>
         </span>
       </a>`;
+  };
 
   /* 아이콘 줄은 게시판입니다 — 아래 항목 카드와 성격이 다릅니다.
      항목은 센터가 해 드리는 일이고, 게시판은 교회끼리 오가는 자리입니다. */
