@@ -1620,13 +1620,13 @@ ${pageHero({
         <span class="contact-ico">${icon('mail')}</span>
         <h2>이메일</h2>
         <strong class="is-email">${emailText()}</strong>
-        <p>급하시면 전화가 빠릅니다.</p>
+        <p>영업일 기준 1~2일 이내 회신드립니다.</p>
       </a>
       <a class="contact-card is-accent" href="apply.html">
         <span class="contact-ico">${icon('doc')}</span>
         <h2>지원 신청</h2>
         <strong>신청서 작성하기</strong>
-        <p>가장 빠른 방법입니다. 접수 후 1~2일 내 담당자가 연락드립니다.</p>
+        <p>여러 항목을 한 번에 적어 보내실 수 있습니다. 접수번호가 나와 어디까지 왔는지 확인하실 수 있습니다.</p>
       </a>
     </div>
   </div>
