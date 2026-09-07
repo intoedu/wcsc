@@ -938,3 +938,10 @@ window.CAPS_PAYMENT = {
   "sdk": "",
   "offNote": "카드 결제는 준비 중입니다. 계좌 이체로 진행해 주세요."
 };
+
+/* 신청서가 접수되면 이 주소로 접수 메일이 한 통 갑니다.
+   센터 설정에서 연락처 이메일을 바꾸면 이 값도 함께 바뀝니다. */
+window.CAPS_CONTACT = {
+  "email": "worichurchsupportcenter@gmail.com",
+  "phone": "010-4254-2270"
+};

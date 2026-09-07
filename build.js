@@ -2326,6 +2326,10 @@ window.CAPS_TICKET_BOARD = ${JSON.stringify(site.ticketBoard, null, 2)};
 /* 카드 결제 설정. enabled 가 false 면 결제 버튼이 아예 그려지지 않습니다.
    공개해도 되는 값만 들어갑니다 — 비밀키는 Edge Function 환경변수에 있습니다. */
 window.CAPS_PAYMENT = ${JSON.stringify(site.payment, null, 2)};
+
+/* 신청서가 접수되면 이 주소로 접수 메일이 한 통 갑니다.
+   센터 설정에서 연락처 이메일을 바꾸면 이 값도 함께 바뀝니다. */
+window.CAPS_CONTACT = ${JSON.stringify({ email: site.contact.email, phone: site.contact.phone }, null, 2)};
 `;
   write('assets/js/data.js', js);
 }

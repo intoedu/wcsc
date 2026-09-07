@@ -257,7 +257,7 @@
     };
 
     window.CAPSDB.submitRequest(payload)
-      .then(function (record) { showDone(record); })
+      .then(function (record) { mailIt(record); showDone(record); })
       .catch(function (err) {
         submitBtn.disabled = false;
         submitBtn.textContent = '신청서 제출하기';
@@ -266,6 +266,46 @@
           : '접수 처리 중 문제가 발생했습니다. 잠시 후 다시 시도하시거나 전화로 문의해 주세요.';
         formError.hidden = false;
       });
+  }
+
+  /* ---------- 접수 메일 ----------
+     신청은 데이터베이스에 저장되지만, 그것만으로는 아무도 모릅니다.
+     관리자 화면에 들어가 보기 전까지 신청이 묻히지 않도록,
+     접수와 동시에 센터 메일함으로 한 통 보냅니다.
+
+     보내는 일은 formsubmit.co 가 대신합니다 — 열쇠도 서버도 필요 없고,
+     처음 한 번만 센터 메일로 온 확인 링크를 누르면 그때부터 계속 옵니다.
+     메일이 실패해도 접수는 이미 끝났으므로 화면에는 티가 나지 않습니다. */
+  function mailIt(record) {
+    var to = (window.CAPS_CONTACT && window.CAPS_CONTACT.email) || '';
+    if (!to || !window.fetch) return;
+
+    var items = (record.services || []).map(window.CAPSDB.serviceName).join(', ');
+    var body = {
+      _subject: '[신청] ' + (record.church_name || '교회') + ' — ' + (items || '지원 신청'),
+      _template: 'table',
+      _captcha: 'false',
+      접수번호: record.code,
+      신청항목: items,
+      교회명: record.church_name || '',
+      교단: record.denomination || '',
+      담당자: ((record.contact_name || '') + ' ' + (record.contact_role || '')).trim(),
+      연락처: record.phone || '',
+      이메일: record.email || '',
+      지역: record.location || '',
+      교회규모: record.size || '',
+      희망시기: record.timeline || '',
+      연락방법: record.prefer || '',
+      남기신말씀: record.message || '',
+    };
+
+    try {
+      window.fetch('https://formsubmit.co/ajax/' + encodeURIComponent(to), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
+      }).catch(function () { /* 접수는 이미 끝났습니다 */ });
+    } catch (ignore) { /* 오래된 브라우저 */ }
   }
 
   /* ---------- 완료 화면 ---------- */
