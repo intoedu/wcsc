@@ -348,6 +348,8 @@
     countTitle();
   }
 
+  /* 무료로 내어 놓는 방에는 요금 칸을 아예 보여 주지 않습니다.
+     신고되지 않은 교회가 값을 적어 넣는 일을 처음부터 막습니다. */
   function syncFree() {
     el('ghPriceBox').hidden = f.free.checked;
     if (f.free.checked) {
@@ -357,7 +359,9 @@
       f.deposit.value = '';
     }
   }
-  f.free.addEventListener('change', syncFree);
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="ghPay"]'), function (r) {
+    r.addEventListener('change', syncFree);
+  });
 
   function collect() {
     return {
@@ -412,6 +416,9 @@
     if (!d.contactName) return '연락받으실 성함을 적어 주세요.';
     if (B.digits(d.contactPhone).length < 9) return '연락처를 확인해 주세요.';
     if (!d.contactHours) return '연락 가능 시간을 적어 주세요. 예배 중에 오는 전화를 줄여 줍니다.';
+    if (!d.freeStay && !d.priceNight && !d.priceWeek && !d.priceMonth) {
+      return '요금을 적어 주시거나, [무료로 내어 놓습니다] 를 골라 주세요.';
+    }
     for (var i = 0; i < vows.length; i++) {
       if (vows[i] && !vows[i].checked) return '아래 확인 항목에 모두 체크해 주세요.';
     }
@@ -431,6 +438,7 @@
     f.address.value = r.addressRough || '';
     f.nearest.value = r.nearest || '';
     f.free.checked = !!r.freeStay;
+    if (!r.freeStay && el('ghFLicensed')) el('ghFLicensed').checked = true;
     syncFree();
     f.night.value = r.priceNight ? B.comma(r.priceNight) : '';
     f.week.value = r.priceWeek ? B.comma(r.priceWeek) : '';

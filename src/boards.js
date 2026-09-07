@@ -669,8 +669,19 @@ function buildGuesthouse(write) {
 
       <fieldset class="ls-fs">
         <legend><span class="ls-step">3</span> 요금과 기간</legend>
-        <label class="ls-chk is-wide"><input type="checkbox" id="ghFFree"><span>
-          <strong>요금을 받지 않습니다</strong> — 사례 여부는 오시는 분과 상의합니다.</span></label>
+        <p class="ls-fs-lead">
+          교회 건물에서 <strong>숙박비를 받으시려면 숙박업 신고가 되어 있어야 합니다.</strong>
+          신고 없이 요금을 받으시면 교회가 곤란해집니다. 그래서 이 게시판에는
+          <strong>무료로 내어 놓는 방</strong>과 <strong>숙박업 신고가 된 시설</strong>만 올리실 수 있습니다.
+        </p>
+        <div class="ls-chks is-stack">
+          <label class="ls-chk is-wide"><input type="radio" name="ghPay" value="free" id="ghFFree" checked><span>
+            <strong>무료로 내어 놓습니다</strong> — 요금을 받지 않습니다.
+            사례 여부는 오시는 분과 상의합니다.</span></label>
+          <label class="ls-chk is-wide"><input type="radio" name="ghPay" value="licensed" id="ghFLicensed"><span>
+            <strong>숙박업 신고가 된 시설입니다</strong> — 수양관 · 기도원처럼
+            요금을 받을 수 있도록 신고되어 있습니다.</span></label>
+        </div>
 
         <div id="ghPriceBox">
           <p class="ls-fs-lead">쓰시는 단위만 채워 주세요. 비워 두면 보여 주지 않습니다.</p>
@@ -757,7 +768,8 @@ function buildGuesthouse(write) {
           <label class="ls-chk is-wide"><input type="checkbox" id="ghVow2"><span>
             사진과 소개는 <strong>이 방을 실제로 찍고 적은 것</strong>입니다.</span></label>
           <label class="ls-chk is-wide"><input type="checkbox" id="ghVow3"><span>
-            숙박업 신고가 필요한 형태인지는 <strong>우리 교회가 관할 보건소에 확인</strong>하며,
+            요금을 적은 경우 <strong>우리 시설이 숙박업 신고가 되어 있음을 확인</strong>했습니다.
+            신고 여부는 우리 교회가 관할 시 · 군 · 구청에 확인하며,
             센터는 게시판만 운영한다는 것을 압니다.</span></label>
         </div>
       </fieldset>`;
@@ -774,7 +786,8 @@ ${pageHero({
     eyebrow: '게스트하우스 · 교회가 내어 주는 방',
     title: '한국에 머무는 동안<br>교회에서 지내십시오',
     lead: '비어 있는 사택과 선교관을 교회가 내어 놓습니다. 안식년으로 들어오신 선교사님, '
-      + '방문 교역자, 유학생이 머물 곳을 찾습니다. 요금과 기간은 교회와 직접 정하십니다.',
+      + '방문 교역자, 유학생이 머물 곳을 찾습니다. '
+      + '무료로 내어 놓는 방과 숙박업 신고가 된 시설만 올라옵니다.',
     extra: `<div class="ls-hero-meta">
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
       <span class="ls-hero-pill is-key">교회 확인 <strong>후 게시</strong></span>
