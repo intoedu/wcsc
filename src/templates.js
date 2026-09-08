@@ -404,6 +404,13 @@ function applyLink(s, base, o) {
   const cls = 'btn ' + (opt.cls || 'btn-primary btn-lg');
   const arrow = opt.arrow === false ? '' : ' ' + icon('arrow', 'ico ico-sm');
 
+  // 우리 게시판에서 받는 항목은 신청서가 아니라 그 게시판으로 보냅니다.
+  if (s.applyVia) {
+    const v = s.applyVia;
+    return `<a class="${cls}" href="${base}${v.href}"
+      data-apply="${s.id}">${esc(v.label)}${esc(v.verb || '으로 가기')}${arrow}</a>`;
+  }
+
   if (s.externalApply) {
     const who = s.externalApplyLabel || '외부 사이트';
     /* 접수 페이지로 보내는 항목은 "…에서 신청하기", 서비스 자체로
