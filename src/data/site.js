@@ -1398,6 +1398,7 @@ const services = [
 
   {
     id: 'community',
+    soon: true,
     category: 'community',
     slug: 'community',
     name: '커뮤니티 센터',

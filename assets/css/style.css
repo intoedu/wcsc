@@ -3053,6 +3053,21 @@ body.is-search-open { overflow: hidden; }
 }
 .item:hover .item-go { color: var(--brand-700); }
 
+/* 홈 화면 타일 — 아직 열지 않은 항목. 상세 카드의 [준비 중] 과 같은 색으로 둡니다. */
+.item-soon {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--gold-100, #FBF0C9);
+  color: var(--gold-ink-deep, #4A3A08);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  vertical-align: 2px;
+  white-space: nowrap;
+}
+
 /* 아이콘 없이 글만 있는 카드 */
 .feat-card.is-plain h3 { color: var(--brand-900); }
 .feat-card.is-plain p { margin-top: 10px; }
