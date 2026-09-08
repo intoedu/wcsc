@@ -167,6 +167,18 @@ table { border-collapse: collapse; width: 100%; }
 .mega-text { display: flex; flex-direction: column; min-width: 0; }
 .mega-text strong { font-size: 15px; color: var(--brand-900); }
 .mega-text small { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.mega-soon {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--gold-100, #FBF0C9);
+  color: var(--gold-ink-deep, #4A3A08);
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
 
 /* =========================================================
    Buttons
