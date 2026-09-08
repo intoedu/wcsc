@@ -148,10 +148,10 @@ function buildIndex() {
 
   const itemTile = (s) => {
     const tag = priceTag(s);
-    return `<a class="item" href="services/${s.slug}.html" data-cat="${s.category}">
+    return `<a class="item${s.soon ? ' is-soon' : ''}" href="services/${s.slug}.html" data-cat="${s.category}">
         <span class="item-ico">${icon(s.icon)}</span>
         <span class="item-body">
-          <strong class="item-name">${esc(s.name)}</strong>
+          <strong class="item-name">${esc(s.name)}${s.soon ? '<span class="item-soon">준비 중</span>' : ''}</strong>
           <span class="item-line">${esc(s.tagline)}</span>
         </span>
         <span class="item-foot">
