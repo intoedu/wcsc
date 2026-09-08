@@ -468,7 +468,7 @@ ${pageHero({
 <!-- 센터 정보 -->
 <section class="section section-alt">
   <div class="wrap narrow">
-    ${sectionHead('센터 정보', '어디에, 언제, 누구에게')}
+    ${sectionHead('', '센터 정보')}
     <dl class="facts">
       <div><dt>이름</dt><dd>${esc(site.fullName || site.name)}</dd></div>
       <div><dt>하는 일</dt><dd>${NUM[categories.length]} 갈래, ${services.length}개 항목 · 게시판 ${T.BOARDS.length}개</dd></div>
@@ -476,7 +476,6 @@ ${pageHero({
       <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
       <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
       <div><dt>업무 시간</dt><dd>${hoursText()}</dd></div>
-      <div><dt>주소</dt><dd>${addressText()}</dd></div>
     </dl>
   </div>
 </section>
@@ -1206,6 +1205,18 @@ function buildApply() {
   // 외부에서 접수하는 항목(@IM 등)은 체크박스가 아니라 링크로 내보냅니다.
   const serviceChecks = services
     .map((s) => {
+      // 신청서로 받지 않고 우리 게시판에서 받는 항목(부동산)은 길만 알려 줍니다.
+      if (s.applyVia) {
+        const v = s.applyVia;
+        return `<a class="pick pick-external" data-service="${s.id}" data-apply="${s.id}"
+          href="${v.href}">
+          <span class="pick-in">
+            <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
+            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(v.short)}</small></span>
+            <span class="pick-out">${esc(v.label)} ${icon('arrow', 'ico ico-xs')}</span>
+          </span>
+        </a>`;
+      }
       if (s.externalApply) {
         const who = s.externalApplyLabel || '외부 사이트';
         return `<a class="pick pick-external" data-service="${s.id}" data-apply="${s.id}"
@@ -1229,6 +1240,7 @@ function buildApply() {
     .join('\n        ');
 
   const externalIds = services.filter((s) => s.externalApply).map((s) => s.id);
+  const viaBoard = services.filter((s) => s.applyVia);
 
   const body = `
 ${pageHero({
@@ -1249,6 +1261,11 @@ ${pageHero({
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
         <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 묶어서 진행합니다.</p>
+        ${viaBoard.length
+          ? `<p class="fs-help fs-help-external">신청서로 받지 않는 항목 — ${viaBoard
+              .map((s) => esc(s.name))
+              .join(' · ')}. 누르시면 등록하시는 자리로 바로 갑니다.</p>`
+          : ''}
         ${externalIds.length
           ? `<p class="fs-help fs-help-external">${externalIds
               .map((id) => esc(services.find((v) => v.id === id).name))
