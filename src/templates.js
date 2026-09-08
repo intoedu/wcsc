@@ -184,7 +184,7 @@ function header(base, active) {
       (s) =>
         `<a class="mega-item" href="${base}services/${s.slug}.html">
           <span class="mega-ico">${icon(s.icon)}</span>
-          <span class="mega-text"><strong>${esc(s.name)}</strong><small>${esc(s.tagline)}</small></span>
+          <span class="mega-text"><strong>${esc(s.name)}${s.soon ? '<span class="mega-soon">준비 중</span>' : ''}</strong><small>${esc(s.tagline)}</small></span>
         </a>`
     )
     .join('');
