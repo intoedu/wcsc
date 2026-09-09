@@ -1,0 +1,166 @@
+@charset "utf-8";
+/* =========================================================
+   우리교회지원센터 — 리플렛(인쇄용) 스타일
+   색은 홈페이지 팔레트(assets/css/style.css)를 그대로 씁니다.
+   단위는 mm · pt 로만 씁니다 (px 쓰지 마세요 — 인쇄 크기가 틀어집니다).
+   ========================================================= */
+
+:root{
+  --brand-900:#12301F;
+  --brand-800:#1B4D2E;
+  --brand-700:#1F7A44;
+  --brand-600:#1F8046;
+  --brand-500:#34A863;
+  --brand-100:#D3EBDB;
+  --brand-50:#F2F9F4;
+
+  --gold-500:#8F6E0B;
+  --gold-600:#755A08;
+  --gold-400:#C79A2E;
+  --gold-100:#FCF5D6;
+  --gold-border:#E6DAA3;
+  --gold-ink:#67500A;
+
+  --ink:#15211A;
+  --ink-2:#3A4A40;
+  --muted:#5F7369;
+  --line:#DCE6DF;
+  --line-2:#EDF3EF;
+  --paper:#FFFFFF;
+  --paper-warm:#F7F6F0;
+
+  --sans:"Noto Sans CJK KR","Noto Sans KR","NanumBarunGothic",sans-serif;
+  --display:"NanumSquare","Noto Sans CJK KR",sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family:var(--sans);
+  color:var(--ink);
+  background:#9aa5a0;               /* 화면에서 볼 때만 보이는 바탕 */
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+  font-size:9pt;
+  line-height:1.55;
+  letter-spacing:-.01em;
+  word-break:keep-all;              /* 한글 단어를 중간에서 자르지 않습니다 */
+}
+
+.sheet{
+  position:relative;
+  background:var(--paper);
+  overflow:hidden;
+  display:flex;
+  margin:0 auto;
+  page-break-after:always;
+  break-after:page;
+}
+.sheet:last-child{ page-break-after:auto; break-after:auto; }
+
+/* ---------- 공통 조판 ---------- */
+h1,h2,h3,h4,p,ul,ol{ margin:0; padding:0; }
+ul{ list-style:none; }
+strong{ font-weight:800; }
+
+.eyebrow{
+  font-family:var(--display); font-weight:800;
+  font-size:7.6pt; letter-spacing:.14em; color:var(--gold-600);
+  text-transform:none;
+}
+.rule{ height:.7mm; width:14mm; background:var(--gold-400); border-radius:1mm; }
+.rule--wide{ width:100%; height:.35mm; background:var(--line); border-radius:0; }
+
+.sec-title{
+  font-family:var(--display); font-weight:800;
+  font-size:12.4pt; color:var(--brand-900); line-height:1.32;
+}
+.sec-sub{ font-size:8pt; color:var(--muted); line-height:1.45; }
+
+.tag{
+  display:inline-block; font-family:var(--display); font-weight:800;
+  font-size:7pt; letter-spacing:.02em;
+  padding:.7mm 1.8mm; border-radius:1.2mm;
+  background:var(--gold-100); color:var(--gold-ink);
+  border:.2mm solid var(--gold-border);
+  white-space:nowrap;
+}
+.tag--green{ background:var(--brand-50); color:var(--brand-800); border-color:var(--brand-100); }
+.tag--solid{ background:var(--brand-700); color:#fff; border-color:var(--brand-700); }
+
+.fineprint{ font-size:6.6pt; line-height:1.5; color:var(--muted); }
+
+/* ---------- 항목 카드 ---------- */
+.cat{ }
+.cat + .cat{ margin-top:6mm; }
+.cat__head{ display:flex; align-items:baseline; gap:2mm; }
+.cat__name{
+  font-family:var(--display); font-weight:800; font-size:11.6pt;
+  color:var(--brand-800); line-height:1.25;
+}
+.cat__line{ flex:1; height:.3mm; background:var(--line); }
+.cat__sub{ font-size:7.6pt; color:var(--muted); margin-top:.8mm; }
+
+.svc{ margin-top:2.6mm; padding-left:0; }
+/* 항목 3개를 패널 높이에 고르게 펴 놓습니다 — 아래가 휑하지 않도록. */
+.cat--flow{ flex:1; display:flex; flex-direction:column; }
+.svc-flow{ flex:1; display:flex; flex-direction:column; justify-content:space-evenly; padding:3mm 0 1mm; }
+.svc-flow .svc{ margin-top:0; }
+.svc__row{ display:flex; gap:2mm; align-items:flex-start; }
+.svc__no{
+  font-family:var(--display); font-weight:800; font-size:7.4pt;
+  color:#fff; background:var(--brand-700);
+  width:5.8mm; height:5.8mm; min-width:5.8mm; border-radius:1.5mm;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:.4mm; letter-spacing:0;
+}
+.svc__body{ flex:1; }
+.svc__name{ font-family:var(--display); font-weight:800; font-size:10pt; color:var(--ink); line-height:1.3; }
+.svc__desc{ font-size:8pt; color:var(--ink-2); line-height:1.5; margin-top:1mm; }
+.svc__price{ font-size:7.8pt; color:var(--gold-600); font-weight:800; margin-top:.8mm; }
+.svc + .svc{ margin-top:4.6mm; }
+
+/* ---------- 상자 ---------- */
+.box{
+  border:.3mm solid var(--line); border-radius:2.2mm;
+  padding:3.2mm 3.4mm; background:var(--brand-50);
+}
+.box--gold{ background:var(--gold-100); border-color:var(--gold-border); }
+.box--plain{ background:#fff; }
+.box__title{
+  font-family:var(--display); font-weight:800; font-size:9.4pt;
+  color:var(--brand-900); margin-bottom:1.6mm;
+}
+
+/* ---------- 절차 ---------- */
+.steps{ margin-top:2.4mm; }
+.step{ display:flex; gap:2.2mm; align-items:flex-start; }
+.step + .step{ margin-top:3.4mm; }
+.step__no{
+  font-family:var(--display); font-weight:800; font-size:7.2pt; color:#fff;
+  background:var(--brand-800); width:5.2mm; height:5.2mm; min-width:5.2mm;
+  border-radius:50%; display:flex; align-items:center; justify-content:center; margin-top:.3mm;
+}
+.step__t{ font-family:var(--display); font-weight:800; font-size:9pt; color:var(--ink); }
+.step__d{ font-size:7.6pt; color:var(--muted); line-height:1.48; margin-top:.4mm; }
+
+/* ---------- 연락처 ---------- */
+.contact__row{ display:flex; gap:2mm; align-items:baseline; }
+.contact__row + .contact__row{ margin-top:1.6mm; }
+.contact__k{
+  font-family:var(--display); font-weight:800; font-size:7.6pt; color:var(--brand-700);
+  width:14mm; min-width:14mm;
+}
+.contact__v{ font-size:8.6pt; color:var(--ink); line-height:1.35; }
+.contact__v--big{ font-family:var(--display); font-weight:800; font-size:12.6pt; letter-spacing:.01em; }
+
+.qr{ display:flex; gap:2.6mm; align-items:center; }
+.qr img{ width:21mm; height:21mm; display:block; }
+.qr__t{ font-family:var(--display); font-weight:800; font-size:8.6pt; color:var(--brand-900); }
+.qr__u{ font-size:7.2pt; color:var(--muted); margin-top:.6mm; word-break:break-all; }
+
+/* ---------- 게시판 ---------- */
+.boards{ display:grid; grid-template-columns:1fr 1fr; gap:2mm; margin-top:2mm; }
+.board{ background:#fff; border:.25mm solid var(--brand-100); border-radius:1.8mm; padding:2.6mm 2.6mm; }
+.board__n{ font-family:var(--display); font-weight:800; font-size:8.2pt; color:var(--brand-800); }
+.board__d{ font-size:7pt; color:var(--muted); line-height:1.42; margin-top:.7mm; }
