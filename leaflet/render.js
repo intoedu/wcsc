@@ -51,6 +51,30 @@ const JOBS = [
     });
     console.log('PDF  ', path.relative(HERE, pdf));
 
+    /* 넘침 검사 — 글이 종이 끝에 너무 붙거나 잘리면 알려 줍니다.
+       (flex 로 짜여 있어, 넘쳐도 화면상으로는 조용히 눌려 사라질 수 있습니다.) */
+    if (!job.bleed) {
+      const warn = await page.evaluate(() => {
+        const MM = 3.7795, bad = [];
+        document.querySelectorAll('.sheet').forEach((sh, i) => {
+          const sr = sh.getBoundingClientRect();
+          let worst = Infinity, who = '';
+          sh.querySelectorAll('*').forEach((el) => {
+            const leaf = el.tagName === 'IMG' || ![...el.children].some((c) => c.nodeType === 1);
+            if (!leaf) return;
+            const r = el.getBoundingClientRect();
+            if (r.height < 1) return;
+            if (el.tagName !== 'IMG' && !el.textContent.trim()) return;
+            const gap = (sr.bottom - r.bottom) / MM;
+            if (gap < worst) { worst = gap; who = el.textContent.trim().slice(0, 24) || el.tagName; }
+          });
+          if (worst < 5) bad.push(`      ${i + 1}면: 아래 여백 ${worst.toFixed(1)}mm — “${who}”`);
+        });
+        return bad;
+      });
+      if (warn.length) console.log('   ⚠ 종이 끝에 너무 붙었습니다 (5mm 미만)\n' + warn.join('\n'));
+    }
+
     /* 미리보기 PNG — 화면에서 바로 확인하실 수 있게 면마다 한 장씩. */
     const sheets = await page.$$('.sheet');
     for (let i = 0; i < sheets.length; i++) {
