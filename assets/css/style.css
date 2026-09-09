@@ -1068,6 +1068,19 @@ table { border-collapse: collapse; width: 100%; }
   border: 1px solid var(--gold-border); color: var(--gold-600); font-size: 12px; font-weight: 700;
 }
 .pick-external:hover .pick-out { background: #fff; }
+
+/* 아직 열지 않은 항목 — 보이되 고를 수 없습니다. */
+.pick.is-soon .pick-in { cursor: default; border-style: dashed; background: var(--bg-soft); }
+.pick.is-soon .pick-in:hover { border-color: var(--line); background: var(--bg-soft); }
+.pick.is-soon .pick-ico,
+.pick.is-soon .pick-text strong,
+.pick.is-soon .pick-text small { color: var(--muted); }
+.pick-soon {
+  display: inline-flex; align-items: center; flex: none;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--gold-100, #FBF0C9); color: var(--gold-ink-deep, #4A3A08);
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+}
 .fs-help-external {
   margin-top: 8px; padding: 11px 14px; border-radius: 9px;
   background: var(--gold-100); border: 1px solid var(--gold-border); color: var(--gold-ink);

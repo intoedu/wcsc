@@ -30,7 +30,7 @@
     if (!wanted.length) return;
     wanted.forEach(function (id) {
       var box = form.querySelector('input[name="services"][value="' + CSS.escape(id) + '"]');
-      if (box) box.checked = true;
+      if (box && !box.disabled) box.checked = true;   // 준비 중 항목은 건너뜁니다
     });
   })();
 
