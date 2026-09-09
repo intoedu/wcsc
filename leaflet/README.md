@@ -50,18 +50,24 @@ npm run leaflet                  # 또는:  node leaflet/render.js
 sudo apt-get install -y fonts-noto-cjk fonts-nanum
 ```
 
-## 4. 인쇄 전에 꼭 바꿔야 하는 것
+## 4. 연락처는 어디서 온 값인가
 
-**전화번호와 주소가 아직 임시값입니다.** `src/data/site.js` 의 `contact` 에도 `TODO(운영)` 로 남아 있는 값이라,
-리플렛에도 그대로 들어가 있습니다. 인쇄를 넘기기 전에 아래 두 곳을 실제 값으로 고치십시오.
+리플렛에 찍힌 연락처는 **운영 DB의 `settings` 표(관리자 화면 → 센터 설정)** 에 들어 있는 값입니다.
+저장소의 `src/data/site.js` 에 있는 `contact` 는 아직 `TODO(운영)` 인 임시값이라 쓰지 않았습니다.
 
-| 파일 | 찾을 말 |
-|------|---------|
-| `leaflet-3fold.html` | `02-0000-0000` · `서울특별시 ○○구 ○○로 00, 0층` |
-| `leaflet-a4.html` | 같음 |
+| 항목 | 값 | 출처 |
+|------|-----|------|
+| 전화 | 010-4254-2270 | `settings.site.phone` |
+| 이메일 | worichurchsupportcenter@gmail.com | `settings.site.email` |
+| 주소 | 경기 용인시 처인구 명지로40번길 13 연세프라자 2층 205호 | `settings.site.address` |
+| 운영시간 | 평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무 | `site.js` 기본값 — DB가 비어 있어 홈페이지도 이 값을 보여 줍니다 |
+| 카카오톡 | (넣지 않았습니다) | `settings.site.kakao` 가 비어 있어, 실제 채널이 있는지 확인되지 않았습니다 |
 
-이메일(`help@caps.or.kr`) · 카카오톡 채널(`@caps교회지원센터`) · 운영시간도 같은 자리에 있으니 함께 확인해 주세요.
-`src/data/site.js` 를 먼저 고치고 리플렛을 맞추면 홈페이지와 어긋나지 않습니다.
+**관리자 화면에서 연락처를 바꾸시면 리플렛도 함께 고쳐야 합니다.** 홈페이지는 DB를 읽어 자동으로 바뀌지만,
+인쇄물은 그렇지 않습니다. `leaflet-3fold.html` 의 `문의` 구역과 `leaflet-a4.html` 의 `.foot` 구역 두 곳입니다.
+
+> `src/data/site.js` 의 `contact` 도 실제 값으로 맞춰 두시길 권합니다.
+> 지금은 DB를 못 읽는 상황(네트워크 오류 등)에서 홈페이지가 `02-0000-0000` 을 보여 줍니다.
 
 ## 5. 들어 있는 그림
 
