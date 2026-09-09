@@ -1205,6 +1205,17 @@ function buildApply() {
   // 외부에서 접수하는 항목(@IM 등)은 체크박스가 아니라 링크로 내보냅니다.
   const serviceChecks = services
     .map((s) => {
+      // 아직 열지 않은 항목은 보이되 고를 수 없습니다 (문의는 받습니다).
+      if (s.soon) {
+        return `<label class="pick is-soon" data-service="${s.id}" aria-disabled="true">
+            <input type="checkbox" name="services" value="${s.id}" disabled>
+            <span class="pick-in">
+              <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
+              <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(s.tagline)}</small></span>
+              <span class="pick-soon">준비 중</span>
+            </span>
+          </label>`;
+      }
       // 신청서로 받지 않고 우리 게시판에서 받는 항목(부동산)은 길만 알려 줍니다.
       if (s.applyVia) {
         const v = s.applyVia;
@@ -1241,6 +1252,7 @@ function buildApply() {
 
   const externalIds = services.filter((s) => s.externalApply).map((s) => s.id);
   const viaBoard = services.filter((s) => s.applyVia);
+  const soonItems = services.filter((s) => s.soon);
 
   const body = `
 ${pageHero({
@@ -1261,6 +1273,11 @@ ${pageHero({
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
         <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 묶어서 진행합니다.</p>
+        ${soonItems.length
+          ? `<p class="fs-help fs-help-external">아직 열지 않은 항목 — ${soonItems
+              .map((s) => esc(s.name))
+              .join(' · ')}. 준비가 끝나면 신청을 받습니다. 그전에도 문의는 받고 있습니다.</p>`
+          : ''}
         ${viaBoard.length
           ? `<p class="fs-help fs-help-external">신청서로 받지 않는 항목 — ${viaBoard
               .map((s) => esc(s.name))

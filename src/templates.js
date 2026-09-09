@@ -404,6 +404,12 @@ function applyLink(s, base, o) {
   const cls = 'btn ' + (opt.cls || 'btn-primary btn-lg');
   const arrow = opt.arrow === false ? '' : ' ' + icon('arrow', 'ico ico-sm');
 
+  // 아직 열지 않은 항목은 신청서로 보내지 않습니다 — 신청서에서 고를 수 없기 때문입니다.
+  if (s.soon) {
+    return `<a class="${cls}" href="${base}contact.html"
+      data-apply="${s.id}">준비 중 — 문의하기${arrow}</a>`;
+  }
+
   // 우리 게시판에서 받는 항목은 신청서가 아니라 그 게시판으로 보냅니다.
   if (s.applyVia) {
     const v = s.applyVia;
