@@ -1204,6 +1204,7 @@ ${ctaBand('../', {
 function buildApply() {
   // 외부에서 접수하는 항목(@IM 등)은 체크박스가 아니라 링크로 내보냅니다.
   const serviceChecks = services
+    .filter((s) => !s.applyVia)   // 게시판에서 받는 항목(부동산)은 신청 항목이 아닙니다
     .map((s) => {
       // 아직 열지 않은 항목은 보이되 고를 수 없습니다 (문의는 받습니다).
       if (s.soon) {
@@ -1215,18 +1216,6 @@ function buildApply() {
               <span class="pick-soon">준비 중</span>
             </span>
           </label>`;
-      }
-      // 신청서로 받지 않고 우리 게시판에서 받는 항목(부동산)은 길만 알려 줍니다.
-      if (s.applyVia) {
-        const v = s.applyVia;
-        return `<a class="pick pick-external" data-service="${s.id}" data-apply="${s.id}"
-          href="${v.href}">
-          <span class="pick-in">
-            <span class="pick-ico">${icon(s.icon, 'ico ico-sm')}</span>
-            <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(v.short)}</small></span>
-            <span class="pick-out">${esc(v.label)} ${icon('arrow', 'ico ico-xs')}</span>
-          </span>
-        </a>`;
       }
       if (s.externalApply) {
         const who = s.externalApplyLabel || '외부 사이트';
@@ -1251,7 +1240,6 @@ function buildApply() {
     .join('\n        ');
 
   const externalIds = services.filter((s) => s.externalApply).map((s) => s.id);
-  const viaBoard = services.filter((s) => s.applyVia);
   const soonItems = services.filter((s) => s.soon);
 
   const body = `
@@ -1277,11 +1265,6 @@ ${pageHero({
           ? `<p class="fs-help fs-help-external">아직 열지 않은 항목 — ${soonItems
               .map((s) => esc(s.name))
               .join(' · ')}. 준비가 끝나면 신청을 받습니다. 그전에도 문의는 받고 있습니다.</p>`
-          : ''}
-        ${viaBoard.length
-          ? `<p class="fs-help fs-help-external">신청서로 받지 않는 항목 — ${viaBoard
-              .map((s) => esc(s.name))
-              .join(' · ')}. 누르시면 등록하시는 자리로 바로 갑니다.</p>`
           : ''}
         ${externalIds.length
           ? `<p class="fs-help fs-help-external">${externalIds
