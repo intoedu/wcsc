@@ -1093,9 +1093,9 @@ ${s.useCases ? `
     <div class="feat-grid" data-live-list="svc.${s.id}.features">
       ${s.features
         .map(
-          (f) => `<article class="feat-card">
+          (f) => `<article class="feat-card${f.soon ? ' is-soon' : ''}">
         <span class="feat-ico">${icon('check', 'ico ico-sm')}</span>
-        <h3>${esc(f.title)}</h3>
+        <h3>${esc(f.title)}${f.soon ? '<span class="feat-soon">준비 중</span>' : ''}</h3>
         <p>${esc(f.desc)}</p>
       </article>`
         )

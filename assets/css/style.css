@@ -550,6 +550,13 @@ table { border-collapse: collapse; width: 100%; }
 }
 .feat-card h3 { font-size: 17px; letter-spacing: -.03em; }
 .feat-card p { margin-top: 10px; font-size: 14.8px; color: var(--muted); line-height: 1.8; }
+/* 아직 열지 않은 세부 항목 */
+.feat-card.is-soon { background: var(--bg-soft); border-style: dashed; }
+.feat-soon {
+  display: inline-block; margin-left: 7px; padding: 2px 8px; border-radius: 999px;
+  background: var(--gold-100, #FBF0C9); color: var(--gold-ink-deep, #4A3A08);
+  font-size: 11.5px; font-weight: 700; vertical-align: 2px; white-space: nowrap;
+}
 
 /* ---------- split / lists / price ---------- */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
