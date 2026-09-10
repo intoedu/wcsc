@@ -2206,7 +2206,6 @@ function buildSearchIndex() {
     'services/smartchurch.html': '앱 어플 모바일 주보앱 출석',
     'services/shorts.html': '영상 편집 유튜브 릴스 설교영상',
     'services/design.html': '현수막 배너 포스터 명함 로고 인쇄 디자인',
-    'services/realestate.html': '교회 매매 임대 상가 건물 부동산 이전',
     'services/sharing.html': '나눔집 소그룹 교재 순모임 성경공부',
     'services/intooffice.html': '행정 서류 결재 문서 전자결재 사무',
     'services/akc.html': '수련회 집회 컨퍼런스 대회',
