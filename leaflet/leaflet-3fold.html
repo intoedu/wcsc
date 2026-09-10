@@ -7,7 +7,7 @@
 <style>
 /* ── A4 가로 297×210mm · 3단 접지(두루마리 접지) ──────────────────
    바깥면 왼쪽→오른쪽 : [안쪽 플랩] [뒷표지] [앞표지]
-   안쪽면 왼쪽→오른쪽 : [알리는 교회] [모이는 교회] [세우는 교회]
+   안쪽면 왼쪽→오른쪽 : [보이는 교회] [사역하는 교회 + 커뮤니티 센터] [세우는 교회 + 게시판]
    안으로 접혀 들어가는 플랩만 3mm 좁습니다(97mm) — 접었을 때 배가 부르지 않게. */
 @page{ size:297mm 210mm; margin:0; }
 .sheet{ width:297mm; height:210mm; }
@@ -30,15 +30,22 @@
   color:var(--gold-600); padding-top:4.4mm; margin-bottom:4.4mm;
   border-top:.3mm solid rgba(18,48,31,.14); }
 .cover__li{ display:flex; gap:2.4mm; align-items:baseline; }
-.cover__li + .cover__li{ margin-top:3.6mm; }
-.cover__li b{ font-family:var(--display); font-weight:800; font-size:9.2pt; color:var(--brand-800); width:23mm; min-width:23mm; letter-spacing:-.015em; }
-.cover__li span{ font-size:7.6pt; color:var(--muted); line-height:1.45; }
+.cover__li + .cover__li{ margin-top:3mm; }
+.cover__li b{ font-family:var(--display); font-weight:800; font-size:8.8pt; color:var(--brand-800); width:25mm; min-width:25mm; letter-spacing:-.02em; }
+.cover__li span{ font-size:7.2pt; color:var(--muted); line-height:1.45; }
 .cover__band{
   background:var(--brand-900); color:#fff; padding:8mm 9mm 9mm;
 }
 .cover__band .bt{ font-family:var(--display); font-weight:800; font-size:11.4pt; line-height:1.56; }
 .cover__band .bd{ font-size:8pt; color:#BFD6C7; margin-top:2.4mm; line-height:1.62; }
 .cover__band .bu{ font-size:7.4pt; color:#8FB79E; margin-top:3.6mm; letter-spacing:.01em; }
+
+/* 게시판 목록 — 다섯 곳이라 격자 대신 한 줄씩 */
+.blist{ margin-top:2.4mm; }
+.bitem + .bitem{ margin-top:2.4mm; }
+.bitem b{ display:block; font-family:var(--display); font-weight:800; font-size:7.8pt;
+  color:var(--brand-800); line-height:1.3; letter-spacing:-.015em; }
+.bitem span{ display:block; font-size:6.9pt; color:#4C5F55; line-height:1.5; margin-top:.6mm; }
 
 /* 뒷표지 */
 .back__logo{ width:34mm; display:block; margin-bottom:4mm; }
@@ -80,9 +87,9 @@
     <h2 class="sec-title" style="margin-top:2.4mm">교회에 필요를<br>채워주는 곳</h2>
     <div class="rule" style="margin-top:3.4mm"></div>
     <p style="margin-top:4mm; font-size:8pt; line-height:1.62; color:var(--ink-2)">
-      홈페이지·디자인·교역자&nbsp;구인·음향·부동산·캠프·앱·행정까지
-      <strong>한&nbsp;곳에서</strong> 맡습니다. 업체를 따로 찾아다니지 않으셔도 됩니다 —
-      신청서 한 장이면 <strong>접수부터 납품까지</strong> 이어집니다.
+      홈페이지 제작부터 마케팅 · 음향 · 캠프 · 앱 · 행정까지
+      <strong>한&nbsp;곳에서</strong> 맡습니다. 교회끼리 직접 만나는 게시판도 함께 운영합니다 —
+      업체를 따로 찾아다니지 않으셔도 됩니다.
     </p>
 
     <div class="box box--gold" style="margin-top:4mm">
@@ -211,14 +218,15 @@
         </h1>
         <p class="cover__desc">
           교회에 필요를 채워주는 곳.<br>
-          알리고, 모이고, 세우는 자리를 함께 준비합니다.
+          지원 항목과 게시판을 함께 운영합니다.
         </p>
       </div>
       <div class="cover__list">
         <div class="cover__listhead">이런 것을 맡습니다</div>
-        <div class="cover__li"><b>알리는 교회</b><span>홈페이지 · 디자인 · 스마트처치 앱</span></div>
-        <div class="cover__li"><b>모이는 교회</b><span>교역자 구인 · 음향 세팅 · AKC 캠프</span></div>
-        <div class="cover__li"><b>세우는 교회</b><span>인투오피스(전자서명) · 부동산</span></div>
+        <div class="cover__li"><b>보이는 교회</b><span>홈페이지 제작 · 마케팅 지원 · 스마트처치 앱</span></div>
+        <div class="cover__li"><b>사역하는 교회</b><span>음향 세팅 · AKC 캠프</span></div>
+        <div class="cover__li"><b>세우는 교회</b><span>인투오피스 · 숏츠 제작 · 소그룹 나눔집</span></div>
+        <div class="cover__li"><b>커뮤니티 센터</b><span>목회자 · 교역자가 서로 잇는 자리</span></div>
       </div>
     </div>
     <div class="cover__band">
@@ -233,127 +241,113 @@
 <!-- ═══════════ 2면 · 안쪽면 ═══════════ -->
 <section class="sheet">
 
-  <!-- ④ 알리는 교회 -->
+  <!-- ④ 보이는 교회 -->
   <div class="panel p-100">
     <div class="eyebrow">교회의 필요</div>
     <h2 class="sec-title" style="margin-top:2.2mm">교회가 실제로 겪는 자리를<br>기준으로 묶었습니다</h2>
     <div class="rule" style="margin-top:3.2mm; margin-bottom:5mm"></div>
 
     <div class="cat cat--flow">
-      <div class="cat__head"><div class="cat__name">알리는 교회</div><div class="cat__line"></div></div>
-      <div class="cat__sub">교회를 처음 만나는 자리를 다듬습니다</div>
+      <div class="cat__head"><div class="cat__name">보이는 교회</div><div class="cat__line"></div></div>
+      <div class="cat__sub">교회의 처음 보이는 공간을 만듭니다</div>
       <p style="font-size:7pt; color:var(--ink-2); line-height:1.6; margin-top:2.8mm">
-        검색해서 들어오고, 현수막을 보고 찾아오고, 앱으로 이어집니다.
-        교회가 어떤 곳인지 밖에서도 분명히 보이게 합니다.
+        홈페이지에서 예배 시간을 확인하고, 현수막을 보고 찾아옵니다.
+        교회를 처음 만나는 자리를 만듭니다.
       </p>
 
       <div class="svc-flow">
-      <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">01</div>
-          <div class="svc__body">
-            <div class="svc__name">홈페이지 제작</div>
-            <div class="svc__desc">처음 찾아오는 사람이 가장 먼저 보는 교회의 얼굴입니다. 교회 소개·예배 시간·설교 영상·주보·오시는 길까지 담아 만들고, 운영까지 맡아 드립니다.</div>
-          </div>
+        <div class="svc">
+          <div class="svc__row"><div class="svc__no">01</div>
+            <div class="svc__body">
+              <div class="svc__name">홈페이지 제작</div>
+              <div class="svc__desc">처음 찾아오는 사람이 가장 먼저 보는 교회의 얼굴입니다. 예배 시간과 오시는 길, 교회 소개와 설교 영상을 담습니다. 고칠 곳이 생기면 말씀만 주세요 — 교회에서 직접 다루실 일이 없습니다.</div>
+            </div></div>
         </div>
-      </div>
-      <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">02</div>
-          <div class="svc__body">
-            <div class="svc__name">디자인 제작</div>
-            <div class="svc__desc">절기 현수막·배너·포스터·초청장·주보. 인쇄소에 바로 넘길 수 있는 파일로 정리해 드리고, 문구만 바꿔 쓰는 서식도 함께 드립니다.</div>
-          </div>
+        <div class="svc">
+          <div class="svc__row"><div class="svc__no">02</div>
+            <div class="svc__body">
+              <div class="svc__name">마케팅 지원</div>
+              <div class="svc__desc">현수막 · 포스터 · 주보부터 SNS 콘텐츠까지. 교회에서 되풀이해 필요한 디자인을 만들어 드리고, 인쇄소에 바로 넘길 파일과 카드뉴스까지 함께 드립니다.</div>
+            </div></div>
         </div>
-      </div>
-      <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">07</div>
-          <div class="svc__body">
-            <div class="svc__name">스마트처치 앱</div>
-            <div class="svc__desc">성도의 휴대폰 안에 들어가는 교회. 주보·예배 영상·공지·출석·심방 기록을 하나로 정리하고, 교역자용 관리 화면도 함께 드립니다.</div>
-          </div>
+        <div class="svc">
+          <div class="svc__row"><div class="svc__no">03</div>
+            <div class="svc__body">
+              <div class="svc__name">스마트처치 앱</div>
+              <div class="svc__desc">성도의 휴대폰 안에 들어가는 교회. 주보 · 예배 영상 · 공지 · 출석 · 심방 기록을 하나로 정리하고, 교역자용 관리 화면도 함께 드립니다.</div>
+            </div></div>
         </div>
-      </div>
       </div>
     </div>
 
     <div class="box box--gold">
-      <div class="box__title" style="font-size:8.6pt">디자인은 여기까지 해 드립니다</div>
-      <p style="font-size:7.6pt; line-height:1.62; color:var(--gold-ink)">
+      <div class="box__title" style="font-size:8.6pt">마케팅은 여기까지 해 드립니다</div>
+      <p style="font-size:7.4pt; line-height:1.62; color:var(--gold-ink)">
         현수막 · 배너 · 포스터 · 초청장 · 주보 시안 제작<br>
         시안당 2회 수정 (그 이상은 협의)<br>
         인쇄소에 바로 넘길 파일 정리 — 규격 · 재단 여백 · 색상<br>
-        온라인 공유용 이미지 함께 제공<br>
+        온라인 공유용 이미지와 SNS 카드뉴스<br>
         교회에서 문구만 바꿔 쓰는 템플릿 파일
       </p>
     </div>
     <p class="fineprint" style="margin-top:4mm">
-      디자인은 시안 제작까지입니다 — 인쇄비·배송비는 별도이며, 완성 파일을 받아 교회에서 편한 곳에 맡기시면 됩니다.
+      마케팅 지원은 시안 제작까지입니다 — 인쇄비 · 배송비는 별도이며, 완성 파일을 받아 교회에서 편한 곳에 맡기시면 됩니다.
     </p>
   </div>
 
-  <!-- ⑤ 모이는 교회 -->
+  <!-- ⑤ 사역하는 교회 + 커뮤니티 센터 -->
   <div class="panel p-100">
-    <div class="cat cat--flow" style="margin-top:0">
-      <div class="cat__head"><div class="cat__name">모이는 교회</div><div class="cat__line"></div></div>
-      <div class="cat__sub">예배와 모임이 이루어지는 자리를 준비합니다</div>
+    <div class="cat" style="margin-top:0">
+      <div class="cat__head"><div class="cat__name">사역하는 교회</div><div class="cat__line"></div></div>
+      <div class="cat__sub">교회 사역의 구조를 함께 만듭니다</div>
       <p style="font-size:7pt; color:var(--ink-2); line-height:1.6; margin-top:2.8mm">
-        사람과 소리와 시간. 모임이 열리는 그 자리에서 사역이 제대로 굴러가도록 함께 준비합니다.
+        예배와 캠프 — 사람이 모이는 자리를 준비합니다. 소리가 또렷해야 말씀이 들리고,
+        캠프는 미리 준비해야 다음 세대가 남습니다.
       </p>
 
-      <div class="svc-flow">
-      <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">03</div>
-          <div class="svc__body">
-            <div class="svc__name">교역자 구인</div>
-            <div class="svc__desc">필요한 사역자의 조건을 알려주시면 센터의 연결망에서 찾아 이어 드립니다. 사례비·사역 범위·가능 시기를 양쪽에 확인한 뒤 연결합니다. 사역지를 찾는 교역자도 등록하실 수 있습니다.</div>
-          </div>
-        </div>
-      </div>
-      <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">04</div>
+      <div class="svc" style="margin-top:4mm">
+        <div class="svc__row"><div class="svc__no">04</div>
           <div class="svc__body">
             <div class="svc__name">음향 세팅</div>
-            <div class="svc__desc">설교가 또렷하게 들리는 예배당. 현장 진단 · 장비 선정 · 설치 · 운영자 교육까지 전 과정을 맡습니다. 온라인 송출을 위한 음향 구성도 함께 잡아 드립니다.</div>
-          </div>
-        </div>
+            <div class="svc__desc">설교가 또렷하게 들리는 예배당. 예배당 음향 진단부터 장비 선정과 설치까지 맡고, 온라인 송출을 위한 음향 구성도 함께 잡아 드립니다.</div>
+          </div></div>
       </div>
       <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">06</div>
+        <div class="svc__row"><div class="svc__no">05</div>
           <div class="svc__body">
             <div class="svc__name">AKC — 어라이즈 코리아 캠프</div>
-            <div class="svc__desc">무너진 이 땅의 다음 세대와 청년을 깨우는 캠프입니다. 여름과 겨울에 열리며, 경기 안성 AKC 수련원에서 진행합니다. 준비할 인력이 없는 교회도 참가 신청만으로 함께하실 수 있습니다.</div>
-          </div>
-        </div>
-      </div>
-      </div>
-
-      <div class="box" style="margin-top:2mm">
-        <div class="box__title" style="font-size:8.6pt">캠프 갈래는 둘입니다</div>
-        <p style="font-size:7.4pt; line-height:1.62; color:var(--ink-2)">
-          <strong>영성캠프</strong> — 청소년 · 청년 · 장년 · 시니어<br>
-          <strong>영역캠프</strong> — 물맷돌 수학 · 홈빌더 결혼 (12영역으로 확장 중)
-        </p>
-        <p style="font-size:7.2pt; line-height:1.56; color:var(--muted); margin-top:2mm">
-          AKC 홈페이지 · intoedu.github.io/AKC-HOMEPAGE
-        </p>
+            <div class="svc__desc">무너진 이 땅의 다음 세대와 청년을 깨우는 캠프입니다. 여름과 겨울 방학에 맞춰 경기도 안성 AKC 수련원에서 열리며, 개인 또는 교회 단위로 등록해 참석하십니다. 준비할 인력이 없는 교회도 참가 신청만으로 함께하실 수 있습니다.</div>
+          </div></div>
       </div>
     </div>
 
-    <div class="box box--plain" style="margin-top:4mm; border-color:var(--brand-100)">
-      <div class="box__title" style="font-size:8.6pt">교역자 구인은 이렇게 진행합니다</div>
+    <div class="cat" style="margin-top:7mm">
+      <div class="cat__head"><div class="cat__name">커뮤니티 센터</div><div class="cat__line"></div></div>
+      <div class="cat__sub">목회자와 교역자가 서로 잇는 자리입니다</div>
+
+      <div class="svc" style="margin-top:4mm">
+        <div class="svc__row"><div class="svc__no">09</div>
+          <div class="svc__body">
+            <div class="svc__name">커뮤니티 센터</div>
+            <div class="svc__desc">사역 광고와 연합 모임, 현장에서 얻은 꿀팁과 중보 기도요청을 나누는 곳입니다. 부동산 매물 게시판 열람과 소그룹 나눔집 맛보기, 숏츠 체험도 여기서 하실 수 있습니다.</div>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:5mm">
+      <div class="box__title" style="font-size:8.6pt">커뮤니티 센터에서 하실 수 있는 것</div>
       <p style="font-size:7.4pt; line-height:1.62; color:var(--ink-2)">
-        필요한 사역자의 조건을 접수해 정리하고, 센터의 연결망에서 조건에 맞는 분을 찾습니다.
-        연결 전에 사례비 · 사역 범위 · 가능 시기를 양쪽에 확인한 뒤 이어 드립니다.
-        사역지를 찾는 교역자도 같은 방식으로 등록하실 수 있습니다.
+        사역 광고 · 연합 모임 · 꿀팁 공유 · 중보 기도요청 · 컨테스트<br>
+        부동산 매물 게시판 열람<br>
+        소그룹 나눔집 맛보기와 숏츠 체험<br>
+        <strong>가입비 없이 쓰실 수 있습니다</strong>
       </p>
     </div>
-    <p class="fineprint" style="margin-top:4mm">
-      교역자 구인에서 센터가 하는 일은 조건 정리와 연결까지입니다 — 면접과 청빙 결정은 교회와 사역자가 직접 하십니다.
+
+    <div class="grow"></div>
+    <p class="fineprint">
+      커뮤니티 센터는 목회자 · 교역자 확인 절차가 있습니다. 올리신 글의 책임은 작성자에게 있으며,
+      센터는 거래를 중개하거나 보증하지 않습니다.
     </p>
   </div>
 
@@ -361,66 +355,47 @@
   <div class="panel p-97">
     <div class="cat" style="margin-top:0">
       <div class="cat__head"><div class="cat__name">세우는 교회</div><div class="cat__line"></div></div>
-      <div class="cat__sub">사역을 받치는 살림과 공간을 갖춥니다</div>
+      <div class="cat__sub">예배 자료부터 행정까지 만들어 드립니다</div>
 
       <div class="svc" style="margin-top:3.6mm">
-        <div class="svc__row">
-          <div class="svc__no">08</div>
+        <div class="svc__row"><div class="svc__no">06</div>
           <div class="svc__body">
             <div class="svc__name">인투오피스 — 전자서명</div>
-            <div class="svc__desc">교회 서류에 도장 받으러 다니지 마십시오. 근로계약서·참가 동의서·지출 결의·시설 사용 승낙을 휴대폰으로 주고받고, 누가 서명했는지 확인하고, 자동으로 분류해 보관합니다.</div>
-          </div>
-        </div>
+            <div class="svc__desc">교회 서류에 도장 받으러 다니지 마십시오. 근로계약서 · 참가 동의서 · 지출 결의 · 시설 사용 승낙을 휴대폰으로 주고받고, 누가 서명했는지 확인하고, 자동으로 분류해 보관합니다.</div>
+          </div></div>
       </div>
       <div class="svc">
-        <div class="svc__row">
-          <div class="svc__no">05</div>
+        <div class="svc__row"><div class="svc__no">07</div>
           <div class="svc__body">
-            <div class="svc__name">부동산 — 교회 매물 게시판</div>
-            <div class="svc__desc">예배 공간을 내놓는 교회와 구하는 교회가 만나는 게시판입니다. 등기부등본·임대차계약서로 실제 매물주·세입자임을 확인한 글만 올라갑니다. 거래가 끝날 때까지 기한 없이 게시합니다.</div>
-          </div>
-        </div>
+            <div class="svc__name">숏츠 제작</div>
+            <div class="svc__desc">이번 주 설교 한 편에서 숏츠 3~5편. 숏츠가 될 구간을 찾아 세로 화면으로 자르고 자막까지 넣어 드립니다. 목사님이 확인하고 고르신 것만 발행됩니다.</div>
+          </div></div>
+      </div>
+      <div class="svc">
+        <div class="svc__row"><div class="svc__no">08</div>
+          <div class="svc__body">
+            <div class="svc__name">소그룹 나눔집</div>
+            <div class="svc__desc">설교 원고를 넣으면 이번 주 나눔집이 나옵니다. 요약과 나눔 질문, 기도 제목을 만들어 드리고, 화면에서 고치신 뒤 PDF 로 받아 그대로 인쇄해 쓰시면 됩니다.</div>
+          </div></div>
       </div>
     </div>
 
     <div class="box" style="margin-top:5mm">
-      <div class="box__title">함께 열려 있는 게시판</div>
-      <div class="boards">
-        <div class="board">
-          <div class="board__n">부동산 매물</div>
-          <div class="board__d">등기부등본·임대차계약서로 확인한 매물만 올라갑니다</div>
-        </div>
-        <div class="board">
-          <div class="board__n">중고 장터</div>
-          <div class="board__d">교회 장비·물품. 원하시면 철거·운반·설치·음향 튜닝까지 대행</div>
-        </div>
-        <div class="board">
-          <div class="board__n">교회 게스트하우스</div>
-          <div class="board__d">비어 있는 사택·선교관을 내어 놓고, 들어온 사역자가 머뭅니다</div>
-        </div>
-        <div class="board">
-          <div class="board__n">집회 티켓팅</div>
-          <div class="board__d">예매 시작 시각·정원 자동 마감·좌석 지정(선택)</div>
-        </div>
+      <div class="box__title">교회끼리 직접 만나는 게시판</div>
+      <div class="blist">
+        <div class="bitem"><b>부동산 매물</b><span>예배 공간을 내놓는 교회와 구하는 교회가 만납니다</span></div>
+        <div class="bitem"><b>교역자 구인 공고</b><span>사례비 · 사택 · 근무 조건을 반드시 적게 합니다</span></div>
+        <div class="bitem"><b>중고 장터</b><span>교회 장비 · 물품. 원하시면 철거 · 운반 · 설치까지 대행합니다</span></div>
+        <div class="bitem"><b>교회 게스트하우스</b><span>무료로 내어 놓는 방과 숙박업 신고가 된 시설만 올립니다</span></div>
+        <div class="bitem"><b>집회 티켓팅</b><span>예매 시작 시각 · 정원 자동 마감 · 좌석 지정(선택)</span></div>
       </div>
-    </div>
-
-    <div class="box box--gold" style="margin-top:4mm">
-      <div class="box__title" style="font-size:8.6pt">비용은 어떻게 되나요</div>
-      <p style="font-size:7.4pt; line-height:1.62; color:var(--gold-ink)">
-        항목마다 다릅니다 — 매달 내는 것, 한 번만 내는 것, 건마다 견적을 내는 것 세 가지입니다.
-      </p>
-      <p style="font-size:7.4pt; line-height:1.62; color:var(--gold-ink); margin-top:2mm">
-        <strong>상담과 견적은 무료</strong>이며, 항목별 내역이 적힌 견적서를 먼저 드립니다.
-        당회·제직회에 그대로 올리실 수 있게 문서로 정리해 드립니다.
-      </p>
     </div>
 
     <div class="grow"></div>
     <p class="fineprint">
-      센터는 게시판을 운영합니다 — 공인중개사법상의 중개 행위는 하지 않으며, 가격·조건 협상과 계약에는 관여하지 않습니다.
-      매물과 물품의 내용은 등록자가 적은 것입니다. 인투오피스는 교회가 직접 쓰시는 프로그램이며
-      회계·문서 작성·신고 대행은 포함되지 않습니다.
+      센터는 게시판을 운영합니다 — 공인중개사법상의 중개 행위는 하지 않으며, 가격 · 조건 협상과 계약에는 관여하지 않습니다.
+      교역자 구인 공고에서도 채용 당사자가 아니며, 면접과 청빙 결정은 교회와 사역자가 직접 하십니다.
+      인투오피스는 교회가 직접 쓰시는 프로그램이며 회계 · 문서 작성 · 신고 대행은 포함되지 않습니다.
     </p>
   </div>
 
