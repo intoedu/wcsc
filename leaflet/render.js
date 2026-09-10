@@ -40,16 +40,29 @@ const JOBS = [
     const w = job.w + job.bleed * 2;
     const h = job.h + job.bleed * 2;
 
+    /* 종이 크기를 CSS 쪽에도 알려 줍니다.
+       HTML 안의 @page 는 도련 없는 크기라서, 도련판을 뽑을 때 그 값으로 쪽이
+       나뉘어 한 면이 두 쪽으로 쪼개집니다 (빈 쪽이 끼어듭니다).
+       여기서 덮어써 두면 CSS 와 PDF 가 같은 크기를 봅니다. */
+    await page.addStyleTag({ content: `@page{ size:${w}mm ${h}mm; margin:0 }` });
+
+    /* 크기는 인치로 넘깁니다 — 밀리미터로 주면 Chromium 이 종이를 0.3mm 쯤
+       크게 잡습니다 (인치로 주면 0.02mm 안쪽입니다). */
     const pdf = path.join(DIST, job.out + '.pdf');
     await page.pdf({
       path: pdf,
-      width: `${w}mm`,
-      height: `${h}mm`,
+      width: `${w / 25.4}in`,
+      height: `${h / 25.4}in`,
       printBackground: true,
       preferCSSPageSize: false,
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     });
-    console.log('PDF  ', path.relative(HERE, pdf));
+
+    /* 면 수 확인 — 쪽이 쪼개지면 여기서 걸립니다. */
+    const sheets = await page.$$eval('.sheet', (els) => els.length);
+    const pages = (fs.readFileSync(pdf).toString('latin1').match(/\/Type\s*\/Page(?![sX])/g) || []).length;
+    const ok = pages === sheets ? '' : `  ⚠ ${sheets}면이어야 하는데 ${pages}쪽입니다`;
+    console.log('PDF  ', path.relative(HERE, pdf) + ok);
 
     /* 넘침 검사 — 글이 종이 끝에 너무 붙거나 잘리면 알려 줍니다.
        (flex 로 짜여 있어, 넘쳐도 화면상으로는 조용히 눌려 사라질 수 있습니다.) */
@@ -76,11 +89,11 @@ const JOBS = [
     }
 
     /* 미리보기 PNG — 화면에서 바로 확인하실 수 있게 면마다 한 장씩. */
-    const sheets = await page.$$('.sheet');
-    for (let i = 0; i < sheets.length; i++) {
+    const shots = await page.$$('.sheet');
+    for (let i = 0; i < shots.length; i++) {
       const png = path.join(DIST, `${job.out}-${i + 1}면.png`);
       if (job.bleed) break;                       // 도련판은 미리보기를 따로 만들지 않습니다
-      await sheets[i].screenshot({ path: png, scale: 'css' });
+      await shots[i].screenshot({ path: png, scale: 'css' });
       console.log('PNG  ', path.relative(HERE, png));
     }
     await page.close();
