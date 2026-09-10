@@ -15,6 +15,28 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="../assets/css/style.css?v=d7251205">
   <link rel="stylesheet" href="../assets/css/auth.css?v=1d79afe0">
+  <script>
+  /* 새로고침하면 홈으로 돌아갑니다.
+
+     브라우저는 "새로고침(reload)" 과 "링크·주소창으로 들어옴(navigate)" 을
+     구분해 알려 줍니다. 새로고침일 때만 보내므로, 남에게 받은 매물 · 공고
+     주소로 들어오신 분은 그 화면을 그대로 보십니다.
+
+     그림이 그려지기 전에 옮기려고 <head> 안에서 바로 돕니다.
+     history 를 늘리지 않도록 replace 를 씁니다 — [뒤로] 가 막히지 않습니다. */
+  (function () {
+    try {
+      var e = (window.performance && performance.getEntriesByType)
+        ? performance.getEntriesByType('navigation')[0] : null;
+      var reloaded = e ? e.type === 'reload'
+        : !!(performance.navigation && performance.navigation.type === 1);
+      var path = location.pathname;
+      var atHome = path.charAt(path.length - 1) === '/'
+        || path.slice(-11) === '/index.html' || path === 'index.html';
+      if (reloaded && !atHome) location.replace('../index.html');
+    } catch (err) { /* 못 알아보는 브라우저에서는 그냥 둡니다 */ }
+  })();
+  </script>
   
 </head>
 <body data-service="shorts">
