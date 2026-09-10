@@ -48,7 +48,7 @@ function buildIndex() {
       </div>
       <ul class="hero-trust">
         <li>${icon('check', 'ico ico-sm')} 상담 · 견적 무료</li>
-        <li>${icon('check', 'ico ico-sm')} 담당자 1인 전담</li>
+        <li>${icon('check', 'ico ico-sm')} 한 곳에서 여러 항목</li>
         <li>${icon('check', 'ico ico-sm')} 교단 · 규모 제한 없음</li>
       </ul>
     </div>
@@ -84,7 +84,7 @@ function buildIndex() {
     ${sectionHead(
       '지원 항목',
       '교회에 필요한 일, 여기서 함께 정리합니다',
-      '어느 항목이 필요한지 확실하지 않아도 괜찮습니다. 상황을 알려주시면 담당자가 함께 정리해 드립니다.'
+      '어느 항목이 필요한지 확실하지 않아도 괜찮습니다. 상황을 알려주시면 센터가 함께 정리해 드립니다.'
     )}
     ${serviceGroups('')}
   </div>
@@ -92,7 +92,7 @@ function buildIndex() {
 
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('우리교회지원센터가 일하는 방식', '업체가 아니라, 교회를 아는 담당자와 일합니다')}
+    ${sectionHead('우리교회지원센터가 일하는 방식', '업체를 찾아다니는 대신, 교회를 아는 곳에 맡깁니다')}
     <div class="why-grid">
       ${site.principles
         .map(
@@ -174,8 +174,8 @@ ${pageHero({
 
     <h2>어떻게 일하나</h2>
     <p>
-      우리교회지원센터는 항목별로 다른 담당자에게 넘기지 않습니다. 교회 한 곳에 담당자 한 명이 배정되어, 여러 항목을 진행하더라도
-      같은 사람과 이야기하게 됩니다. 교회의 규모와 예산, 의사결정 구조를 이미 알고 있는 사람과 일한다는 뜻입니다.
+      우리교회지원센터는 여러 항목을 한 번에 받아 센터 안에서 나눠 진행합니다. 교회가 업체를 따로 찾아다니거나,
+      항목마다 처음부터 다시 설명하지 않으셔도 됩니다. 교회의 규모와 예산, 의사결정 구조를 이해하고 시작합니다.
     </p>
     <p>
       또한 모든 제안은 문서로 드립니다. 당회와 제직회에 그대로 올릴 수 있도록 항목별 범위와 일정, 비용을 정리해 드리며,
@@ -210,7 +210,7 @@ ${pageHero({
 
 ${ctaBand('', {
   title: '교회 상황부터 들려주세요',
-  lead: '무엇이 필요한지 정리되지 않은 상태여도 좋습니다. 담당자가 함께 정리하는 것부터 시작합니다.',
+  lead: '무엇이 필요한지 정리되지 않은 상태여도 좋습니다. 센터가 함께 정리하는 것부터 시작합니다.',
 })}
 `;
 
@@ -234,7 +234,7 @@ function buildProcess() {
 ${pageHero({
   eyebrow: '이용 절차',
   title: '신청에서 사후 지원까지',
-  lead: '접수 후 영업일 기준 1~2일 안에 담당자가 연락드립니다. 상담과 견적에는 비용이 들지 않습니다.',
+  lead: '접수 후 영업일 기준 1~2일 안에 센터에서 연락드립니다. 상담과 견적에는 비용이 들지 않습니다.',
 })}
 
 <section class="section">
@@ -290,7 +290,7 @@ ${pageHero({
       <p>
         신청서를 제출하시면 <strong>접수번호</strong>가 발급됩니다. 이 번호로
         <a href="status.html">신청 조회</a> 페이지에서 접수 내용을 다시 확인하실 수 있습니다.
-        접수번호는 신청 완료 화면에 표시되며, 담당자와 통화하실 때 말씀해 주시면 확인이 빠릅니다.
+        접수번호는 신청 완료 화면에 표시되며, 센터와 통화하실 때 말씀해 주시면 확인이 빠릅니다.
       </p>
     </div>
   </div>
@@ -303,7 +303,7 @@ ${ctaBand('')}
     'process.html',
     layout({
       title: '이용 절차 | 우리교회지원센터',
-      description: '신청 접수, 담당자 배정, 제안·견적, 진행, 사후 지원까지 우리교회지원센터의 5단계 이용 절차를 안내합니다.',
+      description: '신청 접수, 연락·상담, 제안·견적, 진행, 사후 지원까지 우리교회지원센터의 5단계 이용 절차를 안내합니다.',
       base: '',
       active: 'process.html',
       body,
@@ -348,7 +348,7 @@ ${pageHero({
 
 ${ctaBand('', {
   title: '찾는 답이 없으신가요',
-  lead: '전화나 이메일로 문의 주시면 담당자가 직접 확인해 안내드립니다.',
+  lead: '전화나 이메일로 문의 주시면 센터에서 직접 확인해 안내드립니다.',
 })}
 `;
 
@@ -373,7 +373,7 @@ ${pageHero({
   eyebrow: '지원 항목',
   title: '세 갈래 8개 항목,<br>전담창구 4곳이 맡습니다',
   lead: '교회가 겪는 자리별로 세 갈래로 묶었습니다 — 알리는 교회 · 모이는 교회 · 세우는 교회. '
-    + '여러 항목을 한 번에 신청하실 수 있고, 담당자 한 명이 전체 일정을 조율합니다.',
+    + '여러 항목을 한 번에 신청하실 수 있고, 센터가 전체 일정을 조율합니다.',
 })}
 
 <section class="section">
@@ -650,7 +650,7 @@ ${s.scope ? `
 
 ${ctaBand('../', {
   title: `${s.name}, 지금 신청하실 수 있습니다`,
-  lead: '신청서를 남기시면 영업일 기준 1~2일 안에 담당자가 연락드립니다. 상담과 견적은 무료입니다.',
+  lead: '신청서를 남기시면 영업일 기준 1~2일 안에 센터에서 연락드립니다. 상담과 견적은 무료입니다.',
 })}
 
 <nav class="svc-nav" aria-label="다른 항목">
@@ -714,7 +714,7 @@ function buildApply() {
 ${pageHero({
   eyebrow: '지원 신청',
   title: '필요한 항목을 선택해<br>신청서를 남겨주세요',
-  lead: '접수 후 영업일 기준 1~2일 안에 담당자가 연락드립니다. 상담과 견적에는 비용이 들지 않습니다.',
+  lead: '접수 후 영업일 기준 1~2일 안에 센터에서 연락드립니다. 상담과 견적에는 비용이 들지 않습니다.',
 })}
 
 <section class="section">
@@ -728,7 +728,7 @@ ${pageHero({
 
       <fieldset class="fs">
         <legend><span class="fs-no">1</span> 신청 항목 <em class="req">필수</em></legend>
-        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 담당자 한 명이 묶어서 진행합니다.</p>
+        <p class="fs-help">필요한 항목을 모두 선택하세요. 여러 개를 선택하면 센터가 묶어서 진행합니다.</p>
         ${externalIds.length
           ? `<p class="fs-help fs-help-external">${externalIds
               .map((id) => esc(services.find((v) => v.id === id).name))
@@ -864,7 +864,7 @@ ${pageHero({
       <div class="done-card">
         <span class="done-ico">${icon('check')}</span>
         <h2>신청이 접수되었습니다</h2>
-        <p class="done-lead">영업일 기준 1~2일 안에 담당자가 연락드립니다.</p>
+        <p class="done-lead">영업일 기준 1~2일 안에 센터에서 연락드립니다.</p>
         <div class="done-code">
           <span>접수번호</span>
           <strong id="doneCode">—</strong>
@@ -886,7 +886,7 @@ ${pageHero({
     'apply.html',
     layout({
       title: '지원 신청 | 우리교회지원센터',
-      description: '우리교회지원센터 지원 신청서. 필요한 항목을 선택해 신청하시면 담당자가 1~2일 내 연락드립니다.',
+      description: '우리교회지원센터 지원 신청서. 필요한 항목을 선택해 신청하시면 센터에서 1~2일 내 연락드립니다.',
       base: '',
       active: 'apply.html',
       body,
@@ -979,7 +979,7 @@ ${pageHero({
         <span class="contact-ico">${icon('doc')}</span>
         <h2>지원 신청</h2>
         <strong>신청서 작성하기</strong>
-        <p>가장 빠른 방법입니다. 접수 후 1~2일 내 담당자가 연락드립니다.</p>
+        <p>가장 빠른 방법입니다. 접수 후 1~2일 내 센터에서 연락드립니다.</p>
       </a>
     </div>
   </div>
@@ -1217,7 +1217,7 @@ ${pageHero({
       </p>
       <p class="ls-guard-safe">
         올려 주신 서류는 <strong>게시판에 공개되지 않습니다.</strong>
-        올린 본인과 확인 담당자만 열 수 있고, 게시가 끝나면 삭제를 요청하실 수 있습니다.
+        올린 본인과 서류를 확인한 센터 직원만 열 수 있고, 게시가 끝나면 삭제를 요청하실 수 있습니다.
       </p>
     </div>
 

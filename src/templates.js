@@ -396,7 +396,7 @@ function ctaBand(base, opts) {
   <div class="wrap cta-in">
     <div>
       <h2>${esc(o.title || '어떤 항목이 필요한지 아직 모르셔도 괜찮습니다')}</h2>
-      <p>${esc(o.lead || '교회 상황을 알려주시면 담당자가 필요한 항목을 함께 정리해 드립니다. 상담과 견적은 무료입니다.')}</p>
+      <p>${esc(o.lead || '교회 상황을 알려주시면 센터가 필요한 항목을 함께 정리해 드립니다. 상담과 견적은 무료입니다.')}</p>
     </div>
     <div class="cta-actions">
       <a class="btn btn-gold btn-lg" href="${base}apply.html">지원 신청하기</a>
