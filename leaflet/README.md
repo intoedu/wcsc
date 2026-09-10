@@ -59,7 +59,7 @@ sudo apt-get install -y fonts-noto-cjk fonts-nanum
 |------|-----|------|
 | 전화 | 010-4254-2270 | `settings.site.phone` |
 | 이메일 | worichurchsupportcenter@gmail.com | `settings.site.email` |
-| 주소 | 경기 용인시 처인구 명지로40번길 13 연세프라자 2층 205호 | `settings.site.address` |
+| 주소 | (넣지 않았습니다 — 리플렛에서 빼기로 했습니다) | `settings.site.address` |
 | 운영시간 | 평일 09:00 – 18:00 (점심 12:00 – 13:00) · 주말·공휴일 휴무 | `site.js` 기본값 — DB가 비어 있어 홈페이지도 이 값을 보여 줍니다 |
 | 카카오톡 | (넣지 않았습니다) | `settings.site.kakao` 가 비어 있어, 실제 채널이 있는지 확인되지 않았습니다 |
 
