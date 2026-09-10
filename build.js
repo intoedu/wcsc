@@ -1514,7 +1514,6 @@ function planCard(p) {
 
       <dl class="plan-quota">
         <div><dt>나눔집</dt><dd>${esc(p.quota.sharing)}</dd></div>
-        <div><dt>AI 숏츠</dt><dd>${esc(p.quota.shorts)}</dd></div>
       </dl>
 
       ${p.inherits ? `<p class="plan-inherit">${esc(p.inherits)} 패키지에 더해서</p>` : ''}
@@ -2204,7 +2203,6 @@ function buildSearchIndex() {
     'services/sound.html': '스피커 마이크 믹서 앰프 소리 하울링 음향장비 설치',
     'services/homepage.html': '웹사이트 홈피 사이트 도메인 제작 만들기',
     'services/smartchurch.html': '앱 어플 모바일 주보앱 출석',
-    'services/shorts.html': '영상 편집 유튜브 릴스 설교영상',
     'services/design.html': '현수막 배너 포스터 명함 로고 인쇄 디자인',
     'services/sharing.html': '나눔집 소그룹 교재 순모임 성경공부',
     'services/intooffice.html': '행정 서류 결재 문서 전자결재 사무',
