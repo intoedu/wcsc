@@ -1035,9 +1035,9 @@ function buildServicePage(s, i) {
 ${s.campTypes ? `
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('캠프 종류', '두 가지 방식 중에 고르실 수 있습니다',
-      '같은 캠프를 우리 교회가 찾아가서 참석하실 수도, 우리 교회로 불러 여실 수도 있습니다.')}
-    <div class="camp-grid">
+    ${sectionHead('참가 방법', '등록하고 참석하시면 됩니다',
+      '장소와 강사, 프로그램과 안전 관리까지 AKC 팀이 준비합니다.')}
+    <div class="camp-grid${s.campTypes.length === 1 ? ' is-one' : ''}">
       ${s.campTypes.map((c) => `<article class="camp-card">
         <span class="camp-tag">${esc(c.tag)}</span>
         <h3>${esc(c.title)}</h3>

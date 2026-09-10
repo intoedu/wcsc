@@ -1527,6 +1527,8 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
 
 /* ---------- 캠프 종류 ---------- */
 .camp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+/* 한 가지만 있을 때는 반쪽으로 눕지 않게 가운데로 폅니다. */
+.camp-grid.is-one { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; }
 .camp-card {
   display: flex; flex-direction: column; gap: 12px; padding: 30px 28px;
   background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
