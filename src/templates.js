@@ -310,6 +310,13 @@ function layout(o) {
   <meta property="og:title" content="${esc(o.title)}">
   <meta property="og:description" content="${esc(o.description)}">
   <meta property="og:site_name" content="우리교회지원센터">
+  <meta property="og:image" content="${site.url}assets/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="우리교회지원센터 — 교회는 사역에 집중하고, 나머지는 전문가가 맡습니다">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${site.url}assets/img/og-card.png">
   <meta name="theme-color" content="#1F7A44">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>

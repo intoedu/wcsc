@@ -1,0 +1,30 @@
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: P; src: local("Pretendard"); }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px; display: flex; align-items: center; justify-content: center;
+    background: #F5F9F6;
+    font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  }
+  /* 가운데 630×630 정사각 안에 모두 넣습니다.
+     카카오톡 등이 정사각으로 잘라도 로고가 안 잘리도록. */
+  .safe {
+    width: 630px; height: 630px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 30px; padding: 40px;
+  }
+  img { width: 560px; display: block; }
+  .tag {
+    font-size: 27px; font-weight: 700; color: #12301F; letter-spacing: -.03em;
+    text-align: center; line-height: 1.5;
+  }
+  .rule { width: 84px; height: 5px; border-radius: 99px; background: #F2C82F; }
+  .sub { font-size: 20px; color: #4A6B58; letter-spacing: -.02em; }
+</style>
+<div class="safe">
+  <img src="file:///home/user/wcsc/assets/img/logo-row.png" alt="우리교회지원센터">
+  <div class="rule"></div>
+  <div class="tag">교회는 사역에 집중하고,<br>나머지는 전문가가 맡습니다</div>
+  <div class="sub">전국 모든 교회 — 규모 · 지역 · 교단 제한 없음</div>
+</div>
