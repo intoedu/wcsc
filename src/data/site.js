@@ -10,6 +10,10 @@ const site = {
   name: '우리교회지원센터',
   shortName: '우리교회지원센터',
   fullName: 'Wori Church Support Center',
+  /* 링크를 나눌 때 뜨는 그림(og:image)에 쓰는 주소입니다.
+     og:image 는 절대 주소여야 카카오톡 · 페이스북이 읽습니다.
+     TODO(운영): 자체 도메인을 붙이시면 이 값도 함께 바꿔 주세요. */
+  url: 'https://intoedu.github.io/wcsc/',
   tagline: '교회는 사역에 집중하고, 나머지는 전문가가 맡습니다',
   description:
     '우리교회지원센터는 교회에 필요를 채워주는 곳입니다. 홈페이지 제작부터 마케팅, 음향, 캠프, 앱, 행정까지 지원 항목을 맡고, 교회끼리 직접 만나는 게시판 다섯 곳도 함께 운영합니다. 전국 모든 교회 — 규모 · 지역 · 교단 제한이 없습니다.',
