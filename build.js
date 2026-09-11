@@ -65,7 +65,7 @@ function buildIndex() {
       tone: 'green',
       eyebrow: '홈페이지 제작',
       title: '제작비 0원으로<br>교회 홈페이지를',
-      lead: '만들어 드립니다. 관리비는 월 5만원입니다.',
+      lead: '만들어 드리고, 쓰시는 동안 관리까지 맡습니다.',
       href: 'services/homepage.html',
       icon: 'monitor',
       photo: 'homepage',
@@ -326,7 +326,7 @@ function buildAbout() {
     },
     {
       church: '검색해도 교회 정보가 나오지 않습니다',
-      us: '관리비 월 5만원으로 홈페이지를 만들어 드립니다. 제작비는 따로 받지 않습니다.',
+      us: '홈페이지를 만들어 드리고, 쓰시는 동안 관리까지 맡습니다.',
       href: 'services/homepage.html',
       label: '홈페이지 제작',
     },
@@ -350,7 +350,7 @@ function buildAbout() {
     },
     {
       church: '서류에 도장 받으러 여기저기 다녀야 합니다',
-      us: '휴대폰으로 주고받고 자동으로 보관합니다. 월 6,900원입니다.',
+      us: '휴대폰으로 주고받고 자동으로 보관합니다.',
       href: 'services/intooffice.html',
       label: '인투오피스',
     },
@@ -695,7 +695,7 @@ ${pageHero({
       <div><dt>개인정보 보호책임자</dt><dd>${todo(P.officer, '보호책임자 성함과 직책')}</dd></div>
       <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
       <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
-      <div><dt>주소</dt><dd>${addressText()}</dd></div>
+      ${addressText() ? `<div><dt>주소</dt><dd>${addressText()}</dd></div>` : ''}
       <div><dt>사업자등록번호</dt><dd>${todo(P.bizNo, '사업자등록번호')}</dd></div>
       <div><dt>통신판매업 신고번호</dt><dd>${todo(P.mailOrderNo, '통신판매업 신고번호')}</dd></div>
       <div><dt>시행일</dt><dd>${todo(P.effectiveDate, '이 방침을 처음 적용하는 날짜')}</dd></div>
@@ -898,29 +898,28 @@ ${pageHero({
   <div class="wrap">
     ${sectionHead(
       '비용은 세 가지 방식',
-      '항목 성격에 따라 과금 방식이 다릅니다',
-      '어떤 방식이든 상담과 견적에는 비용이 들지 않습니다.'
+      '항목 성격에 따라 내는 방식이 다릅니다',
+      '금액은 지금 다시 정하고 있습니다. 상담과 견적에는 비용이 들지 않습니다.'
     )}
     <div class="bill-grid">
       <article class="bill-card">
         <span class="bill-tag">달마다</span>
         <h3>홈페이지 제작 · 인투오피스</h3>
-        <p class="bill-price">홈페이지 <strong>월 관리비 5만원</strong> · 인투오피스 <strong>월 6,900원</strong></p>
-        <p>초기 비용이 없어 예산 결의를 기다리지 않고 시작할 수 있습니다. 홈페이지는 제작비 0원이고 매달 5만원은
-          서버 유지와 수정 · 장애 대응에 들어가는 관리비입니다. 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
+        <p class="bill-price"><strong>상담 후 안내</strong></p>
+        <p>만들 때 크게 들지 않고 쓰시는 동안 나눠 내는 방식입니다. 홈페이지의 관리비에는 서버 유지와
+          수정 · 장애 대응이 들어가고, 인투오피스는 교회 규모와 관계없이 같은 금액입니다.
           둘 다 월 단위로 중단하실 수 있습니다.</p>
         <p class="bill-where">인투오피스는 <strong>인투오피스에서 직접 결제</strong>하십니다 — 센터를 거치지 않습니다.</p>
       </article>
       <article class="bill-card">
-        <span class="bill-tag">1회 결제</span>
-        <h3>마케팅 지원 · 부동산</h3>
-        <p class="bill-price">디자인 시안 <strong>3만원</strong> · 매물 등록 <strong>6만원</strong></p>
-        <p>필요할 때 한 번만 결제하는 항목입니다.
-          주보처럼 매주 반복되는 경우에는 사역 패키지에 매주 제작이 들어 있습니다.</p>
+        <span class="bill-tag">한 번</span>
+        <h3>마케팅 지원</h3>
+        <p class="bill-price"><strong>상담 후 견적</strong></p>
+        <p>필요할 때 한 번만 내시는 항목입니다. 항목과 수량을 알려주시면 견적을 내어 드립니다.</p>
       </article>
       <article class="bill-card">
         <span class="bill-tag">건별 견적</span>
-        <h3>교역자 구인 · 음향 · AKC</h3>
+        <h3>음향 세팅 · AKC</h3>
         <p class="bill-price"><strong>상담 후 결정</strong></p>
         <p>교회 상황에 따라 범위가 크게 달라지는 항목입니다. 상담 후 항목별 내역이 적힌 견적서를 드립니다.</p>
       </article>
@@ -1614,7 +1613,7 @@ ${pageHero({
     ${sectionHead('찾아오시는 길', '방문 상담은 사전 예약제로 운영합니다')}
     <div class="notice-card">
       <ul class="footer-contact contact-list">
-        <li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>
+        ${addressText() ? `<li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>` : ''}
         <li>${icon('clock', 'ico ico-sm')} ${hoursText()}</li>
         <li>${icon('phoneCall', 'ico ico-sm')} <span>방문 전 <a href="${site.contact.phoneHref}">${phoneText()}</a> 로 예약해 주세요.</span></li>
       </ul>
@@ -1647,7 +1646,9 @@ ${ctaBand('')}
    ========================================================= */
 function buildListings() {
   const board = site.listingBoard;
-  const fee = board.fee.toLocaleString('ko-KR');
+  /* 값을 다시 정하는 중이라 화면에는 적지 않습니다 (site.listingBoard.feeShown). */
+  const feeText = board.feeShown === false
+    ? '서류 확인 뒤 안내' : `${board.fee.toLocaleString('ko-KR')}원`;
 
   const doList = board.does.map((t) => `<li>${esc(t)}</li>`).join('\n        ');
 
@@ -1754,7 +1755,7 @@ ${pageHero({
     + '올리실 때 권리 증빙 서류를 확인해 게시하며, 조건과 서류는 계약 전에 '
     + '직접 한 번 더 확인해 주세요.',
   extra: `<div class="ls-hero-meta">
-      <span class="ls-hero-pill">등록비 <strong>${fee}원</strong> / 건</span>
+      <span class="ls-hero-pill">등록비 <strong>${feeText}</strong></span>
       <span class="ls-hero-pill">게시 <strong>팔릴 때까지</strong></span>
       <span class="ls-hero-pill">사진 <strong>최대 ${board.photoMax}장</strong></span>
     </div>
@@ -2033,7 +2034,7 @@ ${pageHero({
       </fieldset>
 
       <div class="ls-fee">
-        <h3>등록비 ${fee}원 · 팔릴 때까지 게시</h3>
+        <h3>등록비 ${feeText} · 팔릴 때까지 게시</h3>
         <p class="ls-fee-lead">
           <strong>지금 입금하지 않으셔도 됩니다.</strong>
           서류를 먼저 확인한 뒤 계좌를 보내드립니다.
@@ -2045,7 +2046,7 @@ ${pageHero({
             관리자가 권리 증빙 서류를 확인하고 승인하면,
             <em>입금 계좌를 카카오톡으로 보내드립니다.</em> 보통 영업일 1일 이내입니다.</div></li>
           <li><span>3</span><div><strong>입금</strong>
-            받으신 계좌로 등록비 ${fee}원을 보내 주세요.</div></li>
+            받으신 계좌로 안내드린 등록비를 보내 주세요.</div></li>
           <li><span>4</span><div><strong>게시</strong>
             <em>입금이 확인되면 게시글이 올라갑니다.</em> 기한은 없습니다 — 거래가 끝날 때까지 올라가 있습니다.
             팔리시면 <a href="#mine">내가 올린 매물</a> 에서 <strong>[거래 완료]</strong> 를 눌러 내려 주세요.</div></li>
@@ -2070,7 +2071,7 @@ ${pageHero({
 
 ${ctaBand('', {
   title: '내놓으실 공간이 있으신가요?',
-  lead: '권리 증빙 서류만 준비되면 6만원 한 번으로 팔릴 때까지 올려 드립니다. '
+  lead: '권리 증빙 서류만 준비되면 등록비 한 번으로 팔릴 때까지 올려 드립니다. '
     + '게시판 이용이나 다른 지원 항목이 궁금하시면 편하게 문의해 주세요.',
 })}
 `;
@@ -2081,7 +2082,7 @@ ${ctaBand('', {
       title: '교회 매물 게시판 | 우리교회지원센터',
       description:
         '교회 예배 공간 매매 · 임대 매물 게시판. 등기부등본이나 임대차계약서로 권리를 확인한 매물만 게시합니다. '
-        + `등록비 ${fee}원 한 번으로 거래가 끝날 때까지 게시됩니다.`,
+        + '등록비를 한 번 내시면 거래가 끝날 때까지 게시됩니다.',
       base: '',
       active: 'listings.html',
       body,
