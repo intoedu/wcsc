@@ -313,7 +313,7 @@ function layout(o) {
   <meta property="og:image" content="${site.url}assets/img/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="우리교회지원센터 — 교회는 사역에 집중하고, 나머지는 전문가가 맡습니다">
+  <meta property="og:image:alt" content="우리교회지원센터">
   <meta property="og:locale" content="ko_KR">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="${site.url}assets/img/og-card.png">
