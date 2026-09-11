@@ -126,6 +126,8 @@ function hoursText() {
 
 /** 주소 (관리자 수정 반영) */
 function addressText() {
+  /* 비면 빈 문자열입니다 — 부르는 쪽에서 줄째로 감춥니다. */
+  if (!site.contact.address) return '';
   return `<span data-live="site.address">${esc(site.contact.address)}</span>`;
 }
 
@@ -280,7 +282,7 @@ function footer(base) {
         <li>${icon('phoneCall', 'ico ico-sm')} <a href="${site.contact.phoneHref}">${phoneText()}</a></li>
         <li>${icon('mail', 'ico ico-sm')} <a href="mailto:${esc(site.contact.email)}">${emailText()}</a></li>
         <li>${icon('clock', 'ico ico-sm')} ${hoursText()}</li>
-        <li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>
+        ${addressText() ? `<li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>` : ''}
       </ul>
     </div>
   </div>
