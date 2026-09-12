@@ -1901,7 +1901,8 @@ window.CAPSDB = (function () {
         url: function (path) {
           return guard().then(function () {
             var at = split(path);
-            if (at.bucket === 'listing-proofs') {
+            /* 비공개 버킷은 잠깐 동안만 열리는 주소를 만들어 줍니다. */
+            if (at.bucket === 'listing-proofs' || at.bucket === 'request-files') {
               return sb.storage.from(at.bucket).createSignedUrl(at.key, 60 * 10)
                 .then(function (res) {
                   return (res.data && res.data.signedUrl) || '';
@@ -2274,6 +2275,47 @@ window.CAPSDB = (function () {
           uploadedAt: nowIso(),
         };
       });
+    },
+
+    /* -------- 신청서 첨부 --------
+       홈페이지 의뢰서처럼 신청할 때 파일을 함께 받는 항목이 있습니다.
+       사업자등록증이 섞이므로 종류를 가리지 않고 비공개로 둡니다
+       (supabase/migrations 의 request-files 참고). */
+
+    /** 첨부 파일 검사 — 통과하면 빈 문자열 */
+    checkRequestFile: function (file) {
+      if (!file) return '파일을 고르지 않으셨습니다.';
+      if (file.size > 10 * 1024 * 1024) return '파일은 10MB 까지 올릴 수 있습니다.';
+      return '';
+    },
+
+    /** 첨부 올리기 → 신청서에 담을 파일 정보 */
+    uploadRequestFile: function (file, slot) {
+      var me = adapter.auth.current();
+      if (!me) return Promise.reject(new Error('로그인이 필요합니다.'));
+      var bad = api.checkRequestFile(file);
+      if (bad) return Promise.reject(new Error(bad));
+
+      var safe = safeKey(file.name, 'bin');
+      var path = 'request-files/' + me.id + '/' +
+        Date.now().toString(36) + '-' + safe;
+
+      return adapter.files.upload(path, file).then(function () {
+        return {
+          path: path,
+          name: file.name || safe,
+          size: file.size || 0,
+          type: file.type || '',
+          slot: slot || '',
+          uploadedAt: nowIso(),
+        };
+      });
+    },
+
+    /** 첨부 열기용 주소 (올린 본인 · 직원만 열립니다) */
+    requestFileUrl: function (path) {
+      if (!path) return Promise.resolve('');
+      return adapter.files.url(path);
     },
 
     /** 증빙 서류 열기용 주소 (본인 · 직원만 열립니다) */

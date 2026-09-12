@@ -58,10 +58,30 @@
           h(u.name || u.email) + '</option>';
       })).join('');
 
+    /* 신청서에 적힌 칸 이름(logo · bizdoc)이 아니라 교회가 본 라벨로 적습니다. */
+    function fieldLabel(sid, fname) {
+      var svc = (window.CAPS_SERVICES || []).filter(function (x) { return x.id === sid; })[0];
+      var f = svc && (svc.extraFields || []).filter(function (x) { return x.name === fname; })[0];
+      return (f && f.label) || fname;
+    }
+
     var extraRows = Object.keys(r.extra || {}).map(function (key) {
       var parts = key.split('__');
-      return '<div><dt>' + h(db.serviceName(parts[0])) + '<br><small style="font-weight:400">' + h(parts[1]) + '</small></dt>' +
-        '<dd>' + h(r.extra[key]) + '</dd></div>';
+      var val = r.extra[key];
+      var body;
+      if (Object.prototype.toString.call(val) === '[object Array]') {
+        /* 첨부는 비공개 저장소에 있습니다 — 누를 때 10분짜리 주소를 받아 엽니다. */
+        body = '<ul class="adm-files">' + val.map(function (f) {
+          var kb = f.size ? ' <small>' + Math.max(1, Math.round(f.size / 1024)) + 'KB</small>' : '';
+          return '<li>' + h(f.name || '파일') + kb +
+            '<button type="button" data-file="' + h(f.path) + '">열기</button></li>';
+        }).join('') + '</ul>';
+      } else {
+        body = h(val);
+      }
+      return '<div><dt>' + h(db.serviceName(parts[0])) +
+        '<br><small style="font-weight:400">' + h(fieldLabel(parts[0], parts[1])) + '</small></dt>' +
+        '<dd>' + body + '</dd></div>';
     }).join('');
 
     var tasks = r.tasks || [];
@@ -131,6 +151,22 @@
         '</div>',
 
       onMount: function (body) {
+        /* 첨부 열기 — 비공개라 잠깐 열리는 주소를 받아 새 창으로 엽니다. */
+        body.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-file]');
+          if (!b) return;
+          var path = b.getAttribute('data-file');
+          b.disabled = true;
+          db.requestFileUrl(path).then(function (url) {
+            b.disabled = false;
+            if (url) window.open(url, '_blank', 'noopener');
+            else A.toast('파일을 열지 못했습니다.');
+          }).catch(function () {
+            b.disabled = false;
+            A.toast('파일을 열지 못했습니다.');
+          });
+        });
+
         var pendingStatus = r.status;
         var pendingTasks = tasks.slice();
 

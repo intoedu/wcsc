@@ -520,3 +520,14 @@ body.admin .float-cta { display: none !important; }
   border-bottom-right-radius: 6px;
 }
 .rules-text.is-short { min-height: 72px; margin-top: 10px; }
+
+/* 신청서 첨부 — 비공개 저장소에 있어 [열기] 로 잠깐 열립니다. */
+.adm-files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.adm-files li { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.adm-files li small { color: var(--muted); font-size: 12px; }
+.adm-files button {
+  margin-left: auto; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; font-size: 12px; cursor: pointer;
+}
+.adm-files button:hover { border-color: var(--brand-500); color: var(--brand-700); }
+.adm-files button[disabled] { opacity: .5; cursor: default; }
