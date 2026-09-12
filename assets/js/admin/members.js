@@ -53,8 +53,10 @@
     desc: '승인 요청을 수락하고 직분 · 권한을 관리합니다.',
     icon: 'members',
     perm: 'members',
-    badge: function (state) {
-      return state.users.filter(function (u) { return isStaffAccount(u) && !u.approved; }).length;
+    alerts: function (state) {
+      return state.users
+        .filter(function (u) { return isStaffAccount(u) && !u.approved; })
+        .map(function (u) { return u.id; });
     },
 
     render: function (root, state, ctx) {

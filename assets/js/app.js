@@ -68,9 +68,26 @@
     onScroll();
   }
 
+  /* 메뉴의 [홈] 으로 갈 때는 가림막을 띄우지 않습니다.
+
+     처음 들어오실 때와 로고를 누르실 때는 가림막이 뜨는 편이
+     좋습니다 — 사이트가 열리는 느낌이 있습니다. 그런데 메뉴에서
+     [홈] 을 누르는 것은 페이지 사이를 오가는 일이라, 그때마다
+     화면이 덮이면 성가십니다.
+
+     둘 다 index.html 로 가므로 주소만으로는 가릴 수 없습니다.
+     그래서 [홈] 을 누르셨다는 것만 같은 탭 안에 잠깐 적어 두고,
+     홈에서 읽는 즉시 지웁니다. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a.nav-link[href$="index.html"]');
+    if (!a) return;
+    try { window.sessionStorage.setItem('wcsc.veil', 'skip'); } catch (ignore) { /* 못 적어도 그만 */ }
+  });
+
   /* 등장 애니메이션 */
   var targets = document.querySelectorAll(
-    '.svc-card, .why-card, .step, .prep-card, .prob-card, .feat-card, .contact-card, .tl-item'
+    '.svc-card, .why-card, .step, .prep-card, .prob-card, .feat-card, .contact-card, .tl-item, '
+    + '.item, .bd-tile'
   );
   if (targets.length && 'IntersectionObserver' in window) {
     var io = new IntersectionObserver(
@@ -89,6 +106,36 @@
       el.classList.add('reveal');
       io.observe(el);
     });
+  }
+
+  /* 떠 있는 [지원 신청] 버튼 — 진짜 버튼이 보이면 비켜 줍니다.
+
+     좁은 화면에서만 뜨는 버튼인데 position:fixed 라, 마침 화면 아래쪽에
+     [지원 신청하기] 버튼이 와 있으면 그 위에 겹쳐 앉았습니다.
+     첫 화면에서 특히 그랬습니다 — 두 버튼이 포개져 글자가 서로 먹혔습니다.
+
+     화면 안에 진짜 신청 버튼이 하나라도 보이면 뜬 버튼을 숨깁니다.
+     어차피 그 순간에는 있을 이유가 없습니다. */
+  var floatCta = document.querySelector('.float-cta');
+  if (floatCta && window.IntersectionObserver) {
+    var realCtas = Array.prototype.filter.call(
+      document.querySelectorAll('a[href$="apply.html"], a[href*="apply.html?"]'),
+      function (a) { return a !== floatCta && !a.closest('.site-footer'); }
+    );
+
+    if (realCtas.length) {
+      var showing = 0;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          // 하나라도 보이는 동안에는 뜬 버튼을 접어 둡니다.
+          showing += e.isIntersecting ? 1 : -1;
+        });
+        if (showing < 0) showing = 0;
+        floatCta.classList.toggle('is-tucked', showing > 0);
+      }, { rootMargin: '-8px' });
+
+      realCtas.forEach(function (a) { io.observe(a); });
+    }
   }
 
   /* 푸터 연도 */
