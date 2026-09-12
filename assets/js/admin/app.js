@@ -15,6 +15,9 @@ window.CAPSAdmin = (function () {
   };
   var stops = [];
   var currentKey = null;
+  var seen = {};          /* { 화면키: [읽은 id...] } */
+  var unreadWas = null;   /* 직전에 세어 둔 안 읽은 건수 — 늘어난 것만 알립니다 */
+  var baseTitle = document.title;
 
   /* ---------------- 유틸 ---------------- */
 
@@ -95,6 +98,126 @@ window.CAPSAdmin = (function () {
     order.push(key);
   }
 
+  /* ---------------- 읽음 표시 ----------------
+
+     사이드바 숫자는 두 가지입니다.
+
+       알림 배지 — 아직 안 본 새 건입니다. 화면을 열면 그때 목록에 있던
+                   건은 읽은 것으로 남고 숫자가 사라집니다. 그 뒤에 들어온
+                   건만 다시 숫자로 올라옵니다. 화면이 alerts() 로 알립니다.
+
+       현황 숫자 — 내 작업, 미수금처럼 '지금 몇 건인가'를 보는 숫자입니다.
+                   읽었다고 사라지면 안 되므로 그대로 둡니다. badge() 입니다.
+
+     읽은 기록은 이 브라우저에 직원별로 저장합니다. 서버에 두지 않으므로
+     다른 컴퓨터에서 열면 처음 보는 것으로 나옵니다.
+  */
+
+  function seenKey() {
+    var me = db.auth.current();
+    return 'caps.admin.seen.' + ((me && me.id) || 'anon');
+  }
+
+  function loadSeen() {
+    seen = {};
+    try {
+      var raw = window.localStorage.getItem(seenKey());
+      var parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === 'object') seen = parsed;
+    } catch (err) { seen = {}; }
+  }
+
+  function saveSeen() {
+    try { window.localStorage.setItem(seenKey(), JSON.stringify(seen)); }
+    catch (err) { /* 저장이 막혀 있어도 화면은 그대로 동작합니다 */ }
+  }
+
+  /** 이 화면이 알림으로 세는 건들의 id. 알림을 쓰지 않는 화면은 null 입니다. */
+  function alertIds(key) {
+    var v = views[key];
+    if (!v || !v.alerts) return null;
+    try {
+      return (v.alerts(state) || []).map(String);
+    } catch (err) { return null; }
+  }
+
+  function unreadCount(key) {
+    var ids = alertIds(key);
+    if (ids == null) return null;
+    var read = seen[key] || [];
+    var n = 0;
+    for (var i = 0; i < ids.length; i++) {
+      if (read.indexOf(ids[i]) === -1) n++;
+    }
+    return n;
+  }
+
+  /** key 화면에서 지금 보이는 건을 읽은 것으로 남깁니다.
+
+      같은 건을 함께 보여 주는 화면에도 같이 남깁니다 — 항목별 화면에서
+      본 신청이 [전체] 에 새 건으로 다시 뜨면 안 됩니다.
+
+      기록은 '지금 알림 목록에 있는 id' 만 남기고 나머지는 버립니다.
+      처리가 끝나 목록에서 빠진 건은 기억할 필요가 없고, 그래야 저장
+      내용이 무한정 늘지 않습니다. */
+  function markSeen(key) {
+    var mine = alertIds(key);
+    if (mine == null) return;
+    var changed = false;
+
+    for (var i = 0; i < order.length; i++) {
+      var k = order[i];
+      var ids = k === key ? mine : alertIds(k);
+      if (ids == null) continue;
+
+      var old = seen[k] || [];
+      var read = [];
+      for (var j = 0; j < ids.length; j++) {
+        var id = ids[j];
+        if (k === key || mine.indexOf(id) !== -1 || old.indexOf(id) !== -1) read.push(id);
+      }
+      if (read.length !== old.length || read.join('\u0001') !== old.join('\u0001')) {
+        seen[k] = read;
+        changed = true;
+      }
+    }
+    if (changed) saveSeen();
+  }
+
+  function unreadMap() {
+    var m = {};
+    for (var i = 0; i < order.length; i++) {
+      var k = order[i];
+      if (views[k].perm && !db.can(views[k].perm)) continue;
+      var n = unreadCount(k);
+      if (n != null) m[k] = n;
+    }
+    return m;
+  }
+
+  /** 탭 제목과 알림을 맞춥니다.
+      quiet 이면 숫자만 갱신하고 알림은 띄우지 않습니다 (방금 읽은 직후). */
+  function syncAlerts(quiet) {
+    var now = unreadMap();
+
+    if (!quiet && unreadWas) {
+      for (var k in now) {
+        if (views[k].rollup) continue;  /* 다른 화면과 겹치는 숫자입니다 */
+        var grew = now[k] - (unreadWas[k] || 0);
+        if (grew > 0) toast((views[k].nav || views[k].title) + ' ' + grew + '건이 새로 들어왔습니다.', 'new');
+      }
+    }
+    unreadWas = now;
+
+    /* 관리자 화면을 띄워 놓고 다른 일을 하는 동안에도 알 수 있게 탭 제목에 답니다. */
+    var total = 0;
+    for (var key in now) {
+      if (views[key].rollup) continue;
+      total += now[key];
+    }
+    document.title = (total ? '(' + total + ') ' : '') + baseTitle;
+  }
+
   /* ---------------- 사이드바 ---------------- */
 
   var ICONS = {
@@ -138,19 +261,35 @@ window.CAPSAdmin = (function () {
 
     nav.innerHTML = GROUPS.map(function (g) {
       var keys = g.keys || order.filter(function (k) { return k.indexOf(g.prefix) === 0; });
-      var links = keys
-        .filter(function (k) { return views[k] && (!views[k].perm || db.can(views[k].perm)); })
+      var shown = keys.filter(function (k) { return views[k] && (!views[k].perm || db.can(views[k].perm)); });
+
+      var links = shown
         .map(function (k) {
           var v = views[k];
-          var count = v.badge ? v.badge(state) : null;
-          var badge = count == null ? '' :
-            '<span class="adm-count' + (count ? '' : ' is-zero') + '">' + count + '</span>';
+          var badge = '';
+          var fresh = unreadCount(k);
+          if (fresh) {
+            /* 안 본 새 건이 있을 때만 뜹니다. 읽으면 사라집니다. */
+            badge = '<span class="adm-count is-new">' + fresh + '</span>';
+          } else if (v.badge) {
+            var count = v.badge(state);
+            if (count != null) {
+              badge = '<span class="adm-count' + (count ? '' : ' is-zero') + '">' + count + '</span>';
+            }
+          }
           return '<button type="button" class="adm-link' + (currentKey === k ? ' is-on' : '') + '" data-view="' + k + '">' +
             icon(v.icon || k) + '<span class="adm-link-text">' + h(v.nav || v.title) + '</span>' + badge + '</button>';
         })
         .join('');
       if (!links) return '';
-      return (g.title ? '<div class="adm-group"><p class="adm-group-title">' + h(g.title) + '</p>' : '<div class="adm-group">') +
+
+      /* 메뉴가 많아 한눈에 훑기 어려우므로, 새 건이 있는 묶음에 점을 답니다. */
+      var groupNew = shown.filter(function (k) { return !views[k].rollup && unreadCount(k); }).length;
+
+      return (g.title
+        ? '<div class="adm-group"><p class="adm-group-title">' + h(g.title) +
+          (groupNew ? '<span class="adm-group-dot" title="새로 들어온 건이 있습니다"></span>' : '') + '</p>'
+        : '<div class="adm-group">') +
         links + '</div>';
     }).join('');
 
@@ -189,6 +328,9 @@ window.CAPSAdmin = (function () {
     currentKey = key;
     var v = views[key];
     closeDrawer();
+    /* 이 화면을 여는 순간 읽은 것으로 처리합니다 — 배지가 바로 사라집니다. */
+    markSeen(key);
+    syncAlerts(true);
     el('admTitle').textContent = v.title;
     el('admDesc').textContent = v.desc || '';
     el('admActions').innerHTML = '';
@@ -228,6 +370,7 @@ window.CAPSAdmin = (function () {
           done();
         } else if (finished) {
           // 다른 화면이 열려 있어도 사이드바 숫자는 항상 갱신
+          syncAlerts(false);
           renderSidebar();
           if (currentKey && views[currentKey].live !== false) render(currentKey);
         }
@@ -320,7 +463,13 @@ window.CAPSAdmin = (function () {
       el('admShell').hidden = false;
       el('admBody').innerHTML = '<div class="adm-card"><p class="adm-card-lead">불러오는 중…</p></div>';
 
+      /* 직원마다 읽은 기록이 다릅니다. 한 컴퓨터를 같이 써도 섞이지 않습니다. */
+      loadSeen();
+      unreadWas = null;
+      document.title = baseTitle;
+
       watchAll(function () {
+        syncAlerts(true);   /* 처음 들어올 때는 알림을 띄우지 않습니다 */
         var key = window.location.hash.slice(1) || firstAllowed();
         go(key, true);
       });

@@ -144,10 +144,10 @@
       desc: cfg.desc,
       icon: 'listings',
       perm: 'customers',
-      badge: function (state) {
+      alerts: function (state) {
         return (state[cfg.collection] || []).filter(function (r) {
           return r.status === 'pending';
-        }).length;
+        }).map(function (r) { return r.id; });
       },
 
       render: function (root, state, ctx) {
@@ -505,10 +505,10 @@
     desc: '장터에서 산 장비를 달아 달라는 문의입니다. 실측 후 견적을 확정해 드립니다.',
     icon: 'requests',
     perm: 'requests',
-    badge: function (state) {
+    alerts: function (state) {
       return (state.installRequests || []).filter(function (r) {
         return r.status === 'received';
-      }).length;
+      }).map(function (r) { return r.id; });
     },
 
     render: function (root, state, ctx) {

@@ -400,11 +400,11 @@
     desc: '올라온 매물을 확인해 게시하거나 내립니다. 센터는 게시판만 관리하며 중개는 하지 않습니다.',
     icon: 'listings',
     perm: 'customers',
-    badge: function (state) {
+    alerts: function (state) {
       // 수정 승인 요청도 처리해야 할 건입니다 (저장값은 pending 입니다).
       return (state.listings || []).filter(function (r) {
         return r.status === 'pending' || r.status === 'awaiting_payment';
-      }).length;
+      }).map(function (r) { return r.id; });
     },
 
     render: function (root, state, ctx) {
