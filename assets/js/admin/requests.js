@@ -334,11 +334,14 @@
     return {
       title: svc ? svc.name + ' 신청' : '지원 신청 전체',
       nav: svc ? svc.name + (svc.soon ? ' (준비 중)' : '') : '전체',
-      badge: function (state) {
+      /* [전체] 는 항목별 화면과 같은 건을 셉니다. 배지는 보여 주되 탭 제목
+         합계와 알림에서는 빼야 한 건이 두 번 세어지지 않습니다. */
+      rollup: !svc,
+      alerts: function (state) {
         return state.requests.filter(function (r) {
           if (r.status !== 'received') return false;
           return !svc || (r.services || []).indexOf(svc.id) !== -1;
-        }).length;
+        }).map(function (r) { return r.id; });
       },
       desc: '신청받은 내용을 확인하고 담당자와 진행 상황을 관리합니다.',
       icon: 'requests',
