@@ -2269,6 +2269,7 @@ function buildDataScript() {
     no: s.no,
     icon: s.icon,
     name: s.name,
+    soon: !!s.soon,
     tagline: s.tagline,
     summary: s.summary,
     duration: s.duration,
