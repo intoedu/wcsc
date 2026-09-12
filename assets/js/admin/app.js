@@ -123,6 +123,9 @@ window.CAPSAdmin = (function () {
     { title: '', keys: ['dashboard'] },
     { title: '작업', keys: ['mytasks', 'alltasks', 'workload'] },
     { title: '의뢰 관리', keys: ['requests', 'customers', 'consents', 'subscriptions'] },
+    /* 지원 항목마다 따로 들어옵니다. keys 를 손으로 적지 않고 앞가지로 모읍니다 —
+       항목이 늘거나 줄면 site.js 만 고치면 메뉴가 따라옵니다. */
+    { title: '지원 항목별', prefix: 'req-' },
     { title: '게시판', keys: ['listings', 'marketBoard', 'guestBoard', 'eventBoard', 'jobBoard'] },
     { title: '설치 대행', keys: ['installs'] },
     { title: '정산', keys: ['settlement'] },
@@ -134,7 +137,8 @@ window.CAPSAdmin = (function () {
     var nav = el('admNav');
 
     nav.innerHTML = GROUPS.map(function (g) {
-      var links = g.keys
+      var keys = g.keys || order.filter(function (k) { return k.indexOf(g.prefix) === 0; });
+      var links = keys
         .filter(function (k) { return views[k] && (!views[k].perm || db.can(views[k].perm)); })
         .map(function (k) {
           var v = views[k];
