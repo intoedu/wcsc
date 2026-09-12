@@ -34,7 +34,21 @@
     });
   })();
 
-  /* ---------- 선택 항목에 따른 추가 필드 ---------- */
+  /* ---------- 선택 항목에 따른 추가 필드 ----------
+
+     type 이 세 가지입니다.
+       select    고르기
+       textarea  여러 줄 글 (인사말 · SNS 주소 · 참고 홈페이지)
+       files     파일 올리기 (로고 · 사진 · 사업자등록증)
+
+     파일은 고르기만 하고 바로 올리지 않습니다.
+     신청서는 제출할 때 로그인을 받는데, 저장소는 로그인한 사람만 쓸 수
+     있습니다. 고르는 즉시 올리면 [로그인이 필요합니다] 에서 막힙니다.
+     그래서 파일은 들고 있다가, 로그인이 끝난 뒤 제출 직전에 올립니다.
+
+     항목을 껐다 켜도 고른 파일을 잃지 않도록 화면 밖에 둡니다. */
+  var chosen = {};   // { 'homepage__logo': [File, File, …] }
+
   function buildExtraFields() {
     var ids = checkedServices();
     var kept = {};
@@ -51,19 +65,28 @@
       s.extraFields.forEach(function (f) {
         var name = s.id + '__' + f.name;
         var val = kept[name] || '';
-        html += '<div class="field"><label for="' + name + '">' + esc(f.label) + ' <span class="opt">선택</span></label>';
-        if (f.type === 'select') {
+        var wide = f.type === 'textarea' || f.type === 'files';
+        html += '<div class="field' + (wide ? ' is-wide' : '') + '">' +
+          '<label for="' + name + '">' + esc(f.label) + ' <span class="opt">선택</span></label>';
+        if (f.type === 'files') {
+          html += '<input type="file" id="' + name + '" data-files="' + name + '" multiple>' +
+            '<ul class="file-list" id="' + name + '__list"></ul>';
+        } else if (f.type === 'textarea') {
+          html += '<textarea id="' + name + '" name="' + name + '" rows="5"' +
+            (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + '>' + esc(val) + '</textarea>';
+        } else if (f.type === 'select') {
           html += '<select id="' + name + '" name="' + name + '"><option value="">선택해 주세요</option>';
           f.options.forEach(function (o) {
             html += '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>';
           });
           html += '</select>';
-        } else {
+        } else if (f.type !== 'files' && f.type !== 'textarea') {
           html +=
             '<input type="' + (f.type || 'text') + '" id="' + name + '" name="' + name + '"' +
             (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') +
             ' value="' + esc(val) + '">';
         }
+        if (f.help) html += '<p class="field-help">' + esc(f.help) + '</p>';
         html += '</div>';
       });
       html += '</div></div>';
@@ -71,6 +94,48 @@
 
     extraWrap.innerHTML = html;
     extraFieldset.hidden = html === '';
+    wireFiles();
+  }
+
+  /* ---------- 파일 올리기 ---------- */
+
+  function fileRow(name, f, i) {
+    var kb = f.size ? ' <small>' + Math.max(1, Math.round(f.size / 1024)) + 'KB</small>' : '';
+    return '<li>' + esc(f.name) + kb +
+      ' <button type="button" class="file-del" data-del="' + name + '" data-i="' + i + '">지우기</button></li>';
+  }
+
+  function drawList(name) {
+    var ul = document.getElementById(name + '__list');
+    if (!ul) return;
+    var list = chosen[name] || [];
+    ul.innerHTML = list.map(function (f, i) { return fileRow(name, f, i); }).join('');
+  }
+
+  function wireFiles() {
+    Array.prototype.slice.call(extraWrap.querySelectorAll('[data-files]')).forEach(function (input) {
+      var name = input.getAttribute('data-files');
+      drawList(name);
+      input.addEventListener('change', function () {
+        var files = Array.prototype.slice.call(input.files || []);
+        input.value = '';
+        if (!files.length) return;
+        var bad = '';
+        files.forEach(function (f) { bad = bad || window.CAPSDB.checkRequestFile(f); });
+        if (bad) { window.alert(bad); return; }
+        chosen[name] = (chosen[name] || []).concat(files);
+        drawList(name);
+      });
+    });
+
+    extraWrap.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-del]');
+      if (!btn) return;
+      var name = btn.getAttribute('data-del');
+      var i = Number(btn.getAttribute('data-i'));
+      (chosen[name] || []).splice(i, 1);
+      drawList(name);
+    });
   }
 
   function esc(s) {
@@ -228,12 +293,54 @@
       .catch(function () { /* 로그인 창을 닫은 경우 — 입력 내용은 그대로 남습니다 */ });
   });
 
+  var submitLabel = submitBtn.textContent;
+
+  /* 고른 파일을 올립니다 — 로그인이 끝난 뒤에 부릅니다.
+     고른 항목의 것만 올립니다 (껐다 켠 항목의 파일이 따라가지 않도록). */
+  function uploadChosen() {
+    var picked = checkedServices();
+    var keys = Object.keys(chosen).filter(function (k) {
+      return (chosen[k] || []).length && picked.indexOf(k.split('__')[0]) !== -1;
+    });
+    if (!keys.length) return Promise.resolve({});
+
+    var out = {};
+    var jobs = [];
+    keys.forEach(function (k) {
+      chosen[k].forEach(function (file) { jobs.push({ key: k, file: file }); });
+    });
+    var done = 0;
+    return jobs.reduce(function (chain, job) {
+      return chain.then(function () {
+        return window.CAPSDB.uploadRequestFile(job.file, job.key).then(function (info) {
+          (out[job.key] = out[job.key] || []).push(info);
+          done += 1;
+          submitBtn.textContent = '파일 올리는 중… (' + done + '/' + jobs.length + ')';
+        });
+      });
+    }, Promise.resolve()).then(function () { return out; });
+  }
+
   function send() {
     submitBtn.disabled = true;
-    submitBtn.textContent = '제출 중…';
+    submitBtn.textContent = '파일 올리는 중…';
 
+    uploadChosen().then(function (files) {
+      submitBtn.textContent = '제출 중…';
+      finish(files);
+    }).catch(function (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = submitLabel;
+      formError.textContent = (err && err.message) || '파일을 올리지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      formError.hidden = false;
+      formError.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  }
+
+  function finish(files) {
     var fd = new FormData(form);
     var extra = {};
+    Object.keys(files).forEach(function (k) { extra[k] = files[k]; });
     fd.forEach(function (value, key) {
       if (key.indexOf('__') > -1 && String(value).trim() !== '') extra[key] = value;
     });

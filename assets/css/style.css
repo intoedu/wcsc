@@ -734,6 +734,29 @@ table { border-collapse: collapse; width: 100%; }
   outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(31, 128, 70,.13);
 }
 .field.is-invalid input, .field.is-invalid select, .field.is-invalid textarea { border-color: #B3261E; }
+
+/* 신청서 — 여러 줄 글과 파일 올리기는 두 칸을 다 씁니다. */
+.grid-2 .field.is-wide { grid-column: 1 / -1; }
+.field-help { margin: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.field input[type="file"] {
+  padding: 11px 12px; border: 1.5px dashed var(--line); border-radius: 10px;
+  background: var(--bg-soft); font-size: 14px; cursor: pointer;
+}
+.field input[type="file"]:hover { border-color: var(--brand-500); }
+.file-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.file-list:empty { display: none; }
+.file-list li {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 9px; background: var(--bg-soft);
+  font-size: 13.5px; color: var(--ink);
+}
+.file-list li small { color: var(--muted); font-size: 12px; }
+.file-list li.is-busy { color: var(--muted); }
+.file-del {
+  margin-left: auto; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; color: var(--muted); font-size: 12px; cursor: pointer;
+}
+.file-del:hover { border-color: #B3261E; color: #B3261E; }
 .err { font-size: 13.5px; color: #B3261E; font-weight: 600; }
 
 /* service picker */
