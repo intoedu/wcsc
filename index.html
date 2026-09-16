@@ -20,7 +20,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="assets/css/style.css?v=1038d867">
+  <link rel="stylesheet" href="assets/css/style.css?v=585dbcc4">
   <link rel="stylesheet" href="assets/css/auth.css?v=981bfea1">
   <script>
   /* 새로고침하면 홈으로 돌아갑니다.
@@ -43,10 +43,59 @@
       if (reloaded && !atHome) location.replace('index.html');
     } catch (err) { /* 못 알아보는 브라우저에서는 그냥 둡니다 */ }
   })();
+
+  /* 인트로를 보여 줄지 여기서 정합니다 — 화면을 그리기 전에 정해야
+     인트로가 한 번 번쩍였다가 사라지는 일이 없습니다.
+       · 한 번 본 분께는 하루 동안 다시 보여 주지 않습니다
+       · 움직임을 줄여 달라고 설정한 분께는 보여 주지 않습니다
+       · 검색·링크로 속 페이지에 바로 오신 분께는 애초에 없습니다 */
+  (function () {
+    try {
+      var path = location.pathname;
+      var atHome = path.charAt(path.length - 1) === '/'
+        || path.slice(-11) === '/index.html' || path === 'index.html';
+      if (!atHome) return;
+      var calm = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var seen = 0;
+      try { seen = Number(localStorage.getItem('wcsc.opening.seen') || 0); } catch (e) {}
+      var fresh = Date.now() - seen < 24 * 60 * 60 * 1000;
+      if (calm || fresh) document.documentElement.classList.add('no-opening');
+    } catch (err) { document.documentElement.classList.add('no-opening'); }
+  })();
   </script>
   
 </head>
 <body class="is-home">
+  <div class="opening" id="opening" aria-label="우리교회지원센터 소개">
+    <div class="opening-stage">
+      <div class="opening-scene is-on" data-scene="0">
+        <p class="opening-eyebrow">우리교회지원센터</p>
+        <h2 class="opening-title">교회에는 사역 말고도<br>해야 할 일이 참 많습니다</h2>
+        <p class="opening-lead">주보는 주일마다 나가야 하고, 마이크는 울리면 안 되고, 서류는 계속 오갑니다.</p>
+      </div>
+      <div class="opening-scene" data-scene="1">
+        <p class="opening-eyebrow">그런데</p>
+        <h2 class="opening-title">막상 하려고 하면<br>누구에게 맡겨야 할지 막막합니다</h2>
+        <p class="opening-lead">목사님 혼자 하시기에는 벅차고, 봉사자는 바뀌면 처음부터 다시 알려드려야 합니다.</p>
+      </div>
+      <div class="opening-scene" data-scene="2">
+        <p class="opening-eyebrow">그래서</p>
+        <h2 class="opening-title">그 자리를<br>저희가 맡습니다</h2>
+        <p class="opening-lead">보이는 교회 · 사역하는 교회 · 세우는 교회 — 세 자리로 나누어 지원합니다.</p>
+      </div>
+      <div class="opening-scene" data-scene="3">
+        <p class="opening-eyebrow">우리교회지원센터</p>
+        <h2 class="opening-title">앞에서 이끄는 것이 아니라<br>뒤에서 받치는 자리입니다</h2>
+        <p class="opening-lead">목사님들께서 말씀과 성도에게만 마음 쓰실 수 있도록, 나머지는 저희가 맡겠습니다.</p>
+      </div>
+      <div class="opening-dots" aria-hidden="true">
+        <span class="opening-dot is-on"></span><span class="opening-dot"></span><span class="opening-dot"></span><span class="opening-dot"></span>
+      </div>
+      <p class="opening-hint" aria-hidden="true">아래로 내려 보세요</p>
+      <button type="button" class="opening-skip" id="openingSkip">건너뛰기</button>
+    </div>
+  </div>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 <header class="site-header" id="siteHeader">
   <div class="topbar">
@@ -561,5 +610,6 @@
   <script src="assets/js/search.js?v=20738c88" defer></script>
   <script src="assets/js/app.js?v=33bffa2a" defer></script>
   <script src="assets/js/home.js?v=2acf17fa" defer></script>
+  <script src="assets/js/opening.js?v=2e824c70" defer></script>
 </body>
 </html>

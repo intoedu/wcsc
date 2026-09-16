@@ -346,10 +346,31 @@ function layout(o) {
       if (reloaded && !atHome) location.replace('${base}index.html');
     } catch (err) { /* 못 알아보는 브라우저에서는 그냥 둡니다 */ }
   })();
+
+  /* 인트로를 보여 줄지 여기서 정합니다 — 화면을 그리기 전에 정해야
+     인트로가 한 번 번쩍였다가 사라지는 일이 없습니다.
+       · 한 번 본 분께는 하루 동안 다시 보여 주지 않습니다
+       · 움직임을 줄여 달라고 설정한 분께는 보여 주지 않습니다
+       · 검색·링크로 속 페이지에 바로 오신 분께는 애초에 없습니다 */
+  (function () {
+    try {
+      var path = location.pathname;
+      var atHome = path.charAt(path.length - 1) === '/'
+        || path.slice(-11) === '/index.html' || path === 'index.html';
+      if (!atHome) return;
+      var calm = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var seen = 0;
+      try { seen = Number(localStorage.getItem('wcsc.opening.seen') || 0); } catch (e) {}
+      var fresh = Date.now() - seen < 24 * 60 * 60 * 1000;
+      if (calm || fresh) document.documentElement.classList.add('no-opening');
+    } catch (err) { document.documentElement.classList.add('no-opening'); }
+  })();
   </script>
   ${o.head || ''}
 </head>
 <body${o.bodyClass ? ` class="${o.bodyClass}"` : ''}${o.serviceId ? ` data-service="${o.serviceId}"` : ''}>
+${o.opening || ''}
   ${header(base, o.active)}
   <main id="main">
 ${o.body}

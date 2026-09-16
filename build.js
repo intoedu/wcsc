@@ -289,6 +289,50 @@ function buildIndex() {
 </section>
 `;
 
+
+  /* 첫 화면에 들어오면 먼저 흐르는 인트로.
+     스크롤을 내리면 장면이 바뀌고, 다 내려가면 평소 홈 화면이 나옵니다.
+     스크롤을 가로채지 않습니다 — 그냥 긴 구역 위에 장면을 붙여 둔 것이라
+     마우스 휠도, 휴대폰 손가락도, 키보드도 평소대로 움직입니다.
+     오른쪽 아래 [건너뛰기] 를 누르면 바로 홈 화면으로 내려갑니다. */
+  const OPENING_SCENES = [
+    {
+      eyebrow: '우리교회지원센터',
+      title: '교회에는 사역 말고도<br>해야 할 일이 참 많습니다',
+      lead: '주보는 주일마다 나가야 하고, 마이크는 울리면 안 되고, 서류는 계속 오갑니다.',
+    },
+    {
+      eyebrow: '그런데',
+      title: '막상 하려고 하면<br>누구에게 맡겨야 할지 막막합니다',
+      lead: '목사님 혼자 하시기에는 벅차고, 봉사자는 바뀌면 처음부터 다시 알려드려야 합니다.',
+    },
+    {
+      eyebrow: '그래서',
+      title: '그 자리를<br>저희가 맡습니다',
+      lead: '보이는 교회 · 사역하는 교회 · 세우는 교회 — 세 자리로 나누어 지원합니다.',
+    },
+    {
+      eyebrow: '우리교회지원센터',
+      title: '앞에서 이끄는 것이 아니라<br>뒤에서 받치는 자리입니다',
+      lead: '목사님들께서 말씀과 성도에게만 마음 쓰실 수 있도록, 나머지는 저희가 맡겠습니다.',
+    },
+  ];
+
+  const openingBlock = `  <div class="opening" id="opening" aria-label="우리교회지원센터 소개">
+    <div class="opening-stage">
+      ${OPENING_SCENES.map((sc, n) => `<div class="opening-scene${n === 0 ? ' is-on' : ''}" data-scene="${n}">
+        <p class="opening-eyebrow">${esc(sc.eyebrow)}</p>
+        <h2 class="opening-title">${sc.title}</h2>
+        <p class="opening-lead">${esc(sc.lead)}</p>
+      </div>`).join('\n      ')}
+      <div class="opening-dots" aria-hidden="true">
+        ${OPENING_SCENES.map((_, n) => `<span class="opening-dot${n === 0 ? ' is-on' : ''}"></span>`).join('')}
+      </div>
+      <p class="opening-hint" aria-hidden="true">아래로 내려 보세요</p>
+      <button type="button" class="opening-skip" id="openingSkip">건너뛰기</button>
+    </div>
+  </div>`;
+
   write(
     'index.html',
     layout({
@@ -298,7 +342,8 @@ function buildIndex() {
       active: 'index.html',
       body,
       bodyClass: 'is-home',
-      scripts: ['home.js'],
+      opening: openingBlock,
+      scripts: ['home.js', 'opening.js'],
     })
   );
 }

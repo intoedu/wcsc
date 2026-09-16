@@ -3966,3 +3966,145 @@ body.is-intro { overflow: hidden; }
   .sched th, .sched td { padding: 12px 14px; font-size: 15px; }
   .sched tbody th { width: 38%; }
 }
+
+/* =========================================================
+   첫 화면 오프닝 — 스크롤로 넘기는 소개
+   스크롤을 가로채지 않습니다. 인트로는 키가 큰 구역이고,
+   그 안의 무대가 화면에 붙어 있다가(sticky) 지나갑니다.
+   한 번 보신 분과 움직임을 줄여 달라고 하신 분께는
+   <html class="no-opening"> 가 붙어 아예 그려지지 않습니다.
+   ========================================================= */
+.opening {
+  position: relative;
+  height: 400vh;                 /* 장면 4개 — 한 장면에 한 화면씩 */
+  background: var(--brand-800);
+}
+.no-opening .opening { display: none; }
+
+.opening-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+  color: #fff;
+  overflow: hidden;
+}
+/* 바탕에 은은한 빛 — 사진을 급조해 넣는 것보다 깔끔합니다. */
+.opening-stage::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(45% 40% at 22% 18%, rgba(240,196,74,.20), transparent 70%),
+    radial-gradient(50% 45% at 80% 78%, rgba(255,255,255,.12), transparent 70%);
+  pointer-events: none;
+}
+
+.opening-scene {
+  position: absolute;
+  max-width: 44rem;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .55s ease, transform .55s ease;
+  pointer-events: none;
+}
+.opening-scene.is-on { opacity: 1; transform: none; }
+
+.opening-eyebrow {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .005em;
+  color: var(--gold-400);
+  margin-bottom: 18px;
+}
+.opening-title {
+  font-size: clamp(28px, 5.2vw, 52px);
+  line-height: 1.35;
+  letter-spacing: -.03em;
+  color: #fff;
+  word-break: keep-all;
+}
+.opening-lead {
+  margin-top: 22px;
+  font-size: clamp(15px, 1.6vw, 18px);
+  line-height: 1.85;
+  color: rgba(255,255,255,.78);
+  word-break: keep-all;
+}
+
+.opening-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.opening-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.28);
+  transition: background .3s, width .3s;
+}
+.opening-dot.is-on { width: 22px; border-radius: 4px; background: var(--gold-400); }
+
+.opening-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  font-size: 13.5px;
+  color: rgba(255,255,255,.6);
+  animation: opening-bob 2.4s ease-in-out infinite;
+  transition: opacity .4s;
+}
+.opening.is-last .opening-hint { opacity: 0; }
+@keyframes opening-bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, 7px); }
+}
+
+/* 건너뛰기 — 오른쪽 아래 */
+.opening-skip {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 60;
+  padding: 11px 20px;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 999px;
+  background: rgba(0,0,0,.18);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background .2s, border-color .2s;
+}
+.opening-skip:hover { background: rgba(0,0,0,.34); border-color: rgba(255,255,255,.6); }
+body:not(.opening-on) .opening-skip { display: none; }
+
+/* 인트로가 흐르는 동안에는 머리글과 떠 있는 신청 단추를 감춥니다. */
+body.opening-on .site-header,
+body.opening-on .float-cta { opacity: 0; pointer-events: none; }
+.site-header, .float-cta { transition: opacity .3s; }
+
+@media (max-width: 640px) {
+  .opening { height: 360vh; }
+  .opening-dots { bottom: 104px; }
+  .opening-hint { bottom: 64px; }
+  .opening-skip { right: 16px; bottom: 16px; padding: 10px 17px; font-size: 14px; }
+}
+
+/* 움직임을 줄여 달라고 설정하신 분께는 애초에 인트로를 그리지 않지만,
+   혹시 남아 있더라도 흔들리지 않게 해 둡니다. */
+@media (prefers-reduced-motion: reduce) {
+  .opening-hint { animation: none; }
+  .opening-scene { transition: none; }
+}

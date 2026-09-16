@@ -20,7 +20,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231F7A44'/%3E%3Cpath d='M20 9.5v21M13 16.5h14' stroke='%23F2C82F' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css?v=1038d867">
+  <link rel="stylesheet" href="../assets/css/style.css?v=585dbcc4">
   <link rel="stylesheet" href="../assets/css/auth.css?v=981bfea1">
   <script>
   /* 새로고침하면 홈으로 돌아갑니다.
@@ -43,10 +43,31 @@
       if (reloaded && !atHome) location.replace('../index.html');
     } catch (err) { /* 못 알아보는 브라우저에서는 그냥 둡니다 */ }
   })();
+
+  /* 인트로를 보여 줄지 여기서 정합니다 — 화면을 그리기 전에 정해야
+     인트로가 한 번 번쩍였다가 사라지는 일이 없습니다.
+       · 한 번 본 분께는 하루 동안 다시 보여 주지 않습니다
+       · 움직임을 줄여 달라고 설정한 분께는 보여 주지 않습니다
+       · 검색·링크로 속 페이지에 바로 오신 분께는 애초에 없습니다 */
+  (function () {
+    try {
+      var path = location.pathname;
+      var atHome = path.charAt(path.length - 1) === '/'
+        || path.slice(-11) === '/index.html' || path === 'index.html';
+      if (!atHome) return;
+      var calm = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var seen = 0;
+      try { seen = Number(localStorage.getItem('wcsc.opening.seen') || 0); } catch (e) {}
+      var fresh = Date.now() - seen < 24 * 60 * 60 * 1000;
+      if (calm || fresh) document.documentElement.classList.add('no-opening');
+    } catch (err) { document.documentElement.classList.add('no-opening'); }
+  })();
   </script>
   
 </head>
 <body data-service="homepage">
+
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 <header class="site-header" id="siteHeader">
   <div class="topbar">
