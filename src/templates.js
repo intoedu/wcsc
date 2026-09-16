@@ -358,6 +358,12 @@ function layout(o) {
       var atHome = path.charAt(path.length - 1) === '/'
         || path.slice(-11) === '/index.html' || path === 'index.html';
       if (!atHome) return;
+      /* 주소 끝에 ?opening 을 붙이면 하루 기억을 무시하고 다시 보여 줍니다.
+         만드는 쪽에서 확인할 때 씁니다. */
+      if (location.search.indexOf('opening') > -1) {
+        try { localStorage.removeItem('wcsc.opening.seen'); } catch (e) {}
+        return;
+      }
       var calm = window.matchMedia
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var seen = 0;
