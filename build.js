@@ -1034,8 +1034,8 @@ function buildServicePage(s, i) {
 ${s.campTypes ? `
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('참가 방법', '등록하고 참석하시면 됩니다',
-      '장소와 강사, 프로그램과 안전 관리까지 AKC 팀이 준비합니다.')}
+    ${sectionHead(...(s.campTypesHead || ['참가 방법', '등록하고 참석하시면 됩니다',
+      '장소와 강사, 프로그램과 안전 관리까지 AKC 팀이 준비합니다.']))}
     <div class="camp-grid${s.campTypes.length === 1 ? ' is-one' : ''}">
       ${s.campTypes.map((c) => `<article class="camp-card">
         <span class="camp-tag">${esc(c.tag)}</span>
@@ -1058,8 +1058,8 @@ ${s.campTypes ? `
 ${s.campTracks ? `
 <section class="section">
   <div class="wrap">
-    ${sectionHead('캠프 갈래', '영성캠프와 영역캠프',
-      '영혼을 정렬하는 영성캠프에서, 일터와 학교로 나아가는 영역캠프까지 이어집니다.')}
+    ${sectionHead(...(s.campTracksHead || ['캠프 갈래', '영성캠프와 영역캠프',
+      '영혼을 정렬하는 영성캠프에서, 일터와 학교로 나아가는 영역캠프까지 이어집니다.']))}
     <div class="track-grid">
       ${s.campTracks.map((t) => `<article class="track-card">
         <h3>${esc(t.title)}</h3>
@@ -1072,11 +1072,27 @@ ${s.campTracks ? `
   </div>
 </section>` : ''}
 
+${s.schedule ? `
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead(...(s.schedule.head || ['예시 일정', '하루가 이렇게 흘러갑니다']))}
+    <div class="sched-wrap">
+      <table class="sched">
+        <thead><tr><th scope="col">시간</th><th scope="col">일정</th></tr></thead>
+        <tbody>
+          ${s.schedule.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join('\n          ')}
+        </tbody>
+      </table>
+    </div>
+    ${s.schedule.note ? `<p class="sched-note">${esc(s.schedule.note)}</p>` : ''}
+  </div>
+</section>` : ''}
+
 ${s.useCases ? `
 <section class="section section-alt">
   <div class="wrap">
-    ${sectionHead('어떤 문서에 쓰나요', '교회에서 서명이 필요한 거의 모든 곳',
-      '아래는 자주 쓰이는 예입니다. 서명란이 있는 문서라면 무엇이든 올려 쓰실 수 있습니다.')}
+    ${sectionHead(...(s.useCasesHead || ['어떤 문서에 쓰나요', '교회에서 서명이 필요한 거의 모든 곳',
+      '아래는 자주 쓰이는 예입니다. 서명란이 있는 문서라면 무엇이든 올려 쓰실 수 있습니다.']))}
     <div class="use-grid">
       ${s.useCases.map((u) => `<article class="use-card">
         <h3>${esc(u.group)}</h3>
