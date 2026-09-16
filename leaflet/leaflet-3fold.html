@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>우리교회지원센터 리플렛 — A4 3단 접지</title>
+<link rel="stylesheet" href="leaflet.css">
+<style>
+/* ── A4 가로 297×210mm · 3단 접지(두루마리 접지) ──────────────────
+   바깥면 왼쪽→오른쪽 : [안쪽 플랩] [뒷표지] [앞표지]
+   안쪽면 왼쪽→오른쪽 : [보이는 교회] [사역하는 교회 + 세우는 교회] [게시판]
+   안으로 접혀 들어가는 플랩만 3mm 좁습니다(97mm) — 접었을 때 배가 부르지 않게. */
+@page{ size:297mm 210mm; margin:0; }
+.sheet{ width:297mm; height:210mm; }
+.panel{ height:210mm; padding:11mm 8mm; display:flex; flex-direction:column; position:relative; }
+.p-100{ width:100mm; }
+.p-97{ width:97mm; }
+
+/* 앞표지 */
+.cover{ padding:0; background:var(--paper-warm); }
+.cover__top{ flex:1; padding:16mm 10mm 0; display:flex; flex-direction:column; }
+.cover__logo{ width:64mm; display:block; }
+.cover__lead{ margin-top:11mm; }
+.cover__title{
+  font-family:var(--display); font-weight:800; font-size:18.2pt; line-height:1.36;
+  color:var(--brand-900); letter-spacing:-.025em;
+}
+.cover__desc{ margin-top:7mm; font-size:9pt; line-height:1.62; color:var(--ink-2); }
+.cover__list{ margin-top:auto; padding-bottom:11mm; }
+.cover__listhead{ font-family:var(--display); font-weight:800; font-size:7.6pt;
+  color:var(--gold-600); padding-top:4.4mm; margin-bottom:4.4mm;
+  border-top:.3mm solid rgba(18,48,31,.14); }
+.cover__li{ display:flex; gap:2.4mm; align-items:baseline; }
+.cover__li + .cover__li{ margin-top:3mm; }
+.cover__li b{ font-family:var(--display); font-weight:800; font-size:8.8pt; color:var(--brand-800); width:25mm; min-width:25mm; letter-spacing:-.02em; }
+.cover__li span{ font-size:7.2pt; color:var(--muted); line-height:1.45; }
+.cover__band{
+  background:var(--brand-900); color:#fff; padding:8mm 9mm 9mm;
+}
+.cover__band .bt{ font-family:var(--display); font-weight:800; font-size:11.4pt; line-height:1.56; }
+.cover__band .bd{ font-size:8pt; color:#BFD6C7; margin-top:2.4mm; line-height:1.62; }
+.cover__band .bu{ font-size:7.4pt; color:#8FB79E; margin-top:3.6mm; letter-spacing:.01em; }
+
+/* 게시판 목록 — 다섯 곳이라 격자 대신 한 줄씩 */
+.blist{ margin-top:2.4mm; }
+.bitem + .bitem{ margin-top:2.4mm; }
+.bitem b{ display:block; font-family:var(--display); font-weight:800; font-size:7.8pt;
+  color:var(--brand-800); line-height:1.3; letter-spacing:-.015em; }
+.bitem span{ display:block; font-size:6.9pt; color:#4C5F55; line-height:1.5; margin-top:.6mm; }
+
+/* 뒷표지 */
+.back__logo{ width:34mm; display:block; margin-bottom:4mm; }
+
+/* 플랩과 뒷표지는 담을 것이 많아 세로 리듬만 한 칸 좁힙니다.
+   (안쪽 세 면은 여유가 있어 기본 간격 그대로 둡니다.) */
+.flap .step + .step,
+.back .step + .step{ margin-top:3.4mm; }
+.flap .step__d,
+.back .step__d{ margin-top:.9mm; }
+.back .contact__row + .contact__row{ margin-top:2mm; }
+
+/* ── 도련 3mm 판 (?bleed) ─────────────────────────────────────
+   종이를 303×216mm 로 키우고, 바깥쪽으로 향한 가장자리에만 3mm 를 더합니다.
+   재단선(297×210) 밖으로 배경색이 넘어가므로 잘려도 흰 테두리가 남지 않습니다. */
+.bleed .sheet{ width:303mm; height:216mm; }
+.bleed .panel{ height:216mm; padding-top:14mm; padding-bottom:14mm; }
+.bleed .sheet > .p-97:first-child{  width:100mm; padding-left:11mm;  }
+.bleed .sheet > .p-100:first-child{ width:103mm; padding-left:11mm;  }
+.bleed .sheet > .p-97:last-child{   width:100mm; padding-right:11mm; }
+.bleed .sheet > .p-100:last-child{  width:103mm; padding-right:11mm; }
+.bleed .sheet > .cover{ padding:0; }
+.bleed .cover .cover__top{  padding:19mm 13mm 0 10mm; }
+.bleed .cover .cover__band{ padding:8mm 13mm 12mm 10mm; }
+</style>
+</head>
+<body>
+<script>
+  /* ?bleed 를 붙여 열면 도련 3mm 판으로 그립니다 (render.js 가 씁니다). */
+  if (location.search.indexOf('bleed') !== -1) document.documentElement.classList.add('bleed');
+</script>
+
+<!-- ═══════════ 1면 · 바깥면 ═══════════ -->
+<section class="sheet">
+
+  <!-- ① 안쪽 플랩 (접었을 때 안으로 들어갑니다) -->
+  <div class="panel p-97 flap">
+    <div class="eyebrow eyebrow--en">WORI CHURCH SUPPORT CENTER</div>
+    <h2 class="sec-title" style="margin-top:2.4mm">교회에 필요를<br>채워주는 곳</h2>
+    <div class="rule" style="margin-top:3.4mm"></div>
+    <p style="margin-top:4mm; font-size:8pt; line-height:1.62; color:var(--ink-2)">
+      홈페이지 제작부터 마케팅 · 음향 · 캠프 · 앱 · 행정까지
+      <strong>한&nbsp;곳에서</strong> 맡습니다. 교회끼리 직접 만나는 게시판도 함께 운영합니다 —
+      업체를 따로 찾아다니지 않으셔도 됩니다.
+    </p>
+
+    <div class="box box--gold" style="margin-top:4mm">
+      <div class="box__title">상담과 견적은 무료입니다</div>
+      <p style="font-size:7.4pt; line-height:1.62; color:var(--gold-ink)">
+        비용은 제안서 내용에 합의하고 진행이 시작될 때부터 발생합니다.
+        일단 편하게 물어보십시오.
+      </p>
+    </div>
+
+    <div style="margin-top:6mm">
+      <div class="eyebrow">왜 우리교회지원센터인가</div>
+      <div class="steps" style="margin-top:3mm">
+        <div class="step">
+          <div class="step__no">1</div>
+          <div><div class="step__t">교회 사정을 압니다</div>
+          <div class="step__d">교회 규모와 예산, 의사결정 구조를 이해하고 시작합니다. 매번 처음부터 설명하지 않으셔도 됩니다.</div></div>
+        </div>
+        <div class="step">
+          <div class="step__no">2</div>
+          <div><div class="step__t">견적서 먼저, 계약은 나중에</div>
+          <div class="step__d">항목별 내역이 적힌 견적서를 먼저 드립니다. 당회·제직회에 그대로 올리실 수 있게 문서로 정리해 드립니다.</div></div>
+        </div>
+        <div class="step">
+          <div class="step__no">3</div>
+          <div><div class="step__t">여러 항목을 함께</div>
+          <div class="step__d">홈페이지·주보·음향처럼 서로 얽힌 일도 한 번 신청하면 센터가 항목 간 일정을 조율합니다.</div></div>
+        </div>
+        <div class="step">
+          <div class="step__no">4</div>
+          <div><div class="step__t">시작한 뒤에도 이어집니다</div>
+          <div class="step__d">만들고 끝나는 일이 아닙니다. 쓰시는 동안 생기는 수정과 장애는 정해진 창구로 접수됩니다.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+
+    <div class="box box--plain" style="border-color:var(--brand-100); margin-bottom:3.6mm">
+      <div class="box__title" style="font-size:8.4pt">작은 교회도 신청할 수 있나요?</div>
+      <p style="font-size:7.6pt; line-height:1.62; color:var(--ink-2)">
+        네. 오히려 담당 인력이 부족한 교회일수록 도움이 되는 항목이 많습니다.
+        교인 수와 예산 범위를 알려주시면 그 안에서 가능한 방안을 정리해 드립니다.
+      </p>
+    </div>
+
+    <div class="rule--wide"></div>
+    <p class="fineprint" style="margin-top:2.4mm">
+      전국 모든 교회를 지원합니다 — 규모 · 지역 · 교단에 제한이 없습니다.
+      현장 방문이 필요한 항목은 상담할 때 방문 가능일을 함께 안내드립니다.
+    </p>
+  </div>
+
+  <!-- ② 뒷표지 -->
+  <div class="panel p-100 back">
+    <img class="back__logo" src="logo.png" alt="우리교회지원센터">
+
+    <div class="eyebrow">신청은 이렇게 이어집니다</div>
+    <div class="steps" style="margin-top:3.2mm">
+      <div class="step">
+        <div class="step__no">1</div>
+        <div><div class="step__t">신청서 접수</div>
+        <div class="step__d">홈페이지에서 필요한 항목을 골라 신청서를 남기시면 접수번호가 즉시 발급됩니다.</div></div>
+      </div>
+      <div class="step">
+        <div class="step__no">2</div>
+        <div><div class="step__t">연락 · 상담</div>
+        <div class="step__d">영업일 기준 1~2일 안에 센터에서 연락드립니다. 방문 상담도 가능합니다.</div></div>
+      </div>
+      <div class="step">
+        <div class="step__no">3</div>
+        <div><div class="step__t">제안서 · 견적 확인</div>
+        <div class="step__d">범위와 일정, 비용이 정리된 제안서를 드리고 내부 결의에 필요한 서류를 함께 준비해 드립니다.</div></div>
+      </div>
+      <div class="step">
+        <div class="step__no">4</div>
+        <div><div class="step__t">진행 · 시작</div>
+        <div class="step__d">확정된 일정에 따라 진행하고, 중간에 함께 확인한 뒤 실제로 쓰기 시작하십니다.</div></div>
+      </div>
+      <div class="step">
+        <div class="step__no">5</div>
+        <div><div class="step__t">사후 지원</div>
+        <div class="step__d">지원 기간 동안 수정·점검·문의를 지원합니다. 추가 항목도 이어서 요청하십시오.</div></div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+    <div class="box box--plain" style="margin-top:2mm; border-color:var(--brand-100)">
+      <div class="qr">
+        <img src="qr-site.png" alt="우리교회지원센터 홈페이지 QR">
+        <div>
+          <div class="qr__t">휴대폰으로 찍으면<br>바로 신청 화면입니다</div>
+          <div class="qr__u">intoedu.github.io/wcsc</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+
+    <!-- 연락처는 운영 DB(관리자 화면 → 센터 설정)의 값입니다. 거기서 바꾸면 여기도 맞춰 주세요. -->
+    <div style="border-top:.35mm solid var(--line); padding-top:4mm">
+      <div class="eyebrow" style="margin-bottom:2.8mm">문의</div>
+      <div class="contact__row">
+        <div class="contact__k">전화</div>
+        <div class="contact__v contact__v--big">010-4254-2270</div>
+      </div>
+      <div class="contact__row">
+        <div class="contact__k">이메일</div>
+        <div class="contact__v" style="font-size:7.8pt">worichurchsupportcenter@gmail.com</div>
+      </div>
+      <div class="contact__row">
+        <div class="contact__k">운영시간</div>
+        <div class="contact__v">평일 09:00 – 18:00<br><span style="font-size:6.8pt;color:var(--muted)">점심 12:00 – 13:00 · 주말·공휴일 휴무</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 앞표지 -->
+  <div class="panel p-100 cover">
+    <div class="cover__top">
+      <img class="cover__logo" src="logo.png" alt="우리교회지원센터">
+      <div class="cover__lead">
+        <div class="rule"></div>
+        <h1 class="cover__title" style="margin-top:5mm">
+          교회는 사역에 집중하고,<br>나머지는 전문가가<br>맡습니다
+        </h1>
+        <p class="cover__desc">
+          교회에 필요를 채워주는 곳.<br>
+          지원 항목과 게시판을 함께 운영합니다.
+        </p>
+      </div>
+      <div class="cover__list">
+        <div class="cover__listhead">이런 것을 맡습니다</div>
+        <div class="cover__li"><b>보이는 교회</b><span>홈페이지 제작 · 마케팅 지원 · 스마트처치 앱</span></div>
+        <div class="cover__li"><b>사역하는 교회</b><span>음향 세팅 · AKC 캠프</span></div>
+        <div class="cover__li"><b>세우는 교회</b><span>인투오피스 — 전자서명</span></div>
+      </div>
+    </div>
+    <div class="cover__band">
+      <div class="bt">필요한 것을 알려주시면<br>센터에서 연락드립니다</div>
+      <div class="bd">전국 모든 교회 — 규모 · 지역 · 교단에 제한이 없습니다.</div>
+      <div class="bu">Wori Church Support Center · intoedu.github.io/wcsc</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════ 2면 · 안쪽면 ═══════════ -->
+<section class="sheet">
+
+  <!-- ④ 보이는 교회 -->
+  <div class="panel p-100">
+    <div class="eyebrow">교회의 필요</div>
+    <h2 class="sec-title" style="margin-top:2.2mm">교회가 실제로 겪는 자리를<br>기준으로 묶었습니다</h2>
+    <div class="rule" style="margin-top:3.2mm; margin-bottom:5mm"></div>
+
+    <div class="cat cat--flow">
+      <div class="cat__head"><div class="cat__name">보이는 교회</div><div class="cat__line"></div></div>
+      <div class="cat__sub">교회의 처음 보이는 공간을 만듭니다</div>
+      <p style="font-size:7pt; color:var(--ink-2); line-height:1.6; margin-top:2.8mm">
+        홈페이지에서 예배 시간을 확인하고, 현수막을 보고 찾아옵니다.
+        교회를 처음 만나는 자리를 만듭니다.
+      </p>
+
+      <div class="svc-flow">
+        <div class="svc">
+          <div class="svc__row"><div class="svc__no">01</div>
+            <div class="svc__body">
+              <div class="svc__name">홈페이지 제작</div>
+              <div class="svc__desc">처음 찾아오는 사람이 가장 먼저 보는 교회의 얼굴입니다. 예배 시간과 오시는 길, 교회 소개와 설교 영상을 담습니다. 고칠 곳이 생기면 말씀만 주세요 — 교회에서 직접 다루실 일이 없습니다.</div>
+            </div></div>
+        </div>
+        <div class="svc">
+          <div class="svc__row"><div class="svc__no">02</div>
+            <div class="svc__body">
+              <div class="svc__name">마케팅 지원</div>
+              <div class="svc__desc">현수막 · 포스터 · 주보부터 SNS 콘텐츠까지. 교회에서 되풀이해 필요한 디자인을 만들어 드리고, 인쇄소에 바로 넘길 파일과 카드뉴스까지 함께 드립니다.</div>
+            </div></div>
+        </div>
+        <div class="svc">
+          <div class="svc__row"><div class="svc__no">03</div>
+            <div class="svc__body">
+              <div class="svc__name">스마트처치 앱</div>
+              <div class="svc__desc">성도의 휴대폰 안에 들어가는 교회. 주보 · 예배 영상 · 공지 · 출석 · 심방 기록을 하나로 정리하고, 교역자용 관리 화면도 함께 드립니다.</div>
+            </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box--gold">
+      <div class="box__title" style="font-size:8.6pt">마케팅은 여기까지 해 드립니다</div>
+      <p style="font-size:7.4pt; line-height:1.62; color:var(--gold-ink)">
+        현수막 · 배너 · 포스터 · 초청장 · 주보 시안 제작<br>
+        시안당 2회 수정 (그 이상은 협의)<br>
+        인쇄소에 바로 넘길 파일 정리 — 규격 · 재단 여백 · 색상<br>
+        온라인 공유용 이미지와 SNS 카드뉴스<br>
+        교회에서 문구만 바꿔 쓰는 템플릿 파일
+      </p>
+    </div>
+    <p class="fineprint" style="margin-top:4mm">
+      마케팅 지원은 시안 제작까지입니다 — 인쇄비 · 배송비는 별도이며, 완성 파일을 받아 교회에서 편한 곳에 맡기시면 됩니다.
+    </p>
+  </div>
+
+  <!-- ⑤ 사역하는 교회 + 세우는 교회 -->
+  <div class="panel p-100">
+    <div class="cat" style="margin-top:0">
+      <div class="cat__head"><div class="cat__name">사역하는 교회</div><div class="cat__line"></div></div>
+      <div class="cat__sub">교회 사역의 구조를 함께 만듭니다</div>
+      <p style="font-size:7pt; color:var(--ink-2); line-height:1.6; margin-top:2.8mm">
+        예배와 캠프 — 사람이 모이는 자리를 준비합니다. 소리가 또렷해야 말씀이 들리고,
+        캠프는 미리 준비해야 다음 세대가 남습니다.
+      </p>
+
+      <div class="svc" style="margin-top:4mm">
+        <div class="svc__row"><div class="svc__no">04</div>
+          <div class="svc__body">
+            <div class="svc__name">음향 세팅</div>
+            <div class="svc__desc">설교가 또렷하게 들리는 예배당. 예배당 음향 진단부터 장비 선정과 설치까지 맡고, 온라인 송출을 위한 음향 구성도 함께 잡아 드립니다.</div>
+          </div></div>
+      </div>
+      <div class="svc">
+        <div class="svc__row"><div class="svc__no">05</div>
+          <div class="svc__body">
+            <div class="svc__name">AKC — 어라이즈 코리아 캠프</div>
+            <div class="svc__desc">무너진 이 땅의 다음 세대와 청년을 깨우는 캠프입니다. 여름과 겨울 방학에 맞춰 경기도 안성 AKC 수련원에서 열리며, 개인 또는 교회 단위로 등록해 참석하십니다. 준비할 인력이 없는 교회도 참가 신청만으로 함께하실 수 있습니다.</div>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="cat" style="margin-top:7mm">
+      <div class="cat__head"><div class="cat__name">세우는 교회</div><div class="cat__line"></div></div>
+      <div class="cat__sub">예배 자료부터 행정까지 만들어 드립니다</div>
+      <p style="font-size:7pt; color:var(--ink-2); line-height:1.6; margin-top:2.8mm">
+        서류는 휴대폰으로 오가고, 예배 공간은 교회끼리 주고받습니다.
+        눈에 잘 띄지 않지만 막히면 사역 전체가 멈추는 일들입니다.
+      </p>
+
+      <div class="svc" style="margin-top:4mm">
+        <div class="svc__row"><div class="svc__no">06</div>
+          <div class="svc__body">
+            <div class="svc__name">인투오피스 — 전자서명</div>
+            <div class="svc__desc">교회 서류에 도장 받으러 다니지 마십시오. 근로계약서 · 참가 동의서 · 지출 결의 · 시설 사용 승낙을 휴대폰으로 주고받고, 누가 서명했는지 확인하고, 자동으로 분류해 보관합니다.</div>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+    <div class="box box--plain" style="border-color:var(--brand-100)">
+      <div class="box__title" style="font-size:8.6pt">인투오피스는 이렇게 씁니다</div>
+      <p style="font-size:7.4pt; line-height:1.62; color:var(--ink-2)">
+        서명이 필요한 문서를 휴대폰으로 보내고 받기<br>
+        누가 서명했고 누가 안 했는지 확인 · 재알림<br>
+        서명 이력이 담긴 완료 문서 저장<br>
+        종류와 날짜로 자동 분류 · 검색<br>
+        자주 쓰는 문서의 서식 저장
+      </p>
+    </div>
+    <p class="fineprint" style="margin-top:4mm">
+      인투오피스는 교회가 직접 쓰시는 프로그램입니다 — 회계 · 문서 작성 · 신고 대행은 포함되지 않습니다.
+    </p>
+  </div>
+
+  <!-- ⑥ 게시판 -->
+  <div class="panel p-97">
+    <div class="eyebrow">지원 항목을 신청하지 않으셔도</div>
+    <h2 class="sec-title" style="margin-top:2.2mm">교회끼리 직접<br>만나는 게시판</h2>
+    <div class="rule" style="margin-top:3.2mm"></div>
+    <p style="font-size:7.4pt; color:var(--ink-2); line-height:1.62; margin-top:4mm">
+      센터가 게시판을 열어 두고 확인만 합니다.
+      올리고 보는 것은 교회가 직접 하십니다.
+    </p>
+
+    <div class="blist" style="margin-top:6mm">
+      <div class="bitem"><b>부동산 매물</b><span>예배 공간을 내놓는 교회와 구하는 교회가 만납니다. 권리 증빙 서류를 확인한 글만 올라가고, 거래가 끝날 때까지 기한 없이 게시합니다.</span></div>
+      <div class="bitem"><b>교역자 구인 공고</b><span>사례비 · 사택 · 근무 조건을 반드시 적게 합니다 — 보시는 분이 판단할 수 있어야 합니다. 사람을 구하시면 교회가 직접 내립니다.</span></div>
+      <div class="bitem"><b>중고 장터</b><span>교회 장비 · 물품을 주고받습니다. 사시는 교회가 원하시면 철거 · 운반 · 설치 · 음향 튜닝까지 센터가 대행합니다.</span></div>
+      <div class="bitem"><b>교회 게스트하우스</b><span>무료로 내어 놓는 방과 숙박업 신고가 된 시설만 올립니다. 머무실 분과 교회가 직접 연락하십니다.</span></div>
+      <div class="bitem"><b>집회 티켓팅</b><span>예매 시작 시각을 정하고, 정원이 차면 자동으로 마감합니다. 좌석 지정은 선택이며, 신청자 명단은 주최 측이 내려받습니다.</span></div>
+    </div>
+
+    <div class="grow"></div>
+    <p class="fineprint">
+      센터는 게시판을 운영합니다 — 공인중개사법상의 중개 행위는 하지 않으며, 가격 · 조건 협상과 계약에는 관여하지 않습니다.
+      교역자 구인 공고에서도 채용 당사자가 아니며, 면접과 청빙 결정은 교회와 사역자가 직접 하십니다.
+      매물과 물품, 공고의 내용은 등록자가 적은 것입니다.
+    </p>
+  </div>
+
+</section>
+
+</body>
+</html>
