@@ -73,10 +73,10 @@ function buildIndex() {
     },
     {
       tone: 'gold',
-      eyebrow: '교역자 구인',
-      title: '아는 분께 부탁하는 것<br>말고는 없었습니다',
-      lead: '이제 교회가 직접 공고를 올리고, 사역자가 보고 연락합니다.',
-      href: 'jobs.html',
+      eyebrow: '고비캠프',
+      title: '캠프팀이<br>교회로 찾아갑니다',
+      lead: '또래가 또래를 찾아가는 하루 캠프입니다. 숙박 준비가 필요하지 않습니다.',
+      href: 'services/gobicamp.html',
       icon: 'users',
     },
     {
