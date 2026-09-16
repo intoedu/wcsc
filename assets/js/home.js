@@ -33,6 +33,11 @@
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (still) return;
 
+    /* 스크롤 오프닝이 나오는 날에는 로고 가림막을 띄우지 않습니다.
+       오프닝 첫 장면이 이미 로고라 두 번 보시게 됩니다. */
+    if (document.getElementById('opening')
+      && !document.documentElement.classList.contains('no-opening')) return;
+
     /* 메뉴의 [홈] 을 눌러 오신 경우에는 가림막을 띄우지 않습니다.
        페이지 사이를 오가는 일이라 그때마다 화면이 덮이면 성가십니다.
        처음 들어오실 때와 로고를 누르실 때는 그대로 뜹니다. */
