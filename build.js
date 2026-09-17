@@ -292,68 +292,90 @@ function buildIndex() {
 
   /* 첫 화면 오프닝 — 스크롤로 넘기는 다섯 장면.
 
-     ① 로고가 가운데 있다가 교회 안으로 들어갑니다
+     ① 로고 '회' 안의 교회가 돌면서 다가와, 그 안으로 들어갑니다
      ② 목사님 한 분과, 그분이 지고 계신 일들
      ③ 센터 사람들이 들어와 그 일을 하나씩 가져갑니다
      ④ 앞이 비워지고 말씀만 남습니다
      ⑤ 로고에 헤드셋이 씌워지고 시작합니다
 
-     그림은 전부 코드로 그린 SVG 입니다. 도형이라 카드가 하나씩
-     빠져나가는 것을 마음대로 맞출 수 있고, 파일도 가볍습니다.
+     교회는 면을 붙여 세운 진짜 입체입니다(CSS 3D). 돌면서 다가옵니다.
+     사람은 평면 일러스트로 그립니다 — 긴 팔다리, 평평한 색, 이목구비 없음.
+     이목구비를 그리지 않는 것은 그림체 때문만이 아닙니다. 특정한 누군가로
+     보이지 않아야 목사님들이 자기 자신으로 읽으십니다.
 
-     목사님은 가만히 서 계십니다 — 허둥대는 모습으로 그리지 않습니다.
-     짐이 많다는 것은 목사님이 아니라 쌓이는 카드가 말합니다.
+     목사님은 가만히 서 계십니다. 허둥대는 모습으로 그리지 않습니다 —
+     짐이 많다는 것은 목사님이 아니라 쌓이는 카드가 말합니다. */
 
-     스크롤을 가로채지 않습니다. 오프닝은 그냥 키가 큰 구역이고
-     그 안의 무대가 화면에 붙어 있다가 지나갑니다. */
+  const SKIN = '#EDC9A9', SKIN2 = '#D9AE86', HAIR = '#2F3A34';
+  const ROBE = '#12402A', ROBE2 = '#0C3120', PANTS = '#2B3A5A';
+  const TOP = '#D9A32B', TOP2 = '#B8862049';
 
-  const artChurch = `<svg class="art art-church" viewBox="0 0 240 230" fill="none" aria-hidden="true">
-    <path d="M117 4h6v22h-6z M110 11h20v6h-20z" fill="#F2C82F"/>
-    <path d="M120 26 112 44h16z" fill="#F2C82F"/>
-    <path d="M120 40 44 100h152z" fill="#F2C82F"/>
-    <rect x="60" y="100" width="120" height="106" rx="7" fill="#0E3B26"/>
-    <rect class="ch-door" x="103" y="142" width="34" height="64" rx="17" fill="#F2C82F"/>
-    <circle cx="82" cy="128" r="9" fill="#F2C82F" opacity=".5"/>
-    <circle cx="158" cy="128" r="9" fill="#F2C82F" opacity=".5"/>
-  </svg>`;
-
-  const artPastor = `<g class="fig-pastor">
-    <ellipse cx="0" cy="120" rx="50" ry="7" fill="#000" opacity=".18"/>
-    <path d="M-34 120V64c0-19 15-34 34-34s34 15 34 34v56z" fill="#0E3B26"/>
-    <path d="M0 30c-7 0-13 2-18 6l18 30 18-30c-5-4-11-6-18-6z" fill="#F4F7F5"/>
-    <path d="M-3 41h6v25h-6z M-11 49h22v6h-22z" fill="#F2C82F"/>
-    <circle cx="0" cy="-2" r="25" fill="#E8C4A2"/>
-    <path d="M-25 -2A25 25 0 0 1 25 -2Z" fill="#2B3A33"/>
-    <circle cx="-9" cy="0" r="2.4" fill="#2B3A33"/>
-    <circle cx="9" cy="0" r="2.4" fill="#2B3A33"/>
-    <path d="M-6 11q6 4 12 0" stroke="#2B3A33" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  /* 목사님 — 서 계십니다. 한 손만 살짝 들려 있습니다. */
+  const artPastor = `<g class="fig fig-pastor">
+    <ellipse cx="0" cy="4" rx="46" ry="7" fill="#000" opacity=".2"/>
+    <rect x="-19" y="-86" width="15" height="88" rx="7.5" fill="${PANTS}"/>
+    <rect x="4" y="-86" width="15" height="88" rx="7.5" fill="${PANTS}"/>
+    <rect x="-23" y="-9" width="21" height="11" rx="5.5" fill="#1A2540"/>
+    <rect x="2" y="-9" width="21" height="11" rx="5.5" fill="#1A2540"/>
+    <path d="M-27-174c0-11 9-19 20-19h14c11 0 20 8 20 19l4 96c-21 7-41 7-62 0z" fill="${ROBE}"/>
+    <path d="M-27-174c0-11 9-19 20-19h7v115c-11 0-21-1-31-4z" fill="${ROBE2}"/>
+    <path d="M-9-193h18l-9 26z" fill="#F4F7F5"/>
+    <rect x="-38" y="-172" width="13" height="74" rx="6.5" fill="${ROBE}"/>
+    <circle cx="-31.5" cy="-96" r="7" fill="${SKIN}"/>
+    <g transform="rotate(-24 27 -168)">
+      <rect x="21" y="-172" width="13" height="70" rx="6.5" fill="${ROBE}"/>
+      <circle cx="27.5" cy="-100" r="7" fill="${SKIN}"/>
+    </g>
+    <rect x="-7" y="-206" width="14" height="18" rx="4" fill="${SKIN2}"/>
+    <ellipse cx="0" cy="-222" rx="19" ry="21" fill="${SKIN}"/>
+    <path d="M-19-224a19 21 0 0 1 38 0c0-16-8-24-19-24s-19 8-19 24z" fill="${HAIR}"/>
   </g>`;
 
-  /* 센터 사람은 헤드셋을 쓰고 있습니다 — 로고의 헤드셋과 이어집니다. */
-  const artStaff = (n) => `<g class="fig-staff staff-${n}">
-    <ellipse cx="0" cy="106" rx="42" ry="6" fill="#000" opacity=".18"/>
-    <path d="M-29 106V58c0-16 13-29 29-29s29 13 29 29v48z" fill="#B8912F"/>
-    <circle cx="0" cy="4" r="21" fill="#E8C4A2"/>
-    <path d="M-21 4A21 21 0 0 1 21 4Z" fill="#3A2E1C"/>
-    <circle cx="-7.5" cy="6" r="2" fill="#3A2E1C"/>
-    <circle cx="7.5" cy="6" r="2" fill="#3A2E1C"/>
-    <path d="M-23 4a23 23 0 0 1 46 0" stroke="#0E3B26" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-    <rect x="-27" y="2" width="8" height="14" rx="4" fill="#0E3B26"/>
-    <rect x="19" y="2" width="8" height="14" rx="4" fill="#0E3B26"/>
-    <path d="M23 16q0 12-11 13" stroke="#0E3B26" stroke-width="2.6" fill="none"/>
-    <circle cx="11" cy="29" r="3" fill="#0E3B26"/>
+  /* 센터 사람 — 헤드셋을 쓰고 있습니다. 로고의 헤드셋과 이어집니다. */
+  const artStaff = (n, lift) => `<g class="fig fig-staff staff-${n}">
+    <ellipse cx="0" cy="4" rx="40" ry="6" fill="#000" opacity=".2"/>
+    <rect x="-17" y="-78" width="14" height="80" rx="7" fill="${PANTS}"/>
+    <rect x="3" y="-78" width="14" height="80" rx="7" fill="${PANTS}"/>
+    <rect x="-21" y="-9" width="19" height="11" rx="5.5" fill="#1A2540"/>
+    <rect x="2" y="-9" width="19" height="11" rx="5.5" fill="#1A2540"/>
+    <path d="M-24-156c0-10 8-18 18-18h12c10 0 18 8 18 18l3 84c-18 6-36 6-54 0z" fill="${TOP}"/>
+    <rect x="-34" y="-154" width="12" height="66" rx="6" fill="${TOP}"/>
+    <circle cx="-28" cy="-88" r="6.5" fill="${SKIN}"/>
+    <g transform="rotate(${lift} 25 -150)">
+      <rect x="19" y="-154" width="12" height="66" rx="6" fill="${TOP}"/>
+      <circle cx="25" cy="-88" r="6.5" fill="${SKIN}"/>
+    </g>
+    <rect x="-6" y="-186" width="12" height="16" rx="4" fill="${SKIN2}"/>
+    <ellipse cx="0" cy="-200" rx="17" ry="19" fill="${SKIN}"/>
+    <path d="M-17-202a17 19 0 0 1 34 0c0-14-7-22-17-22s-17 8-17 22z" fill="#3A2E1C"/>
+    <path d="M-19-202a19 19 0 0 1 38 0" stroke="#F2C82F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <rect x="-23" y="-204" width="7" height="13" rx="3.5" fill="#F2C82F"/>
+    <rect x="16" y="-204" width="7" height="13" rx="3.5" fill="#F2C82F"/>
+    <path d="M20-191q0 11-10 12" stroke="#F2C82F" stroke-width="2.4" fill="none"/>
+    <circle cx="9" cy="-179" r="2.8" fill="#F2C82F"/>
   </g>`;
 
   /* 목사님이 지고 계신 일들 — 하나씩 떠올랐다가, 하나씩 옮겨 갑니다. */
   const OPENING_TASKS = [
-    { label: '성도 맞이', x: -210, y: -62 },
-    { label: '주보', x: 200, y: -78 },
-    { label: '음향', x: -228, y: 44 },
-    { label: '서류', x: 214, y: 36 },
+    { label: '성도 맞이', x: -230, y: -120 },
+    { label: '주보', x: 216, y: -142 },
+    { label: '음향', x: -244, y: 10 },
+    { label: '서류', x: 228, y: -6 },
   ];
   const taskCards = OPENING_TASKS.map((t, n) =>
     `<div class="op-task task-${n}" style="--tx:${t.x}px;--ty:${t.y}px">${esc(t.label)}</div>`
   ).join('\n        ');
+
+  /* 로고 '회' 안의 교회 — 면을 붙여 세운 진짜 입체입니다.
+     밑변 반너비 55 에 지붕 네 면이 모입니다 (78 × cos45° ≈ 55). */
+  const church3d = `<div class="op-church" aria-hidden="true">
+        <div class="cw cw-f"></div><div class="cw cw-b"></div>
+        <div class="cw cw-l"></div><div class="cw cw-r"></div>
+        <div class="cr cr1"></div><div class="cr cr2"></div>
+        <div class="cr cr3"></div><div class="cr cr4"></div>
+        <div class="c-win"></div><div class="c-door"></div>
+        <div class="c-cross"><i></i><b></b><span class="turn"><i></i><b></b></span></div>
+      </div>`;
 
   const openingBlock = `  <div class="opening" id="opening" aria-label="우리교회지원센터 소개">
     <div class="opening-stage">
@@ -362,7 +384,7 @@ function buildIndex() {
         <div class="op-logo-wrap">
           <img class="op-logo" src="assets/img/logo-light-nohead.png" alt="우리교회지원센터" width="899" height="549">
         </div>
-        ${artChurch}
+        ${church3d}
         <p class="opening-lead">교회 안으로 들어가 보겠습니다.</p>
       </div>
 
@@ -370,7 +392,7 @@ function buildIndex() {
         <p class="opening-eyebrow">교회의 하루</p>
         <h2 class="opening-title">사역 말고도<br>해야 할 일이 참 많습니다</h2>
         <div class="op-field">
-          <svg class="art art-figs" viewBox="-160 -60 320 200" fill="none" aria-hidden="true">${artPastor}</svg>
+          <svg class="art art-figs" viewBox="-200 -250 400 270" fill="none" aria-hidden="true">${artPastor}</svg>
           ${taskCards}
         </div>
       </div>
@@ -379,10 +401,10 @@ function buildIndex() {
         <p class="opening-eyebrow">그래서</p>
         <h2 class="opening-title">그 자리를<br>저희가 맡습니다</h2>
         <div class="op-field">
-          <svg class="art art-figs" viewBox="-160 -60 320 200" fill="none" aria-hidden="true">
+          <svg class="art art-figs" viewBox="-200 -250 400 270" fill="none" aria-hidden="true">
+            <g transform="translate(-118 0) scale(.88)">${artStaff(1, -34)}</g>
             ${artPastor}
-            <g transform="translate(-108 14) scale(.82)">${artStaff(1)}</g>
-            <g transform="translate(108 14) scale(.82)">${artStaff(2)}</g>
+            <g transform="translate(118 0) scale(.88)">${artStaff(2, 16)}</g>
           </svg>
           ${taskCards}
         </div>
@@ -392,13 +414,13 @@ function buildIndex() {
         <p class="opening-eyebrow">그러면</p>
         <h2 class="opening-title">목사님 앞에<br>말씀만 남습니다</h2>
         <div class="op-field">
-          <svg class="art art-figs" viewBox="-160 -60 320 200" fill="none" aria-hidden="true">
+          <svg class="art art-figs" viewBox="-200 -250 400 270" fill="none" aria-hidden="true">
             ${artPastor}
-            <g class="op-book" transform="translate(0 84)">
-              <rect x="-27" y="-17" width="54" height="34" rx="3" fill="#0A2A1B"/>
-              <rect x="-27" y="-17" width="7" height="34" rx="2" fill="#F4F7F5"/>
-              <rect x="-6" y="-9" width="26" height="3" rx="1.5" fill="#F2C82F" opacity=".75"/>
-              <rect x="-6" y="-1" width="18" height="3" rx="1.5" fill="#F2C82F" opacity=".45"/>
+            <g class="op-book" transform="translate(30 -118) rotate(-16)">
+              <rect x="-26" y="-18" width="52" height="36" rx="3" fill="#0A2A1B"/>
+              <rect x="-26" y="-18" width="7" height="36" rx="2" fill="#F4F7F5"/>
+              <rect x="-6" y="-9" width="26" height="3.4" rx="1.7" fill="#F2C82F" opacity=".75"/>
+              <rect x="-6" y="-1" width="18" height="3.4" rx="1.7" fill="#F2C82F" opacity=".45"/>
             </g>
           </svg>
         </div>
