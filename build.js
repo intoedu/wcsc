@@ -81,13 +81,13 @@ function buildIndex() {
     },
     {
       tone: 'deep',
-      eyebrow: '중고 장터',
-      title: '쓰던 음향과 악기를<br>교회끼리',
-      lead: '설치가 필요하시면 별도 비용으로 맡아 드립니다.',
-      href: 'market.html',
+      eyebrow: '브라이즈워십',
+      title: '찬양팀이<br>교회로 찾아갑니다',
+      lead: '그리스도의 나타나심을 기다리며 함께 예배합니다.',
+      href: 'services/brides.html',
       icon: 'speaker',
-      photo: 'market',
-      focus: 'center bottom',
+      photo: 'brides',
+      focus: 'center 40%',
     },
     {
       tone: 'mint',
@@ -1163,7 +1163,7 @@ function buildServicePage(s, i) {
           <div><dt>과금 방식</dt><dd>${esc(s.billing || '건별 견적')}</dd></div>
           <div><dt>소요 기간</dt><dd data-live="svc.${s.id}.duration">${esc(s.duration)}</dd></div>
           <div><dt>상담 · 견적</dt><dd>무료</dd></div>
-          <div><dt>지원 지역</dt><dd>전국</dd></div>
+          <div><dt>지원 지역</dt><dd>${esc(s.area || "전국")}</dd></div>
         </dl>
       </div>`}
     </div>
