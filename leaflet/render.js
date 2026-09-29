@@ -25,7 +25,18 @@ const JOBS = [
 
 (async () => {
   fs.mkdirSync(DIST, { recursive: true });
-  const browser = await chromium.launch();
+  /* 크롬을 어디서 찾을지 —
+     playwright 가 내려받은 것이 없으면 이미 깔려 있는 크로미움을 씁니다.
+     (이 작업 환경에는 /opt/pw-browsers/chromium 이 미리 들어 있습니다.) */
+  const BROWSER_PATHS = [
+    process.env.LEAFLET_CHROMIUM,
+    '/opt/pw-browsers/chromium',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome',
+  ].filter(Boolean);
+  const found = BROWSER_PATHS.find((b) => fs.existsSync(b));
+  const browser = await chromium.launch(found ? { executablePath: found } : {});
 
   for (const job of JOBS) {
     const file = path.join(HERE, job.src);
