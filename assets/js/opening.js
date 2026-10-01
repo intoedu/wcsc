@@ -116,7 +116,9 @@
     if (H !== lastH) {
       lastH = H;
       var h = H - window.innerHeight;
-      if (h > 0) jump(Math.round(lastP * h));
+      /* 끝 바로 앞에서 돌리면 반올림으로 끝에 닿아 버립니다 — 한 칸 앞에
+         둡니다. 끝내는 것은 사용자의 다음 스크롤이 합니다. */
+      if (h > 0) jump(Math.min(Math.round(lastP * h), h - 1));
     }
     onScroll();
   }
