@@ -4176,6 +4176,12 @@ body.opening-on .opening-stage,
 /* 끝나면 — 키가 큰 구역을 접어 자리를 비우고, 무대는 그 자리에서
    옅어져 사라집니다. 위로 밀려 올라가지 않습니다. */
 .opening.is-done { height: 0; }
+
+/* 사라지는 동안 화면을 잠급니다 (opening.js 가 붙였다 뗍니다).
+   휴대폰에서 손가락을 튕긴 관성은 이벤트로 막을 수 없고 화면 자체를
+   잠가야 멈춥니다. 스크롤바 자리는 남겨 두어(scrollbar-gutter) 잠그고
+   풀 때 화면 폭이 바뀌어 홈이 옆으로 들썩이지 않게 합니다. */
+html.opening-lock { overflow: hidden; scrollbar-gutter: stable; }
 .opening.is-leaving .opening-stage {
   opacity: 0;
   pointer-events: none;
