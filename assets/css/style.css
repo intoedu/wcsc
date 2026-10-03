@@ -1559,6 +1559,9 @@ body[data-ls-pane="mine"] .page-hero { display: none; }
 .camp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 /* 한 가지만 있을 때는 반쪽으로 눕지 않게 가운데로 폅니다. */
 .camp-grid.is-one { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; }
+/* 세 장이면 한 줄에 셋 — 두 칸에 놓으면 마지막 한 장이 외따로 남습니다. */
+.camp-grid.is-three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 980px) { .camp-grid.is-three { grid-template-columns: 1fr; } }
 .camp-card {
   display: flex; flex-direction: column; gap: 12px; padding: 30px 28px;
   background: #fff; border: 1px solid var(--line); border-radius: var(--radius);

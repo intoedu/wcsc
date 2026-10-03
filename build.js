@@ -15,6 +15,16 @@ const Boards = require('./src/boards');
 /* 갈래 수를 우리말로. 손으로 적어 두면 항목이 늘 때마다 어긋납니다. */
 const NUM = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
 
+/* 항목 이름 뒤의 '은 / 는'. 마지막 글자에 받침이 있으면 '은', 없으면 '는'.
+   이름 뒤에 '은' 을 그냥 붙였더니 [고비캠프은] [인투오피스은] [커뮤니티 센터은]
+   처럼 나갔습니다. 한글이 아닌 글자로 끝나면(AKC) 읽는 소리가 대개
+   받침 없이 끝나 '는' 을 씁니다. */
+function eunNeun(word) {
+  const c = String(word).trim().slice(-1).charCodeAt(0);
+  if (c >= 0xac00 && c <= 0xd7a3) return (c - 0xac00) % 28 ? '은' : '는';
+  return '는';
+}
+
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
   applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
   plans, planRules, trial, invite, boardTabs,
@@ -1191,7 +1201,7 @@ ${s.campTypes ? `
   <div class="wrap">
     ${sectionHead(...(s.campTypesHead || ['참가 방법', '등록하고 참석하시면 됩니다',
       '장소와 강사, 프로그램과 안전 관리까지 AKC 팀이 준비합니다.']))}
-    <div class="camp-grid${s.campTypes.length === 1 ? ' is-one' : ''}">
+    <div class="camp-grid${s.campTypes.length === 1 ? ' is-one' : s.campTypes.length === 3 ? ' is-three' : ''}">
       ${s.campTypes.map((c) => `<article class="camp-card">
         <span class="camp-tag">${esc(c.tag)}</span>
         <h3>${esc(c.title)}</h3>
@@ -1233,9 +1243,9 @@ ${s.schedule ? `
     ${sectionHead(...(s.schedule.head || ['예시 일정', '하루가 이렇게 흘러갑니다']))}
     <div class="sched-wrap">
       <table class="sched">
-        <thead><tr><th scope="col">시간</th><th scope="col">일정</th></tr></thead>
+        <thead><tr>${(s.schedule.cols || ['시간', '일정']).map((c) => `<th scope="col">${esc(c)}</th>`).join('')}</tr></thead>
         <tbody>
-          ${s.schedule.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join('\n          ')}
+          ${s.schedule.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th>${r.slice(1).map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('\n          ')}
         </tbody>
       </table>
     </div>
@@ -1276,7 +1286,7 @@ ${s.useCases ? `
 
 <section class="section">
   <div class="wrap narrow">
-    ${sectionHead('진행 순서', `${s.name}은 이렇게 진행됩니다`)}
+    ${sectionHead('진행 순서', `${s.name}${eunNeun(s.name)} 이렇게 진행됩니다`)}
     <ol class="timeline">
       ${s.steps
         .map(
@@ -1439,7 +1449,7 @@ ${pageHero({
         ${externalIds.length
           ? `<p class="fs-help fs-help-external">${externalIds
               .map((id) => esc(services.find((v) => v.id === id).name))
-              .join(' · ')} 은 별도 접수 페이지에서 신청받습니다. 아래에서 해당 항목을 누르면 새 창으로 열립니다.</p>`
+              .join(' · ')}${eunNeun(services.find((v) => v.id === externalIds[externalIds.length - 1]).name)} 별도 접수 페이지에서 신청받습니다. 아래에서 해당 항목을 누르면 새 창으로 열립니다.</p>`
           : ''}
         <div class="pick-grid">
         ${serviceChecks}
