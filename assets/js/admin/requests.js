@@ -65,9 +65,15 @@
       return (f && f.label) || fname;
     }
 
+    var AGREE = { refund: '취소 · 환불 규정' };
     var extraRows = Object.keys(r.extra || {}).map(function (key) {
       var parts = key.split('__');
       var val = r.extra[key];
+      /* 동의 기록은 항목의 답이 아닙니다 — 따로 적습니다. */
+      if (parts[0] === 'agree') {
+        return '<div><dt>동의<br><small style="font-weight:400">' + h(AGREE[parts[1]] || parts[1]) + '</small></dt>' +
+          '<dd>' + h(val) + '</dd></div>';
+      }
       var body;
       if (Object.prototype.toString.call(val) === '[object Array]') {
         /* 첨부는 비공개 저장소에 있습니다 — 누를 때 10분짜리 주소를 받아 엽니다. */

@@ -25,11 +25,33 @@ function eunNeun(word) {
   return '는';
 }
 
+/* 단가표 — 금액은 숫자(원)로 적어 두고 여기서 '25,000원' 으로 바꿉니다.
+   항목 페이지와 비용 안내 페이지가 같은 표를 씁니다. */
+function priceTableHtml(t) {
+  const won = (v) => (typeof v === 'number' ? `${v.toLocaleString('ko-KR')}원` : esc(v));
+  return `<div class="sched-wrap">
+      <table class="sched price-table">
+        <thead><tr>${t.cols.map((c) => `<th scope="col">${esc(c)}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${t.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th>${r.slice(1).map((v) => `<td>${won(v)}</td>`).join('')}</tr>`).join('\n          ')}
+        </tbody>
+      </table>
+    </div>
+    ${t.notes && t.notes.length ? `<ul class="price-notes">${t.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}`;
+}
+
 const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
   applyLink, externalNote, site, categories, services, serviceGroups, categoryCards, categoryOf,
   plans, planRules, trial, invite, boardTabs,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
+
+/* 운영 사업자 한 줄 — 하단 · 약관 · 환불 규정이 함께 씁니다. */
+const BIZ = site.business || {};
+const LEGAL = site.legal || {};
+function mailOrderText() {
+  return BIZ.mailOrderNo ? esc(BIZ.mailOrderNo) : '신고 진행 중';
+}
 
 const ROOT = __dirname;
 const out = [];
@@ -857,12 +879,13 @@ ${pageHero({
     ${sectionHead('누구에게', '물어보실 곳')}
     <dl class="facts">
       <div><dt>기관명</dt><dd>${esc(site.fullName || site.name)}</dd></div>
+      <div><dt>운영</dt><dd>${esc(BIZ.name)} (대표 ${esc(BIZ.ceo)})</dd></div>
       <div><dt>개인정보 보호책임자</dt><dd>${todo(P.officer, '보호책임자 성함과 직책')}</dd></div>
       <div><dt>전화</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a></dd></div>
       <div><dt>이메일</dt><dd><a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
       ${addressText() ? `<div><dt>주소</dt><dd>${addressText()}</dd></div>` : ''}
-      <div><dt>사업자등록번호</dt><dd>${todo(P.bizNo, '사업자등록번호')}</dd></div>
-      <div><dt>통신판매업 신고번호</dt><dd>${todo(P.mailOrderNo, '통신판매업 신고번호')}</dd></div>
+      <div><dt>사업자등록번호</dt><dd>${todo(P.bizNo || BIZ.bizNo, '사업자등록번호')}</dd></div>
+      <div><dt>통신판매업 신고번호</dt><dd>${mailOrderText()}</dd></div>
       <div><dt>시행일</dt><dd>${todo(P.effectiveDate, '이 방침을 처음 적용하는 날짜')}</dd></div>
     </dl>
     <p class="pv-fine">
@@ -1312,7 +1335,16 @@ ${s.scope ? `
   </div>
 </section>` : ''}
 
-<section class="section${s.scope ? '' : ' section-alt'}">
+${s.priceTable ? `
+<section class="section${s.scope ? '' : ' section-alt'}" id="price">
+  <div class="wrap narrow">
+    ${sectionHead(...(s.priceTable.head || ['단가표', '금액']))}
+    ${priceTableHtml(s.priceTable)}
+    <p class="price-refund">결제 전 <a href="../refund.html">취소 · 환불 규정</a>을 꼭 확인해 주세요. 신청하실 때 동의를 받습니다.</p>
+  </div>
+</section>` : ''}
+
+<section class="section${(!!s.scope) !== (!!s.priceTable) ? '' : ' section-alt'}">
   <div class="wrap">
     <div class="split">
       <div class="split-col">
@@ -1334,6 +1366,7 @@ ${s.scope ? `
             <div><dt>상담 · 견적</dt><dd>무료</dd></div>
           </dl>
           ${applyLink(s, '../', { cls: 'btn-primary btn-block', label: '견적 요청하기', arrow: false })}
+          ${s.payElsewhere ? '' : `<p class="price-refund">결제 전 <a href="../refund.html">취소 · 환불 규정</a>을 확인해 주세요.</p>`}
         </div>
       </div>
     </div>
@@ -1570,6 +1603,21 @@ ${pageHero({
         </label>
       </fieldset>
 
+      <fieldset class="fs">
+        <legend><span class="fs-no">5</span> 취소 · 환불 규정 확인</legend>
+        <div class="consent-box consent-refund" tabindex="0">
+          <p><strong>교회마다 따로 만드는 일이라, 시작한 작업은 환불되지 않습니다.</strong></p>
+          <p>결제 후 작업을 시작하기 전에는 <strong>전액</strong> 돌려드립니다. 작업을 시작한 뒤에는 이미 시작한 작업(단계)의 금액을 뺀 나머지를 돌려드리며, 결과물을 모두 받으신 뒤에는 환불되지 않습니다. 센터 사정으로 진행하지 못하면 전액 돌려드립니다.</p>
+          <p>영상 제작에서 <strong>편집만</strong> 맡기시는 경우, 의뢰 시작과 함께 편집이 시작되어 그 뒤에는 환불되지 않습니다.</p>
+          <p><a href="refund.html" target="_blank" rel="noopener">취소 · 환불 규정 전체 보기</a> · <a href="terms.html" target="_blank" rel="noopener">이용약관</a></p>
+        </div>
+        <label class="check-line">
+          <input type="checkbox" id="refundAgree" name="refund_agree" data-version="${esc(LEGAL.version)}" required>
+          <span>취소 · 환불 규정과 이용약관을 확인했고 동의합니다. <em class="req">필수</em></span>
+        </label>
+        <p class="err" id="err-refund" hidden>취소 · 환불 규정에 동의해 주세요.</p>
+      </fieldset>
+
       <div class="form-submit">
         <button type="submit" class="btn btn-primary btn-lg btn-block" id="submitBtn">신청서 제출하기</button>
         <p class="form-note">제출 후 접수번호가 발급됩니다. 문의: <a href="${site.contact.phoneHref}">${phoneText()}</a></p>
@@ -1708,33 +1756,84 @@ function planCard(p) {
 }
 
 function buildPricing() {
-  /* 패키지를 다시 짜는 동안 내용을 내려 둡니다.
-     주소는 살려 두고(들어오시는 분이 404 를 만나지 않게) 안내만 보여 줍니다.
-     패키지 내용(plans · trial · invite)은 src/data/site.js 에 그대로 있으니,
-     다시 여실 때는 이 함수만 예전 모양으로 되돌리면 됩니다. */
+  /* 비용 안내 — PG 심사가 '무엇을, 얼마에 파는지' 를 보는 곳입니다.
+     금액이 정해진 것은 단가표로, 교회마다 달라지는 것은 무엇에 따라
+     정해지는지를 적습니다. 결제 전에 볼 환불 규정을 바로 아래에 둡니다.
+     (패키지 plans · trial · invite 는 site.js 에 그대로 있습니다 — 다시
+     여실 때 이 페이지에 구역을 더하면 됩니다.) */
+  const video = services.find((s) => s.id === 'video');
+  const board = site.listingBoard;
+  const open = services.filter((s) => !s.soon);
+
   const body = `
 ${pageHero({
-  eyebrow: '패키지',
-  title: '패키지를 다시 짜고 있습니다',
-  lead: '더 알맞은 기준으로 고쳐 쓰는 중입니다. 준비되는 대로 이 자리에 올려 드리겠습니다.',
+  eyebrow: '비용 안내',
+  title: '무엇을,<br>얼마에 맡기시는지',
+  lead: '금액이 정해진 항목은 단가표로, 교회마다 달라지는 항목은 무엇에 따라 정해지는지 적어 두었습니다. 상담과 견적에는 비용이 들지 않습니다.',
 })}
 
-<section class="section">
+${video && video.priceTable ? `
+<section class="section" id="video">
   <div class="wrap narrow">
-    <div class="renew-box">
-      <h2>지금은 요금을 안내해 드리지 못합니다</h2>
-      <p>
-        비용이 궁금하시면 전화나 문의로 알려 주세요. 지금 필요하신 항목만 놓고
-        견적을 따로 내어 드립니다. 상담과 견적에는 비용이 들지 않습니다.
-      </p>
-      <div class="renew-actions">
-        <a class="btn btn-primary btn-lg" href="apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
-        <a class="btn btn-outline btn-lg" href="contact.html">문의하기</a>
-      </div>
-      <p class="renew-fine">
-        홈페이지 · 인투오피스처럼 이미 금액이 정해진 항목은
-        <a href="services/index.html">지원 항목</a> 에서 그대로 보실 수 있습니다.
-      </p>
+    ${sectionHead('영상 제작', '단가표 — 60초 기준 · 부가세 별도')}
+    ${priceTableHtml(video.priceTable)}
+    <div class="price-actions">
+      <a class="btn btn-primary" href="apply.html?service=video">영상 제작 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+      <a class="btn btn-outline" href="services/video.html">자세히 보기</a>
+    </div>
+  </div>
+</section>` : ''}
+
+<section class="section section-alt" id="board">
+  <div class="wrap narrow">
+    ${sectionHead('게시판 이용료', '부동산 매물만 등록비가 있습니다')}
+    <div class="sched-wrap">
+      <table class="sched price-table">
+        <thead><tr><th scope="col">게시판</th><th scope="col">이용료</th><th scope="col">게시 기간</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">부동산 매물</th><td>${Number(board.fee).toLocaleString('ko-KR')}원</td><td>거래가 끝날 때까지</td></tr>
+          <tr><th scope="row">중고 장터 · 교역자 구인 · 게스트하우스 · 집회 티켓팅</th><td>무료</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sched-note">매물 등록비는 서류를 확인한 뒤 입금 안내를 드리며, 입금이 확인되면 게시합니다. 중고 장터의 설치 대행은 별도 유상 서비스로, 현장을 보고 견적을 드립니다.</p>
+    <div class="price-actions">
+      <a class="btn btn-primary" href="listings.html#new">매물 올리기 ${icon('arrow', 'ico ico-sm')}</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="all">
+  <div class="wrap narrow">
+    ${sectionHead('지원 항목 전체', '항목마다 비용과 결제 방식')}
+    <div class="sched-wrap">
+      <table class="sched price-table is-text">
+        <thead><tr><th scope="col">항목</th><th scope="col">비용</th><th scope="col">결제 방식</th></tr></thead>
+        <tbody>
+          ${open.map((s) => `<tr><th scope="row"><a href="services/${s.slug}.html">${esc(s.name)}</a></th><td>${esc(s.price || '상담 후 견적')}</td><td>${esc(s.payElsewhere ? `${s.payElsewhere}에서 직접` : (s.billing || '건별 견적'))}</td></tr>`).join('\n          ')}
+        </tbody>
+      </table>
+    </div>
+    <p class="sched-note">[상담 후 견적] 인 항목은 신청서를 남겨 주시면 1영업일 안에 연락드려 견적서를 보내 드립니다. 견적서에는 작업 범위, 포함하지 않는 작업, 금액, 일정, 환불 기준을 함께 적습니다. 여러 항목을 묶는 패키지는 다시 짜고 있습니다.</p>
+  </div>
+</section>
+
+<section class="section section-alt" id="refund">
+  <div class="wrap narrow">
+    ${sectionHead('결제 전에', '취소 · 환불은 이렇게 됩니다')}
+    <div class="sched-wrap">
+      <table class="sched">
+        <tbody>
+          <tr><th scope="row">결제 후, 작업 시작 전</th><td><strong>전액 환불</strong></td></tr>
+          <tr><th scope="row">작업을 시작한 뒤</th><td>이미 시작한 작업(단계)의 금액을 뺀 나머지 환불</td></tr>
+          <tr><th scope="row">결과물을 모두 받으신 뒤 · 게시가 시작된 뒤</th><td>환불되지 않습니다 (저희 실수는 무료로 고쳐 드립니다)</td></tr>
+          <tr><th scope="row">센터 사정으로 진행하지 못할 때</th><td><strong>전액 환불</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="price-actions">
+      <a class="btn btn-outline" href="refund.html">취소 · 환불 규정 전체 보기</a>
+      <a class="btn btn-outline" href="terms.html">이용약관</a>
     </div>
   </div>
 </section>
@@ -1745,12 +1844,361 @@ ${ctaBand('')}
   write(
     'pricing.html',
     layout({
-      title: '패키지 (준비 중) | 우리교회지원센터',
+      title: '비용 안내 | 우리교회지원센터',
       description:
-        '패키지를 다시 짜고 있습니다. 준비되는 대로 안내해 드리며, '
-        + '그 사이에는 필요하신 항목만 놓고 견적을 따로 내어 드립니다.',
+        '영상 제작 단가표, 게시판 이용료, 지원 항목별 비용과 결제 방식, 그리고 결제 전에 보실 취소 · 환불 기준을 적어 두었습니다.',
       base: '',
       active: 'pricing.html',
+      body,
+    })
+  );
+}
+
+/* =========================================================
+   취소 · 환불 규정
+
+   PG 심사가 가장 먼저 보는 페이지입니다. 그리고 법이 정한 조건을
+   갖춰야 '시작한 작업은 환불되지 않습니다' 가 효력을 가집니다.
+
+     전자상거래법 제17조 제2항 제5호
+       용역은 제공이 시작되면 청약철회를 할 수 없다. 다만 나눠서
+       제공하는 용역은 아직 시작하지 않은 부분은 철회할 수 있다.
+     같은 조 제6항
+       철회할 수 없는 사유를 소비자가 알기 쉽게 표시하지 않으면,
+       그래도 철회할 수 있다.
+     같은 법 시행령 제21조
+       주문에 따라 따로 만드는 것은, 미리 따로 알리고 서면(전자문서
+       포함)으로 동의를 받아야 철회를 제한할 수 있다.
+
+   그래서 — 이 페이지에 분명히 적고, 신청서와 매물 등록에서 따로
+   동의를 받고(판과 시각을 함께 남깁니다), '시작한 단계만' 공제합니다.
+
+   영상 제작은 팀 매뉴얼 3(환불)을 그대로 옮겼습니다. 나머지 항목은
+   같은 틀로 적은 기본값입니다 — 대표님 확인이 필요합니다.
+   ========================================================= */
+function buildRefund() {
+  const won = (n) => `${Number(n).toLocaleString('ko-KR')}원`;
+
+  /* 항목별 기준 */
+  const PARTS = [
+    {
+      id: 'video',
+      title: '영상 제작',
+      lead: '영상 제작팀의 환불 기준입니다.',
+      rows: [
+        ['입금 후 의뢰 시작 전', '전액 환불 — 담당자 배정, 자료를 기다리는 기간도 포함합니다'],
+        ['의뢰 시작 후 (교회 사정)', '시작한 작업(기획 · 촬영 · 편집)의 금액만 빼고 환불합니다. 뺄 금액이 받은 금액보다 크면 차액을 청구합니다'],
+        ['편집만 맡기신 경우', '의뢰 시작과 함께 편집이 시작되므로, 의뢰 시작 뒤에는 환불되지 않습니다'],
+        ['센터 사정으로 진행하지 못할 때', '전액 환불 — 이미 받으신 결과물(기획서 · 촬영 원본)을 계속 쓰시면 그 금액만 뺍니다'],
+        ['천재지변 · 출연자 사고 등', '먼저 일정을 다시 잡습니다. 어려우면 시작하지 않은 작업은 전액, 시작한 작업은 실제 든 비용만 빼고 환불합니다'],
+      ],
+      start: [
+        '첫 작업 — 의뢰 시작일 (기획을 맡기시면 기획, 아니면 촬영이나 편집)',
+        '촬영 — 촬영일 2영업일 전 (사람과 장비를 잡는 때)',
+        '편집 — 기획서 · 구성안이 확정되고 촬영이 끝난(또는 영상을 받은) 때',
+      ],
+      example: {
+        title: '예시 — 홍보 스케치 60초, 기획 + 촬영 + 편집 530,000원 (기획 200,000 · 촬영 180,000 · 편집 150,000), 선금 265,000원 입금',
+        rows: [
+          ['자료를 기다리는 중 (의뢰 시작 전)', '0원', `${won(265000)} 전액 환불`],
+          ['기획 중', won(200000), `${won(65000)} 환불`],
+          ['촬영일 2영업일 전 이후', `${won(380000)} (기획 + 촬영)`, `${won(115000)} 추가 청구`],
+          ['편집 시작 후', `${won(530000)} (전체)`, `잔금 ${won(265000)} 청구`],
+        ],
+      },
+      more: [
+        '작업 자료가 오지 않으면 — 입금 후 15영업일에 [일정 다시 잡기(최대 7영업일, 한 번)] 와 [전액 환불] 가운데 고르시도록 여쭙니다. 회신이 없으면 최종 안내 후 계약을 끝내고 전액 환불합니다.',
+        '의뢰 시작 후 연락이 닿지 않으면 — 보류를 알려 드리고(보류 기간은 작업 기간에서 뺍니다), 그래도 회신이 없으면 최종 안내 후 계약을 끝냅니다. 만든 결과물은 전달하고, 시작하지 않은 작업 금액은 돌려드립니다.',
+        '약속한 최종본 전달일보다 센터 사정으로 10영업일 넘게 늦어지면 해지하실 수 있고, 이때는 전액 환불합니다 (받으신 결과물을 쓰시면 그 금액만 뺍니다).',
+      ],
+    },
+    {
+      id: 'homepage',
+      title: '홈페이지 제작',
+      rows: [
+        ['제작 착수 전', '전액 환불'],
+        ['제작 착수 후', '진행한 단계(기획 · 디자인 시안 · 제작)의 금액을 뺀 나머지를 환불합니다. 단계별 금액은 견적서에 적어 드립니다'],
+        ['사이트를 열어 드린 뒤', '제작비는 환불되지 않습니다'],
+        ['월 관리비', '해지를 말씀하신 다음 달부터 청구하지 않습니다. 이미 시작된 달은 환불되지 않습니다. 연 단위로 미리 내셨다면 남은 달만큼 돌려드리되, 연납 할인을 받으셨으면 쓰신 달을 월 금액으로 다시 계산합니다'],
+      ],
+    },
+    {
+      id: 'design',
+      title: '마케팅 지원 (디자인 · SNS)',
+      rows: [
+        ['시안 작업 시작 전', '전액 환불'],
+        ['시안 작업을 시작한 건', '환불되지 않습니다. 여러 건을 함께 맡기셨다면 시작하지 않은 건은 환불합니다'],
+        ['주보처럼 매주 받는 정기 제작', '해지를 말씀하신 다음 회차부터 청구하지 않습니다'],
+      ],
+    },
+    {
+      id: 'sound',
+      title: '음향 세팅 · 설치 대행',
+      rows: [
+        ['현장 방문(진단 · 실측) 전', '전액 환불'],
+        ['현장 방문 후, 설치 전', '진단 · 출장 비용을 뺀 나머지를 환불합니다. 금액은 견적서에 적어 드립니다'],
+        ['설치를 시작한 뒤', '진행한 작업의 금액을 뺀 나머지를 환불합니다'],
+        ['장비 대금', '교회에서 직접 사시는 장비는 판매처의 환불 규정을 따릅니다'],
+      ],
+    },
+    {
+      id: 'listing',
+      title: `부동산 매물 게시판 등록비 (${won(site.listingBoard.fee)})`,
+      rows: [
+        ['입금 후 게시 전', '전액 환불'],
+        ['게시가 시작된 뒤', '환불되지 않습니다 — 게시는 거래가 끝날 때까지 기한 없이 유지됩니다'],
+        ['센터 사정으로 게시하지 못할 때', '전액 환불'],
+      ],
+      note: '서류를 먼저 확인한 뒤 입금 안내를 드리므로, 서류가 맞지 않아 게시하지 못하는 경우에는 돈이 먼저 나가지 않습니다.',
+    },
+  ];
+
+  const body = `
+${pageHero({
+  eyebrow: '취소 · 환불 규정',
+  title: '결제 전에<br>꼭 읽어 주세요',
+  lead: '언제까지 전액 돌려드리고, 언제부터 돌려드리지 못하는지 적어 두었습니다. 신청하실 때 이 규정에 따로 동의를 받습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    ${sectionHead('한눈에', '시작하기 전에는 전액, 시작한 단계는 공제')}
+    <div class="sched-wrap">
+      <table class="sched">
+        <thead><tr><th scope="col">언제</th><th scope="col">환불</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">결제 후, 작업을 시작하기 전</th><td><strong>전액 환불</strong></td></tr>
+          <tr><th scope="row">작업을 시작한 뒤</th><td>이미 시작한 작업(단계)의 금액을 뺀 나머지 환불</td></tr>
+          <tr><th scope="row">결과물을 모두 받으신 뒤 · 게시가 시작된 뒤</th><td>환불되지 않습니다 — 저희 실수는 횟수와 관계없이 무료로 고쳐 드립니다</td></tr>
+          <tr><th scope="row">센터 사정으로 진행하지 못할 때</th><td><strong>전액 환불</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sched-note">
+      <strong>작업을 시작한 날</strong>은 작업에 필요한 자료가 모두 도착해, 담당자가 "의뢰 시작" 을 날짜와 함께
+      글(메신저 · 이메일)로 알려 드린 날입니다. 이 날이 환불을 가르는 기준이 됩니다.
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('왜', '시작한 작업을 돌려드리지 못하는 이유')}
+    <div class="legal-doc">
+      <p>
+        홈페이지 · 영상 · 디자인은 교회마다 따로 만드는 일이라, 한 번 시작한 작업은 다른 곳에 다시 쓸 수 없습니다.
+      </p>
+      <p>
+        전자상거래법은 계약 뒤 7일 안에 청약을 철회할 수 있도록 하면서, <strong>용역의 제공이 시작된 경우</strong>에는
+        철회할 수 없도록 하고(제17조 제2항 제5호), 나눠서 제공하는 용역은 <strong>아직 시작하지 않은 부분</strong>은
+        철회할 수 있도록 합니다. 이 규정은 그 기준을 따릅니다 — 그래서 전부가 아니라 <strong>시작한 단계만</strong> 공제합니다.
+      </p>
+      <p>
+        또 교회의 주문에 따라 따로 만드는 일은, 미리 따로 알려 드리고 동의를 받아야 철회를 제한할 수 있습니다
+        (같은 법 시행령 제21조). 신청서와 매물 등록 화면에서 이 규정을 따로 보여 드리고 동의를 받으며,
+        동의하신 규정의 판과 시각을 함께 남깁니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow">
+    ${sectionHead('항목별', '항목마다의 기준')}
+    <div class="refund-parts">
+      ${PARTS.map((pt) => `<article class="refund-part" id="refund-${pt.id}">
+        <h3>${esc(pt.title)}</h3>
+        ${pt.lead ? `<p class="refund-lead">${esc(pt.lead)}</p>` : ''}
+        <div class="sched-wrap">
+          <table class="sched">
+            <tbody>
+              ${pt.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join('\n              ')}
+            </tbody>
+          </table>
+        </div>
+        ${pt.start ? `<h4>작업이 시작된 것으로 보는 때</h4>
+        <ul class="price-notes">${pt.start.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+        ${pt.example ? `<h4>${esc(pt.example.title)}</h4>
+        <div class="sched-wrap">
+          <table class="sched">
+            <thead><tr><th scope="col">취소한 때</th><th scope="col">빼는 금액</th><th scope="col">결과</th></tr></thead>
+            <tbody>
+              ${pt.example.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('\n              ')}
+            </tbody>
+          </table>
+        </div>` : ''}
+        ${pt.more ? `<ul class="price-notes">${pt.more.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+        ${pt.note ? `<p class="sched-note">${esc(pt.note)}</p>` : ''}
+      </article>`).join('\n      ')}
+
+      <article class="refund-part" id="refund-elsewhere">
+        <h3>센터가 결제를 받지 않는 항목</h3>
+        <ul class="price-notes">
+          <li>AKC — 캠프 등록과 참가비는 AKC 에서 받고, AKC 의 기준을 따릅니다.</li>
+          <li>브라이즈워십 — 후원으로 운영되며, 재정은 교회와 브라이즈워십이 직접 협의합니다.</li>
+          <li>인투오피스 — 결제와 해지는 인투오피스에서 합니다.</li>
+          <li>집회 티켓팅 — 참가비의 수납 · 환불 · 일정 변경은 집회 주최 측이 정하고 안내합니다.</li>
+          <li>외부 접수 페이지에서 신청 · 결제하신 경우 — 그 접수처의 규정을 따릅니다.</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap narrow">
+    ${sectionHead('절차', '환불은 이렇게 받으십니다')}
+    <ol class="legal-steps">
+      <li>전화 · 이메일 · 담당자 메신저로 취소를 말씀해 주세요. 글로 남겨 주시면 날짜가 분명해집니다.</li>
+      <li>담당자가 빼는 금액과 돌려드릴 금액을 내역과 함께 알려 드립니다.</li>
+      <li>계좌 이체로 내셨다면 돌려받으실 계좌를 확인한 뒤 <strong>5영업일 안에</strong> 입금합니다.
+        카드로 내셨다면 카드 결제를 취소하며, 실제 반영은 카드사 사정에 따라 며칠 걸릴 수 있습니다.</li>
+    </ol>
+    <p class="sched-note">
+      영업일은 월~금이며 공휴일은 빼고 셉니다. 불만이나 분쟁은 아래 연락처로 먼저 말씀해 주시고,
+      협의가 되지 않으면 한국소비자원(국번 없이 1372)에 도움을 요청하실 수 있습니다.
+    </p>
+    ${legalOperator()}
+  </div>
+</section>
+`;
+
+  write(
+    'refund.html',
+    layout({
+      title: '취소 · 환불 규정 | 우리교회지원센터',
+      description: '결제 후 작업 시작 전에는 전액 환불, 시작한 단계는 공제합니다. 항목별 환불 기준과 절차를 적어 두었습니다.',
+      base: '',
+      active: 'refund.html',
+      body,
+    })
+  );
+}
+
+/* 약관 · 환불 규정 맨 아래의 운영자 상자 */
+function legalOperator() {
+  return `<dl class="facts legal-facts">
+      <div><dt>운영</dt><dd>${esc(BIZ.name)} — 우리교회지원센터를 운영합니다</dd></div>
+      <div><dt>대표</dt><dd>${esc(BIZ.ceo)}</dd></div>
+      <div><dt>사업자등록번호</dt><dd>${esc(BIZ.bizNo)}</dd></div>
+      <div><dt>통신판매업 신고번호</dt><dd>${mailOrderText()}</dd></div>
+      <div><dt>주소</dt><dd>${esc(BIZ.address)}</dd></div>
+      <div><dt>전화 · 이메일</dt><dd><a href="${site.contact.phoneHref}">${phoneText()}</a> · <a href="mailto:${esc(site.contact.email)}">${emailText()}</a></dd></div>
+      <div><dt>시행일</dt><dd>${esc(LEGAL.effectiveDate)}</dd></div>
+    </dl>`;
+}
+
+/* =========================================================
+   이용약관
+
+   신청 → 견적 → 동의 · 결제 로 계약이 서는 지금의 흐름을 그대로
+   적었습니다. 배상 한도처럼 법률 검토가 필요한 조항은 넣지 않았습니다
+   (영상팀 매뉴얼에도 '법률 검토 후' 로 적혀 있습니다).
+   ========================================================= */
+function buildTerms() {
+  const A = [
+    ['목적', [
+      `이 약관은 ${esc(BIZ.name)}(이하 "센터")가 운영하는 우리교회지원센터 홈페이지와 지원 서비스를 이용하는 조건과 절차, 센터와 이용자의 권리와 의무를 정합니다.`,
+    ]],
+    ['정의', [
+      '"서비스" 란 센터가 홈페이지에서 안내하는 지원 항목(홈페이지 제작, 마케팅 지원, 영상 제작, 음향 세팅 등)과 게시판을 말합니다.',
+      '"이용자" 란 이 약관에 따라 서비스를 신청하거나 이용하는 교회 · 단체 · 개인을 말합니다.',
+      '"의뢰 시작일" 이란 작업에 필요한 자료가 모두 도착해 센터가 작업 시작을 날짜와 함께 글로 알린 날을 말합니다.',
+      '"확정 문서" 란 이용자가 글로 확정한 기획서 · 구성안 · 시안처럼 작업의 기준이 되는 문서를 말합니다.',
+    ]],
+    ['약관의 게시와 변경', [
+      '센터는 이 약관을 홈페이지 하단에 게시합니다.',
+      '센터는 관련 법령을 어기지 않는 범위에서 약관을 바꿀 수 있으며, 바꿀 때는 시행일 7일 전부터(이용자에게 불리한 경우 30일 전부터) 홈페이지에 알립니다.',
+      '바뀐 약관은 시행일 이후에 맺는 계약부터 적용하며, 이미 맺은 계약은 그때의 약관을 따릅니다.',
+    ]],
+    ['신청과 계약', [
+      '이용자는 홈페이지의 신청서로 서비스를 신청합니다.',
+      '센터는 신청 내용을 확인한 뒤 견적서를 보냅니다. 견적서에는 작업 범위, 포함하지 않는 작업, 금액, 일정, 환불 기준을 적습니다.',
+      '이용자가 견적서에 글로 동의하고 대금을 결제하면 계약이 성립합니다. 게시판 등록비처럼 금액이 정해진 서비스는 안내된 금액을 결제한 때 성립합니다.',
+      '센터는 일정 · 지역 · 내용상 서비스를 제공하기 어려운 경우 신청을 받지 않을 수 있으며, 그 사유를 알려 드립니다.',
+    ]],
+    ['대금과 결제', [
+      '금액은 비용 안내(단가표)와 견적서를 따르며, 따로 적지 않으면 부가가치세는 별도입니다.',
+      '결제는 계좌 이체 또는 센터가 안내하는 결제 수단으로 합니다.',
+      '항목에 따라 선금과 잔금으로 나누어 받을 수 있으며, 나누는 기준은 견적서에 적습니다.',
+      '세금계산서가 필요하시면 사업자등록증 또는 고유번호증과 받으실 이메일을 알려 주십시오.',
+    ]],
+    ['서비스의 제공', [
+      '센터는 확정 문서와 견적서에 적은 일정에 따라 서비스를 제공합니다.',
+      '이용자는 작업에 필요한 자료를 정한 기한까지 보내 주셔야 하며, 자료나 의견을 기다리는 기간은 작업 기간에 넣지 않습니다.',
+      '센터가 약속한 날짜를 지키기 어려우면 미리 알리고 바뀐 날짜를 안내합니다.',
+    ]],
+    ['수정과 추가 작업', [
+      '결과물마다 견적서에 적은 횟수만큼 수정해 드립니다. 센터의 실수(오탈자, 확정한 내용의 누락 등)는 횟수와 관계없이 무료로 고칩니다.',
+      '확정 문서 안의 내용을 고치는 것은 수정이고, 확정 문서 자체를 바꾸는 것(구성 변경, 분량 추가 등)은 추가 작업입니다. 추가 작업은 금액과 기간을 먼저 알리고 이용자가 동의한 뒤에 진행합니다.',
+      '결과물을 전달한 뒤 견적서에 정한 확인 기간 안에 수정 요청이 없으면 확정된 것으로 봅니다.',
+    ]],
+    ['청약철회 · 취소 · 환불', [
+      '취소와 환불은 <a href="refund.html">취소 · 환불 규정</a>을 따릅니다.',
+      '서비스는 이용자의 주문에 따라 따로 만드는 용역이므로, 제공이 시작된 부분은 청약철회를 할 수 없습니다(전자상거래법 제17조 제2항 제5호). 아직 시작하지 않은 부분은 철회할 수 있습니다.',
+      '센터는 신청서와 등록 화면에서 이 사실을 미리 따로 알리고, 이용자의 동의를 전자문서로 받아 그 기록을 보관합니다.',
+    ]],
+    ['이용자의 의무', [
+      '이용자는 센터에 보내는 글 · 사진 · 영상 · 음원 · 로고 등을 쓸 권리가 있어야 하며, 그 권리에 관한 문제는 이용자가 책임집니다.',
+      '이용자는 게시판에 사실과 다른 내용, 다른 사람의 권리를 침해하는 내용, 광고성 글을 올려서는 안 됩니다.',
+      '촬영에 나오는 분의 초상권 동의와 촬영 장소의 허가는 견적서에 정한 쪽이 받습니다.',
+    ]],
+    ['결과물의 이용', [
+      '대금을 모두 치르시면 이용자는 결과물을 정한 용도에 자유롭게 쓰실 수 있습니다.',
+      '결과물에 들어간 글꼴 · 음원 · 이미지 등 제3자의 자료는 그 사용 허락 범위 안에서 씁니다.',
+      '원본 파일과 작업 파일(프로젝트 파일)은 따로 정하지 않으면 드리지 않습니다.',
+      '센터는 이용자가 글로 동의한 경우에만 결과물을 작업 사례로 공개합니다.',
+    ]],
+    ['게시판', [
+      '센터는 교회끼리 직접 만나는 게시판(부동산 매물 · 중고 장터 · 교역자 구인 · 게스트하우스 · 집회 티켓팅)을 운영합니다. 센터는 거래나 계약의 당사자가 아니며, 공인중개사법상의 중개 행위를 하지 않습니다.',
+      '게시글의 내용은 올린 분이 책임집니다. 센터는 허위 · 중복 · 광고성 글과 법령에 어긋나는 글을 내릴 수 있습니다.',
+      '집회 참가비의 수납 · 환불 · 일정 변경은 집회 주최 측이 정하고 안내합니다.',
+    ]],
+    ['책임', [
+      '센터의 고의나 과실로 이용자에게 손해가 생기면 센터가 배상합니다.',
+      '이용자가 확정한 내용의 오류, 이용자가 보낸 자료의 권리 문제, 천재지변 · 출연자 불참처럼 센터의 책임이 아닌 사유로 생긴 손해는 센터가 책임지지 않습니다.',
+    ]],
+    ['개인정보', [
+      '개인정보는 <a href="privacy.html">개인정보 처리방침</a>에 따라 처리합니다.',
+    ]],
+    ['분쟁의 해결', [
+      '서비스에 관한 불만이나 분쟁은 아래 연락처로 접수하시면 지체 없이 처리합니다.',
+      '협의가 되지 않으면 한국소비자원 등 분쟁조정기관에 조정을 신청하실 수 있습니다.',
+      '소송은 민사소송법에 따른 관할 법원에 제기합니다.',
+    ]],
+  ];
+
+  const body = `
+${pageHero({
+  eyebrow: '이용약관',
+  title: '서비스를 이용하시는<br>약속',
+  lead: '신청부터 결제 · 수정 · 환불까지, 센터와 교회가 서로 지킬 것을 적었습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="legal-doc">
+      ${A.map(([title, items], i) => `<article class="legal-art" id="art-${i + 1}">
+        <h2>제${i + 1}조 (${esc(title)})</h2>
+        ${items.length === 1 ? `<p>${items[0]}</p>` : `<ol>${items.map((t) => `<li>${t}</li>`).join('')}</ol>`}
+      </article>`).join('\n      ')}
+      <article class="legal-art">
+        <h2>부칙</h2>
+        <p>이 약관은 ${esc(LEGAL.effectiveDate)}부터 시행합니다.</p>
+      </article>
+    </div>
+    ${legalOperator()}
+  </div>
+</section>
+`;
+
+  write(
+    'terms.html',
+    layout({
+      title: '이용약관 | 우리교회지원센터',
+      description: '우리교회지원센터 서비스의 신청 · 계약 · 결제 · 수정 · 환불 · 게시판 이용에 관한 약관입니다.',
+      base: '',
+      active: 'terms.html',
       body,
     })
   );
@@ -2211,6 +2659,9 @@ ${pageHero({
             <span>허위 · 중복 · 광고성 글로 확인되면 <strong>사전 통보 없이 삭제되고 등록비는 환불되지 않는다</strong>는 점에 동의합니다.</span></label>
           <label class="chk"><input type="checkbox" id="lsVow4">
             <span>센터는 <strong>게시판 운영</strong>까지이며, <strong>연락 · 협상 · 계약은 제가 직접 진행</strong>한다는 점을 이해했습니다.</span></label>
+          <label class="chk"><input type="checkbox" id="lsVow5" data-version="${esc(LEGAL.version)}">
+            <span>등록비는 <strong>게시 전에는 전액 돌려받고, 게시가 시작되면 돌려받지 못한다</strong>는
+              <a href="refund.html#refund-listing" target="_blank" rel="noopener">취소 · 환불 규정</a>에 동의합니다.</span></label>
         </div>
       </fieldset>
 
@@ -2234,7 +2685,8 @@ ${pageHero({
         </ol>
         <p class="ls-fee-note">
           서류가 맞지 않으면 사유와 함께 반려되며, 이 경우 <strong>입금 안내를 보내지 않습니다</strong> —
-          돈이 먼저 나가는 일은 없습니다.
+          돈이 먼저 나가는 일은 없습니다. 입금 후 게시 전에 취소하시면 전액 돌려드리고,
+          게시가 시작되면 돌려드리지 않습니다 (<a href="refund.html#refund-listing">취소 · 환불 규정</a>).
           진행 상태는 <a href="#mine">내가 올린 매물</a> 에서 언제든 확인하실 수 있습니다.
         </p>
       </div>
@@ -2359,6 +2811,9 @@ function buildSearchIndex() {
     ['apply.html', '지원 신청', '필요한 것을 적어 보내 주시면 연락드립니다', '페이지', '신청서 접수'],
     ['status.html', '신청 현황', '내가 넣은 신청이 어디까지 갔는지', '페이지', '진행 상황 조회'],
     ['privacy.html', '개인정보 처리방침', '무엇을 받아 두고 언제 지우는지', '페이지', '개인정보 방침 약관 수집 보관 삭제 탈퇴'],
+    ['pricing.html', '비용 안내', '영상 단가표 · 게시판 이용료 · 항목별 비용', '페이지', '요금 가격 단가표 비용 얼마 견적 결제'],
+    ['refund.html', '취소 · 환불 규정', '시작 전에는 전액, 시작한 단계는 공제', '페이지', '환불 취소 청약철회 위약금 돌려받기'],
+    ['terms.html', '이용약관', '신청 · 계약 · 결제 · 수정 · 환불에 관한 약속', '페이지', '약관 계약 이용 조건'],
   ].forEach(([url, title, desc, cat, kw]) => add({ url, title, desc, cat, kw }));
 
   /* 큰 갈래 */
@@ -2412,14 +2867,13 @@ function buildSearchIndex() {
   add({ url: 'jobs.html#new', title: '구인 공고 올리기', desc: '우리 교회에서 함께할 사역자를 찾기', cat: '게시판', kw: '등록 채용 모집 전도사' });
   add({ url: 'jobs.html', title: '사역자 자리 찾기', desc: '교회들이 올린 구인 공고 보기', cat: '게시판', kw: '취업 지원 사역지 청빙' });
 
-  /* 값을 물으시는 분이 많은데 패키지 페이지는 지금 닫혀 있습니다.
-     빈손으로 돌려보내지 말고 물어보실 곳으로 안내합니다. */
+  /* 값을 물으시는 분이 많습니다 — 비용 안내(단가표)로 보냅니다. */
   add({
     url: 'pricing.html',
     title: '비용이 얼마인가요',
-    desc: '항목마다 다릅니다. 무엇이 필요하신지 알려 주시면 견적을 내어 드립니다 — 상담은 무료입니다.',
+    desc: '영상 제작은 단가표로, 나머지 항목은 무엇에 따라 정해지는지 적어 두었습니다. 상담과 견적은 무료입니다.',
     cat: '자주 찾는 것',
-    kw: '요금 가격 비용 값 얼마 견적 금액 무료 돈 월 관리비 패키지 요금제',
+    kw: '요금 가격 비용 값 얼마 견적 금액 무료 돈 월 관리비 패키지 요금제 단가표',
   });
   add({
     url: 'status.html',
@@ -2541,6 +2995,8 @@ function main() {
   buildStatus();
   buildContact();
   buildPrivacy();
+  buildTerms();
+  buildRefund();
   buildMoved();
   buildListings();
   Boards.buildMarket(write);

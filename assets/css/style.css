@@ -4206,3 +4206,69 @@ html.opening-lock { overflow: hidden; scrollbar-gutter: stable; }
   .opening-scene, .op-task, .op-headset, .op-church, .fig-staff, .op-book { transition: none; }
   .opening.is-leaving .opening-stage { transition: none; }
 }
+
+/* =========================================================
+   결제 · 약관 — 단가표, 취소 · 환불 규정, 이용약관, 하단 사업자 정보
+   PG 심사가 보는 곳들입니다. 눈에 잘 띄되, 읽기 쉬운 글이어야 합니다.
+   ========================================================= */
+
+/* 단가표 — 숫자는 오른쪽에 맞춰 자릿수가 세로로 줄 서게 합니다 */
+.price-table tbody th { width: auto; white-space: normal; }
+.price-table thead th:not(:first-child),
+.price-table td { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.price-table td { font-weight: 700; color: var(--brand-800); }
+.price-table.is-text thead th:not(:first-child) { text-align: left; }
+.price-table.is-text td { text-align: left; white-space: normal; font-weight: 500; color: var(--ink-2); }
+.price-table th a { color: var(--brand-700); text-decoration: underline; text-underline-offset: 3px; }
+.price-notes { margin-top: 16px; padding-left: 1.1em; list-style: disc; font-size: 14.5px; line-height: 1.8; color: var(--ink-2); }
+.price-notes li + li { margin-top: 4px; }
+.price-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.price-refund { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
+.price-refund a, .ls-fee-note a { color: var(--brand-700); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+/* 취소 · 환불 규정 */
+.refund-parts { display: flex; flex-direction: column; gap: 26px; }
+.refund-part {
+  padding: 26px 26px 24px; background: #fff;
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+.refund-part > h3 { font-size: 19px; color: var(--brand-800); margin-bottom: 12px; }
+.refund-part h4 { margin: 20px 0 10px; font-size: 15px; color: var(--brand-800); line-height: 1.6; }
+.refund-lead { margin-bottom: 12px; font-size: 14.5px; color: var(--muted); }
+.refund-part .sched { background: #fff; }
+
+/* 약관 본문 */
+.legal-doc { font-size: 15.5px; line-height: 1.9; color: var(--ink-2); }
+.legal-doc p + p { margin-top: 12px; }
+.legal-doc strong { color: var(--brand-800); }
+.legal-doc a { color: var(--brand-700); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.legal-art + .legal-art { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line-2); }
+.legal-art h2 { font-size: 17px; color: var(--brand-800); margin-bottom: 10px; }
+.legal-art ol { padding-left: 1.3em; list-style: decimal; }
+.legal-art ol li + li { margin-top: 6px; }
+.legal-steps { padding-left: 1.3em; list-style: decimal; font-size: 15.5px; line-height: 1.9; color: var(--ink-2); }
+.legal-steps li + li { margin-top: 8px; }
+.legal-facts { margin-top: 30px; }
+
+/* 신청서의 환불 규정 동의 — 개인정보 동의와 나란히 두되 따로 읽히게 */
+.consent-refund { max-height: none; border-left: 4px solid var(--gold-400); }
+.consent-refund a { color: var(--brand-700); font-weight: 700; text-decoration: underline; }
+
+/* 하단 — 약관 링크 · 사업자 정보 */
+.footer-legal {
+  padding: 22px 0 6px; border-top: 1px solid rgba(255,255,255,.1);
+  font-size: 13px; line-height: 1.9; color: #85A793;
+}
+.footer-legal-links { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-bottom: 10px; }
+.footer-legal-links a { color: #DCE8E0; }
+.footer-legal-links a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.footer-legal-links strong { color: #fff; }
+.footer-biz { display: flex; flex-wrap: wrap; gap: 0 14px; }
+.footer-biz span { white-space: nowrap; }
+.footer-biz span:first-child { flex-basis: 100%; white-space: normal; }
+.footer-biz strong { color: #DCE8E0; }
+.footer-biz a { color: #DCE8E0; text-decoration: underline; margin-left: 6px; }
+@media (max-width: 640px) {
+  .footer-biz span { white-space: normal; }
+  .refund-part { padding: 22px 18px; }
+}

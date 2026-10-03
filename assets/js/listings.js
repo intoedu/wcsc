@@ -506,7 +506,8 @@
   /* 폼에 담긴 사진 목록 (아직 저장되지 않은 것도 포함) */
   var photos = [];
 
-  var vows = ['lsVow1', 'lsVow2', 'lsVow3', 'lsVow4'].map(function (id) {
+  /* 다섯 번째는 취소 · 환불 규정 동의입니다 — 게시가 시작되면 돌려받지 못한다는 것. */
+  var vows = ['lsVow1', 'lsVow2', 'lsVow3', 'lsVow4', 'lsVow5'].map(function (id) {
     return document.getElementById(id);
   });
 
@@ -961,7 +962,7 @@
     if (data.kind === 'rent_monthly' && !data.monthly) return '월세를 적어 주세요.';
     if (!hasProof) return '권리를 확인할 수 있는 서류를 첨부해 주세요.';
     if (vows.some(function (c) { return c && !c.checked; })) {
-      return '아래 확인 항목 네 가지에 모두 동의해 주셔야 등록됩니다.';
+      return '아래 확인 항목 ' + vows.filter(Boolean).length + '가지에 모두 동의해 주셔야 등록됩니다.';
     }
     return '';
   }

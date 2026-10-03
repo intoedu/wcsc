@@ -152,7 +152,8 @@
       var el = form.elements[n];
       return el && el.value.trim() !== '';
     });
-    var s3 = form.elements.message.value.trim() !== '' && form.elements.consent.checked;
+    var s3 = form.elements.message.value.trim() !== '' && form.elements.consent.checked
+      && (!form.elements.refund_agree || form.elements.refund_agree.checked);
     var states = [s1, s2, s3];
     for (var i = 0; i < items.length; i++) {
       items[i].classList.toggle('is-done', states[i]);
@@ -225,6 +226,13 @@
     errConsent.hidden = consent;
     if (!consent) problems.push(form.elements.consent);
 
+    /* 취소 · 환불 규정 — 따로 알리고 따로 동의를 받습니다 (전자상거래법 시행령 제21조). */
+    var refund = form.elements.refund_agree;
+    if (refund) {
+      document.getElementById('err-refund').hidden = refund.checked;
+      if (!refund.checked) problems.push(refund);
+    }
+
     return problems;
   }
 
@@ -236,6 +244,9 @@
     }
     if (e.target.name === 'consent' && e.target.checked) {
       document.getElementById('err-consent').hidden = true;
+    }
+    if (e.target.name === 'refund_agree' && e.target.checked) {
+      document.getElementById('err-refund').hidden = true;
     }
     updateProgress();
   });
@@ -344,6 +355,13 @@
     fd.forEach(function (value, key) {
       if (key.indexOf('__') > -1 && String(value).trim() !== '') extra[key] = value;
     });
+
+    /* 어느 판의 환불 규정에, 언제 동의했는지 남깁니다 — 전자문서 동의의 근거입니다. */
+    var refund = form.elements.refund_agree;
+    if (refund && refund.checked) {
+      extra.agree__refund = '동의 · 취소 · 환불 규정 ' + (refund.getAttribute('data-version') || '')
+        + ' · ' + new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+    }
 
     var payload = {
       services: checkedServices(),

@@ -169,7 +169,7 @@ const NAV = [
   { href: 'index.html', label: '홈' },
   { href: 'about.html', label: '센터 소개' },
   { href: 'services/index.html', label: '지원 항목', key: 'services' },
-  { href: 'pricing.html', label: '패키지' },
+  { href: 'pricing.html', label: '비용 안내' },
   { href: 'listings.html', label: '게시판', key: 'boards' },
   { href: 'process.html', label: '이용 절차' },
   { href: 'faq.html', label: '자주 묻는 질문' },
@@ -244,6 +244,25 @@ function header(base, active) {
 </header>`;
 }
 
+/* 하단 사업자 정보 — 전자상거래법상 사이버몰 운영자 표시 사항.
+   통신판매업 신고번호가 생기면 공정위 사업자 정보 확인 링크도 함께 붙습니다. */
+function bizLine() {
+  const B = site.business || {};
+  if (!B.name) return '';
+  const no = String(B.bizNo || '').replace(/[^0-9]/g, '');
+  const check = B.mailOrderNo && no
+    ? ` <a href="https://www.ftc.go.kr/bizCommPop.do?wrkr_no=${no}" target="_blank" rel="noopener">사업자 정보 확인</a>`
+    : '';
+  return `<p class="footer-biz">
+      <span>우리교회지원센터는 <strong>${esc(B.name)}</strong>이 운영합니다.</span>
+      <span>상호 ${esc(B.name)}</span><span>대표 ${esc(B.ceo)}</span>
+      <span>사업자등록번호 ${esc(B.bizNo)}</span>
+      <span>통신판매업 신고 ${B.mailOrderNo ? esc(B.mailOrderNo) : '신고 진행 중'}${check}</span>
+      <span>주소 ${esc(B.address)}</span>
+      <span>고객센터 ${esc(site.contact.phone)}</span><span>${esc(site.contact.email)}</span>
+    </p>`;
+}
+
 function footer(base) {
   const serviceLinks = services
     .map((s) => `<li><a href="${base}services/${s.slug}.html">${esc(s.name)}</a></li>`)
@@ -288,6 +307,15 @@ function footer(base) {
         ${addressText() ? `<li>${icon('pin', 'ico ico-sm')} ${addressText()}</li>` : ''}
       </ul>
     </div>
+  </div>
+  <div class="wrap footer-legal">
+    <nav class="footer-legal-links" aria-label="약관과 방침">
+      <a href="${base}terms.html">이용약관</a>
+      <a href="${base}refund.html"><strong>취소 · 환불 규정</strong></a>
+      <a href="${base}privacy.html"><strong>개인정보 처리방침</strong></a>
+      <a href="${base}pricing.html">비용 안내</a>
+    </nav>
+    ${bizLine()}
   </div>
   <div class="wrap footer-bottom">
     <p>© <span id="year">2026</span> 우리교회지원센터. All rights reserved.</p>
