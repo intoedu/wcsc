@@ -1467,13 +1467,20 @@ window.CAPSDB = (function () {
     var ensured = {};
     function ensureUser(user) {
       if (!cfg.ensureUser || !user || ensured[user.id]) return Promise.resolve();
-      return sb.rpc('ensure_user').then(function (res) {
+      // 구글로 가입하면 가입 화면에 적은 값(이름 · 연락처 · 교회 · 직원 신청)이 메타데이터로 가지 않습니다.
+      // 구글로 넘어가기 전에 이 탭에 맡겨 둔 값을 함께 넘겨, 빈 칸만 채우게 합니다(권한은 올리지 않음).
+      var intent = {};
+      try {
+        intent = JSON.parse(window.sessionStorage.getItem('caps.signup.intent') || '{}') || {};
+      } catch (e) { intent = {}; }
+      return sb.rpc('ensure_user', { p_intent: intent }).then(function (res) {
         if (res.error) {
           // 서버 준비가 덜 된 경우 — 원인을 찾을 수 있게 남겨 둡니다.
           if (window.console) console.warn('[wcsc] ensure_user 실패:', res.error.message);
           return;
         }
         ensured[user.id] = true;
+        try { window.sessionStorage.removeItem('caps.signup.intent'); } catch (e) { /* 무시 */ }
         // 실패해도 로그인은 막지 않습니다 — 아래에서 회원 행을 못 읽으면 '정보 없음'으로 보입니다.
       }, function () { /* 네트워크 오류 — 다음 확인 때 다시 부릅니다 */ });
     }
