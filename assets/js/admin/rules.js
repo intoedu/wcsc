@@ -28,6 +28,9 @@
     return m ? m[1] : '';
   })();
 
+  // 통합 DB(스키마를 따로 쓰는 경우)인지 — supabase-config.js 의 schema 값
+  var SHARED_SCHEMA = (window.SUPABASE_CONFIG || {}).schema || '';
+
   var KINDS = {
     supabase: {
       label: 'Supabase SQL',
@@ -97,6 +100,23 @@
           '<div class="adm-card"><h2>내용을 불러올 수 없습니다</h2>' +
           '<p class="adm-card-lead"><code>' + h(kind.file) + '</code> 의 내용이 비어 있습니다. ' +
           '저장소에서 <code>npm run build</code> 를 실행하면 <code>assets/js/rules-text.js</code> 로 생성됩니다.</p></div>';
+        bindTabs(root);
+        return;
+      }
+
+      // 통합 뒤(인투마케팅 DB 안의 wcsc 영역)에는 이 설치용 SQL 을 쓰면 안 됩니다.
+      // public 기준으로 쓰여 있어, 실행하면 교회 표가 인투마케팅 쪽 공용 영역에 잘못 만들어집니다.
+      if (which === 'supabase' && SHARED_SCHEMA) {
+        root.innerHTML = head +
+          '<div class="adm-card"><h2>통합 DB에서는 이 SQL을 실행하지 않습니다</h2>' +
+          '<p class="adm-card-lead">지금 이 사이트는 인투마케팅 DB 안의 <code>' + h(SHARED_SCHEMA) + '</code> 영역을 씁니다. ' +
+            '이 화면의 설치용 SQL은 따로 쓰던 시절의 <code>public</code> 기준이라, 실행하면 ' +
+            '교회 표가 인투마케팅 쪽에 잘못 만들어집니다. 표 · 규칙을 바꿀 일이 있으면 인투마케팅 DB 담당과 함께 정리하세요.</p>' +
+          '<div class="guide-box"><strong>첫 최고관리자 지정</strong><br>' +
+            '가입을 마친 뒤 SQL Editor 에서 아래 한 줄을 실행하세요 (이메일만 바꿔서).' +
+            '<textarea class="rules-text is-short" id="ownerSql" readonly spellcheck="false">' +
+            'update ' + h(SHARED_SCHEMA) + ".users set role = 'owner', approved = true\nwhere email = '본인이메일@example.com';" +
+            '</textarea></div></div>';
         bindTabs(root);
         return;
       }
