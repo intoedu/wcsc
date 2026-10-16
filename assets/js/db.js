@@ -1474,6 +1474,11 @@ window.CAPSDB = (function () {
         intent = JSON.parse(window.sessionStorage.getItem('caps.signup.intent') || '{}') || {};
       } catch (e) { intent = {}; }
       return sb.rpc('ensure_user', { p_intent: intent }).then(function (res) {
+        // 서버 함수가 아직 인자 없는 모양(ensure_user())이면 PGRST202(그런 함수 없음)가 옵니다.
+        // 그때는 인자 없이 다시 불러, 서버가 어느 모양이든 회원 행은 만들어지게 합니다.
+        if (res.error && res.error.code === 'PGRST202') return sb.rpc('ensure_user');
+        return res;
+      }).then(function (res) {
         if (res.error) {
           // 서버 준비가 덜 된 경우 — 원인을 찾을 수 있게 남겨 둡니다.
           if (window.console) console.warn('[wcsc] ensure_user 실패:', res.error.message);
