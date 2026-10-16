@@ -1529,6 +1529,11 @@ window.CAPSDB = (function () {
     }
 
     var ready = loadSdk().then(function (lib) {
+      // 안전장치: ensure_user 를 쓰는 설정(통합 뒤)인데 로그인 저장 이름이 없으면,
+      // 같은 주소의 인투마케팅 로그인을 그대로 읽어 교회 회원이 몰래 만들어집니다. 연결하지 않습니다.
+      if (cfg.ensureUser && !cfg.storageKey) {
+        throw new Error('설정 오류: storageKey 없이 ensureUser 를 켤 수 없습니다 (supabase-config.js).');
+      }
       var options = {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
       };
@@ -1706,7 +1711,10 @@ window.CAPSDB = (function () {
 
         signOut: function () {
           return guard().then(function () {
-            return sb.auth.signOut().then(function () {
+            // 통합 뒤에는 같은 계정을 인투마케팅 사이트에서도 씁니다. 기본값(global)으로 나가면
+            // 그쪽 로그인까지 모두 풀리므로, 설정이 있으면 이 브라우저에서만 나갑니다.
+            var out = cfg.signOutScope ? sb.auth.signOut({ scope: cfg.signOutScope }) : sb.auth.signOut();
+            return out.then(function () {
               profile = null;
               authUser = null;
               emitAuth();

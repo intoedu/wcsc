@@ -42,6 +42,7 @@
          · 로그인 저장 이름을 따로 둬서, 같은 주소의 인투마케팅 사이트와 로그인이 섞이지 않습니다
          · 서버 함수는 wcsc- 가 붙은 이름을 부릅니다 (wcsc-payment-confirm)
          · 로그인한 뒤 wcsc.ensure_user() 로 교회 회원 정보를 먼저 만듭니다
+         · 로그아웃은 이 브라우저에서만 (같은 계정의 인투마케팅 로그인은 유지)
    ESC 쪽 준비(스키마 노출 · 권한 · 함수 · 구글 로그인 · 주소 허용 목록)가 끝나기 전에
    esc 로 바꾸면 사이트가 동작하지 않습니다. */
 window.SUPABASE_CONFIG = (function () {
@@ -59,6 +60,7 @@ window.SUPABASE_CONFIG = (function () {
       storageKey: 'wcsc-auth',
       fnPrefix: 'wcsc-',
       ensureUser: true,
+      signOutScope: 'local',   // 교회에서 나가도 인투마케팅 쪽 로그인은 그대로
     },
   };
   return TARGETS[TARGET];
