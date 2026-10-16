@@ -48,6 +48,18 @@ const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
 
 /* 운영 사업자 한 줄 — 하단 · 약관 · 환불 규정이 함께 씁니다. */
 const BIZ = site.business || {};
+/* 개인정보 처리방침의 「보관 국가」 — supabase-config.js 의 TARGET 을 따라갑니다.
+   old = 교회 DB(도쿄), esc = 인투마케팅 DB(서울). 옮기는 날 TARGET 을 바꾸고 build 하면 함께 바뀝니다. */
+const DB_REGION = (function () {
+  let target = 'old';
+  try {
+    const cfgText = fs.readFileSync(path.join(__dirname, 'assets/js/supabase-config.js'), 'utf8');
+    target = (cfgText.match(/var TARGET = '(\w+)'/) || [])[1] || 'old';
+  } catch (e) { /* 설정 파일이 없으면 기본값 */ }
+  return target === 'esc'
+    ? { country: '대한민국 (서울)', note: '이 사이트의 자료는 대한민국(서울)에 있는 서버에 저장됩니다.' }
+    : { country: '일본 (도쿄)', note: '이 사이트의 자료는 일본에 있는 서버에 저장됩니다. 국외로 옮겨 보관하는 것이므로\n          미리 알려 드립니다. 동의하지 않으실 수 있으나, 그 경우 회원가입과 게시판 이용이 어렵습니다.' };
+})();
 const LEGAL = site.legal || {};
 function mailOrderText() {
   return BIZ.mailOrderNo ? esc(BIZ.mailOrderNo) : '신고 진행 중';
@@ -837,13 +849,10 @@ ${pageHero({
         <h3>Supabase</h3>
         <dl>
           <div><dt>맡기는 일</dt><dd>데이터베이스, 로그인 처리, 사진 · 서류 보관</dd></div>
-          <div><dt>보관 국가</dt><dd><strong>일본 (도쿄)</strong></dd></div>
+          <div><dt>보관 국가</dt><dd><strong>${DB_REGION.country}</strong></dd></div>
           <div><dt>받는 이</dt><dd>Supabase, Inc.</dd></div>
         </dl>
-        <p class="pv-note">
-          이 사이트의 자료는 일본에 있는 서버에 저장됩니다. 국외로 옮겨 보관하는 것이므로
-          미리 알려 드립니다. 동의하지 않으실 수 있으나, 그 경우 회원가입과 게시판 이용이 어렵습니다.
-        </p>
+        <p class="pv-note">${DB_REGION.note}</p>
       </article>
       <article class="pv-item">
         <h3>GitHub Pages</h3>

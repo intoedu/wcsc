@@ -45,6 +45,9 @@
          · 로그아웃은 이 브라우저에서만 (같은 계정의 인투마케팅 로그인은 유지)
    ESC 쪽 준비(스키마 노출 · 권한 · 함수 · 구글 로그인 · 주소 허용 목록)가 끝나기 전에
    esc 로 바꾸면 사이트가 동작하지 않습니다. */
+// 이 사이트는 Supabase 를 씁니다 — 아래 값이 비면(TARGET 오타 등) 옛 Firebase 로 넘어가지 않고 연결 실패로 보입니다.
+window.SUPABASE_CONFIG_EXPECTED = true;
+
 window.SUPABASE_CONFIG = (function () {
   var TARGET = 'old';   // ← 옮기는 날 'esc' 로
 
@@ -63,5 +66,8 @@ window.SUPABASE_CONFIG = (function () {
       signOutScope: 'local',   // 교회에서 나가도 인투마케팅 쪽 로그인은 그대로
     },
   };
-  return TARGETS[TARGET];
+  var picked = TARGETS[TARGET] || {};
+  // 옮기는 날 데이터를 뜨는 동안: true 로 바꾸면 읽기 · 로그인만 되고 저장은 잠시 막힙니다.
+  picked.readOnly = false;
+  return picked;
 })();

@@ -1468,7 +1468,12 @@ window.CAPSDB = (function () {
     function ensureUser(user) {
       if (!cfg.ensureUser || !user || ensured[user.id]) return Promise.resolve();
       return sb.rpc('ensure_user').then(function (res) {
-        if (!res.error) ensured[user.id] = true;
+        if (res.error) {
+          // 서버 준비가 덜 된 경우 — 원인을 찾을 수 있게 남겨 둡니다.
+          if (window.console) console.warn('[wcsc] ensure_user 실패:', res.error.message);
+          return;
+        }
+        ensured[user.id] = true;
         // 실패해도 로그인은 막지 않습니다 — 아래에서 회원 행을 못 읽으면 '정보 없음'으로 보입니다.
       }, function () { /* 네트워크 오류 — 다음 확인 때 다시 부릅니다 */ });
     }
@@ -1531,6 +1536,9 @@ window.CAPSDB = (function () {
     var ready = loadSdk().then(function (lib) {
       // 안전장치: ensure_user 를 쓰는 설정(통합 뒤)인데 로그인 저장 이름이 없으면,
       // 같은 주소의 인투마케팅 로그인을 그대로 읽어 교회 회원이 몰래 만들어집니다. 연결하지 않습니다.
+      if (!cfg.url || !cfg.anonKey) {
+        throw new Error('설정 오류: Supabase 주소 · 키가 비어 있습니다 (supabase-config.js 의 TARGET 확인).');
+      }
       if (cfg.ensureUser && !cfg.storageKey) {
         throw new Error('설정 오류: storageKey 없이 ensureUser 를 켤 수 없습니다 (supabase-config.js).');
       }
@@ -1571,6 +1579,16 @@ window.CAPSDB = (function () {
     function guard() {
       return ready.then(function () {
         if (loadError) throw new Error(LOAD_MSG);
+      });
+    }
+
+    /* 쓰기 관문 — 서버를 옮기는 동안(readOnly) 새 글 · 신청 · 수정을 받지 않습니다.
+       읽기와 로그인은 그대로 됩니다. 옮기는 날 옛 DB 에 늦게 들어온 글이 사라지는 것을 막습니다. */
+    function writable() {
+      return guard().then(function () {
+        if (cfg.readOnly) {
+          throw new Error('서버를 옮기는 중이라 잠시 저장할 수 없습니다. 30분쯤 뒤에 다시 시도해 주세요.');
+        }
       });
     }
 
@@ -1632,13 +1650,15 @@ window.CAPSDB = (function () {
         },
 
         signUp: function (data) {
-          return guard().then(function () {
+          return writable().then(function () {
             return sb.auth.signUp({
               email: String(data.email || '').trim(),
               password: data.password,
               options: {
-                // 가입 트리거(handle_new_user)가 이 값으로 users 행을 만듭니다.
+                // 가입 트리거(handle_new_user) 또는 ensure_user 가 이 값으로 users 행을 만듭니다.
+                // site: 통합 뒤 같은 로그인 표를 쓰는 인투마케팅 가입 장치가 교회 가입을 알아보고 건너뛰게 합니다.
                 data: {
+                  site: 'wcsc',
                   name: (data.name || '').trim(),
                   phone: (data.phone || '').trim(),
                   church: (data.church || '').trim(),
@@ -1742,7 +1762,7 @@ window.CAPSDB = (function () {
 
         /** 비밀번호 변경 — 현재 비밀번호로 다시 확인한 뒤 바꿉니다. */
         changePassword: function (data) {
-          return guard().then(function () {
+          return writable().then(function () {
             if (!profile) throw new Error('로그인이 필요합니다.');
             if (String(data.next || '').length < 6) {
               throw new Error('새 비밀번호는 6자 이상으로 입력해 주세요.');
@@ -1758,7 +1778,7 @@ window.CAPSDB = (function () {
         },
 
         updateProfile: function (patch) {
-          return guard().then(function () {
+          return writable().then(function () {
             if (!profile) throw new Error('로그인이 필요합니다.');
             return sb.from('users').update(toRow('users', patch)).eq('id', profile.id)
               .then(fail)
@@ -1802,7 +1822,7 @@ window.CAPSDB = (function () {
       },
 
       add: function (name, data) {
-        return guard().then(function () {
+        return writable().then(function () {
           var row = toRow(name, Object.assign({ createdAt: nowIso() }, data));
           return sb.from(TABLE[name] || name).insert(row).select().single()
             .then(function (res) {
@@ -1813,7 +1833,7 @@ window.CAPSDB = (function () {
       },
 
       set: function (name, id, data) {
-        return guard().then(function () {
+        return writable().then(function () {
           var pk = PK[name] || 'id';
           var row = toRow(name, data);
           row[pk] = id;
@@ -1826,7 +1846,7 @@ window.CAPSDB = (function () {
       },
 
       update: function (name, id, patch) {
-        return guard().then(function () {
+        return writable().then(function () {
           if (DOC_TABLES[name]) {
             // 문서 표는 부분 수정 대신 기존 내용에 덮어씁니다.
             return sb.from(TABLE[name]).select('data').eq('id', id).maybeSingle()
@@ -1843,7 +1863,7 @@ window.CAPSDB = (function () {
       },
 
       remove: function (name, id) {
-        return guard().then(function () {
+        return writable().then(function () {
           return sb.from(TABLE[name] || name).delete().eq(PK[name] || 'id', id).then(fail);
         });
       },
@@ -1888,7 +1908,7 @@ window.CAPSDB = (function () {
        * 그래서 서버 함수 하나로 묶어 부릅니다.
        */
       rpc: function (name, args) {
-        return guard().then(function () {
+        return writable().then(function () {
           return sb.rpc(name, args || {}).then(function (res) {
             if (res.error) throw new Error(say(res.error));
             return res.data;
@@ -1902,7 +1922,7 @@ window.CAPSDB = (function () {
        * 서버 쪽 함수에 맡깁니다.
        */
       fn: function (name, body) {
-        return guard().then(function () {
+        return writable().then(function () {
           return sb.functions.invoke(FN_PREFIX + name, { body: body || {} }).then(function (res) {
             if (res.error) {
               // 함수가 스스로 거절한 경우(아직 연결 안 됨 등)의 안내를 살려 냅니다.
@@ -1918,7 +1938,7 @@ window.CAPSDB = (function () {
 
       files: {
         upload: function (path, file) {
-          return guard().then(function () {
+          return writable().then(function () {
             var at = split(path);
             return sb.storage.from(at.bucket)
               .upload(at.key, file, { contentType: file.type, upsert: true })
@@ -1950,7 +1970,7 @@ window.CAPSDB = (function () {
         },
 
         remove: function (path) {
-          return guard().then(function () {
+          return writable().then(function () {
             var at = split(path);
             return sb.storage.from(at.bucket).remove([at.key]).catch(function () { return null; });
           });
@@ -1965,7 +1985,9 @@ window.CAPSDB = (function () {
 
   /* Supabase 설정이 있으면 그쪽을, 없고 Firebase 설정이 있으면 Firebase 를,
      둘 다 없으면 브라우저 저장소(데모)를 씁니다. */
-  var adapter = hasSupabase() ? SupabaseAdapter()
+  // SUPABASE_CONFIG_EXPECTED: 설정 파일이 Supabase 를 쓰겠다고 했는데 값이 비면(예: TARGET 오타)
+  // 옛 Firebase 로 조용히 넘어가지 않고 연결 실패로 보이게 합니다.
+  var adapter = (hasSupabase() || window.SUPABASE_CONFIG_EXPECTED) ? SupabaseAdapter()
     : isConfigured() ? FirebaseAdapter()
     : LocalAdapter();
 
