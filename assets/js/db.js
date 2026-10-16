@@ -1321,6 +1321,16 @@ window.CAPSDB = (function () {
 
   function SupabaseAdapter() {
     var cfg = window.SUPABASE_CONFIG || {};
+    /* DB 통합(교회 DB → 인투마케팅 DB 안의 wcsc 스키마)에 대비한 설정.
+       supabase-config.js 에 값이 없으면 지금과 똑같이 동작합니다.
+         schema     — 표 · 함수가 있는 스키마 (없으면 public)
+         storageKey — 브라우저에 로그인을 저장하는 이름. 같은 주소(intomarketing.co.kr)를
+                      쓰는 인투마케팅 사이트와 로그인이 섞이지 않게 따로 둡니다.
+         fnPrefix   — 서버 함수 이름 앞에 붙일 말 (예: 'wcsc-' → wcsc-payment-confirm)
+         ensureUser — 로그인한 뒤 wcsc.ensure_user() 로 교회 회원 정보를 먼저 만듭니다
+                      (통합 뒤에는 가입 트리거가 교회 회원 행을 만들어 주지 않습니다) */
+    var SCHEMA = cfg.schema || 'public';
+    var FN_PREFIX = cfg.fnPrefix || '';
     var sb = null;
     var profile = null;   // public.users 행 (화면이 보는 계정 정보)
     var authUser = null;  // auth 사용자 (로그인 방식 확인에 씁니다)
@@ -1451,10 +1461,24 @@ window.CAPSDB = (function () {
       });
     }
 
-    /** 로그인한 계정의 users 행을 읽습니다. (가입 트리거가 만들어 둡니다) */
+    /* 통합 뒤에는 교회 회원 행을 가입 트리거 대신 ensure_user() 가 만듭니다.
+       같은 계정으로 여러 번 불러도 한 번만 만들어지는 함수라, 탭을 열 때마다 불러도 됩니다.
+       다만 한 화면 안에서는 계정마다 한 번만 부릅니다. */
+    var ensured = {};
+    function ensureUser(user) {
+      if (!cfg.ensureUser || !user || ensured[user.id]) return Promise.resolve();
+      return sb.rpc('ensure_user').then(function (res) {
+        if (!res.error) ensured[user.id] = true;
+        // 실패해도 로그인은 막지 않습니다 — 아래에서 회원 행을 못 읽으면 '정보 없음'으로 보입니다.
+      }, function () { /* 네트워크 오류 — 다음 확인 때 다시 부릅니다 */ });
+    }
+
+    /** 로그인한 계정의 users 행을 읽습니다. (가입 트리거 또는 ensure_user 가 만들어 둡니다) */
     function loadProfile(user) {
       if (!user) return Promise.resolve(null);
-      return sb.from('users').select('*').eq('id', user.id).maybeSingle()
+      return ensureUser(user).then(function () {
+        return sb.from('users').select('*').eq('id', user.id).maybeSingle();
+      })
         .then(function (res) {
           if (res.data) return fromRow('users', res.data);
           // 트리거가 도는 사이 잠깐 없을 수 있어 한 번 더 봅니다.
@@ -1505,9 +1529,12 @@ window.CAPSDB = (function () {
     }
 
     var ready = loadSdk().then(function (lib) {
-      sb = lib.createClient(cfg.url, cfg.anonKey, {
+      var options = {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
-      });
+      };
+      if (cfg.storageKey) options.auth.storageKey = cfg.storageKey;
+      if (SCHEMA !== 'public') options.db = { schema: SCHEMA };
+      sb = lib.createClient(cfg.url, cfg.anonKey, options);
 
       watchdog();
 
@@ -1836,7 +1863,7 @@ window.CAPSDB = (function () {
           if (loadError) { cb([]); return; }
           pull();
           channel = sb.channel('wcsc-' + table)
-            .on('postgres_changes', { event: '*', schema: 'public', table: table }, pull)
+            .on('postgres_changes', { event: '*', schema: SCHEMA, table: table }, pull)
             .subscribe();
         });
 
@@ -1868,7 +1895,7 @@ window.CAPSDB = (function () {
        */
       fn: function (name, body) {
         return guard().then(function () {
-          return sb.functions.invoke(name, { body: body || {} }).then(function (res) {
+          return sb.functions.invoke(FN_PREFIX + name, { body: body || {} }).then(function (res) {
             if (res.error) {
               // 함수가 스스로 거절한 경우(아직 연결 안 됨 등)의 안내를 살려 냅니다.
               var msg = (res.data && res.data.message) || say(res.error);

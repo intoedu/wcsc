@@ -33,7 +33,33 @@
         where email = '본인이메일@example.com';
    ========================================================= */
 
-window.SUPABASE_CONFIG = {
-  url: 'https://tbxosynzszcgtieonsui.supabase.co',
-  anonKey: 'sb_publishable_cdMCKXcHMpIaHqLT5uvs0w_5SwIRGgt',
-};
+/* ---------------------------------------------------------
+   DB 통합 — 「옮기는 날」에 아래 TARGET 한 줄만 'esc' 로 바꿉니다
+   ---------------------------------------------------------
+   old : 지금의 교회 DB (wcsc 프로젝트, 도쿄)
+   esc : 인투마케팅 DB (ESC 프로젝트, 서울) 안의 wcsc 스키마
+         · 표 · 함수는 schema 'wcsc' 에서 찾습니다
+         · 로그인 저장 이름을 따로 둬서, 같은 주소의 인투마케팅 사이트와 로그인이 섞이지 않습니다
+         · 서버 함수는 wcsc- 가 붙은 이름을 부릅니다 (wcsc-payment-confirm)
+         · 로그인한 뒤 wcsc.ensure_user() 로 교회 회원 정보를 먼저 만듭니다
+   ESC 쪽 준비(스키마 노출 · 권한 · 함수 · 구글 로그인 · 주소 허용 목록)가 끝나기 전에
+   esc 로 바꾸면 사이트가 동작하지 않습니다. */
+window.SUPABASE_CONFIG = (function () {
+  var TARGET = 'old';   // ← 옮기는 날 'esc' 로
+
+  var TARGETS = {
+    old: {
+      url: 'https://tbxosynzszcgtieonsui.supabase.co',
+      anonKey: 'sb_publishable_cdMCKXcHMpIaHqLT5uvs0w_5SwIRGgt',
+    },
+    esc: {
+      url: 'https://qkvebwxewttqtcryfycy.supabase.co',
+      anonKey: 'sb_publishable_Me_R6M540Fg60nmEVqByTg_p-zD8pxa',
+      schema: 'wcsc',
+      storageKey: 'wcsc-auth',
+      fnPrefix: 'wcsc-',
+      ensureUser: true,
+    },
+  };
+  return TARGETS[TARGET];
+})();
