@@ -324,7 +324,10 @@
     desc: '교회별 정보와 구독 현황, 신청 이력을 확인합니다.',
     icon: 'customers',
     perm: 'customers',
-    badge: function (state) { return state.customers.length; },
+    /* 전체 고객 수가 아니라 '아직 안 본 새 고객' 입니다. */
+    alerts: function (state) {
+      return state.customers.map(function (c) { return c.id; });
+    },
 
     render: function (root, state, ctx) {
       var all = state.customers;

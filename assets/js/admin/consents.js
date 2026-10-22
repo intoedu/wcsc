@@ -31,8 +31,10 @@
     desc: '고객 교회에 정보 수정 승인을 요청하고, 응답을 확인합니다.',
     icon: 'consents',
     perm: 'customers',
-    badge: function (state) {
-      return state.editConsents.filter(function (x) { return x.status === 'pending'; }).length;
+    alerts: function (state) {
+      return state.editConsents
+        .filter(function (x) { return x.status === 'pending'; })
+        .map(function (x) { return x.id; });
     },
 
     render: function (root, state, ctx) {

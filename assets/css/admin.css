@@ -25,14 +25,21 @@ body.admin .float-cta { display: none !important; }
 
 .adm-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 22px; }
 .adm-brand .logo-mark { width: 42px; height: 42px; }
+.adm-brand .logo-img { height: 30px; width: auto; flex: none; display: block; }
 .adm-brand-text { display: flex; flex-direction: column; line-height: 1.25; }
 .adm-brand-text strong { color: #fff; font-size: 16.5px; letter-spacing: -.03em; }
 .adm-brand-text small { color: #85A793; font-size: 11.5px; }
 
 .adm-group { margin-top: 18px; }
 .adm-group-title {
+  display: flex; align-items: center; gap: 7px;
   padding: 0 10px 8px; font-size: 11.5px; font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase; color: #5D739A;
+}
+/* 메뉴가 많아 한눈에 훑기 어려우므로, 새 건이 있는 묶음에 점을 답니다. */
+.adm-group-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #FF5C4D; box-shadow: 0 0 0 3px rgba(255,92,77,.18);
 }
 
 .adm-link {
@@ -56,6 +63,10 @@ body.admin .float-cta { display: none !important; }
 }
 .adm-link.is-on .adm-count { background: var(--gold-400); color: #27200A; }
 .adm-count.is-zero { background: rgba(255,255,255,.07); color: #6D82A0; }
+
+/* 안 본 새 건. 읽으면 아예 사라지므로 0 은 표시하지 않습니다. */
+.adm-count.is-new { background: #FF5C4D; color: #fff; }
+.adm-link.is-on .adm-count.is-new { background: #fff; color: #C23227; }
 
 .adm-side-foot { margin-top: auto; padding-top: 22px; }
 .adm-me {
@@ -519,3 +530,14 @@ body.admin .float-cta { display: none !important; }
   border-bottom-right-radius: 6px;
 }
 .rules-text.is-short { min-height: 72px; margin-top: 10px; }
+
+/* 신청서 첨부 — 비공개 저장소에 있어 [열기] 로 잠깐 열립니다. */
+.adm-files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.adm-files li { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.adm-files li small { color: var(--muted); font-size: 12px; }
+.adm-files button {
+  margin-left: auto; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; font-size: 12px; cursor: pointer;
+}
+.adm-files button:hover { border-color: var(--brand-500); color: var(--brand-700); }
+.adm-files button[disabled] { opacity: .5; cursor: default; }
