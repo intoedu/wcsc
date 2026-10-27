@@ -339,7 +339,7 @@ function buildIndex() {
      짐이 많다는 것은 목사님이 아니라 쌓이는 카드가 말합니다. */
 
   const SKIN = '#EDC9A9', SKIN2 = '#D9AE86', HAIR = '#2F3A34';
-  const ROBE = '#12402A', ROBE2 = '#0C3120', PANTS = '#2B3A5A';
+  const ROBE = '#4A1B0B', ROBE2 = '#381408', PANTS = '#2B3A5A';
   const TOP = '#D9A32B', TOP2 = '#B8862049';
 
   /* 목사님 — 서 계십니다. 한 손만 살짝 들려 있습니다. */
@@ -351,7 +351,7 @@ function buildIndex() {
     <rect x="2" y="-9" width="21" height="11" rx="5.5" fill="#1A2540"/>
     <path d="M-27-174c0-11 9-19 20-19h14c11 0 20 8 20 19l4 96c-21 7-41 7-62 0z" fill="${ROBE}"/>
     <path d="M-27-174c0-11 9-19 20-19h7v115c-11 0-21-1-31-4z" fill="${ROBE2}"/>
-    <path d="M-9-193h18l-9 26z" fill="#F4F7F5"/>
+    <path d="M-9-193h18l-9 26z" fill="#F7F9FC"/>
     <rect x="-38" y="-172" width="13" height="74" rx="6.5" fill="${ROBE}"/>
     <circle cx="-31.5" cy="-96" r="7" fill="${SKIN}"/>
     <g transform="rotate(-24 27 -168)">
@@ -449,8 +449,8 @@ function buildIndex() {
           <svg class="art art-figs" viewBox="-200 -250 400 270" fill="none" aria-hidden="true">
             ${artPastor}
             <g class="op-book" transform="translate(30 -118) rotate(-16)">
-              <rect x="-26" y="-18" width="52" height="36" rx="3" fill="#0A2A1B"/>
-              <rect x="-26" y="-18" width="7" height="36" rx="2" fill="#F4F7F5"/>
+              <rect x="-26" y="-18" width="52" height="36" rx="3" fill="#280E06"/>
+              <rect x="-26" y="-18" width="7" height="36" rx="2" fill="#F7F9FC"/>
               <rect x="-6" y="-9" width="26" height="3.4" rx="1.7" fill="#F2C82F" opacity=".75"/>
               <rect x="-6" y="-1" width="18" height="3.4" rx="1.7" fill="#F2C82F" opacity=".45"/>
             </g>
