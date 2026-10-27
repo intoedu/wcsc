@@ -151,7 +151,7 @@ body.staff { background: var(--brand-900); }
   padding: 44px 52px; color: #fff; overflow: hidden;
   background:
     radial-gradient(760px 420px at 88% -10%, rgba(242, 200, 47,.20), transparent 60%),
-    linear-gradient(155deg, #12301F 0%, #1B4D2E 55%, #1F7A44 100%);
+    linear-gradient(155deg, #44190A 0%, #61230E 55%, #7C2D12 100%);
 }
 .sp-aside::after {
   content: ""; position: absolute; inset: 0; opacity: .5; pointer-events: none;
@@ -168,7 +168,7 @@ body.staff { background: var(--brand-900); }
 .sp-brand .logo-img { height: 32px; width: auto; flex: none; display: block; }
 .sp-brand-text { display: flex; flex-direction: column; line-height: 1.25; }
 .sp-brand-text strong { font-size: 17px; color: #fff; letter-spacing: -.03em; }
-.sp-brand-text small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #9DB4D8; }
+.sp-brand-text small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #CBABA0; }
 
 .sp-copy { max-width: 30em; }
 .sp-badge {
@@ -177,13 +177,13 @@ body.staff { background: var(--brand-900); }
   color: #FFF; font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
 }
 .sp-copy h1 { font-size: clamp(26px, 3vw, 36px); color: #fff; letter-spacing: -.035em; line-height: 1.32; }
-.sp-copy p { margin-top: 18px; font-size: 16px; line-height: 1.85; color: #B6C6DA; }
+.sp-copy p { margin-top: 18px; font-size: 16px; line-height: 1.85; color: #E2D1CB; }
 .sp-list { margin-top: 26px; display: grid; gap: 11px; }
-.sp-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.8px; color: #C6D3E4; }
-.sp-list svg { flex: none; margin-top: 4px; color: #93C5FD; width: 17px; height: 17px; }
+.sp-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.8px; color: #F2EAE7; }
+.sp-list svg { flex: none; margin-top: 4px; color: #F2C82F; width: 17px; height: 17px; }
 
-.sp-foot { font-size: 13px; color: #6D82A0; }
-.sp-foot a { color: #AFCBB8; text-decoration: underline; text-underline-offset: 3px; }
+.sp-foot { font-size: 13px; color: #BB9284; }
+.sp-foot a { color: #E2D1CB; text-decoration: underline; text-underline-offset: 3px; }
 .sp-foot a:hover { color: #fff; }
 
 /* 오른쪽 폼 패널 */
