@@ -177,7 +177,7 @@ const NAV = [
 ];
 
 function header(base, active) {
-  const links = NAV.map((n) => {
+  const links = NAV.filter((n) => !(site.dbOff && n.key === 'boards')).map((n) => {
     const isOn = active === n.href
       || (n.key === 'services' && active && active.startsWith('services/'))
       || (n.key === 'boards' && BOARDS.some((x) => x.href === active));
@@ -221,8 +221,8 @@ function header(base, active) {
     </button>
 
     <div class="header-side">
-      <span id="authSlot"></span>
-      <a class="btn btn-primary btn-sm nav-cta" href="${base}apply.html">지원 신청</a>
+${site.dbOff ? '' : `      <span id="authSlot"></span>
+      <a class="btn btn-primary btn-sm nav-cta" href="${base}apply.html">지원 신청</a>`}
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="메뉴 열기">
         <span></span><span></span><span></span>
       </button>
@@ -275,7 +275,7 @@ function footer(base) {
         ${logoMark(base, { light: true, row: false })}
       </a>
       <p class="footer-desc">${esc(site.description)}</p>
-      <a class="btn btn-gold" href="${base}apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+      ${site.dbOff ? '' : `<a class="btn btn-gold" href="${base}apply.html">지원 신청하기 ${icon('arrow', 'ico ico-sm')}</a>`}
     </div>
     <div class="footer-col">
       <h3>지원 항목</h3>
@@ -288,15 +288,15 @@ function footer(base) {
         <li><a href="${base}process.html">이용 절차</a></li>
         <li><a href="${base}faq.html">자주 묻는 질문</a></li>
         <li><a href="${base}contact.html">문의하기</a></li>
-        <li><a href="${base}status.html">신청 조회</a></li>
-        <li><a href="${base}privacy.html">개인정보 처리방침</a></li>
-        <li><a href="${base}listings.html">부동산 매물</a></li>
+${site.dbOff ? '' : `        <li><a href="${base}status.html">신청 조회</a></li>
+`}        <li><a href="${base}privacy.html">개인정보 처리방침</a></li>
+${site.dbOff ? '' : `        <li><a href="${base}listings.html">부동산 매물</a></li>
         <li><a href="${base}market.html">중고 장터</a></li>
         <li><a href="${base}guesthouse.html">게스트하우스</a></li>
         <li><a href="${base}tickets.html">집회 티켓팅</a></li>
         <li><a href="${base}jobs.html">교역자 구인</a></li>
         <li><a href="${base}staff.html" class="footer-staff">직원 로그인</a></li>
-      </ul>
+`}      </ul>
     </div>
     <div class="footer-col">
       <h3>문의</h3>
@@ -413,7 +413,7 @@ ${o.opening || ''}
 ${o.body}
   </main>
   ${footer(base)}
-  <a class="float-cta" href="${base}apply.html">지원 신청</a>
+  ${site.dbOff ? '' : `<a class="float-cta" href="${base}apply.html">지원 신청</a>`}
 
   <!-- 찾아보기 — assets/js/search.js 가 채웁니다 -->
   <div class="ss" id="siteSearch" data-base="${base}" hidden role="dialog" aria-modal="true" aria-label="찾아보기">
@@ -431,15 +431,16 @@ ${o.body}
       </p>
     </div>
   </div>
-  <script src="${base}assets/js/supabase-config.js${ver('assets/js/supabase-config.js')}" defer></script>
-  <script src="${base}assets/js/firebase-config.js${ver('assets/js/firebase-config.js')}" defer></script>
+  <!-- 옛 DB 를 정리하는 동안(site.dbOff)에는 DB 에 닿는 스크립트를 싣지 않습니다. -->
+${site.dbOff ? '' : `  <script src="${base}assets/js/supabase-config.js${ver('assets/js/supabase-config.js')}" defer></script>
+  <script src="${base}assets/js/firebase-config.js${ver('assets/js/firebase-config.js')}" defer></script>`}
   <script src="${base}assets/js/data.js${ver('assets/js/data.js')}" defer></script>
-  <script src="${base}assets/js/db.js${ver('assets/js/db.js')}" defer></script>
+${site.dbOff ? '' : `  <script src="${base}assets/js/db.js${ver('assets/js/db.js')}" defer></script>
   <script src="${base}assets/js/profile.js${ver('assets/js/profile.js')}" defer></script>
   <script src="${base}assets/js/account.js${ver('assets/js/account.js')}" defer></script>
   <script src="${base}assets/js/auth-ui.js${ver('assets/js/auth-ui.js')}" defer></script>
   <script src="${base}assets/js/consent-ui.js${ver('assets/js/consent-ui.js')}" defer></script>
-  <script src="${base}assets/js/live-content.js${ver('assets/js/live-content.js')}" defer></script>
+  <script src="${base}assets/js/live-content.js${ver('assets/js/live-content.js')}" defer></script>`}
   <script src="${base}assets/js/search-index.js${ver('assets/js/search-index.js')}" defer></script>
   <script src="${base}assets/js/search.js${ver('assets/js/search.js')}" defer></script>
   <script src="${base}assets/js/app.js${ver('assets/js/app.js')}" defer></script>
@@ -500,6 +501,7 @@ function applyLink(s, base, o) {
   }
 
   // 우리 게시판에서 받는 항목은 신청서가 아니라 그 게시판으로 보냅니다.
+  if (s.applyVia && site.dbOff) return '';
   if (s.applyVia) {
     const v = s.applyVia;
     return `<a class="${cls}" href="${base}${v.href}"
@@ -514,6 +516,7 @@ function applyLink(s, base, o) {
     return `<a class="${cls}" href="${s.externalApply}" target="_blank" rel="noopener"
       data-apply="${s.id}">${esc(who)}${esc(verb)}${arrow}</a>`;
   }
+  if (site.dbOff) return '';
   return `<a class="${cls}" href="${base}apply.html?service=${s.id}"
       data-apply="${s.id}">${esc(opt.label || '이 항목 신청하기')}${arrow}</a>`;
 }
@@ -639,7 +642,7 @@ function ctaBand(base, opts) {
       <p>${esc(o.lead || '교회 상황을 알려주시면 담당자가 필요한 항목을 함께 정리해 드립니다. 상담과 견적은 무료입니다.')}</p>
     </div>
     <div class="cta-actions">
-      <a class="btn btn-gold btn-lg" href="${base}apply.html">지원 신청하기</a>
+      ${site.dbOff ? '' : `<a class="btn btn-gold btn-lg" href="${base}apply.html">지원 신청하기</a>`}
       <a class="btn btn-ghost-light btn-lg" href="${site.contact.phoneHref}">전화 상담 ${phoneText()}</a>
     </div>
   </div>

@@ -46,6 +46,12 @@ const { esc, icon, layout, pageHero, sectionHead, faqList, serviceCard, ctaBand,
   // 연락처는 반드시 이 함수들로 — 관리자가 [센터 설정] 에서 바꾼 값이 반영됩니다.
   phoneText, emailText, hoursText, addressText } = T;
 
+/* 옛 DB 를 정리하는 동안 로그인 · 신청 · 게시판을 닫습니다 — src/data/site.js 의 dbOff. */
+const DB_OFF = !!site.dbOff;
+const CLOSED_PAGES = ['apply.html', 'status.html', 'listings.html', 'market.html',
+  'guesthouse.html', 'tickets.html', 'jobs.html'];
+const isClosed = (url) => DB_OFF && CLOSED_PAGES.includes(String(url).split(/[?#]/)[0]);
+
 /* 운영 사업자 한 줄 — 하단 · 약관 · 환불 규정이 함께 씁니다. */
 const BIZ = site.business || {};
 const LEGAL = site.legal || {};
@@ -209,7 +215,7 @@ function buildIndex() {
 <section class="bn-wrap">
   <div class="wrap">
     <div class="bn-rail" id="bnRail" role="region" aria-label="주요 안내">
-      ${BANNERS.map(banner).join('\n      ')}
+      ${BANNERS.filter((b) => !isClosed(b.href)).map(banner).join('\n      ')}
     </div>
     <div class="bn-dots" id="bnDots" aria-hidden="true">
       ${BANNERS.map((b, i) => `<button type="button" class="bn-dot${i === 0 ? ' is-on' : ''}" data-go="${i}" tabindex="-1"></button>`).join('\n      ')}
@@ -231,10 +237,10 @@ function buildIndex() {
       </a>
     </div>
 
-    <p class="sc-label is-second">게시판 <small>교회끼리 사고, 나누고, 만나는 곳</small></p>
+${DB_OFF ? '' : `    <p class="sc-label is-second">게시판 <small>교회끼리 사고, 나누고, 만나는 곳</small></p>
     <div class="sc-grid is-boards">
       ${T.BOARDS.map(boardShortcut).join('\n      ')}
-    </div>
+    </div>`}
   </div>
 </section>
 
@@ -313,7 +319,7 @@ function buildIndex() {
 
       <p class="call-or">통화가 어려우시면</p>
       <ul class="call-alt">
-        <li><a href="apply.html">${icon('doc', 'ico ico-sm')} 지원 신청서 남기기</a></li>
+${DB_OFF ? '' : `        <li><a href="apply.html">${icon('doc', 'ico ico-sm')} 지원 신청서 남기기</a></li>`}
         <li><a href="mailto:${esc(site.contact.email)}">${icon('mail', 'ico ico-sm')} ${emailText()}</a></li>
       </ul>
     </div>
@@ -558,7 +564,7 @@ ${pageHero({
     '자랑하는 말 대신, 교회에서 실제로 벌어지는 일과 저희가 맡는 것을 나란히 적었습니다.')}
 
     <ul class="pairs">
-      ${PAIRS.map((p) => `<li class="pair">
+      ${PAIRS.filter((p) => !isClosed(p.href)).map((p) => `<li class="pair">
         <div class="pair-church">
           <span class="pair-tag">교회에서는</span>
           <p>${esc(p.church)}</p>
@@ -965,7 +971,7 @@ ${pageHero({
   </div>
 </section>
 
-<section class="section">
+${DB_OFF ? '' : `<section class="section">
   <div class="wrap narrow">
     ${sectionHead('신청 후', '접수 상태 확인')}
     <div class="notice-card">
@@ -976,7 +982,7 @@ ${pageHero({
       </p>
     </div>
   </div>
-</section>
+</section>`}
 
 ${ctaBand('')}
 `;
@@ -1067,7 +1073,7 @@ ${pageHero({
 <!-- 게시판도 여기에 함께 둡니다.
      성격은 다르지만 [지원 항목] 을 눌러 들어온 분이 "여기 있는 게
      전부인가" 하고 나가시면 게시판 다섯을 아예 못 보십니다. -->
-<section class="section">
+${DB_OFF ? '' : `<section class="section">
   <div class="wrap">
     ${sectionHead('게시판', '교회끼리 직접 잇는 자리',
       '위 항목은 센터가 맡아 해 드리는 일이고, 아래는 교회와 교회가 센터를 거치지 않고 '
@@ -1080,7 +1086,7 @@ ${pageHero({
       </a>`).join('\n      ')}
     </div>
   </div>
-</section>
+</section>`}
 
 <section class="section section-alt">
   <div class="wrap">
@@ -1750,8 +1756,8 @@ function planCard(p) {
       </ul>
       ${p.note ? `<p class="plan-note">${esc(p.note)}</p>` : ''}
 
-      <a class="btn ${p.popular ? 'btn-primary' : 'btn-ghost'} plan-cta"
-         href="apply.html?plan=${p.id}">${p.free ? '무료로 시작하기' : '30일 체험 신청'}</a>
+${DB_OFF ? '' : `      <a class="btn ${p.popular ? 'btn-primary' : 'btn-ghost'} plan-cta"
+         href="apply.html?plan=${p.id}">${p.free ? '무료로 시작하기' : '30일 체험 신청'}</a>`}
     </article>`;
 }
 
@@ -1778,7 +1784,7 @@ ${video && video.priceTable ? `
     ${sectionHead('영상 제작', '단가표 — 60초 기준 · 부가세 별도')}
     ${priceTableHtml(video.priceTable)}
     <div class="price-actions">
-      <a class="btn btn-primary" href="apply.html?service=video">영상 제작 신청하기 ${icon('arrow', 'ico ico-sm')}</a>
+${DB_OFF ? '' : `      <a class="btn btn-primary" href="apply.html?service=video">영상 제작 신청하기 ${icon('arrow', 'ico ico-sm')}</a>`}
       <a class="btn btn-outline" href="services/video.html">자세히 보기</a>
     </div>
   </div>
@@ -1797,9 +1803,9 @@ ${video && video.priceTable ? `
       </table>
     </div>
     <p class="sched-note">매물 등록비는 서류를 확인한 뒤 입금 안내를 드리며, 입금이 확인되면 게시합니다. 중고 장터의 설치 대행은 별도 유상 서비스로, 현장을 보고 견적을 드립니다.</p>
-    <div class="price-actions">
+${DB_OFF ? '' : `    <div class="price-actions">
       <a class="btn btn-primary" href="listings.html#new">매물 올리기 ${icon('arrow', 'ico ico-sm')}</a>
-    </div>
+    </div>`}
   </div>
 </section>
 
@@ -2227,12 +2233,12 @@ ${pageHero({
         <strong class="is-email">${emailText()}</strong>
         <p>영업일 기준 1~2일 이내 회신드립니다.</p>
       </a>
-      <a class="contact-card is-accent" href="apply.html">
+${DB_OFF ? '' : `      <a class="contact-card is-accent" href="apply.html">
         <span class="contact-ico">${icon('doc')}</span>
         <h2>지원 신청</h2>
         <strong>신청서 작성하기</strong>
         <p>여러 항목을 한 번에 적어 보내실 수 있습니다. 접수번호가 나와 어디까지 왔는지 확인하실 수 있습니다.</p>
-      </a>
+      </a>`}
     </div>
   </div>
 </section>
@@ -2798,7 +2804,7 @@ window.CAPS_STORAGE_RULES_VERSION = ${JSON.stringify(stVersion)};
    ========================================================= */
 function buildSearchIndex() {
   const rows = [];
-  const add = (o) => rows.push(o);
+  const add = (o) => { if (!isClosed(o.url)) rows.push(o); };
 
   /* 주요 페이지 */
   [
@@ -2975,6 +2981,37 @@ function stampAssets() {
   });
 }
 
+/* 닫은 페이지 — 옛 주소로 들어온 분께 안내만 드립니다. 원래 페이지 코드는 그대로 둡니다. */
+function buildClosed(rel) {
+  const base = rel.includes("/") ? "../" : "";
+  const body = `
+${pageHero({
+  eyebrow: '잠시 닫았습니다',
+  title: '온라인 신청과 게시판을<br>잠시 닫았습니다',
+  lead: '전화나 이메일로 연락 주시면 바로 도와드리겠습니다.',
+})}
+
+<section class="section">
+  <div class="wrap narrow">
+    <div class="moved">
+      <div class="moved-act">
+        <a class="btn btn-primary btn-lg" href="${site.contact.phoneHref}">${icon('phoneCall', 'ico ico-sm')} ${phoneText()}</a>
+        <a class="btn btn-outline btn-lg" href="${base}contact.html">문의 방법 보기</a>
+      </div>
+    </div>
+  </div>
+</section>
+`;
+  write(rel, layout({
+    title: '잠시 닫았습니다 | 우리교회지원센터',
+    description: '온라인 신청과 게시판을 잠시 닫았습니다. 전화나 이메일로 연락 주세요.',
+    base,
+    active: '',
+    body,
+    head: '<meta name="robots" content="noindex">',
+  }));
+}
+
 function main() {
   /* 자동 생성되는 스크립트를 먼저 만듭니다.
      페이지에 붙는 주소에 파일 내용을 요약한 번호(?v=)를 다는데,
@@ -2991,18 +3028,24 @@ function main() {
   buildServicesIndex();
   buildPricing();
   services.forEach(buildServicePage);
-  buildApply();
-  buildStatus();
+  if (DB_OFF) {
+    CLOSED_PAGES.forEach(buildClosed);
+  } else {
+    buildApply();
+    buildStatus();
+  }
   buildContact();
   buildPrivacy();
   buildTerms();
   buildRefund();
-  buildMoved();
-  buildListings();
-  Boards.buildMarket(write);
-  Boards.buildGuesthouse(write);
-  Boards.buildTickets(write);
-  Boards.buildJobs(write);
+  if (DB_OFF) buildClosed('services/staffing.html'); else buildMoved();
+  if (!DB_OFF) {
+    buildListings();
+    Boards.buildMarket(write);
+    Boards.buildGuesthouse(write);
+    Boards.buildTickets(write);
+    Boards.buildJobs(write);
+  }
   console.log(`생성 완료 (${out.length}개)`);
   out.forEach((f) => console.log('  ' + f));
 }
