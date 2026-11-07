@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wori Church Support Center Leaflet — A4 Single Sheet</title>
+<link rel="stylesheet" href="leaflet.css">
+<style>
+/* ── A4 세로 210×297mm · 양면 낱장 (접지 없음) ──────────────────
+   사무실 프린터로 바로 뽑아 그날 바로 나눠 드릴 수 있는 판입니다. */
+@page{ size:210mm 297mm; margin:0; }
+.sheet{ width:210mm; height:297mm; flex-direction:column; }
+.pg{ padding:0 15mm 13mm; display:flex; flex-direction:column; flex:1; }
+
+/* 머리말 */
+.hd{ background:var(--paper-warm); padding:11mm 15mm 9mm; margin:0 -15mm 6mm; }
+.hd__in{ display:flex; align-items:flex-end; gap:10mm; }
+.hd__logo{ width:56mm; display:block; }
+.hd__txt{ flex:1; }
+.hd__t{ font-family:var(--display); font-weight:800; font-size:15pt; line-height:1.4; color:var(--brand-900); letter-spacing:-.02em; }
+.hd__d{ font-size:8.6pt; line-height:1.62; color:var(--ink-2); margin-top:3mm; }
+
+.hd--slim{ padding:9mm 15mm 8mm; }
+
+/* 갈래별 가로 띠 — 한 줄에 세 항목씩. */
+.band + .band{ margin-top:5.5mm; }
+.band__head{ display:flex; align-items:baseline; gap:3mm; }
+.band__name{ font-family:var(--display); font-weight:800; font-size:12.4pt; color:var(--brand-800); white-space:nowrap; }
+.band__sub{ font-size:8pt; color:var(--muted); white-space:nowrap; }
+.band__line{ flex:1; height:.3mm; background:var(--line); }
+.cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:5mm; margin-top:4mm; }
+.card{ border:.25mm solid var(--line); border-radius:2.4mm; padding:3.6mm 3.6mm 3.8mm; background:#fff; }
+.card--gold{ background:var(--gold-100); border-color:var(--gold-border); }
+
+/* 비용 세 가지 — 앞면 아래를 받치는 띠 */
+.costs{ display:grid; grid-template-columns:repeat(3,1fr); gap:3mm; margin-top:2.6mm; }
+.cost{ background:#fff; border:.25mm solid var(--gold-border); border-radius:1.8mm; padding:2.8mm 3mm; }
+.cost b{ display:block; font-family:var(--display); font-weight:800; font-size:8.6pt; color:var(--gold-ink); }
+.cost span{ display:block; font-size:7.6pt; color:var(--ink-2); line-height:1.56; margin-top:.8mm; }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8mm; }
+.col{ display:flex; flex-direction:column; }
+
+/* 게시판 5열 */
+.boards5{ display:grid; grid-template-columns:repeat(5,1fr); gap:2.6mm; margin-top:2.6mm; }
+.boards5 .board{ padding:2.2mm 2.2mm 2.4mm; }
+.boards5 .board__d{ font-size:6.6pt; line-height:1.5; }
+
+/* 절차 5칸 */
+.flow{ display:grid; grid-template-columns:repeat(5,1fr); gap:2.6mm; margin-top:2mm; }
+.flow__c{ border:.3mm solid var(--line); border-radius:2.2mm; padding:3mm 3mm 3.4mm; background:#fff; }
+.flow__n{
+  font-family:var(--display); font-weight:800; font-size:7.2pt; color:#fff; background:var(--brand-800);
+  width:5.2mm; height:5.2mm; border-radius:50%; display:flex; align-items:center; justify-content:center;
+}
+.flow__t{ font-family:var(--display); font-weight:800; font-size:8.4pt; color:var(--ink); margin-top:2mm; }
+.flow__d{ font-size:7pt; color:var(--muted); line-height:1.56; margin-top:1.2mm; }
+
+/* 연락처 밴드 */
+.foot{ background:var(--brand-900); color:#fff; margin:0 -15mm -13mm; padding:6mm 15mm 7mm; }
+.foot__in{ display:flex; gap:8mm; align-items:flex-start; }
+.foot__col{ flex:0 0 80mm; }
+.foot .contact__k{ width:13mm; min-width:13mm; }
+.foot .qr__u{ word-break:keep-all; white-space:nowrap; }
+.foot__logo{ width:35mm; display:block; margin-bottom:3mm; }
+.foot .contact__k{ color:#8FB79E; }
+.foot .contact__v{ color:#fff; }
+.foot .qr__t{ color:#fff; }
+.foot .qr__u{ color:#8FB79E; }
+.foot__qr{ background:#fff; border-radius:2.4mm; padding:3mm; }
+.foot__qr img{ width:24mm; height:24mm; display:block; }
+
+/* ── 도련 3mm 판 (?bleed) ── */
+.bleed .sheet{ width:216mm; height:303mm; }
+.bleed .pg{ padding:0 18mm 16mm; }
+.bleed .hd{ margin:0 -18mm 10mm; padding:16mm 18mm 11mm; }
+.bleed .foot{ margin:0 -18mm -16mm; padding:8mm 18mm 12mm; }
+</style>
+<link rel="stylesheet" href="leaflet-en.css">
+</head>
+<body>
+<script>
+  /* ?bleed 를 붙여 열면 도련 3mm 판으로 그립니다 (render.js 가 씁니다). */
+  if (location.search.indexOf('bleed') !== -1) document.documentElement.classList.add('bleed');
+</script>
+
+<!-- ═══════════ 앞면 ═══════════ -->
+<section class="sheet">
+  <div class="pg">
+    <div class="hd">
+      <div class="hd__in">
+        <img class="hd__logo" src="logo.png" alt="Wori Church Support Center">
+        <div class="hd__txt">
+          <div class="rule" style="margin-bottom:3.4mm"></div>
+          <h1 class="hd__t">Let your church<br>We will do the rest</h1>
+          <p class="hd__d">
+            Wori Church Support Center <strong>meets everything your church needs.</strong>From websites to print, apps, sound and camps — all in one place. Submit one request form and <strong>we take it from there.</strong> Open to every church in Korea — no limits on size, region or denomination. Some items, however, cover a set service area.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__head">
+        <div class="band__name">Visible Church</div>
+        <div class="band__sub">The first space people see</div>
+        <div class="band__line"></div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">01</div>
+            <div class="svc__body">
+              <div class="svc__name">Church Website</div>
+              <div class="svc__desc">The first face a visitor sees. Service times, directions, an introduction to the church and sermon videos. When something needs changing, just tell us.</div>
+            </div></div>
+        </div>
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">02</div>
+            <div class="svc__body">
+              <div class="svc__name">Print &amp; Marketing</div>
+              <div class="svc__desc">Banners, posters and bulletins through to social media. We design what your church needs again and again, and hand over print-ready files and card news together.</div>
+            </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__head">
+        <div class="band__name">Ministering Church</div>
+        <div class="band__sub">Building the shape of ministry</div>
+        <div class="band__line"></div>
+      </div>
+      <div class="cards" style="grid-template-columns:repeat(2,1fr)">
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">03</div>
+            <div class="svc__body">
+              <div class="svc__name">Sound System Setup</div>
+              <div class="svc__desc">A sanctuary where the sermon is heard clearly. We assess the room, choose and install the equipment, and set up the mix for online streaming too.</div>
+            </div></div>
+        </div>
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">04</div>
+            <div class="svc__body">
+              <div class="svc__name">AKC — Arise Korea Camp</div>
+              <div class="svc__desc">A camp that wakes the next generation and young adults of this land. Held over the summer and winter breaks, with churches gathering together — so a church with few young people can still take part.</div>
+            </div></div>
+        </div>
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">05</div>
+            <div class="svc__body">
+              <div class="svc__name">GOBI Camp — Going Vision Camp</div>
+              <div class="svc__desc">A one-day camp where a regional church camp team comes to you. Choose from four tracks — gospel, values, learning and mission — and there is no minimum number. The church provides the space and lunch.</div>
+            </div></div>
+        </div>
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">06</div>
+            <div class="svc__body">
+              <div class="svc__name">Brides Worship — worship ministry</div>
+              <div class="svc__desc">Not a one-off event. They stay until a church's worship can stand on its own — starting a worship gathering together, training worshippers, and handing the work over once people are ready to serve. Serving the Seoul metropolitan area.</div>
+            </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__head">
+        <div class="band__name">Supported Church</div>
+        <div class="band__sub">From worship materials to admin</div>
+        <div class="band__line"></div>
+      </div>
+      <div class="cards" style="grid-template-columns:repeat(2,1fr)">
+        <div class="card">
+          <div class="svc__row"><div class="svc__no">07</div>
+            <div class="svc__body">
+              <div class="svc__name">IntoOffice — e-signature</div>
+              <div class="svc__desc">Stop carrying documents around for a stamp. Send employment contracts, consent forms, expense approvals and facility use permits by phone, see who has signed, and have everything filed automatically.</div>
+            </div></div>
+        </div>
+        <div class="card card--gold">
+          <div class="box__title" style="font-size:9pt">How churches use IntoOffice</div>
+          <p style="font-size:7.8pt; line-height:1.62; color:var(--gold-ink)">
+            Send and receive documents for signature by phone · See who has signed and who has not · Send reminders · Keep completed documents with their signing history · Filed automatically by type and date · Searchable · Save the forms you use often
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+
+    <div style="background:var(--brand-900); color:#fff; border-radius:2.4mm; padding:4.4mm 5mm; display:flex; align-items:center; gap:5mm">
+      <div style="font-family:var(--display); font-weight:800; font-size:9.6pt; line-height:1.4">
+        How to apply · Boards · Contact — <span style="color:var(--gold-400)">on the back</span> of this sheet
+      </div>
+      <div class="grow"></div>
+      <div style="font-size:8pt; color:#BFD6C7; white-space:nowrap">intoedu.github.io/wcsc</div>
+    </div>
+
+    <p class="fineprint" style="margin-top:4.5mm">
+      Marketing covers design only; printing and delivery are separate. IntoOffice is software your church runs itself — accounting, drafting and filing on your behalf are not included.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════ on the back ═══════════ -->
+<section class="sheet">
+  <div class="pg">
+    <div class="hd hd--slim">
+      <div class="eyebrow">How a request moves</div>
+      <h2 class="sec-title" style="margin-top:2.2mm">One request form. The Center takes it from there.</h2>
+    </div>
+
+    <div class="flow">
+      <div class="flow__c">
+        <div class="flow__n">1</div>
+        <div class="flow__t">Submit the form</div>
+        <div class="flow__d">Pick the items you need on our website and leave a request. You get a reference number straight away.</div>
+      </div>
+      <div class="flow__c">
+        <div class="flow__n">2</div>
+        <div class="flow__t">Call and consultation</div>
+        <div class="flow__d">We get in touch within 1–2 business days. We can also visit you.</div>
+      </div>
+      <div class="flow__c">
+        <div class="flow__n">3</div>
+        <div class="flow__t">Proposal and quote</div>
+        <div class="flow__d">You receive a proposal with scope, schedule and cost, plus the documents you need for an internal decision.</div>
+      </div>
+      <div class="flow__c">
+        <div class="flow__n">4</div>
+        <div class="flow__t">Work and launch</div>
+        <div class="flow__d">We work to the agreed schedule, check in with you partway, and hand it over for real use.</div>
+      </div>
+      <div class="flow__c">
+        <div class="flow__n">5</div>
+        <div class="flow__t">Support afterwards</div>
+        <div class="flow__d">Fixes, checks and questions are supported through the support period. Add more items any time.</div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:4mm">
+      <div class="box__title">Boards where churches meet each other directly — open to you with no support item requested</div>
+      <div class="boards5">
+        <div class="board">
+          <div class="board__n">Church Property</div>
+          <div class="board__d">Churches letting go of a worship space meet churches looking for one. Only posts with verified ownership documents go up, and they stay listed until the deal closes.</div>
+        </div>
+        <div class="board">
+          <div class="board__n">Ministry Job Postings</div>
+          <div class="board__d">Stipend, housing and working conditions must be stated — the reader has to be able to judge. Once you have filled the post, the church takes it down.</div>
+        </div>
+        <div class="board">
+          <div class="board__n">Used Equipment Market</div>
+          <div class="board__d">Church equipment and goods change hands. If the buying church wants it, the Center handles removal, transport, installation and sound tuning.</div>
+        </div>
+        <div class="board">
+          <div class="board__n">Church Guesthouse</div>
+          <div class="board__d">Only rooms offered free of charge and facilities registered as lodging are listed. Guests and churches contact each other directly.</div>
+        </div>
+        <div class="board">
+          <div class="board__n">Event Ticketing</div>
+          <div class="board__d">Set the time booking opens and it closes automatically when full. Seat selection is optional, and the organiser downloads the list of registrants.</div>
+        </div>
+      </div>
+      <p class="fineprint" style="margin-top:3mm">
+        The Center operates the boards only — it does not act as a broker under the Licensed Real Estate Agents Act, and takes no part in negotiating price or terms, or in contracts. For ministry job postings the Center is not the employer; interviews and calling decisions are made by the church and the minister directly. Listings, goods and postings are written by whoever posts them.
+      </p>
+    </div>
+
+    <div class="grid2" style="margin-top:4mm">
+      <div>
+        <div class="eyebrow">Why Wori Church Support Center</div>
+        <div class="steps" style="margin-top:3.4mm">
+          <div class="step">
+            <div class="step__no">1</div>
+            <div><div class="step__t">We know how churches work</div>
+            <div class="step__d">We start out understanding your size, your budget and how decisions get made. You will not have to explain it from scratch every time.</div></div>
+          </div>
+          <div class="step">
+            <div class="step__no">2</div>
+            <div><div class="step__t">A quote first, a contract later</div>
+            <div class="step__d">You get an itemised quote before anything is signed, written up so you can take it straight to your board or session.</div></div>
+          </div>
+          <div class="step">
+            <div class="step__no">3</div>
+            <div><div class="step__t">Several needs at once</div>
+            <div class="step__d">Website, bulletin and sound are tangled together — no need to find a vendor for each. Request once and the Center schedules them around each other.</div></div>
+          </div>
+          <div class="step">
+            <div class="step__no">4</div>
+            <div><div class="step__t">It does not end at delivery</div>
+            <div class="step__d">Building it is not the end. Fixes and faults that come up while you use it go through one set channel, and we state the support period for each item.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="box box--gold">
+          <div class="box__title">Consultation and quotes are free</div>
+          <p style="font-size:8pt; line-height:1.62; color:var(--gold-ink)">
+            You pay only once you have agreed to a proposal and work begins. Ask us first — it costs nothing.
+          </p>
+        </div>
+
+        <div class="box box--plain" style="margin-top:5mm; border-color:var(--brand-100)">
+          <div class="box__title" style="font-size:9pt">How far design goes</div>
+          <p style="font-size:8pt; line-height:1.62; color:var(--ink-2)">
+            Design for banners, posters, invitations and bulletins; two rounds of revision each; print-ready files (size, bleed, colour mode); images for sharing online; and template files your church can edit the wording of.
+          </p>
+        </div>
+
+        <div class="box box--plain" style="margin-top:5mm; border-color:var(--brand-100)">
+          <div class="box__title" style="font-size:9pt">Can a small church apply?</div>
+          <p style="font-size:8pt; line-height:1.62; color:var(--ink-2)">
+            Yes. The fewer staff you have, the more of this helps. Tell us your attendance and budget range and we will lay out what is possible within it.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+
+    <!-- 연락처는 운영 DB(관리자 화면 → 센터 설정)의 값입니다. 거기서 바꾸면 여기도 맞춰 주세요. -->
+    <div class="foot">
+      <img class="foot__logo" src="logo-mono-white.png" alt="Wori Church Support Center">
+      <div class="foot__in">
+        <div class="foot__col">
+          <div class="contact__row">
+            <div class="contact__k">Phone</div>
+            <div class="contact__v contact__v--big">+82 10-4254-2270</div>
+          </div>
+          <div class="contact__row">
+            <div class="contact__k">Email</div>
+            <div class="contact__v">worichurchsupportcenter@gmail.com</div>
+          </div>
+          <div class="contact__row">
+            <div class="contact__k">Hours</div>
+            <div class="contact__v" style="font-size:8pt">Weekdays 09:00 – 18:00 <span style="font-size:7pt;color:#8FB79E">(Lunch 12:00–13:00 · Closed weekends &amp; holidays)</span></div>
+          </div>
+        </div>
+        <div class="grow"></div>
+        <div class="qr">
+          <div class="foot__qr"><img src="qr-site.png" alt="QR code — Wori Church Support Center website"></div>
+          <div>
+            <div class="qr__t">Scan with your phone<br>to open the request form</div>
+            <div class="qr__u">intoedu.github.io/wcsc</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

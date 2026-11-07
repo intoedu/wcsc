@@ -21,6 +21,12 @@ const JOBS = [
   { src: 'leaflet-3fold.html', out: 'wcsc-리플렛-3단접지-도련3mm-인쇄소용', w: 297, h: 210, bleed: 3 },
   { src: 'leaflet-a4.html',    out: 'wcsc-리플렛-A4낱장-양면',             w: 210, h: 297, bleed: 0 },
   { src: 'leaflet-a4.html',    out: 'wcsc-리플렛-A4낱장-도련3mm-인쇄소용',  w: 210, h: 297, bleed: 3 },
+
+  /* 영문판 — 칸 너비와 접는 선은 한글판과 같습니다. 글자 규칙만 leaflet-en.css 로 바뀝니다. */
+  { src: 'leaflet-3fold-en.html', out: 'wcsc-leaflet-trifold-A4',          w: 297, h: 210, bleed: 0 },
+  { src: 'leaflet-3fold-en.html', out: 'wcsc-leaflet-trifold-bleed3mm',    w: 297, h: 210, bleed: 3 },
+  { src: 'leaflet-a4-en.html',    out: 'wcsc-leaflet-A4-sheet',            w: 210, h: 297, bleed: 0 },
+  { src: 'leaflet-a4-en.html',    out: 'wcsc-leaflet-A4-bleed3mm',         w: 210, h: 297, bleed: 3 },
 ];
 
 (async () => {

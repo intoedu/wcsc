@@ -1,0 +1,65 @@
+/* ── 영문판 덧씌우기 ───────────────────────────────────────────
+   leaflet.css 다음에 읽습니다. 글자 다루는 규칙만 바꿉니다 —
+   칸 너비와 접는 선은 한글판과 똑같이 두어야 같은 틀로 인쇄됩니다.
+
+   한글은 단어를 자르지 않으려고 word-break:keep-all 을 씁니다.
+   로마자에 그대로 두면 줄 끝이 들쭉날쭉해지므로 되돌립니다.
+   자간도 반대입니다 — 한글은 0 에 가깝게, 로마자는 조금 벌려야 읽힙니다. */
+:root{
+  --sans:"Inter","Noto Sans CJK KR",sans-serif;
+  --display:"Inter Display","Inter",sans-serif;
+}
+body{
+  word-break:normal;
+  overflow-wrap:break-word;
+  hyphens:auto;
+  letter-spacing:0;
+}
+.eyebrow{ letter-spacing:.12em; text-transform:uppercase; font-size:7pt; }
+.eyebrow--en{ letter-spacing:.12em; font-size:7pt; }
+.sec-title, .cover__title{ letter-spacing:-.018em; }
+.cat__name, .svc__name, .step__t, .box__title, .bitem b, .cover__li b{ letter-spacing:-.008em; }
+.svc__no, .step__no{ letter-spacing:0; }
+
+/* 로마자는 같은 포인트에서 한글보다 커 보이고 줄이 길어집니다.
+   본문만 아주 조금 줄여 같은 칸에 들어가게 합니다. */
+.svc__desc, .step__d{ font-size:7.2pt; line-height:1.56; }
+.bitem span{ font-size:6.7pt; line-height:1.46; }
+.fineprint{ line-height:1.5; }
+
+/* 표지 제목은 로마자가 길어 한 줄이 넘칠 수 있어 한 단계 낮춥니다. */
+.cover__title{ font-size:17pt; }
+.cover__li b{ width:30mm; min-width:30mm; font-size:8.2pt; }
+.cover__li span{ font-size:6.9pt; }
+
+/* 표지 — 로마자 제목이 한글보다 길어 아래 띠가 밀려났습니다.
+   제목과 목록을 한 단계씩 줄이고 위아래 여백을 조여 띠를 제자리로 돌립니다. */
+.cover__top{ padding-top:13mm; }
+.cover__title{ font-size:15.6pt; line-height:1.3; }
+.cover__desc{ font-size:8.2pt; line-height:1.56; margin-top:6mm; }
+.cover__list{ padding-bottom:8mm; }
+.cover__listhead{ padding-top:3.6mm; margin-bottom:3.6mm; }
+.cover__li + .cover__li{ margin-top:2.4mm; }
+.cover__li b{ width:34mm; min-width:34mm; font-size:7.8pt; line-height:1.3; }
+.cover__li span{ font-size:6.7pt; line-height:1.4; }
+.cover__band .bt{ font-size:10.6pt; line-height:1.5; }
+.cover__band .bd{ font-size:7.6pt; }
+.cover__band .bu{ font-size:7pt; }
+
+/* A4 낱장 뒷면 — 로마자 본문이 길어 아래 연락처 띠가 종이 밖으로 밀렸습니다.
+   글자 크기는 그대로 두고 칸 사이와 안쪽 여백만 조입니다. */
+.flow__d{ font-size:6.6pt; line-height:1.5; }
+.flow__c{ padding:2.6mm 2.6mm 2.8mm; }
+.flow__t{ font-size:8pt; margin-top:1.6mm; }
+.boards5 .board{ padding:2mm 2mm 2.2mm; }
+.board span, .board p{ font-size:6.4pt; line-height:1.44; }
+.band + .band{ margin-top:4.2mm; }
+.cards{ gap:4mm; margin-top:3.2mm; }
+.card{ padding:3mm 3mm 3.2mm; }
+.hd--slim{ padding:7.5mm 15mm 6.5mm; }
+.foot{ padding:5mm 15mm 6mm; }
+.foot__logo{ width:30mm; margin-bottom:2.4mm; }
+
+/* 3단 접지 안쪽 플랩 — 맨 아래 잔글씨가 종이 끝에 바싹 붙습니다. 한 호 줄입니다. */
+.flap .fineprint{ font-size:6.3pt; line-height:1.46; }
+.flap .step__d{ font-size:7pt; }
